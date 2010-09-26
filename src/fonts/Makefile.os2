@@ -1,0 +1,91 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+
+# FONT MAKEFILE
+# makes font files *.fmt from *.afm using makefmt
+# makes *.fve fron *.gle using fbuild
+# also makes font.dat
+#
+include ../../config.os2
+
+FVE = \
+	glemark.fve plba.fve plcc.fve plcg.fve plci.fve \
+	plcr.fve plcs.fve pldr.fve plge.fve \
+	plgg.fve plgi.fve plsa.fve plsg.fve \
+	plsr.fve plss.fve plsym1.fve plsym2.fve \
+	plti.fve pltr.fve texcmb.fve texcmex.fve \
+	texcmitt.fve texcmmi.fve texcmr.fve texcmss.fve \
+	texcmssb.fve texcmssi.fve texcmsy.fve texcmti.fve \
+	texcmtt.fve
+
+FMT = 	\
+	glemark.fmt plba.fmt plcc.fmt plcg.fmt \
+	plci.fmt plcr.fmt plcs.fmt pldr.fmt \
+	plge.fmt plgg.fmt plgi.fmt plsa.fmt plsg.fmt \
+	plsr.fmt plss.fmt plsym1.fmt plsym2.fmt plti.fmt \
+	pltr.fmt psagb.fmt psagbo.fmt psagd.fmt psagdo.fmt \
+	psbd.fmt psbdi.fmt psbli.fmt psc.fmt pscb.fmt \
+	pscbo.fmt psco.fmt psh.fmt pshb.fmt pshbo.fmt \
+	pshc.fmt pshcb.fmt pshcbo.fmt pshcdo.fmt pshn.fmt \
+	pshnb.fmt pshnbo.fmt pshno.fmt psho.fmt psncsb.fmt \
+	psncsbi.fmt psncsi.fmt psncsr.fmt pspb.fmt pspbi.fmt \
+	pspi.fmt pspr.fmt pssym.fmt pstb.fmt pstbi.fmt \
+	psti.fmt pstr.fmt pszcmi.fmt pszd.fmt texcmb.fmt \
+	texcmex.fmt texcmitt.fmt texcmmi.fmt texcmr.fmt texcmsl.fmt \
+	texcmss.fmt texcmssb.fmt texcmssi.fmt texcmsy.fmt texcmti.fmt \
+	texcmtt.fmt
+
+all: $(FVE) $(FMT) movefonts
+
+.SUFFIXES: .fve .fmt .afm .gle
+
+.afm.fmt:
+	$(PROJECT_BINDIR)/bin/makefmt.exe $<
+
+.gle.fve:
+	$(PROJECT_BINDIR)/bin/fbuild.exe $<
+
+clean:
+	-$(RM) *.fve *.fmt
+
+movefonts: $(FVE) $(FMT) $(PROJECT_BINDIR)/bin/makefmt.exe $(PROJECT_BINDIR)/bin/fbuild.exe
+	-mkdir.exe $(PROJECT_BINDIR)/font
+	-cp.exe *.fve *.fmt $(PROJECT_BINDIR)/font
+	-cp.exe font.dat $(PROJECT_BINDIR)/font
+	-cp.exe psfont.dat $(PROJECT_BINDIR)/font
+

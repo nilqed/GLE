@@ -1,0 +1,532 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+
+# global makefile for gle
+# @configure_input@
+
+.PHONY : all
+.PHONY : clean
+.PHONY : distclean
+.PHONY : cleansrc
+.PHONY : cleandoc
+.PHONY : cleanfonts
+.PHONY : install
+.PHONY : uninstall
+.PHONY : bundle
+.PHONY : glegs
+.PHONY : qmake
+.PHONY : gui
+.PHONY : strip
+.PHONY : finddeps
+.PHONY : doc
+.PHONY : license
+.PHONY : qgle
+
+.PHONY : make_all
+.PHONY : pre_install
+.PHONY : post_install
+.PHONY : install_script
+.PHONY : install_noscript
+.PHONY : nsis
+.PHONY : snapshot
+.PHONY : nosnapshot
+
+.PHONY : zipsrc
+.PHONY : zipexe
+.PHONY : tarsrc
+.PHONY : tarsrcf
+
+include config.i
+include config.aconf
+
+export RUNBUILD=1
+export GLE_SNAPSHOT=@GLE_SNAPSHOT@
+export HAVE_EXTRA_FONTS=@HAVE_EXTRA_FONTS@
+
+CXX=@CXX@
+CXXFLAGS=@CXXFLAGS@
+CPPFLAGS=@CPPFLAGS@
+
+LDFLAGS=@LDFLAGS@
+LIBS=@LIBS@
+
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+datarootdir=@datarootdir@
+docdir=@docdir@
+
+INSTALL_LIB=@libdir@
+INSTALL_BIN=@GLE_INSTALL_BIN@
+INSTALL_DIR=@GLE_INSTALL_DATA@
+
+INSTALL=@INSTALL@
+INSTALL_PROGRAM=@INSTALL_PROGRAM@
+INSTALL_DATA=@INSTALL_DATA@
+MKDIR_P=@MKDIR_P@
+
+PKGCONFIGDIR=$(INSTALL_LIB)/pkgconfig
+MANDIR=@mandir@
+
+GLE_VERSION=@GLE_VERSION@
+
+INSTALL_METHOD=install_script
+ifeq (@HAVE_NOSCRIPTS@,1)
+	INSTALL_METHOD=install_noscript
+endif
+
+ifeq (@HAVE_QT@,1)
+ifeq (@HAVE_MAC@,1)
+	INSTALL_METHOD:=$(INSTALL_METHOD) install_qgle_mac_default
+	RUN_QGLE:=./build/bin/QGLE.app/Contents/MacOS/QGLE 
+else
+	INSTALL_METHOD:=$(INSTALL_METHOD) install_qgle
+	RUN_QGLE:=./build/bin/qgle
+endif
+endif
+
+ifeq (@HAVE_AUTOPACKAGE@,1)
+	INSTALL_METHOD:=$(INSTALL_METHOD) install_ap
+endif
+
+ifeq (@HAVE_LIBGLE@,1)
+	INSTALL_METHOD:=install_libgle $(INSTALL_METHOD)
+else
+	ifeq (@HAVE_LIBGLE_STATIC@,1)
+		INSTALL_METHOD:=install_libgle $(INSTALL_METHOD)
+	endif
+endif
+
+GLE_SRC_LIB_DIR:=build/lib
+ifeq (@HAVE_WIN32@,1)
+	GLE_SRC_LIB_DIR:=build/bin
+endif
+
+DO_ALL=make_all
+ifeq (@MAKE_AUTOPACKAGE@,1)
+	DO_ALL=autopackage
+endif
+
+WIN32_INSTALL_NAME = gle-graphics-$(GLE_VERSION)$(GLE_SNAPSHOT)-exe-win32.exe
+RELEASE_DIR = ./release
+NSIS_SCRIPT_DIR = ./contrib\packagers\nsis
+
+all: $(DO_ALL)
+
+make_all: configure
+	-$(MKDIR_P) build
+	-$(MKDIR_P) build/bin
+	-$(MKDIR_P) build/lib
+	-$(MKDIR_P) build/doc
+	-$(MKDIR_P) build/gleinc
+	$(MAKE) -C src/gle make_glebtool
+	$(MAKE) -C src/gle/bitmap
+	$(MAKE) -C src/gle/surface
+	$(MAKE) -C src/gle/letzfitz
+	$(MAKE) -C src/gle/tokens
+	$(MAKE) -C src/gle
+	$(MAKE) -C src/fbuild
+	$(MAKE) -C src/makefmt
+	$(MAKE) -C src/manip
+	$(MAKE) -C src/gui -f MakefileAC
+	$(MAKE) -C src/fonts -f Makefile.gcc
+	$(MAKE) -C src/lib -f Makefile.gcc
+	$(MAKE) -C src/TeX
+	@echo ""
+	@echo "********************************************************************"
+	@echo "Type \"make doc\" to build the GLE reference manual (requires LaTeX)"
+	@echo "Type \"make install\" to install GLE $(GLE_VERSION)$(GLE_SNAPSHOT)"
+	@echo "Install data into: $(INSTALL_DIR)"
+	@echo "Install library into: $(INSTALL_LIB)"
+	@echo "Install binary into: $(INSTALL_BIN)"
+	@echo "********************************************************************"
+	@echo ""
+
+cleansrc:
+	$(MAKE) -C src/gle/bitmap clean
+	$(MAKE) -C src/gle/surface clean
+	$(MAKE) -C src/gle/letzfitz clean
+	$(MAKE) -C src/gle/tokens clean
+	$(MAKE) -C src/gle clean
+	$(MAKE) -C src/fbuild clean
+	$(MAKE) -C src/makefmt clean
+	$(MAKE) -C src/manip clean
+	$(MAKE) -C src/gui -f MakefileAC clean
+	$(MAKE) -C src/fonts -f Makefile.gcc clean
+	$(MAKE) -C src/TeX clean
+	-@$(RM) config.status
+	-@$(RM) config.log
+	-@$(RMDIR) build/bin
+	-@$(RMDIR) build/lib
+	-@$(RMDIR) build/font
+	-@$(RMDIR) build/gleinc
+	-@$(RM) build/glerc
+	-@$(RM) build/init.tex
+	-@$(RM) build/inittex.ini
+	-@$(RM) build/manip.hlp
+
+clean: cleansrc	cleandoc cleanfonts clean_dmg
+	-@$(RMDIR) build
+
+distclean: clean
+	-@$(RM) platform/autoconf/gle-graphics.pc
+	-@$(RM) platform/autopackage/gle4.apspec
+	-@$(RM) src/config.h
+	-@$(RM) src/doc/gle.1
+	-@$(RM) src/fbuild/Makefile
+	-@$(RM) src/gle/bitmap/Makefile
+	-@$(RM) src/gle/letzfitz/Makefile
+	-@$(RM) src/gle/Makefile
+	-@$(RM) src/gle/surface/Makefile
+	-@$(RM) src/gle/tokens/Makefile
+	-@$(RM) src/gui/MakefileAC
+	-@$(RM) src/gui/qgle.pro
+	-@$(RM) src/makefmt/Makefile
+	-@$(RM) src/manip/Makefile
+	-@$(RM) src/TeX/Makefile
+	-@$(RM) Makefile
+
+install: clean_install pre_install $(INSTALL_METHOD) post_install
+
+pre_install:
+	-$(MKDIR_P) $(DESTDIR)$(INSTALL_DIR)
+	-$(MKDIR_P) $(DESTDIR)$(INSTALL_BIN)
+	-$(MKDIR_P) $(DESTDIR)$(MANDIR)/man1
+	-$(MKDIR_P) $(DESTDIR)$(docdir)
+	-$(MKDIR_P) $(DESTDIR)$(PKGCONFIGDIR)
+	-$(INSTALL_DATA) build/glerc $(DESTDIR)$(INSTALL_DIR)
+	-$(INSTALL_DATA) build/inittex.ini $(DESTDIR)$(INSTALL_DIR)
+	-$(INSTALL_DATA) build/init.tex $(DESTDIR)$(INSTALL_DIR)
+	-$(INSTALL_DATA) build/manip.hlp $(DESTDIR)$(INSTALL_DIR)
+	-$(INSTALL_DATA) src/doc/gle.1 $(DESTDIR)$(MANDIR)/man1/
+	-$(INSTALL_DATA) platform/autoconf/gle-graphics.pc $(DESTDIR)$(PKGCONFIGDIR)/
+	-cp -p -r build/font $(DESTDIR)$(INSTALL_DIR)
+	-cp -p -r build/doc/* $(DESTDIR)$(docdir)
+	-cp -p -r build/gleinc $(DESTDIR)$(INSTALL_DIR)
+	-chmod -R a+rX $(DESTDIR)$(INSTALL_DIR)/font
+	-chmod -R a+rX $(DESTDIR)$(INSTALL_DIR)/gleinc
+	-chmod -R a+rX $(DESTDIR)$(docdir)
+
+post_install:
+	@echo ""
+	@echo "****************************************************************"
+	@echo "GLE $(GLE_VERSION)$(GLE_SNAPSHOT) has been installed"
+	@echo "You can use GLE now by entering the command \"gle\""
+	@echo "(Provided that $(DESTDIR)$(INSTALL_BIN) is in your PATH.)"
+	@echo "****************************************************************"
+	@echo ""
+
+# noscript version: do not put scripts in bin directory that set up GLE_TOP
+# gle does not need GLE_TOP anymore on most operating systems
+
+install_noscript:
+	-$(INSTALL_PROGRAM) -m 755 build/bin/gle* $(DESTDIR)$(INSTALL_BIN)/
+	-$(INSTALL_PROGRAM) -m 755 build/bin/manip* $(DESTDIR)$(INSTALL_BIN)/
+
+# script version: put scripts in bin directory that set up GLE_TOP
+
+install_script:
+	-$(MKDIR_P) $(DESTDIR)$(INSTALL_DIR)/bin
+	-cp -p build/bin/gle* $(DESTDIR)$(INSTALL_DIR)/bin/
+	-cp -p build/bin/manip* $(DESTDIR)$(INSTALL_DIR)/bin/
+	-echo "#!/bin/sh" > $(DESTDIR)$(INSTALL_BIN)/gle
+	-echo "GLE_TOP=$(INSTALL_DIR)" >> $(DESTDIR)$(INSTALL_BIN)/gle
+	-echo "export GLE_TOP" >> $(DESTDIR)$(INSTALL_BIN)/gle
+	-echo "$(INSTALL_DIR)/bin/gle \$$@" >> $(DESTDIR)$(INSTALL_BIN)/gle
+	-chmod 755 $(DESTDIR)$(INSTALL_BIN)/gle
+	-echo "#!/bin/sh" > $(DESTDIR)$(INSTALL_BIN)/manip
+	-echo "GLE_TOP=$(INSTALL_DIR)" >> $(DESTDIR)$(INSTALL_BIN)/manip
+	-echo "export GLE_TOP" >> $(DESTDIR)$(INSTALL_BIN)/manip
+	-echo "$(INSTALL_DIR)/bin/manip \$$@" >> $(DESTDIR)$(INSTALL_BIN)/manip
+	-chmod 755 $(DESTDIR)$(INSTALL_BIN)/manip
+
+install_qgle:
+	-$(INSTALL_PROGRAM) -m 755 build/bin/qgle $(DESTDIR)$(INSTALL_BIN)/
+	-@echo ""
+	-@echo "****************************************************************"
+	-@echo "QGLE has been installed in: $(DESTDIR)$(INSTALL_BIN)"
+	-@echo "****************************************************************"
+
+install_libgle:
+	-$(MKDIR_P) $(DESTDIR)$(INSTALL_LIB)/
+	-$(INSTALL_PROGRAM) -m 755 build/lib/libgle* $(DESTDIR)$(INSTALL_LIB)/
+
+#####################
+# Code for Mac OS/X #
+#####################
+
+install_qgle_mac_default:
+	bash platform/script/install_qgle_mac
+
+GLE_BUNDLE_TOP:=build/bin/QGLE.app/Contents/share/gle-graphics/$(GLE_VERSION)
+
+bundle:
+	-$(MKDIR_P) build/bin/QGLE.app/Contents/bin
+	-cp -p build/bin/gle build/bin/QGLE.app/Contents/bin/
+	-cp -p build/bin/glegs build/bin/QGLE.app/Contents/bin/glegs
+	-cp -p -r build/lib build/bin/QGLE.app/Contents/
+	-$(MKDIR_P) $(GLE_BUNDLE_TOP)/
+	-cp -p build/glerc $(GLE_BUNDLE_TOP)/
+	-echo "begin config gle" > $(GLE_BUNDLE_TOP)/glerc
+	-echo "   current = $(VERSION_NUMBER).$(BUILD_NUMBER)" >> $(GLE_BUNDLE_TOP)/glerc
+	-echo "end config" >> $(GLE_BUNDLE_TOP)/glerc
+	-echo "begin config tools" >> $(GLE_BUNDLE_TOP)/glerc
+	-echo "   ghostscript = \"\$$EXELOC/../bin/glegs\"">> $(GLE_BUNDLE_TOP)/glerc
+	-echo "   libgs = \"/Library/Frameworks/Ghostscript.framework\"">> $(GLE_BUNDLE_TOP)/glerc
+	-echo "end config" >> $(GLE_BUNDLE_TOP)/glerc
+	-cp -p build/inittex.ini $(GLE_BUNDLE_TOP)/
+	-cp -p build/init.tex $(GLE_BUNDLE_TOP)/
+	-cp -p -r build/font $(GLE_BUNDLE_TOP)/
+	-cp -p -r build/doc $(GLE_BUNDLE_TOP)/
+	-cp -p -r build/gleinc $(GLE_BUNDLE_TOP)/
+	install_name_tool -change $(DESTDIR)$(INSTALL_LIB)/libgle-graphics-@GLE_VERSION@.dylib @executable_path/../lib/libgle-graphics-@GLE_VERSION@.dylib build/bin/QGLE.app/Contents/MacOS/QGLE
+
+LIBPNG_PATH=$(HOME)/staticlibs/lib/libpng14.14.dylib
+
+bundle_libpng:
+	-cp -p $(LIBPNG_PATH) build/bin/QGLE.app/Contents/lib/libpng.dylib
+	install_name_tool -id @executable_path/../lib/libpng.dylib build/bin/QGLE.app/Contents/lib/libpng.dylib
+	install_name_tool -change $(LIBPNG_PATH) @executable_path/../lib/libpng.dylib build/bin/QGLE.app/Contents/MacOS/QGLE
+	install_name_tool -change $(LIBPNG_PATH) @executable_path/../lib/libpng.dylib build/bin/QGLE.app/Contents/lib/libgle-graphics-@GLE_VERSION@.dylib
+
+otool:
+	@echo "GLE"
+	otool -L build/bin/QGLE.app/Contents/bin/gle
+	@echo "GLEGS"
+	otool -L build/bin/QGLE.app/Contents/bin/glegs
+	@echo "MANIP"
+	otool -L build/bin/manip
+	@echo "LIBGLE-GRPAPHICS"
+	otool -L build/bin/QGLE.app/Contents/lib/libgle-graphics-@GLE_VERSION@.dylib
+	@echo "QGLE"
+	otool -L build/bin/QGLE.app/Contents/MacOS/QGLE
+
+#####################
+# Begin build DMG   #
+#####################
+#
+# Build file for creating DMG files.
+#
+# The DMG packager looks for a template.dmg.bz2 for using as its
+# DMG template. If it doesn't find one, it generates a clean one.
+#
+# If you create a DMG template, you should make one containing all
+# the files listed in $(SOURCE_FILES) below, and arrange everything to suit
+# your style. The contents of the files themselves does not matter, so
+# they can be empty (they will be overwritten later).
+#
+# Remko Tronçon
+# http://el-tramo.be/about
+# Licensed under the MIT License. See LICENSE.txt for details.
+
+################################################################################
+# Customizable variables
+################################################################################
+
+SOURCE_DIR ?= build/bin
+SOURCE_FILES ?= QGLE.app
+TEMPLATE_DMG ?= template.dmg
+
+################################################################################
+# DMG building. No editing should be needed beyond this point.
+################################################################################
+
+MASTER_DMG=gle-graphics-$(VERSION_NUMBER).$(BUILD_NUMBER)$(GLE_SNAPSHOT)-exe-mac.dmg
+WC_DMG=wc.dmg
+WC_DIR=wc
+
+.PHONY: dmg
+dmg: $(MASTER_DMG)
+
+$(TEMPLATE_DMG): $(TEMPLATE_DMG).bz2
+	bunzip2 -k $<
+
+$(TEMPLATE_DMG).bz2:
+	@echo
+	@echo --------------------- Generating empty template --------------------
+	mkdir template
+	hdiutil create -fs HFSX -layout SPUD -size 60m "$(TEMPLATE_DMG)" -srcfolder template -format UDRW -volname "gle-graphics-$(VERSION_NUMBER).$(BUILD_NUMBER)$(GLE_SNAPSHOT)" -quiet
+	rmdir template
+	bzip2 "$(TEMPLATE_DMG)"
+	@echo
+
+$(WC_DMG): $(TEMPLATE_DMG)
+	cp $< $@
+
+$(MASTER_DMG): $(WC_DMG) $(addprefix $(SOURCE_DIR)/,$(SOURCE_FILES))
+	@echo
+	@echo --------------------- Creating Disk Image --------------------
+	mkdir -p $(WC_DIR)
+	hdiutil attach "$(WC_DMG)" -noautoopen -quiet -mountpoint "$(WC_DIR)"
+	for i in $(SOURCE_FILES); do  \
+		rm -rf "$(WC_DIR)/$$i"; \
+		ditto -rsrc "$(SOURCE_DIR)/$$i" "$(WC_DIR)/$$i"; \
+	done
+	#rm -f "$@"
+	#hdiutil create -srcfolder "$(WC_DIR)" -format UDZO -imagekey zlib-level=9 "$@" -volname "gle-graphics-$(VERSION_NUMBER).$(BUILD_NUMBER)$(GLE_SNAPSHOT)" -scrub -quiet
+	WC_DEV=`hdiutil info | grep "$(WC_DIR)" | grep "Apple_HFS" | awk '{print $$1}'` && \
+	hdiutil detach $$WC_DEV -quiet -force
+	rm -f "$(MASTER_DMG)"
+	hdiutil convert "$(WC_DMG)" -quiet -format UDZO -imagekey zlib-level=9 -o "$@"
+	rm -rf $(WC_DIR)
+	@echo
+
+.PHONY: clean_dmg
+clean_dmg:
+	-rm -rf $(TEMPLATE_DMG) $(MASTER_DMG) $(WC_DMG)
+
+#####################
+# End build DMG     #
+#####################
+
+#####################
+# Make glegs        #
+#####################
+
+glegs:
+	$(MAKE) -C src/gui -f MakefileAC $(PROJECT_BINDIR)/bin/glegs
+
+#####################
+# Rerun qmake       #
+#####################
+
+qmake:
+	$(MAKE) -C src/gui -f MakefileAC qmake
+	
+qgle:
+	$(RUN_QGLE)
+
+# Code for Autopackage
+
+install_ap:
+	-$(INSTALL_DATA) platform/autopackage/gle.desktop $(DESTDIR)$(INSTALL_DIR)
+	-$(INSTALL_DATA) platform/autopackage/gle.xml $(DESTDIR)$(INSTALL_DIR)
+	-$(INSTALL_DATA) platform/autopackage/gle.png $(DESTDIR)$(INSTALL_DIR)
+
+uninstall: clean_install
+
+clean_install:
+	-@$(RM) $(DESTDIR)$(INSTALL_BIN)/gle*
+	-@$(RM) $(DESTDIR)$(INSTALL_BIN)/manip*
+	-@$(RM) $(DESTDIR)$(INSTALL_BIN)/qgle*
+	-@$(RM) $(DESTDIR)$(INSTALL_DIR)/bin/*
+	-@$(RMDIR) $(DESTDIR)$(INSTALL_DIR)/bin
+	-@$(RM) $(DESTDIR)$(INSTALL_DIR)/font/*
+	-@$(RMDIR) $(DESTDIR)$(INSTALL_DIR)/font
+	-@$(RM) $(DESTDIR)$(INSTALL_DIR)/doc/*
+	-@$(RMDIR) $(DESTDIR)$(INSTALL_DIR)/doc
+	-@$(RM) $(DESTDIR)$(INSTALL_DIR)/gleinc/*
+	-@$(RMDIR) $(DESTDIR)$(INSTALL_DIR)/gleinc
+	-@$(RM) $(DESTDIR)$(INSTALL_DIR)/*
+
+configure: configure.ac
+	aclocal
+	autoconf
+	-@echo ""
+	-@echo "****************************************************************"
+	-@echo "Error: configure.ac changed, please reconfigure with ./configure"
+	-@echo "****************************************************************"
+	false
+
+gui:
+	$(MAKE) -C src/gui -f MakefileAC
+
+zipsrc:
+	$(MAKE) -f Makefile.gcc zipsrc
+
+tarsrc:
+	$(MAKE) -f Makefile.gcc tarsrc
+
+tarsrcf:
+	$(MAKE) -f Makefile.gcc tarsrcf
+
+zipexe:
+	zip -r $(BASE_NAME)-$(VERSION_NUMBER).$(BUILD_NUMBER)$(GLE_SNAPSHOT)-exe.zip build
+	echo "Created: $(BASE_NAME)-$(VERSION_NUMBER).$(BUILD_NUMBER)$(GLE_SNAPSHOT)-exe.zip"
+
+license:
+	cat srcfiles.txt | xargs perl platform/script/checklicense.pl
+
+# *** WARNING ***
+# Don't add "strip" to the default install target:
+# This breaks creating "debug" packages on openSUSE and Fedora.
+strip:
+	-strip build/bin/gle*
+	-strip build/bin/fbuild*
+	-strip build/bin/makefmt*
+	-strip build/bin/glegs*
+	-strip $(GLE_SRC_LIB_DIR)/libgle*
+	-strip build/bin/qgle*
+	-strip build/bin/manip*
+
+finddeps:
+	./build/bin/gle -finddeps
+
+cleandoc:
+	$(MAKE) -C gle-refman -f Makefile.gcc clean
+
+cleanfonts:
+	$(MAKE) -C gle-refman -f Makefile.gcc cfonts
+
+doc:
+	-$(MKDIR_P) build/doc
+	$(MAKE) -C gle-refman -f Makefile.gcc fig
+	$(MAKE) -C gle-refman -f Makefile.gcc fonts
+	$(MAKE) -C gle-refman -f Makefile.gcc pdf
+	$(MAKE) -C gle-refman -f Makefile.gcc pdf
+	$(MAKE) -C gle-refman -f Makefile.gcc index
+	$(MAKE) -C gle-refman -f Makefile.gcc pdf
+	cp gle-refman/gle-manual.pdf build/doc/
+	cp README.txt build/doc/
+	cp LICENSE.txt build/doc/
+
+autopackage:
+	(export APBUILD_STATIC_LIBGCC=1; export APBUILD_STATIC="tiff png12 png jpeg z"; makepackage platform/autopackage/gle4.apspec)
+	mv gle-@GLE_VERSION@.x86.package GLE-@GLE_VERSION@-x86-linux.package
+
+nsis: strip
+	-$(MKDIR_P) $(RELEASE_DIR)
+	-@$(RM) $(RELEASE_DIR)/$(WIN32_INSTALL_NAME)
+	-makensis /V1 /DGLE_VERSION=@GLE_VERSION@ /DOUTPUT_FILENAME=$(WIN32_INSTALL_NAME) contrib\\packagers\\nsis\\gle.nsi
+	-mv contrib/packagers/nsis/$(WIN32_INSTALL_NAME) $(RELEASE_DIR)
+
+snapshot:
+	perl platform/script/makesnapshot.pl 1
+
+nosnapshot:
+	perl platform/script/makesnapshot.pl 0

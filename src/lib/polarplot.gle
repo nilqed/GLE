@@ -1,0 +1,108 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Subroutines to create polar plots (r = f(theta))
+
+sub polar fct$ from to tstep color$ fill$ lwidth
+   default tstep  0.025
+   default color  black
+   default fill   clear
+   default lwidth 0.02
+   t = from
+   r = eval(fct$)
+   gsave
+   set color color$ lwidth lwidth
+   begin path stroke fill fill$
+      amove xg(r*cos(t)) yg(r*sin(t))
+      for t = from+tstep to to step tstep
+          r = eval(fct$)
+          aline xg(r*cos(t)) yg(r*sin(t))
+      next t
+      closepath
+   end path
+   grestore
+end sub
+
+sub polar_data ds$ color$ fill$ lwidth type$ 
+   default color  black
+   default fill   clear
+   default lwidth 0.02
+   default type   line
+   gsave
+   set color color$ lwidth lwidth
+   if type$="line" then
+      for i = 1 to ndata(ds$) 
+          amove xg(0) yg(0)
+          local r = datayvalue(ds$,i)
+          local t = torad(dataxvalue(ds$,i))
+          aline xg(r*cos(t)) yg(r*sin(t))
+      next i
+   else
+     begin path stroke fill fill$
+        local r = datayvalue(ds$,1)
+        local t = torad(dataxvalue(ds$,1))
+        amove xg(r*cos(t)) yg(r*sin(t))
+        for i = 2 to ndata(ds$)
+            r = datayvalue(ds$,i) 
+            t = torad(dataxvalue(ds$,i))
+            aline xg(r*cos(t)) yg(r*sin(t))
+        next i
+        closepath
+     end path
+   end if
+   grestore
+end sub
+
+sub polar_grid radius rings sectors color$
+  default radius  1.0
+  default rings   4
+  default sectors 8
+	default color   gray10
+	gsave
+	set color color$
+	for ring = 1 to rings
+	   amove xg(0) yg(0)
+	   circle xg(radius/rings*ring)-xg(0)
+	next ring
+	for sector = 1 to sectors	   
+	   local theta = 2*pi/sectors*(sector-1)
+	   amove xg(0) yg(0)	   
+	   aline xg(radius*cos(theta)) yg(radius*sin(theta))
+	next sector
+	grestore
+end sub

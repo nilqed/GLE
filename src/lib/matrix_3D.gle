@@ -1,0 +1,454 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 Jan Soubusta                                      !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! This library is designed to plot 3D BAR graphs of square matrices
+
+! ----------------------------------------------------------------------
+! Global constants with typical values:
+! ----------------------------------------------------------------------
+! mmax       (4 or 16) size of the matrix
+! r          (6 cm)    the matrix is drawn to a 3D cube r.r.r
+! alfa       (25 deg)  rotation of the cube in horizontal direction
+! beta       (30 deg)  rotation of the cube in vertical direction
+! ----------------------------------------------------------------------
+! x0,y0                position of the left bottom corner of the cube
+! xgrp, ygrp           position of the perspective point of infinity
+! persp_scale  (3)     perspective scale
+! ----------------------------------------------------------------------
+! z_axis_min   z_axis_bottom_value
+! z_axis_max   z_axis_top_value
+! z0           baseline for drawing 3D bars up or down
+! ----------------------------------------------------------------------
+!
+! Used colors:
+! ----------------------------------------------------------------------
+! color_frame$, col_T$, col_L$, col_R$, col_BR$, col_BL$
+! ----------------------------------------------------------------------
+!
+! Important subroutines
+!
+! sub project_3D2D s1 s2 s3
+! Takes one point of 3D box [s1,s2,s3] and calculates its position in
+! the picture [xgr,ygr]
+!
+! sub draw_back_frame
+! Draws three back lines of the cube.
+!
+! sub draw_middle_frame
+! Draws six additional lines of the cube.
+!
+! sub draw_front_frame
+! Draws three front lines of the cube.
+!
+! sub normalize_z zvalue
+! Calculates normalized z coordinate in a range (0,1)
+! (zvalue - bottom_z_value)/(top_z_value - bottom_z_value)
+!
+! sub draw_bar_z i j zvalue
+! Draws one bar, (i,j) element of the matrix with a given value (zvalue).
+!
+! sub draw_matrix_row k l
+! Draws one row of the matrix. The subroutine reads one row of the matrix
+! and displays the elements in reverse order (the last one the first).
+! This condition ensures correct resulting visualization.
+!
+! sub draw_z_ticks h1 h2 h3
+! Draws ticks with labels to z_axis: from h1, to h2, with a step h3.
+! The format of z_axis labels can be set, e.g.
+! formatz$ = "fix 2"
+!
+! sub draw_xy_ticks
+! Draws ticks to x_axis and y_axis
+!
+! sub label_x i txt$
+! Draws label txt$ to i-th x_axis tick.
+!
+! sub label_y i txt$
+! Draws label txt$ to i-th y_axis tick.
+
+r = 6
+color_frame$ = "black"
+col_T$  = "rgb(1,.8,.8)"
+col_L$  = "rgb(.8,.8,1)"
+col_R$  = "rgb(.8,1,.8)"
+col_BR$ = "rgb(.6,.6,1)"
+col_BL$ = "rgb(.6,1,.6)"
+
+dmin = z_axis_min
+dmax = z_axis_max
+
+sa = sin(torad(alfa))
+ca = cos(torad(alfa))
+sb = sin(torad(beta))
+cb = cos(torad(beta))
+ux = todeg(atan((ca/sa)*sb))
+uy = -todeg(atan((sa/ca)*sb))
+
+x0 = 0; y0 = 0
+
+set join round just cc
+
+!-----------------------------------------------------------
+
+sub project_3D2D s1 s2 s3
+   xgr = x0+r*(s1*ca+s2*sa)
+   local zp  = s1*sa-s2*ca
+   ygr = y0+r*(s3*cb-zp*sb)
+   zp  = s3*sb+zp*cb
+   ! perspektiva
+   if (zp<persp_scale) then
+      local zper = persp_scale/(persp_scale-zp)
+      xgr = zper*xgr+(1-zper)*xgrp
+      ygr = zper*ygr+(1-zper)*ygrp
+   else
+      ! IT IS OUT, predmety nejsou prede mnou, ale za mnou
+      xgr = 0
+      ygr = 0
+   end if
+end sub
+
+!-----------------------------------------------------------
+
+sub od_do a1 a2 a3 b1 b2 b3
+   project_3D2D a1 a2 a3
+   amove xgr ygr
+   project_3D2D b1 b2 b3
+   aline xgr ygr
+end sub
+
+!-----------------------------------------------------------
+
+sub _do b1 b2 b3
+   amove xgr ygr
+   project_3D2D b1 b2 b3
+   aline xgr ygr
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_back_frame
+   gsave
+   set color color_frame$
+   od_do 0 1 0 0 0 0
+   od_do 0 1 0 1 1 0
+   od_do 0 1 0 0 1 1
+   grestore
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_middle_frame
+   gsave
+   set color color_frame$
+   od_do 0 0 0 0 0 1
+   _do 0 1 1
+   _do 1 1 1
+   _do 1 1 0
+   _do 1 0 0
+   _do 0 0 0
+   grestore
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_front_frame
+   gsave
+   set color color_frame$
+   od_do 1 0 1 0 0 1
+   od_do 1 0 1 1 1 1
+   od_do 1 0 1 1 0 0
+   grestore
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_bar_z_zero i j
+   project_3D2D (i-1)/mmax (j-1)/mmax z0
+   x_1=xgr; y_1=ygr
+   project_3D2D (i)/mmax (j-1)/mmax z0
+   x_2=xgr; y_2=ygr
+   project_3D2D (i)/mmax (j)/mmax z0
+   x_3=xgr; y_3=ygr
+   project_3D2D (i-1)/mmax (j)/mmax z0
+   x_4=xgr; y_4=ygr
+   begin path fill col_T$ stroke
+      amove x_1 y_1
+      aline x_2 y_2
+      aline x_3 y_3
+      aline x_4 y_4
+      closepath
+   end path
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_bar_z_up i j z
+   project_3D2D (i-1)/mmax (j-1)/mmax z
+   x_1=xgr; y_1=ygr
+   project_3D2D (i)/mmax (j-1)/mmax z
+   x_2=xgr; y_2=ygr
+   project_3D2D (i)/mmax (j)/mmax z
+   x_3=xgr; y_3=ygr
+   project_3D2D (i-1)/mmax (j)/mmax z
+   x_4=xgr; y_4=ygr
+   project_3D2D (i-1)/mmax (j-1)/mmax z0
+   x_01=xgr; y_01=ygr
+   project_3D2D (i)/mmax (j-1)/mmax z0
+   x_02=xgr; y_02=ygr
+   project_3D2D (i)/mmax (j)/mmax z0
+   x_03=xgr; y_03=ygr
+   begin path fill col_T$ stroke
+      amove x_1 y_1
+      aline x_2 y_2
+      aline x_3 y_3
+      aline x_4 y_4
+      closepath
+   end path
+   begin path fill col_L$ stroke
+      amove x_1 y_1
+      aline x_01 y_01
+      aline x_02 y_02
+      aline x_2 y_2
+      closepath
+   end path
+   begin path fill col_R$ stroke
+      amove x_2 y_2
+      aline x_02 y_02
+      aline x_03 y_03
+      aline x_3 y_3
+      closepath
+   end path
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_bar_z_down i j z
+   project_3D2D (i-1)/mmax (j-1)/mmax z
+   x_1=xgr; y_1=ygr
+   project_3D2D (i)/mmax (j-1)/mmax z
+   x_2=xgr; y_2=ygr
+   project_3D2D (i)/mmax (j)/mmax z
+   x_3=xgr; y_3=ygr
+   project_3D2D (i-1)/mmax (j)/mmax z
+   x_4=xgr; y_4=ygr
+
+   project_3D2D (i-1)/mmax (j-1)/mmax z0
+   x_01=xgr; y_01=ygr
+   project_3D2D (i)/mmax (j-1)/mmax z0
+   x_02=xgr; y_02=ygr
+   project_3D2D (i)/mmax (j)/mmax z0
+   x_03=xgr; y_03=ygr
+   project_3D2D (i-1)/mmax (j)/mmax z0
+   x_04=xgr; y_04=ygr
+
+   begin clip
+      begin path clip
+         amove x_01 y_01
+         aline x_02 y_02
+         aline x_03 y_03
+         aline x_04 y_04
+         closepath
+      end path
+      begin path fill col_T$ stroke
+         amove x_1 y_1
+         aline x_2 y_2
+         aline x_3 y_3
+         aline x_4 y_4
+         closepath
+      end path
+      begin path fill col_BL$ stroke
+         amove x_1 y_1
+         aline x_01 y_01
+         aline x_04 y_04
+         aline x_4 y_4
+         closepath
+      end path
+      begin path fill col_BR$ stroke
+         amove x_4 y_4
+         aline x_04 y_04
+         aline x_03 y_03
+         aline x_3 y_3
+         closepath
+      end path
+   end clip
+   begin path fill col_L$ stroke
+      amove x_1 y_1
+      aline x_01 y_01
+      aline x_02 y_02
+      aline x_2 y_2
+      closepath
+   end path
+   begin path fill col_R$ stroke
+      amove x_2 y_2
+      aline x_02 y_02
+      aline x_03 y_03
+      aline x_3 y_3
+      closepath
+   end path
+end sub
+
+!-----------------------------------------------------------
+
+sub normalize_z zvalue       !zvalue  (0 , 1)
+   local vys
+   if (zvalue<dmin) then
+     dmin=zvalue
+   else if (zvalue>dmax) then
+     dmax=zvalue
+   end if
+   vys=(zvalue-z_axis_min)/(z_axis_max-z_axis_min)
+   return vys
+end sub
+
+!-----------------------------------------------------------
+
+sub normalize_z0 zvalue       !zvalue  (0 , 1)
+   local vys
+   vys=(zvalue-z_axis_min)/(z_axis_max-z_axis_min)
+   return vys
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_bar_z i j zvalue
+   z=normalize_z(zvalue)
+   if (z>z0) then
+      draw_bar_z_up i j z
+   else if (z<z0) then
+      draw_bar_z_down i j z
+   else
+      draw_bar_z_zero i j
+   end if
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_matrix_row k l
+   local h
+   fread vstup h
+   if (l<mmax) then
+      draw_matrix_row k l+1
+   end if
+   draw_bar_z k l h
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_z_ticks h1 h2 h3
+   kk=(h2-h1)/h3
+   for k=0 to kk
+      zvalue=h1+k*h3
+      z=normalize_z0(zvalue)
+      !@od_do 0 0 z -.03 -.03 z
+      !@project_3D2D -.07 -.07 z
+      !  amove xgr ygr+.05
+      project_3D2D 0 0 z
+      amove xgr ygr
+      rline -.2 0
+      rmove -.35 0
+      if (formatz$="") then
+          if (abs(zvalue)<1e-5) then
+             write 0
+          else
+             write zvalue
+          end if
+      else
+         write format$(zvalue,formatz$)
+      end if
+   next k
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_xy_ticks
+   for k=0 to mmax-1
+      pom=(k+.5)/mmax
+      od_do pom 0 0 pom -.05 0
+      od_do 1 pom 0 1.05 pom 0
+   next k
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_xy_ticks2 po
+   for k=0 to mmax-1
+      local pom=(k+.5)/mmax
+      if ((k%po)=0) then
+         od_do pom 0 0 pom -.05 0
+         od_do 1 pom 0 1.05 pom 0
+      else
+         od_do pom 0 0 pom -.03 0
+         od_do 1 pom 0 1.03 pom 0
+      end if
+   next k
+end sub
+
+!-----------------------------------------------------------
+
+sub label_x i txt$
+   project_3D2D (i-.5)/mmax -.2 0
+   amove xgr ygr
+   begin rotate ux
+      write txt$
+   end rotate
+end sub
+
+!-----------------------------------------------------------
+
+sub label_y i txt$
+   project_3D2D 1.15 (i-.5)/mmax 0
+   amove xgr ygr
+   begin rotate uy
+      write txt$
+   end rotate
+end sub
+
+!-----------------------------------------------------------
+
+sub draw_bar_graph_3d f$
+   draw_back_frame
+   fopen f$ vstup read
+   for k = 1 to mmax
+      draw_matrix_row k 1
+   next k
+   fclose vstup
+   draw_middle_frame
+   draw_front_frame
+end sub
+
+

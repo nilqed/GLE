@@ -1,0 +1,113 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+#
+# config file for gcc and make
+#
+
+HAVE_LIBX11 = 1
+# enabling the above will include the X11 driver in gle
+
+#  -Wunused-variable
+
+EXTRA_DEFS := -D __UNIX__ -Wreturn-type
+OBJ_SUFF	  =o
+CC		  =g++
+EXE_SUFF	  =
+AR		  =ar
+RM		  =rm -rf
+RMDIR		  =rm -rf
+MKDIR		  =mkdir
+PATH_SEP	=/
+
+INSTALL_DIR     =/usr/share/gle/$(VERSION_NUMBER).$(BUILD_NUMBER)
+INSTALL_BIN     =$(GLE_RPM_ROOT)/usr/bin
+
+ROOT_INSTALL_DIR  =$(GLE_RPM_ROOT)$(INSTALL_DIR)
+
+-include extraconfig.gcc
+
+#
+# other global defines
+#
+PROJECT_BINDIR 	= ../../build
+PROJECT_LIBDIR 	= ../../lib
+PROJECT_INCDIR 	= ../../include
+
+#
+# GLE_TOP does not need to be defined anymore during compile
+#
+GLE_TOP         = ../../build
+
+EXTRA_INCLUDE_PATHS	=
+EXTRA_LIB_PATHS		=
+
+# On Solaris, add these to LIBS:
+# -lsocket -lnsl
+
+LIBS			=
+
+ifeq (HAVE_LIBTIFF,1)
+	EXTRA_DEFS		:= $(EXTRA_DEFS) -D HAVE_LIBTIFF
+	ifdef LIBTIFFDIR
+		EXTRA_INCLUDE_PATHS := $(EXTRA_INCLUDE_PATHS) -I$(LIBTIFFDIR)
+		EXTRA_LIB_PATHS	:= $(EXTRA_LIB_PATHS) -L$(LIBTIFFDIR)
+	endif
+	LIBS			:= $(LIBS) -ltiff
+endif
+
+ifeq (HAVE_LIBPNG,1)
+	EXTRA_DEFS		:= $(EXTRA_DEFS) -D HAVE_LIBPNG
+	ifdef LIBPNGDIR
+		EXTRA_INCLUDE_PATHS := $(EXTRA_INCLUDE_PATHS) -I$(LIBPNGDIR) -I$(ZLIBDIR)
+		EXTRA_LIB_PATHS	:= $(EXTRA_LIB_PATHS) -L$(LIBPNGDIR)
+	endif
+	ifdef ZLIBDIR
+		EXTRA_INCLUDE_PATHS := $(EXTRA_INCLUDE_PATHS) -I$(ZLIBDIR)
+		EXTRA_LIB_PATHS	:= $(EXTRA_LIB_PATHS) -L$(ZLIBDIR)
+	endif
+	LIBS			:= $(LIBS) -lpng
+endif
+
+ifeq (HAVE_LIBX11,1)
+	EXTRA_DEFS		:= $(EXTRA_DEFS) -D HAVE_X11
+	EXTRA_LIB_PATHS		:= $(EXTRA_LIB_PATHS) -L/usr/X11/lib	
+	LIBS			:= $(LIBS) -lX11
+endif
+
+CXXFLAGS	=$(VERSION_INFO) $(EXTRA_DEFS) $(EXTRA_INCLUDE_PATHS)
+LINKFLAGS	=$(EXTRA_LIB_PATHS) $(LIBS)

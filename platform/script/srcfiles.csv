@@ -1,0 +1,60 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+$.,Makefile.*;config.*;configure.ac;configure;README.txt;LICENSE.txt,*.zip;*.gz;*.patch;Makefile;test.*;.*;extraconfig.*;srcfiles.txt;conf.txt*;config.status;config.log;aclocal.m4
+platform/autoconf,config.*;install-sh;*.in,gle-graphics.pc
+platform/autopackage,gle.*;*.in;*.pl,gle4.apspec
+platform/script,*,
+platform/mac,*.sh;*.src,
+contrib/packagers/nsis,*.nsi;*.ico;*.bmp,*.psd
+contrib/editors/highlighting,*.el;*.nedit;*.vim;*.stx
+gle-refman,Makefile.*;*.tex;*.gle;*.dat;*.csv;*.big;*.sur;*.z;*.key;*.lab;*.let;*.sty;*.pl;*.lis,*.eps;*.pdf;*.ps;*.inc;*.aux;*.idx;*.ilg;*.ind;*.log;*.out;*.toc;*-cdata.dat;*-clabels.dat;*-cvalues.dat$src,config.h.*;config_noauto.h,config.h
+gle-refman/qgle/screenshot,*.png,
+$src,config.h.*;config_noauto.h,config.h
+src/doc,*.in,gle.1
+src/gle,Makefile.*;*.cpp;*.h;*.i;files.txt,Makefile;*.o
+src/makefmt,Makefile.*;*.cpp;*.h;*.i;files.txt;parseAFM.diff,Makefile;*.o
+src/fbuild,Makefile.*;*.cpp;*.h;*.i;files.txt,Makefile;*.o
+$src/gui,Makefile.*;*.cpp;*.h;*.i;*.txt;*.html;*.in;*.sh;*.rc;*.qrc;doxyfile,Makefile;*.o;MakefileAC;qgle.pro;qrc_qgle.cpp;*.Debug;*.Release
+src/gui/gsinc,*.h;LICENSE
+src/gui/images,*.png;*.ico;*.icns
+src/TeX,Makefile.*;*.tex;*.cmd,Makefile
+src/lib,Makefile.*;*.gle
+src/fonts,Makefile.*;*.gle;*.afm;*.dat;*.enc;*.txt;*.pl;*.html;*.inf,*.fve;*.fmt;movefonts
+src/manip,Makefile.*;*.cpp;*.h;*.i;files.txt;*.hlp;*.dat,Makefile;*.o
+src/samples,Makefile.*;qgle_keyboard.gle;sample.gle;sample_compare.eps

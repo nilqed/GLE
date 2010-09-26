@@ -1,0 +1,553 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{GLE Installation on a PC}
+\index{DOS}
+To install GLE, put the distribution disk into drive a: and
+type:
+\begin{verbatim}
+     a:install
+\end{verbatim}
+
+GLE requires at least 800K of disk space for a minimal installation
+and 3.3M for a full installation (including all device drivers
+and fonts).
+
+GLE also requires 530K or more of free memory. Use the DOS
+command CHKDSK to check this figure. If you don't have
+enough then take copies of your AUTOEXEC.BAT and CONFIG.SYS files
+and then remove as much as possible from these files.
+
+GLE may work with less memory depending on what you are drawing.
+
+The installation disk contains a version of CGLE which will
+make use of epanded memory.  This version can run with 70K less
+memory but if you don't have expanded memory then it has to
+use your hard disk instead which is a great deal slower.
+
+\index{EPS}
+\index{Encapsulated PostScript}
+To produce an .eps file for inclusion in WordPerfect you would type:
+\begin{verbatim}
+     C:> psgle myfile /eps
+\end{verbatim}
+This will create a file called myfile.EPS.
+
+WordPerfect can also understand a special file format which contains
+both an EPS file for printing to PostScript printers and a bitmap  TIFF
+image for displaying on the screen.  GLE can create this sort of
+file with the command:
+\begin{verbatim}
+     C:> wpgle myfile
+\end{verbatim}
+This will create a file called MYFILE.EPF which you can include into
+WordPerfect.
+
+If your PC is connected to a VAX computer which has a PostScript printer
+you may copy MYFILE.PS to the VAX using a standard file transfer
+program (e.g. FTP, KERMIT, VDISK)
+
+The best way to see what GLE can do is to have a play with it, simply
+start it up and try out some of the examples:
+\begin{verbatim}
+     Press F3       (Load file)
+     Press <enter>  (for a menu of GLE files)
+     Use arrow keys to select example, then press <enter>
+     Press F10 to draw the picture
+     Press ESC to get back to the GLE editor.
+     ...
+     When you find a graph try pressing F9 and modifying
+     one of the fields (use F1 for an explanation of each
+     field).
+\end{verbatim}
+
+Used symbols for PC:
+\begin{verbatim}
+GLE_NOCONTROLD TRUE  (Stops ^D being added to ps files)
+(this is the default for unix)
+
+GLE_ADDBGI ...       (high resolution BGI-Driver)
+(see Device Drivers)
+\end{verbatim}
+%
+%
+\input{sm_gle32_tut}
+%%\section{32bit DOS Version of GLE}
+%%\index{DOS!32bit}
+%
+
+\section{Running GLE on a VAX}
+\index{VAX}
+The command to run GLE is:
+\begin{verbatim}
+     $ cgle myfile.gle
+     $ cgle myfile.gle /dev=regis
+     $ cgle myfile.gle /dev=x
+\end{verbatim}
+See the directory CGLE\_EXAMPLES: for examples and templates.
+To get access to these files from the GLE menus use the commands:
+\begin{verbatim}
+     $ define workarea sys$login:,cgle_examples:
+     $ set default workarea:
+     $ cgle stack4b.gle      ! or any other example
+\end{verbatim}
+
+If your keyboard doesn't have the function keys F9 thru F14 you can
+use GOLD (PF1) followed by the numbers 9,0,1,2,3,4 (on the top of the
+QWERTYUIOP keypad).
+
+Keyboard Mappings:\\
+\begin{center}
+\begin{tabular}{|l|l|l|l|} \hline
+VT100  & VT200 &  PC	& Meaning	\\ \hline
+GOLD 1 & F11  & F1	& Help 		\\
+GOLD 2 & F12  & F2	& Save		\\
+GOLD 3 & F13  & F3	& Load		\\
+GOLD 4 & F14  & F4	& Save-as	\\
+GOLD 9 & F9   & F9   	& Graph-menu	\\
+GOLD 0 & F10  & F10  	& Draw-it 	\\
+Control+Z & Control+Z & Control+Z 	& Exit/Escape \\
+& & Alt+X		& Exit/Escape \\
+Control+E & Control+E  & 	& Calls VAX EDT	\\
+Control+F & Control+F  & 	& Toggle fast/slow text \\
+Control+R & Control+R  & F5	& Shows errors \\
+& & Control+S	& Shells to DOS \\ \hline
+\end{tabular}
+\end{center}
+
+Supported devices: VT100, REGIS (VT125, VT240), TEK4010, VWS, XWindows.
+
+Supported output: PostScript, HPGL, Epson, Epson 24pin, HP Deskjet.
+
+\index{printing}
+To create a PostScript output file (.PS) and automatically print it to
+the LASER queue you would type:
+\begin{verbatim}
+     $ cgle myfile /print
+\end{verbatim}
+
+\index{EPS}
+\index{Encapsulated PostScript}
+To produce an .eps file for inclusion in \LaTeX\ you would type:
+\begin{verbatim}
+     $ cgle myfile /dev=eps
+\end{verbatim}
+
+To produce a .ps file suitable for printing to a laser writer type:
+\begin{verbatim}
+     $ cgle myfile /dev=ps
+\end{verbatim}
+
+The DCL symbol GLE\_NOCONTROLD should be set to "TRUE" to kill the
+\verb#^D# on vms systems.
+
+If you set the DCL symbol GLE\_EDITOR to TPU then you will get
+TPU instead of EDT when you press \verb#^E#.
+
+\section{It didn't work, bugs!!!}
+\index{bugs} \index{errors}
+If the installation fails, or one of the example GLE files fails to work
+then the most likely reason is a shortage of memory due to too many
+memory resident programs/drivers.  To fix this remove these utilities from
+your autoexec.bat and config.sys files temporarily.
+
+There may well be a bug in your GLE file,  try using the
+trace option to find the bug.\\
+On a PC:
+\begin{verbatim}
+     C:\GLE> psgle myfile /trace
+\end{verbatim}
+
+On a VAX:
+\begin{verbatim}
+     $ cgle myfile /dev=ps /trace
+\end{verbatim}
+
+Another reason for a failure is a bug in GLE,  {\bf Please} report
+bugs to Chris Pugmire (Internet srghcxp@grv.dsir.govt.nz,  grv::srghcxp)
+so they can be fixed. If possible, try and find a way of
+repeating the problem, then send relevant GLE and data files with
+an outline of what is wrong.
+
+\index{device drivers}
+\index{drivers} \index{EPSON} \index{LaserJet} \index{DeskJet}
+\index{plotters} \index{printers} 
+\section{Device Drivers}
+GLE supports the following devices.
+
+Interactive: IBM/PC (BGI), VT100, REGIS (VT125, VT240), TEK4010, VWS, XWindows.
+
+Output: PostScript, HPGL, EPSON, EPSON 24pin, HP Deskjet.
+
+Keyboard Mappings:
+\begin{center}
+\begin{tabular}{|l|l|l|l|} \hline
+VT100  & VT200 &  PC	& Meaning	\\ \hline
+GOLD 1 & F11  & F1	& Help 		\\
+GOLD 2 & F12  & F2	& Save		\\ 
+GOLD 3 & F13  & F3	& Load		\\
+GOLD 4 & F14  & F4	& Save-as	\\
+GOLD 9 & F9   & F9   	& Graph-menu	\\
+GOLD 0 & F10  & F10  	& Draw-it 	\\ 
+Control+Z & Control+Z & Control+Z 	& Exit/Escape \\
+& & Alt+X		& Exit/Escape \\
+Control+E & Control+E  & 	& Calls VAX EDT	\\
+Control+F & Control+F  & 	& Toggle fast/slow text \\ \hline
+\end{tabular}
+\end{center}
+To find out what drivers are available type in:
+\begin{verbatim} 
+     ls /usr/local/gle/gle_*
+\end{verbatim}
+\subsection{PC Screen Drivers}
+\index{PC screen driver}
+\index{Device Drivers!PC screen driver}
+Remember that what you see on the screen isn't always what you will
+get on the printer.  For example filled regions will not be filled,
+and some characters may not look right.
+
+After pressing F10 and drawing the graph it can be annotated by using 
+the mouse (or arrow keys) to draw lines, text and boxes.  
+To draw lines simply click on the points of the line, use the right
+hand mouse button to `pick up' the pen.  
+
+To draw text press the letter `t' and then click on where you would
+like the text to be drawn.  
+
+All movements are rounded to the grid size settings which are 
+1.0cm, 0.1cm, 0.01cm etc.  
+
+The height and colour of the text/lines is determined by the current
+settings at the end of the GLE file.
+
+If there is no mouse driver loaded then a cross-hair will appear 
+and it can be moved around using the arrow keys.  Press `c' to 
+click, instead of the mouse button.
+% sm
+\subsubsection{SuperVGA}
+\index{Device Drivers!PC SVGA}
+%
+To use a SuperVGA card you first need to get a BGI
+driver that supports your card.  From anonymous FTP
+you can get svgabgi3.zip: ftp wuarchive.wustl.edu
+\begin{verbatim}
+     ftp> user anonymous
+     ftp> (mail ident)
+     ftp> cd /mirrors/msdos/borland
+     ftp> binary
+     ftp> get svgabgi3.zip
+     ftp> quit
+\end{verbatim}
+Then unzip it, decide which driver will match your SVGA card
+and copy that driver into \verb?\GLE\EXE?.
+\begin{verbatim}
+     c:> pkunzip svgabgi3.zip
+     c:> pkunzip svgabgi3.zip
+     c:> type readme. 
+     c:> copy svga16.bgi \gle\exe
+\end{verbatim}
+Define an environment variable to tell gle about this driver
+and which mode to use. (put this line in your autoexec.bat)
+\begin{verbatim} 
+     c:> set gle_addbgi=4.svga16
+\end{verbatim}                                                                                      
+% sm
+%%\subsection{GO32/GRX Screen Driver}
+%%\include{sm_gle32_prog}
+\input{sm_gle32_prog}
+
+%
+\subsection{PostScript Driver}
+\index{PostScript (driver)}
+\index{printing}
+To print a GLE file to the laser printer type:
+\begin{verbatim}
+     $ cgle myfile /print
+\end{verbatim}
+
+or on a PC:
+\begin{verbatim}
+     C:\GLE> psgle myfile   
+     C:\GLE> print myfile.ps 
+\end{verbatim}
+
+\index{flipping}
+The postscript drivers for GLE will automatically flip a 
+picture to best fit onto the page,  e.g. a wide graph
+(as defined by the size command at the top) will be drawn 
+in {\em landscape} mode and a tall thin graph will be drawn in
+{\em portrait} mode.
+
+\index{EPS}
+\index{Device Drivers!PostScript}
+\index{PostScript (EPS, WordPerfect)}
+\index{Encapsulated PostScript}
+\index{WordPerfect}
+\index{\LaTeX \ (inserting graphs)}
+To produce an .eps file on a VAX for inclusion in \LaTeX \ or 
+WordPerfect you would type:
+\begin{verbatim}
+     $ cgle myfile /dev=eps
+\end{verbatim}
+
+On a PC you would type:
+\begin{verbatim}
+     C:\GLE> psgle myfile  /eps
+     (this creates myfile.eps, not myfile.ps)
+\end{verbatim}
+
+WordPerfect can also understand a special file format which contains
+both an EPS file for printing to PostScript printers and a bitmap  TIFF 
+image for displaying on the screen.  GLE can create this sort of 
+file with the command:
+\begin{verbatim}
+     C:> wpgle myfile
+\end{verbatim}
+This will create a file called MYFILE.EPF which you can include into
+WordPerfect.
+
+%Inside your \LaTeX \ document use the \LaTeX \  command:
+%\begin{verbatim}
+%     \graphin{myfile.eps}{12.0cm}{3.0cm}{1.0}
+%\end{verbatim}
+% sm
+To include Postscript in a \LaTeX \ document use epsf.sty of the 
+{\sf DVIPS}-package.  
+Inside your \LaTeX \ document use {\sf\\epsffile } to put it at the right
+place in a {\sf picture}-environment, e.g. :
+\begin{verbatim}
+     \documentstyle[12pt,epsf]{article}
+     ...
+     \begin{picture}(13.0, 5.5)
+     \put(0.0,0.0){
+     \epsfclipon
+     \epsfxsize=6cm
+     \epsffile[60 170 560 740]{myfile.ps} } % [ bounding-box ] { file_name }
+     \end{picture}
+\end{verbatim}
+	
+Advanced features of {\sf epsf.sty} are described in {\tt
+../TeX/src/dvips/dvips.tex}.
+% sm
+
+\index{lwidth}
+\index{line width}
+The laser printer driver will draw all zero width lines .02cm wide
+for any line width equal to zero, but if an lwidth 
+is greater than zero and less than or equal to .0001 then it will use a line 
+width of 1 pixel.  Without this it would be impossible to specify 
+a line width that didn't occasionally get rounded to 2 pixels.
+
+There are also some commandline switches
+\begin{verbatim}
+                /nod       (add ^D to ps file)
+                /addd      (Don't add ^D to ps file)
+                /nomaxpath (Don't choke on complex fill paths)
+                /fill      (For dvibit, makes bar's filled instead of shaded)
+\end{verbatim}
+
+\index{Device Drivers!TEK4010}
+\subsection{TEK4010 Driver}
+This driver allows initialization sequences to be defined 
+with the symbols TEK\_OPEN and TEK\_CLOSE.
+
+On a VAX this is normally done by CGLECMD.COM so that when you
+specify /DEV=V550 the assignments are done for you.
+(V550 = Visual 550)
+
+\index{plotter pens}
+\index{pens} \index{HPGL}
+\subsection{HPGL Driver}
+\index{Device Drivers!HPGL Driver}
+This driver allows initialization sequences to be defined 
+in the symbols HPGL\_OPEN and HPGL\_CLOSE.  On the PC 
+use environment variables and on the VAX use DCL symbols.
+Also HPGL\_WIDTH and HPGL\_HEIGHT can be defined for non A3 plotters.
+
+The HPGL driver supports sizes greater than A3.
+
+The symbols HPGL\_ADDX, HPGL\_ADDY add a margin to the plot.  
+These default to .9cm and 1.5cm
+
+On a VAX this is normally done by CGLECMD.COM so that when you
+specify /DEV=HPA4 the assignments are done for you.
+
+The HPGL driver assigns the following colours to pen numbers:
+
+1=black, 2=red, 3=green, 4=blue, 5=magenta, 6=white, 7=yellow.
+
+To get Gle-Output in a WIN-WORD text, HPGL is a good and easy way to do it.
+\index{Win-Word} \index{Win-Word!HPGL-Import}
+
+The use of the HPGL-Converter HP2XX of Heinz W. Werntges is another way to
+get various pix-map format output. HP2XX has been ported successfully 
+for Unix, OS/2, DOS, Amiga, Atari, VMS and AXP. \\ 
+HP2XX has many controling options. In
+the current version it is able to write the following formats: 
+mf, cad, em, epic, eps, pcl, pcx, pic, img, pbm, pre, uis.
+
+HP2XX is available via anonymous FTP at ftp.rz.uni-duesseldorf.de. For
+further information ask Heinz (Internet:
+werntges@clio.rz.uni-duesseldorf.de).
+\index{hp2xx}
+\index{HPGL!converter}
+%
+
+\subsection{PC Bitmap Drivers}
+\index{PC Bitmap Driver}
+\index{Device Drivers!PC Bitmap Driver}
+GLE supports the EPSON 8 and 24 pin and HP deskjet/laserjet printers.
+To support bitmap devices which require a large amount of memory GLE 
+first writes a device independent file OUT.DVI, then the
+appropriate bitmap driver for your printer will read the OUT.DVI file
+and create a bitmap which it then prints to LPT1:
+
+\begin{verbatim}
+     C:> dvigle myfile      (produces OUT.DVI)
+     C:> dviepson           (creates bitmap and prints to LPT1:)
+\end{verbatim}
+
+The output options are:
+\begin{verbatim}
+     C:> dviepson           Standard EPSON printers 
+     C:> dviep24            24 Pin EPSON printers (180dpi)
+     C:> dvilj              HP Laser jet, Desk jet (150 dpi)
+     C:> dvilj300           HP Laser jet, Desk jet (300 dpi)
+     C:> dviprint -dpj      HP PaintJet printers
+     C:> dviprint -dsx      Sixel graphics driver
+\end{verbatim}
+The high resolution drivers (dviep24, dvilj300) are significantly slower
+than the low resolution drivers so would only be used for final output.
+
+See the file AAREADME.GLE for the latest information on drivers.
+% sm
+\clearpage
+\subsection{DVIPRINT}
+\index{Bitmap Driver}
+\index{Device Drivers! DVIPRINT}
+All available bitmap drivers and options can be use with 
+\begin{verbatim}
+     gle myfile -ddevice [-hires] [...]
+\end{verbatim} 
+To find out what drivers are available type in:
+\begin{verbatim}
+     gle_dviprint
+
+Usage: dviprint [-depson | -dlj] [-old] [-hires] [-vhires] [-debug] [-output xx.prt]
+        -depson   To produce output for epson printers 
+        -dwp      To add tiff image to wp .eps file 
+        -dec      Epson color ribbon printers 
+        -dlj      To produce output for HP LaserJet printers 
+        -dpj      To produce output for HP PaintJet printers 
+        -dsx      Sixel graphics, for DEC printers la100's ...
+        -dvt      To print bitmap to screen (preview) 
+        -over     Overhead transparency mode for PaintJet
+        -old      For old HP Laser Jet printers (no compression)
+        -hires    Uses high resolution for that printer (slower)
+        -vhires   Viritcal high resolution for sixel graphics
+        -wide     If your printer has a wide carriage 
+        -noflip   Disable's auto flipping 
+        -flip     Forces flip  
+        -nosquash Tries to print it full size
+        -compress Force internal bitmap compression (slow) 
+        -noff     No form feed
+        -debug    Prints debug messages
+        -out x.x  Prints output to file instead of printer port
+\end{verbatim}
+% sm
+% 
+\subsection{Fonts (font mapping)}
+\index{Device Drivers!fonts}
+By default the generic fonts (rm, rmb, ss, tt etc) will all map
+to PLSR (plotter simplex roman) on BITMAP and HPGL drivers.  To make
+this happen on other drivers put the command 
+{\sf plotter fonts} immediately after the {\sf size} command 
+at the top of the GLE file.
+
+A typical result of this change in fonts is that something 
+that lines up on the screen will not line up when printed 
+to an EPSON printer.  If this happens then use the {\sf plotter fonts}
+command.
+
+If a character is missing from a font, or isn't the particular 
+variation you like, you can define a character to be from 
+a different font in this way: 
+\begin{verbatim}
+     \chardef{%}{{\setfont{texcmr}\char{37}}} 
+     \chardef{[}{{\setfont{texcmr}\char{91}}} 
+     \chardef{]}{{\setfont{texcmr}\char{93}}} 
+\end{verbatim}
+
+	On the PC some fonts may not be installed to save disk space.
+When one of the missing fonts is  called for, a replacement 
+font will be displayed, this may look
+terrible and some special characters may be completely wrong.
+
+\clearpage
+More importantly if you use a font which does not have its font metric
+file installed (e.g. C:/GLE/FONTS/PLSR.FMT) then the
+PostScript driver will space the characters incorrectly.  This can 
+be fixed by extracting that particular metric file from the 
+distribution file CGLE\_FVE.ZIP using PKUNZIP. 
+
+\subsection{Printer Fonts}
+\index{Device Printer!fonts}
+You can now tell gle about postscript fonts that you have 
+downloaded into your own printer.
+
+Lets pretend we are adding a font called Greek-Bold
+\begin{verbatim}
+                1) Download the font into you laser printer
+                2) Add a line to FONT.DAT
+psgb 86 psgb.fmt plsr.fve psgb.fmt
+a    b  c        d
+                a = GLE's name for the font
+                b = The next unused number in font.dat
+                c = The font metric file, this can be created using
+                        makefmt from and adobe font metric file
+                        (.afm) which you should have been supplied
+                        with your font.
+                d = The font vector file, this is just a font that
+                        that gle can use to draw your font on non
+                        postscript devices.
+                3) Add a line to psfont.dat
+psgb Greek-Bold
+\end{verbatim}
+This tells the postscript driver that this is a 
+font that the printer knows how to deal with.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5

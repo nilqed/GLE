@@ -1,0 +1,177 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+size 11 4
+
+include "../../script/manual.gle"
+manual_graph_mode
+
+sub pmove d a
+	amove xpos()+d*cos(torad(a)) ypos()+d*sin(torad(a))
+end sub
+
+sub dist a$ b$
+	return sqrt((ptx(a$)-ptx(b$))^2 + (pty(a$)-pty(b$))^2)
+end sub
+
+begin object curve
+	set just lc
+	amove 0.2 1.5
+	begin box add 0.1 round 0.1 name b1
+		tex "GLE"
+	end box
+
+	set just bl
+	amove 2 0.1
+
+	begin box add 0.1 round 0.1 name b2
+		tex "test.gle"
+	end box
+
+	join b1.rc -> b2.tc curve 0 90 1.2 1
+end object
+
+amove 0 pageheight()
+draw curve.tl
+
+set just tl
+amove 0 pty(curve.bc)-0.2
+gsave
+set hei 0.3
+tex "\texttt{join b1.rc -> b2.tc curve 0 90 1.2 1}"
+grestore
+
+r = 0.35; hi = 0.2; d = 1.2
+set just cc
+
+begin object joint
+	begin name c
+		amove 0 0
+		tex "$c$"
+		ellipse r hi
+	end name
+
+	begin name a
+		pmove d 100
+		tex "$a$"
+		ellipse r hi
+	end name
+
+	begin name b
+		pmove d 220
+		tex "$b$"
+		ellipse r hi
+	end name
+
+	join a.c -> b.c
+	join a.c -> c.c
+	join b.c -> c.c
+end object
+
+amove pagewidth() pageheight()
+draw joint.tr
+
+set just tr
+amove pagewidth() pty(curve.bc)-0.2
+gsave
+set hei 0.3
+tex "\texttt{join a.c -> b.c}"
+grestore
+
+begin object hvjoin
+   box 0.3 0.3 name b1
+   rmove 2 0
+   box 1 1 name b2
+   join b1.rc -> b2.h
+end object
+
+amove 0 pty(curve.bc)-0.8
+draw hvjoin.tl
+
+set just tl
+amove 0 pty(hvjoin.bc)-0.2
+gsave
+set hei 0.3
+tex "\texttt{join b1.rc -> b2.h}"
+grestore
+
+begin object join_ci_box
+  set just cc
+	begin name a
+		amove 0 0
+		tex "$a$"
+		ellipse r hi
+	end name
+
+  pmove 1.5 160
+	begin box add 0.2 name b
+		tex "$b$"
+	end box
+
+	join a.c -> b.box
+end object
+
+amove pagewidth() pty(curve.bc)-0.8
+draw join_ci_box.tr
+
+set just tr
+amove pagewidth() pty(join_ci_box.bc)-0.2
+gsave
+set hei 0.3
+tex "\texttt{join a.c -> b.box}"
+grestore
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

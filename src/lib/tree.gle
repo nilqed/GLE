@@ -1,0 +1,263 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Subroutines for drawing trees
+
+include "shape.gle"
+include "ellipse.gle"
+
+! these constants are final (don't change these)
+! the defaults can be modified with the functions below
+tree_edge_label_hei = 0.25
+tree_node_hei = 0.3;        tree_leaf_hei = 0.25
+tree_node_dx = 0.6;         tree_node_dy = 0.9
+tree_node_x_fill = 0.2;     tree_node_y_fill = 0.12
+tree_node_min_sx = 0;       tree_node_min_sx = 0
+tree_edge_label_add = 0.05; tree_edge_label_dy = 0.1
+tree_edge_arrow = 0;        tree_node_ellipse = 0
+
+sub set_tree_node_dxdy dx dy
+   tree_node_dx = dx
+   tree_node_dy = dy
+end sub
+
+sub set_tree_node_fill dx dy
+   tree_node_x_fill = dx
+   tree_node_y_fill = dy
+end sub
+
+sub set_tree_node_min_size sx sy
+   tree_node_min_sx = sx
+   tree_node_min_sy = sy
+end sub
+
+sub set_tree_hei nodehei leafhei labelhei
+   tree_edge_label_hei = labelhei
+   tree_node_hei = nodehei
+   tree_leaf_hei = leafhei
+end sub
+
+sub set_tree_edge_label_add_dy add dy
+   tree_edge_label_add = add
+   tree_edge_label_dy = dy
+end sub
+
+sub set_tree_edge_arrow arr
+   tree_edge_arrow = arr
+end sub
+
+sub set_tree_node_ellipse ell
+   tree_node_ellipse = ell
+end sub
+
+sub set_leaf_ellipse_size_str str$
+   set hei tree_leaf_hei
+   set_ellipse_size_str str$
+end sub
+
+sub texortext str$ name$ delta hi
+   set hei hi
+   if name$ = "" then
+      if shape_use_tex = 0 then
+          write str$
+      else
+          tex str$
+      end if
+   else
+      if shape_use_tex = 0 then
+          begin box name name$ add delta nobox
+             write str$
+          end box
+      else
+          tex str$ name name$ add delta
+      end if
+   end if
+end sub
+
+sub drawcliparc x0l x1l y0l x0b x1b label$
+   if label$ <> "" then
+      begin clip
+         begin path clip
+            amove x0b y0l-tree_node_dy
+            box x1b-x0b tree_node_dy fill clear
+            amove pointx(ch.bl) pointy(ch.bl)
+            box width(ch) height(ch) fill clear reverse
+         end path
+         amove x0l y0l
+         if tree_edge_arrow = 1 then aline x1l y0l-tree_node_dy arrow end
+         aline x1l y0l-tree_node_dy
+      end clip
+   else
+      amove x0l y0l
+      if tree_edge_arrow = 1 then aline x1l y0l-tree_node_dy arrow end
+      aline x1l y0l-tree_node_dy
+   end if
+end sub
+
+sub draw_edge_label x1 y1 x2 y2 label$
+   if label$ <> "" then
+      amove (x1+x2)/2-tree_edge_label_dy*(x2-x1)/(y2-y1) (y1+y2)/2-tree_edge_label_dy
+      texortext label$ "ch" tree_edge_label_add tree_edge_label_hei
+   end if
+end sub
+
+sub def_binary_node label$ llab$ rlab$ ltree$ rtree$ name$
+   default llab ""
+   default rlab ""
+   local e_c = ellipse_c
+   begin object name$
+      set just tc hei tree_node_hei
+      local nodehi = theight(label$)+2*tree_node_y_fill
+      if nodehi < tree_node_min_sy then
+         nodehi = tree_node_min_sy
+      end if
+      amove 0 -tree_node_y_fill
+      local xleft = -twidth(label$)/2-tree_node_x_fill
+      local xright = twidth(label$)/2+tree_node_x_fill
+      local addx = tree_node_min_sx-(xright-xleft)
+      if addx > 0 then
+         xleft = xleft - addx/2
+         xright = xright + addx/2
+      end if
+      if tree_node_ellipse = 0 then
+         amove xleft 0
+         box xright-xleft nodehi
+         set just cc
+         amove 0 nodehi/2
+         texortext label$ "lab" 0 tree_node_hei
+      else
+         set_ellipse_c e_c
+         ellipse_text 0 nodehi/2 label$ "lab"
+      end if
+      local wd1 = width(ltree$)
+      local wd2 = width(rtree$)
+      local totwd = wd1/2+wd2/2+tree_node_dx
+      set just center
+      if isname(ltree$+".lab") then
+         amove -totwd/2 -tree_node_dy
+         draw ltree$+".tc" name "l"   
+         if tree_node_ellipse = 0 then
+            local to_xl = ptx("l.lab.tc")
+            draw_edge_label to_xl -tree_node_dy 0 0 llab$
+            drawcliparc 0 to_xl 0 to_xl 0 llab$
+         else 
+            if tree_edge_arrow = 1 then join lab.ci -> l.lab.ci
+            else join lab.ci - l.lab.ci
+         end if
+      else
+         draw_edge_label -totwd/2 -tree_node_dy 0 0 llab$
+         drawcliparc 0 -totwd/2 0 -totwd/2 0 llab$
+         amove -totwd/2 -tree_node_dy
+         draw ltree$+".tc" name "l"
+      end if
+      if isname(rtree$+".lab") then
+         amove +totwd/2 -tree_node_dy
+         draw rtree$+".tc" name "r"
+         if tree_node_ellipse = 0 then
+            local to_xr = ptx("r.lab.tc")
+            draw_edge_label to_xr -tree_node_dy 0 0 rlab$
+            drawcliparc 0 to_xr 0 0 to_xr rlab$
+         else 
+            if tree_edge_arrow = 1 then join lab.ci -> r.lab.ci
+            else join lab.ci - r.lab.ci
+         end if
+      else
+         draw_edge_label totwd/2 -tree_node_dy 0 0 rlab$
+         drawcliparc 0 totwd/2 0 0 totwd/2 rlab$
+         amove +totwd/2 -tree_node_dy
+         draw rtree$+".tc" name "r"
+      end if
+   end object
+end sub
+
+sub def_tertiary_node label$ llab$ mlab$ rlab$ ltree$ mtree$ rtree$ name$
+   default llab ""
+   default mlab ""
+   default rlab ""
+   local e_c = ellipse_c
+   begin object name$
+      set just tc hei tree_node_hei
+      local nodehi = theight(label$)+2*tree_node_y_fill
+      if nodehi < tree_node_min_sy then
+         nodehi = tree_node_min_sy
+      end if
+      amove 0 -tree_node_y_fill
+      local xleft = -twidth(label$)/2-tree_node_x_fill
+      local xright = twidth(label$)/2+tree_node_x_fill
+      local addx = tree_node_min_sx-(xright-xleft)
+      if addx > 0 then
+         xleft = xleft - addx/2
+         xright = xright + addx/2
+      end if
+      if tree_node_ellipse = 0 then
+         amove xleft 0
+         box xright-xleft nodehi
+         set just cc
+         amove 0 nodehi/2
+         texortext label$ "lab" 0 tree_node_hei
+      else
+         set_ellipse_c e_c
+         ellipse_text 0 nodehi/2 label$ "lab"
+      end if
+      local wd1 = width(ltree$)
+      local wdm = width(mtree$)
+      local wd2 = width(rtree$)
+      set just center
+      draw_edge_label -(wd1+wdm)/2-tree_node_dx -tree_node_dy 0 0 llab$
+      drawcliparc 0 -(wd1+wdm)/2-tree_node_dx ybot -(wd1+wdm)/2-tree_node_dx 0 llab$
+      draw_edge_label 0 -tree_node_dy 0 0 mlab$
+      drawcliparc 0 0 ybot -tree_node_dx/2 tree_node_dx/2 mlab$
+      draw_edge_label (wd2+wdm)/2+tree_node_dx -tree_node_dy 0 0 rlab$
+      drawcliparc 0 (wd2+wdm)/2+tree_node_dx ybot 0 (wd2+wdm)/2+tree_node_dx rlab$
+      amove -(wd1+wdm)/2-tree_node_dx ybot-tree_node_dy
+      draw ltree$+".tc"
+      amove (wd1+wdm)/2+tree_node_dx ybot-tree_node_dy
+      draw rtree$+".tc"
+      amove 0 ybot-tree_node_dy
+      draw mtree$+".tc"
+   end object
+end sub
+
+sub def_leaf_ellipse str$ name$
+   local c = ellipse_c
+   begin object name$
+      set_ellipse_c c
+      set hei tree_leaf_hei
+      ellipse_text 0 0 str$ "lab"
+   end object
+end sub

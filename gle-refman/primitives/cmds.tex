@@ -1,0 +1,1157 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Primitives}
+\label{prim:chap}
+
+A GLE command is a sequence of keywords and values separated by white space
+(one or more spaces or tabs).  Each command must begin on a new line. Keywords
+may not be abbreviated, the case is not significant.  All coordinates are
+expressed in centimeters from the bottom left corner of the page.
+
+GLE uses the concept of a {\bf current point} which most commands use.
+For example, the command {\sf aline 2 3} will draw a line from the
+{\bf current point} to the coordinates (2,3).
+
+The current graphics state also includes other settings like
+line width, colour, font, 2d transformation matrix.  All of these
+can be set with various GLE commands.
+
+\section{Graphics Primitives (a summary)}
+{\sf ! {\it comment}} \\
+{\sf @{\it xxx}} \\
+{\sf abound {\it x y}}
+{\sf aline {\it x y} [arrow start] [arrow end] [arrow both] [curve {\it $\alpha1$} {\it $\alpha2$} {\it d1} {\it d2}]} \\
+{\sf amove {\it x y}}  \\
+{\sf arc {\it radius a1 a2 [arrow end] [arrow start] [arrow both]}} \\
+{\sf arcto {\it x1 y1 x2 y2 rad}}  \\
+{\sf begin box [fill {\it pattern}] [add {\it gap}] [nobox] [name {\it xyz}] [round {\it val}]}  \\
+{\sf begin clip }  \\
+{\sf begin name {\it name}}  \\
+{\sf begin object {\it name}}  \\
+{\sf begin origin}  \\
+{\sf begin path [stroke] [fill {\it pattern}] [clip]}  \\
+{\sf begin rotate {\it angle}}  \\
+{\sf begin scale {\it x y}}  \\
+{\sf begin table }  \\
+{\sf begin tex } \\
+{\sf begin text [width {\it exp}] }    \\
+{\sf begin translate {\it x y}}  \\
+{\sf bezier {\it x1 y1 x2 y2 x3 y3}}  \\
+{\sf bitmap {\it filename width height} [type {\it type}]} \\
+{\sf bitmap\_info {\it filename width height} [type {\it type}]} \\
+{\sf box {\it x y} [justify {\it jtype}] [fill {\it color}] [name {\it xxx}] [nobox] [round {\it val}]} \\
+{\sf circle {\it radius} [fill {\it pattern}]}  \\
+{\sf closepath }  \\
+{\sf colormap {\it fct} {\it xmin} {\it xmax} {\it ymin} {\it ymax} {\it pixels-x} {\it pixels-y} {\it width} {\it height} [color] [palette {\it pal}]} \\
+{\sf curve {\it ix iy }[{\it x1 y1 x y x y ... xn yn}]{\it ex ey }}  \\
+{\sf define marker {\it markername  subroutine-name}} \\
+{\sf draw {\it name.point [{\it arg1} ... {\it argn}] [name {\it name}]}} \\
+{\sf ellipse dx dy [options]} \\
+{\sf elliptical\_arc dx dy theta1 theta2 [options]} \\
+{\sf for {\it var} = {\it exp1} to {\it exp2} [step {\it exp3}] {\it command [...]} next {\it var}}  \\
+{\sf grestore}  \\
+{\sf gsave}  \\
+{\sf if {\it exp} then {\it command [...]} else {\it command [...]} end if}  \\
+{\sf include {\it filename}}  \\
+{\sf join {\it object1.just sep object2.just} [curve {\it $\alpha1$} {\it $\alpha2$} {\it d1} {\it d2}]}   \\
+{\sf local {\it var}$_1$, $\ldots$, {\it var}$_n$} \\
+{\sf margins {\it top} {\it bottom} {\it left} {\it right}} \\
+{\sf marker {\it marker-name} [{\it scale-factor}]}  \\
+{\sf orientation {\it o}} \\
+{\sf papersize {\it size}} \\
+{\sf postscript {\it filename.eps  width-exp height-exp}}   \\
+{\sf print {\it string\$} $\ldots$} \\
+{\sf psbbtweak} \\
+{\sf pscomment} {\it exp} \\
+{\sf rbezier {\it x1 y1 x2 y2 x3 y3}}  \\
+{\sf return} {\it exp}  \\
+{\sf reverse }  \\
+{\sf rline {\it x y} [arrow end] [arrow start] [arrow both]  [curve {\it $\alpha1$} {\it $\alpha2$} {\it d1} {\it d2}]}   \\
+{\sf rmove {\it x y}}  \\
+{\sf save {\it objectname}}   \\
+{\sf set alabeldist {\it d}}  \\
+{\sf set alabelscale {\it s}}  \\
+{\sf set arrowangle {\sf angle}}  \\
+{\sf set arrowsize {\sf size}}  \\
+{\sf set arrowstyle {\sf simple | filled | empty}} \\
+{\sf set atitledist {\it s}}  \\
+{\sf set atitlescale {\it s}}  \\
+{\sf set background {it c}} \\
+{\sf set cap {\sf butt | round | square}}  \\
+{\sf set color {\it col}}  \\
+{\sf set dashlen {\it dashlen-exp}}  \\
+{\sf set fill {\it fill color/pattern}}  \\
+{\sf set font {\it font-name}}  \\
+{\sf set fontlwidth {\it line-width}}  \\
+{\sf set hei {\it character-size}}  \\
+{\sf set join {\sf mitre | round | bevel }}  \\
+{\sf set just left $|$ center $|$ right  $|$ tl $|$ etc...}  \\
+{\sf set lstyle {\it line-style}}  \\
+{\sf set lwidth {\it line-width}}  \\
+{\sf set pattern {\it fill pattern}}  \\
+{\sf set texscale {\it scale} $|$ {\it fixed} $|$ {\it none}} \\
+{\sf set titlescale {\it s}}  \\
+{\sf set ticksscale {\it s}}  \\
+{\sf sub {\it sub-name paramter1 paramter2 etc}}  \\
+{\sf tex {\it string} [name {\it xxx}] [add {\it val}]}  \\
+{\sf text {\it unquoted-text-string}}  \\
+{\sf write {\it string\$} $\ldots$}
+
+\section{Graphics Primitives (in detail)}
+\begin{commanddescription}
+
+\item[{\sf ! {\it comment}}]\index{comment}\index{"!}
+Indicates the start of a comment. GLE ignores everything from the exclamation point to the end of the line. This works both in GLE scripts and in data files used in, e.g., graph blocks.
+
+\item[{\sf @{\it xxx}}] Executes subroutine {\it xxx}.
+\index{"@}
+
+\item[{\sf abound {\it x y}}]
+\index{abound}
+Update the current bounding box to include the point $(x,y)$ without drawing anything. This command is useful in combination with `begin box', `begin name', etc., e.g., to add empty space to the box.
+
+\item[{\sf aline {\it x y}  [arrow start]  [arrow end] [arrow both]  [curve {\it $\alpha1$} {\it $\alpha2$} {\it d1} {\it d2}]}]
+\index{aline} \index{arrow} Draws a line from
+the current point to the absolute coordinates
+{\it (x,y)}, which then becomes the new current point.  The arrow qualifiers
+are optional, they draw arrows at the start or end of the line,  the size of
+the arrow is proportional to the current font height.
+
+If the curve option is given, then a Bezier curve\index{Bezier curve}\index{curve} is drawn instead of a line. The first control point is located at a distance $d1$ and angle $\alpha1$ from the current point and the second control point is located at distance $d2$ and angle $\alpha2$ from {\it (x,y)}.
+
+\item[{\sf amove {\it x y}}]
+\index{amove} Changes the current point to the absolute coordinates
+{\it (x,y)}.
+
+\item[{\sf arc {\it radius a1 a2 [arrow end] [arrow start] [arrow both]}}]
+\index{arc}\index{narc} Draws an arc of a circle in the anti-clockwise direction, centered
+at the current point, of radius {\it radius},
+starting at angle {\it a1} and finishing at angle {\it a2}. Angles
+are specified in degrees.  Zero degrees is at three o'clock and Ninety
+degrees is at twelve o'clock.
+
+\preglecode{}
+\begin{Verbatim}
+     arc 1.2 20 45
+\end{Verbatim}
+\postglecode{}
+
+The command {\sf narc} is identical but draws the arc in the clockwise
+direction.  This is important when constructing a path.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+amove 0.5 0.5 
+rline 1 0.5 arrow end 
+set lwidth 0.1
+arc 1 10 160
+arc 0.5 -90  0
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_arc}}
+\end{minipage}
+
+\item[{\sf arcto {\it x1 y1 x2 y2  rad}}]
+\index{arcto} Draws a line from the current point to {\it (x1,y1)} then to
+{\it (x2,y2)} but fits an arc of radius {\it rad} joining the two
+vectors instead of a vertex at the point {\it (x1,y1)}.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+amove 1.5 .5 
+rline 1 0
+set lwidth .1 
+arcto 2 0 -1 1 .5
+set lwidth 0
+rline -1 1 
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_arcto}}
+\end{minipage}
+
+\item[{\sf begin {\it block\_name} ... {\it end block\_name}}]
+There are several block structured commands in GLE.  Each
+{\sf begin} must have a matching {\sf end}.  Blocks which change the
+current graphics state (e.g. scale, rotate, clip etc) will restore
+whatever they change at the end of the block.  Indentation is optional
+but should be used to make the  GLE program easier to read.
+
+\item[{\sf begin box [fill {\it pattern}] [add {\it gap}] [nobox] [name {\it xyz}] [round {\it val}]} ]
+\index{add}
+\index{begin!box}
+\index{nobox}
+\index{name (box)}
+\label{cmd:beginbox}
+Draws a box around everything between {\sf begin box} and {\sf end box}.
+The option {\sf add} adds a margin of {\sf margin} cm to each side of the box to make the
+box slightly larger than the area defined by the graphics primitives in the
+{\sf begin box} \ldots {\sf end box} group (to leave a gap around text for
+example).  The option {\sf nobox} stops the box outline from being drawn.
+
+The {\sf name} option saves the coordinates of the box for later use
+with among others the {\sf join} command.
+
+If the {\sf round} option is used, a box with rounded corners will be drawn.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin box add 0.2
+   begin box fill gray10 add 0.2 round .3
+      text John
+   end box
+end box
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_beginbox}}
+\end{minipage}
+
+\item[{\sf begin clip }]
+\index{clip}
+\index{begin!clip}
+This saves the current clipping region.
+A clipping region is an arbitrary path made from lines and curves
+which defines the area on which drawing can occur.
+This is used to undo the
+effect of a clipping region defined with the begin path command.
+See the example CLIP.GLE in appendix B at the end of the manual.
+
+\item[{\sf begin name {\it name}}]
+\index{begin!name}\label{cmd:beginname}
+
+Saves the coordinates of what is inside the block for later use with among others the {\sf join} command. This command is equivalent to `{\sf begin box name} $\ldots$ {\sf nobox}'.
+
+\item[{\sf begin object {\it name} [{\it arg1}, \ldots, {\it argn}]}]
+\index{begin!object}\label{cmd:beginobject}
+
+Declares a new object (sub-figure) that can be drawn later with the `{\sf draw}' command. Section~\ref{sec:objblocks} explains in detail how this command works and how it can be used.
+
+Object blocks can have arguments if they are not defined inside a subroutine. Such object blocks are called `static objects'; they behave similar to subroutines. Object blocks can also be defined inside a subroutine. In that case, they are called `dynamic objects' and cannot have arguments. They may, however, refer to all arguments and local variables of the surrounding subroutine.
+
+\item[{\sf begin origin}]
+\index{amove (origin)}
+\index{begin!origin} This makes the current point the origin.
+This is good for subroutines or something which has been drawn
+using {\sf amove,aline}. Everything between the {\sf begin origin} and
+{\sf end origin} can be moved as one unit.  The current point is also
+saved and restored.
+
+\item[{\sf begin path [stroke] [fill {\it pattern}] [clip]} ]
+\index{begin!path}  \index{path} \index{end path} \index{stroke}
+Initialises the drawing of a filled shape.  All the lines and curves generated
+until the next {\sf end path} command will be stored and then used to draw the
+shape. {\sf stroke} draws the outline of the shape, {\sf fill} paints the
+inside of the shape in the given colour and {\sf clip} defines the shape
+as a clipping region for all future drawing.  Clipping and filling
+will only work on PostScript devices.
+
+\item[{\sf begin rotate {\it angle}}]
+\index{rotate}
+\index{angle}
+\index{begin!rotate} The coordinate system is rotated anti-clockwise about the current point by
+the angle {\it angle} (in degrees).  For example, to draw a line of text running
+vertically up the page (as a Y axis label, say), type:
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin rotate 90
+   text This is
+end rotate
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_rot1}}
+\end{minipage}
+
+\item[{\sf begin scale {\it x y}}]
+\index{scale}
+\index{begin!scale} Everything between the {\sf begin} and {\sf end} is scaled
+by the factors x and y. E.g., {\it scale 2 3} would make
+the picture twice as wide and three times higher.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin scale 3 1 
+   begin rotate 30
+      text This is
+   end rotate
+end scale
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_rot2}}
+\end{minipage}
+
+\pagebreak[2]
+
+\item[{\sf begin table }]
+\index{table} \index{begin!table} This module is an alternative
+to the TEXT module.  It reads
+the spaces and tabs in the source file and aligns the words
+accordingly.  A single space between two words
+is treated as a real space, not an alignment space.
+
+With a proportionally spaced font columns will line
+up on the left hand side but not on the right hand side.
+However with a fixed pitch font, like {\sf tt},
+everything will line up.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin table 
+   Here is my table
+   of text see  how 
+     22   44    55  33
+     0.1  999   1   .2
+     3    33    2   33
+   it lines up
+end table
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_table}}
+\end{minipage}
+
+\item[{\sf begin text [width {\it exp}] }  ]
+\index{text (width)}
+\index{text (begin)}
+\index{justify (text)}
+\index{begin!text} This module displays multiple lines/paragraphs of text.
+The block of text is justified according to the current justify setting.
+See the {\sf set just} command for a description of justification settings.
+
+If a width is specified the text is wrapped and justified
+to the given width.  If a width is not given, each line of text
+is drawn as it appears in the file.  Remember that GLE treats
+text in the same way that \LaTeX \ does, so multiple spaces are ignored
+and some characters have special meaning. E.g, \verb#\ ^ _ & { }#
+
+\index{greek characters}
+To include Greek characters in the middle of text use a
+backslash followed by the name of the character.
+E.g., \verb+ 3.3\Omega S+ would produce ``3.3$\Omega$S''.
+
+To put a space between the Omega and the S add a
+backslash space at the end. E.g.,  \verb+ 3.3\Omega\ S+
+produces ``3.3$\Omega$ S''
+
+Sometimes the space control characters (e.g. \verb+\:+)
+are also ignored, this may
+happen at the beginning of a line of text. In this case use the
+control sequence \verb+\glass+ which will trick GLE into
+thinking it isn't at the beginning of a line. E.g.,
+
+\preglecode{}
+\begin{Verbatim}
+     text \glass \:\: Indented text
+\end{Verbatim}
+\postglecode{}
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+set hei 0.25 just tl font tt
+begin text width 5
+  This is my paragraph of text to see
+  if it wraps things at four cm as I have 
+  told it to do.
+end text 
+...
+begin text 
+  Now some text 
+  without a width
+  specified
+end text 
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_text}}
+\end{minipage}
+
+\index{char} \index{chardef} \index{def}
+\index{movexy} \index{setfont} \index{sethei}
+\index{baselineskip} \index{setstretch} \index{lineskip}
+\index{mathchar} \index{mathchardef} \index{mathcode}
+\index{TeX} \index{\LaTeX} There are several \LaTeX \ like commands which can be used within text. The complete list can be found in Appendix \ref{ltxsym:sec}. A few examples are:
+
+\begin{Verbatim}
+\ \' \v \u \= \^ \. \H \~ \'' Implemented TeX accents
+^{} _{}                       Superscript, subscript
+\\ \_                         Forced Newline, underscore character
+\, \: \;                      0.5em, 1em, 2em space (em = width of the letter `m')
+\tex{expression}              Any LaTeX expression
+\char{22}                     Any character in current font
+\glass                        Makes move/space work on beginning of line
+\rule{2}{4}                   Draws a filled in box, 2cm by 4cm
+\setfont{rmb}                 Sets the current text font
+\sethei{0.3}                  Sets the font height (in cm)
+\setstretch{2}                Scales the quantity of glue between words
+\lineskip{0.1}                Sets the default distance between lines of text
+\linegap{-1}                  Sets the minimum required gap between lines
+{\rm ...}, {\it ...}          Sets roman, and italic font
+{\bf ...}, {\tt ...}          Sets bold, and typewriter (monospaced) font
+\alpha, \beta, ...            Greek symbols
+\end{Verbatim}
+
+\item[{\sf begin translate {\it x y}}]
+\index{translate}
+\index{begin!translate} Everything between the {\sf begin} and {\sf end} is moved
+x units to the right and y units up.
+
+\item[{\sf bezier {\it x1 y1 x2 y2 x3 y3}}]
+\index{bezier}
+Draws a B\'{e}zier cubic section from the current point to the point
+{\it (x3,y3)} with B\'{e}zier cubic control points at the coordinates
+{\it (x1,y1)} and {\it (x2,y2)}.  For a full explanation of B\'{e}zier curves
+see the PostScript Language Reference Manual.
+
+% \item[{\sf bigfile {\it filename.gle}}]
+% \index{bigfile} \index{include (bigfile)}
+% This command reads the file one line at a time, compiles each line and executes it.  This means it can read any sized file.  However, complex multi-line commands cannot be used.  Subroutines can be used but not defined, inside the bigfile.  Note: there is also a bigfile option in the graphing module for large datasets.
+
+\item[{\sf bitmap {\it filename width height} [type {\it type}]}]
+\index{bitmap}
+
+Imports the bitmap \textit{filename}. The bitmap is scaled to \textit{width}$\times$\textit{height}. If one of these is zero, it is computed based on the other one and the aspect ratio of the bitmap. GLE supports TIFF, JPEG, PNG and GIF bitmaps (depending on the compilation options).
+
+Bitmaps are compressed automatically by GLE using either the LZW or the JPEG compression scheme.
+
+\item[{\sf bitmap\_info {\it filename width height} [type {\it type}]}]
+\index{bitmap\_info}
+
+Returns the dimensions in pixels of the bitmap in the output parameters \textit{width} and \textit{height}.
+
+
+\item[{\sf box {\it x y} [justify {\it jtype}] [fill {\it color}] [name {\it xxx}] [nobox] [round {\it val}]} ]
+\index{box}
+\index{nobox}
+\index{justify (box)}
+\index{name (box)}
+Draws a box, of width {\it x} and height {\it y}, with its bottom left corner
+at the current point.  If the justify option is used, the box will
+be positioned relative to the specified point. E.g.,  TL = top left,
+CC = center center, BL = bottom left, CENTER = bottom center,
+RIGHT = bottom right, LEFT = bottom left.  See {\sf set just} for a description
+of justification settings.
+
+If a fill pattern is specified, the box will be filled.
+Remember that white fill is different from no fill pattern - white fill will
+erase anything that was inside the box.
+
+If the {\sf round} option is used, a box with rounded corners will be drawn.
+
+\item[{\sf circle {\it radius} [fill {\it pattern}]} ]
+\index{circle} \index{radius} Draws a circle at the current point,
+with radius {\it radius}.  If a fill
+pattern is specified the circle will be filled.
+
+\item[{\sf closepath }]
+\index{closepath}
+\index{aline (closepath)}
+Joins the beginning of a line to the end of a line. I.e., it does an {\sf aline}
+to the end of the last {\sf amove}.
+
+\item[{\sf colormap {\it fct} {\it xmin} {\it xmax} {\it ymin} {\it ymax} {\it pixels-x} {\it pixels-y} {\it width} {\it height} [color] [palette {\it pal}]}]
+\index{colormap!command}
+
+Draws a colormap of the function {\it fct}$(x,y)$, in which $x$ ranges from {\it xmin} to {\it xmax}, and $y$ ranges from {\it ymin} to {\it ymax}. The size of the colormap is {\it width} by {\it height} centimeter and the resolution is {\it pixels-x} by {\it pixels-y} pixels. A colormap is grayscale by default; it is drawn in color if the option {\it color} is given. In the latter case, it is possible to specify a palette subroutine {\it pal} mapping the range $0 \ldots 1$ to a range of colors. This command is similar to the colormap command in a graph block (Sec.~\ref{colormap}).
+
+\item[{\sf curve {\it ix iy }[{\it x1 y1 x y x y ... xn yn}]{\it ex ey }}  ]
+\index{curve} Draws a curve starting at the current point and passing through the points
+{\it (x1,y1)} \ldots {\it (xn,yn)}, with an initial slope of {\it (ix,iy)} to
+{\it (x1,y1)} and a final slope of {\it (ex,ey)}. All the vectors are
+relative movements from the vector before.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+amove 1 1 
+curve 1 0 0 1 1 0 0 -1 1 0 
+amove 3.6 1 
+curve 0 1 0 1 1 0 0 -1 0 -1 
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_curve}}
+\end{minipage}
+
+\item[{\sf define marker {\it markername  subroutine-name}}]
+\index{define marker}
+This defines a new marker called {\it markername} which will call
+the subroutine {\it subroutine-name} whenever it is used.  It
+passes two parameters, the first is the requested size of the
+marker and the second is a value from a secondary dataset which
+can be used to vary size or rotation of a marker for each point plotted.
+
+To define a character from the postscript ZapDingbats font as a marker you
+would use, e.g.
+
+\begin{Verbatim}
+sub subnamex size mdata
+   gsave                               ! save font and x,y
+   set just left font pszd hei size
+   t$ = "\char{102}"
+   rmove -twidth(t$)/2 -theight(t$)/2  ! centers marker
+   write t$
+   grestore                            ! restores font and x,y
+end sub
+\end{Verbatim}
+
+The second parameter can be supplied using the {\it mdata} command
+when drawing a graph,  this gives the marker subroutine a
+value from another dataset to use to draw the marker.  For
+example the marker could vary in size, or angle, with every
+one plotted.
+
+\begin{Verbatim}
+d3 marker myname mdata d4
+\end{Verbatim}
+
+\item[{\sf define {\it markername  fontname scale dx dy}}]
+This command defines a new marker, from any font, it is
+automatically centered but can be adjusted using dx,dy. e.g.
+
+\begin{Verbatim}
+defmarker hand pszd 43 1 0 0
+\end{Verbatim}
+
+\item[{\sf draw {\it name.point [{\it arg1} ... {\it argn}] [name {\it name}]}}]
+\label{cmd:draw}
+
+Draws a named object block that has been previously defined using a ``begin/end object'' (p.~\pageref{cmd:beginobject}) construct. The object is drawn such that the point indicated by the first argument of the draw command appears at the current position. The point can be any (hierarchically) named point on the object and may include the justify options defined for the join command (p.~\pageref{cmd:join}).
+
+If the object block has parameters (similar to a subroutine) then these parameters can be given as {\it arg1} \ldots {\it argn}.
+
+The ``draw'' command names the object using the same name as the name of the object block by default. An alternative name can be supplied using its ``name'' option.
+
+See Sec.~\ref{sec:objblocks} for a detailed explanation of this command with examples.
+
+\item[{\sf ellipse} {\it dx dy [options]}]
+\index{ellipse}
+
+This command draws an ellipse with the diameters {\it dx} and {\it dy} in the $x$ and $y$ directions, respectively.  The {\it options} are the same as the {\sf circle} command.
+
+\item[{\sf elliptical\_arc} {\it dx dy theta1 theta2 [options]}]
+\index{elliptical\_arc}\index{elliptical\_narc}
+
+This command is similar to the {\sf arc} command except that it draws an elliptical arc in the clockwise direction with the diameters  {\it dx} and  {\it dy} in the $x$ and $y$ directions, respectively. {\it theta1} and {\it theta2} are the start and stop angle, respectively.  The {\it options} are the same as for the {\sf arc} command.
+
+The command {\sf elliptical\_narc} is identical but draws the arc in the clockwise direction.  This is important when constructing a path.
+
+\item[{\sf for {\it var} = {\it exp1} to {\it exp2} [step {\it exp3}] {\it command [...]} next {\it var}}  ]
+\index{for} \index{next} \index{step}
+The {\sf for ... next} structure lets you repeat a block of statements
+a number of times.
+
+GLE sets {\sf var} equal to {\it exp1} and then repeats the following
+steps.
+
+\begin{itemize}
+\item If {\sf var} is greater than {\it exp2} then GLE commands are skipped
+until the line after the {\sf next} statement.
+\item The value {\it exp3} is added to {\sf var}.
+\item The statements between the {\sf for} and {\sf next} statement are executed.
+\end{itemize}
+
+If {\it exp1} is greater than {\it exp2} then the loop is not executed.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+for x = 1 to 4 step 0.5
+   amove x 1
+   aline 5-x 2
+next x
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_for}}
+\end{minipage}
+
+\item[{\sf grestore}]
+\index{grestore} Restores the most recently saved graphics state.  This is the simplest way to
+restore complicated transformations such as rotations and translations.  It
+must be paired with a previous {\sf gsave} command.
+
+\item[{\sf gsave}]
+\index{gsave} Saves the current graphics transformation matrix and the current point
+and the current colour, font etc.
+
+\item[{\sf if {\it expression} then {\it command [...]} else {\it command [...]} end if}]
+\index{if}\index{else}\index{then}\index{end if}
+If {\it expression} evaluates to true, then execution continues with the
+statements up to the corresponding {\sf else}, otherwise the statements
+following the {\sf else} and up to the corresponding {\sf end if} are executed.
+
+\preglecode{}
+\begin{Verbatim}
+     amove 3 3
+     if xpos()=3 then
+        text We are at x=3
+     else
+        text We are elsewhere
+     end if
+\end{Verbatim}
+\postglecode{}
+
+Note: {\sf end if} is not spelt {\sf endif}.
+
+\item[{\sf include {\it filename}}]\label{incl:cmnd}
+\index{include} Includes the GLE script ``filename'' into the current script. This is useful for including library scripts with subroutines. GLE searches a number of predefined directories for include files. By default, this includes the current directory and the ``lib'' or ``gleinc'' subdirectory of the root directory (GLE\_TOP) of your GLE installation. The latter includes a number of subroutine files that are distributed with GLE (Table~\ref{inc:tab}). Additional include directories can be defined by means of the environment variable GLE\_USRLIB\index{GLE\_USRLIB}.
+
+\begin{table}[t]
+\centering
+\caption{\label{inc:tab}Include files distributed with GLE.}
+\begin{tabular}{ll} \hline
+barstyles.gle             & Defines additional styles for bar plots.\\
+color.gle                 & Defines functions for working with colors.\\
+colors-gle-4.0.12.gle     & Redefines all colors defined in GLE 4.0.12 and before.\\
+contour.gle               & Subroutines for drawing contour plots\\
+electronics.gle           & Subroutines for drawing electronical circuits\\
+ellipse.gle               & Draw text in an ellipse\\
+feyn.gle                  & Subroutines for drawing Feynmann diagrams\\
+graphutil.gle             & Subroutines for drawing graphs\\
+piesub.gle                & Pie chart routines\\
+polarplot.gle             & Polar plotting routines\\
+shape.gle                 & Drawing various shapes\\
+simpletree.gle            & Draw simple trees\\
+stm.gle                   & Add labels to images\\
+ziptext.gle               & Draw zipped text\\ \hline
+\end{tabular}
+\end{table}
+
+% With a large include file GLE may run out of memory. If this happens, use the {\sf bigfile} command instead of {\sf include}. Note: there is also a bigfile option in the graphing module.
+
+\item[{\sf join {\it object1.just sep object2.just} [curve {\it $\alpha1$} {\it $\alpha2$} {\it d1} {\it d2}]}]
+\index{name (join)}\index{join}\label{cmd:join}
+Draws a line between two named objects. An object is simply a point or a box which was given a name when it was drawn.
+
+\index{justify (join)}
+The justify qualifiers are the standard GLE justification abbreviations: \verb#.br# (bottom right), \verb#.bl# (bottom left), \verb#.bc# (bottom centre), \verb#.tr# (top right), \verb#.tc# (top centre), \verb#.tl# (top left), \verb#.cr# (centre right), \verb#.cc# (centre centre), and \verb#.cl# (centre left). In addition, \verb#.v# and \verb#.h# can be used to draw vertical or horizontal lines connecting to the object, \verb#.c# for drawing a line connecting to e circle or ellipse, and \verb#.box# for drawing a line to a rectangle. Fig.~\ref{joicur:fig} shows examples of the different cases.
+
+If {\it sep} is written as {\sf -}, a line is drawn between the named objects e.g.
+
+\begin{Verbatim}
+     join fred.tr - mary.tl
+\end{Verbatim}
+
+Arrow heads can be included at both ends of the line by writing {\it sep} as \verb#<->#. Single arrow heads are produced by \verb#<-# and \verb#->#.  Note that {\it sep} must be separated from object1.just and object2.just by white space.
+
+If the justification qualifiers are omitted, a line will be drawn between the centers of the two objects (clipped at the edges of the rectangles which define the objects). This is the same as using the \verb#.box# qualifier on both objects.
+
+The {\sf curve} option is explained with the {\sf aline} command. Fig.~\ref{joicur:fig} shows an example where the ``join'' command is used with the curve option.
+
+Sec.~\ref{join:sec} contains several examples of joining objects.
+
+\item[{\sf local {\it var}$_1$, $\ldots$, {\it var}$_n$}]
+\index{local}
+
+Defines a local variable inside a subroutine. It is possible to initialize the variable to a particular value with, e.g., `\texttt{local x = 3}', which defines the local variable `x' and assigns it the value 3. You can also define several local variables at once, e.g., `\texttt{local x, y}' defines the local variables `x' and `y'.
+
+\item[{\sf margins {\it top} {\it bottom} {\it left} {\it right}}]
+
+This command can be used to define the page margins. Margins are only relevant for making full-page figures (using the -fullpage command line option). See also the ``papersize'' command.
+
+\index{scale (marker)}
+\item[{\sf marker {\it marker-name} [{\it scale-factor}]}  ]
+\index{wmarker} \index{marker} Draws marker {\it marker-name} at the current point.  The size of the marker
+is proportional to the current font size, scaled by the value of
+{\it scale-factor} if present.  Markers are referred to by name, eg.
+{\sf square}, {\sf diamond}, {\sf triangle} and {\sf fcircle}.  Markers
+beginning with the letter {\sf f} are usually filled variants.  Markers
+beginning with {\sf w} are filled with white so lines are not visible
+through the marker. For a complete
+list of markers refer to Fig.~\ref{mark:fig}.
+
+\begin{Verbatim}
+set just lc
+amove 0.5 2.5
+marker diamond 1
+rmove 0.6 0; text Diamond
+amove 0.5 2
+marker triangle 1
+rmove 0.6 0; text Triangle
+...
+\end{Verbatim}
+
+\item[{\sf orientation {\it o}}]\index{orientation}\label{orient:cmd}
+
+Sets the orientation of the output in full-page mode. Possible values are ``portrait'' and ``landscape''. Fig.~\ref{fullpage:fig} illustrates these two cases.
+
+\begin{figure}[tb]
+\centering
+\mbox{\input{primitives/fig/gc_marker.inc}}
+\caption{\label{mark:fig}All markers supported by GLE. (The names that start with ``w'' are white filled.)}
+\end{figure}
+
+\item[{\sf papersize {\it size}}]\index{papersize}\label{papsiz:cmd}
+\item[{\sf papersize {\it width} {\it height}}]
+
+Sets the paper size of the output. This is used only when GLE is run with the option ``-fullpage'' or when the PostScript output device is used (i.e., ``-d ps''). The command either takes one argument, which should be one of the predefined paper size names or two numbers, which give the width and height of the output measured in cm. The following paper sizes are known by GLE: a0paper, a1paper, a2paper, a3paper, a4paper, and letterpaper.
+
+If a ``size'' command is given in the script, then the output is drawn centered on the page. If no size command is included in the script, then the output will appear relative to the bottom-left corner of the page, offset by the page margins (see ``margins'' command). Fig.~\ref{fullpage:fig} illustrates these two cases.
+
+The paper size can also be set in GLE's configuration file (Sec.~\ref{conffile:sec}).
+
+\begin{figure}[tb]
+\centering
+\mbox{\input{primitives/fig/fullpage.inc}}
+\caption{\label{fullpage:fig}Result of different combinations of the commands ``papersize'', ``margins'', ``size'', and ``orientation'' for fullpage graphics (gle -fullpage figure.gle).}
+\end{figure}
+
+\item[{\sf postscript {\it filename.eps  width-exp height-exp}} ]
+\index{postscript} Includes an encapsulated postscript file into a
+GLE picture, the postscript picture will be scaled up or down to fit
+the width given.  On the screen you will just see a rectangle.
+
+Only the {\it width-exp} is used to scale the picture so that the
+aspect ratio is maintained. The
+height is only used to display a rectangle of the right size on the screen.
+
+\item[{\sf print {\it string\$} $\ldots$}]
+\index{print} This command prints its argument to the console (terminal).
+
+\item[{\sf psbbtweak}]
+\index{psbbtweak}
+
+Changes the default behavior of the bounding box.  The default behavior is to have the lower corner at (-1,-1), which for some interpreters (i.e., Photoshop) will leave a black line around the bottom and left borders.  If this command is specified then the origin of the bounding box will be set to (0,0).
+
+This command must appear before the first {\sf size} command in the GLE file.
+
+\begin{figure}
+\centering
+\mbox{\input{primitives/fig/curve.inc}}
+\caption{\label{joicur:fig}Different ways of joining objects.}
+\end{figure}
+
+\item[{\sf pscomment} {\it exp}]
+\index{pscomment}
+
+Allows inclusion of {\it exp} as a comment in the preamble of the postscript file.  Multiple {\sf pscomment} commands are allowed.
+
+This command must appear before the first {\sf size} command in the GLE file.
+
+\item[{\sf rbezier {\it x1 y1 x2 y2 x3 y3}}]
+\index{bezier (rbezier)} \index{rbezier}
+This command is identical to the BEZIER command except that the points are
+all relative to the current point.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+amove   0.5 2.8 
+rbezier 1   1   2 -1  3   1
+amove   0.2 0.2 
+rbezier 1   1   2 1.2 1.8 0
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_bezier}}
+\end{minipage}
+
+\item[{\sf return} {\it exp}]
+\index{return}
+The {\sf return} command is used inside subroutines to return a value.
+
+\item[{\sf reverse }]
+\index{reverse}
+Reverses the direction of the current path.  This is used when filling
+multiple paths in order that the Non-Zero Winding Rule will know which
+part of the path is `inside'.
+
+With the Non-Zero Winding Rule an imaginary line is drawn through the
+object. Every time a line of the object crosses it from left to
+right, one is added to the counter; every time a line of the object
+crosses it from right to left, one is subtracted from the counter. Everywhere
+the counter is non-zero is considered to be the `inside' of the drawing and
+is filled.
+
+% \graphin{gc_nonzero.eps}{12.0cm}{3.0cm}{1.0}
+\psgraphin{primitives/fig/gc_nonzero}{12.0}{3.0}{\sf reverse}
+
+\item[{\sf rline {\it x y} [arrow end] [arrow start] [arrow both] [curve {\it $\alpha1$} {\it $\alpha2$} {\it d1} {\it d2}]}]
+\index{rline}
+\index{arrow}
+Draws a line from the current point to the relative coordinates {\it (x,y)},
+which then become the new current point.  If the current point is (5,5) then
+{\sf rline 3 -2} is equivalent to {\sf aline 8 3}.  The optional
+qualifiers on the end of the command will draw arrows at one or both
+ends of the line,  the size of the arrow head is proportional to the current
+font size.
+
+The {\sf curve} option is explained with the {\sf aline} command.
+
+\item[{\sf rmove {\it x y}}]
+\index{rmove} Changes the current point to the relative coordinate
+{\it (x,y)}.  If the
+current point is (5,5) then {\sf rmove 3 -2} is equivalent to {\sf amove 8 3}.
+
+\item[{\sf save {\it objectname}} ]
+\index{save}
+\index{name (point)}
+This command saves a point for later use with the join command.
+
+\item[{\sf set alabeldist {\it d}}]
+\index{alabeldist}
+
+The spacing between the graph axis labels and the axis is set to {\it d}.
+
+\item[{\sf set alabelscale {\it s}}]
+\index{alabelscale}
+
+The graph axis label font size is set to `\texttt{alabelscale}' times `\texttt{hei}'.
+
+\item[{\sf set arrowangle {\sf angle}}]
+\index{arrowangle}
+
+Sets the opening angle of the arrow tips. (Actually, half of the opening angle.)
+
+\item[{\sf set arrowsize {\sf size}}]
+\index{arrowsize}
+
+Sets the length of the arrow tips in centimeter.
+
+\item[{\sf set arrowstyle {\sf simple | filled | empty}}]
+\index{arrowstyle}
+
+Sets the style of the arrow tips. There are three pre-defined styles: simple, filled, and empty (See Fig.~\ref{arrsty:fig}).
+
+It is also possible to create user-defined arrow tip styles. To do so, create a subroutine `{\sf arrow\_xxxx langle aangle asize}', with {\sf xxxx} the name of the new style. The parameter {\sf langle} is the angle of the line on which the arrow tip is to be drawn and the parameters {\sf aangle} and {\sf asize} are the current values of the settings {\sf arrowangle} and {\sf arrowsize}. The user-defined style can be enabled, in the same way as the built-in ones, with `{\sf set arrowstyle xxxx}'. Fig.~\ref{arrsty:fig} shows the three predefined styles and a user-defined tip style that is defined by the following subroutine:
+
+\begin{Verbatim}
+sub arrow_circle langle aangle asize
+   circle 0.1 fill red
+end sub
+\end{Verbatim}
+
+\noindent{}More complex examples of user-defined arrow styles can be found in the GLE example repository.
+
+\begin{figure}
+\centering
+\includegraphics{primitives/fig/gc_arrstyle}
+\caption{\label{arrsty:fig}Different arrow tip styles.}
+\end{figure}
+
+\item[{\sf set atitledist {\it s}}]
+\index{atitledist}
+
+The spacing between the graph axis title and the axis labels is set to {\it d}.
+
+\item[{\sf set atitlescale {\it s}}]
+\index{atitlescale}
+
+The graph axis title font size is set to `\texttt{atitlescale}' times `\texttt{hei}'.
+
+\item[{\sf set background {it c}}]
+
+Set the background color for a pattern fill to $c$. (See `set fill'.)
+
+\item[{\sf set cap {\sf butt | round | square}}]
+\index{round (cap)}
+\index{cap}
+Defines what happens at the end of a wide line.
+
+\psgraphin{primitives/fig/gc_cap}{12.0}{3.0}{\sf set cap}
+
+\item[{\sf set color {\it col}}]
+\label{scol:cmd}
+\index{color}
+\index{rgb()}
+\index{rgb255()}
+Sets the current colour for all future drawing operations. GLE supports all SVG/X11 standard color names. These are listed in Appendix~\ref{colors:sec}, and include the following: black, white, red, green, blue, cyan, magenta, yellow, gray10, gray20, $\ldots$, gray90. It is also possible to specify a gray scale as a real number with 0.0 = black and 1.0 = white. Colors can also be set using the HTML notation, e.g., \#FF0000 = red. Finally, the functions rgb(red,green,blue) and rgb255(red,green,blue) may be used to create custom colors. Fig.~\ref{colex:fig} gives some examples.
+
+\begin{figure}
+\centering
+\mbox{\input{primitives/fig/setcolor.inc}}
+\caption{\label{colex:fig}Examples of setting the drawing color.}
+\end{figure}
+
+\vspace{0.25cm}
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+mm$ = "blue"
+amove 0.5 0.5 
+for c = 0 to 1 step 0.05
+   box 0.2 2 fill (c) nobox
+   rmove 0.2 0
+next c 
+amove 2 1 
+box 2 1 fill white nobox
+rmove -0.2 0.2
+box 2 1 fill mm$
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_color}}
+\end{minipage}
+
+\item[{\sf set dashlen {\it dashlen-exp}}]
+\index{dashlen}
+Sets the length of the smallest dash used for the line styles.
+This command MUST come before the {\sf set lstyle} command.
+This may be needed when scaling a drawing by a large factor.
+
+\begin{figure}
+\centering
+\mbox{\input{primitives/fig/grids.inc}}
+\caption{\label{filpat:fig}Patterns for painting shapes.}
+\end{figure}
+
+\item[{\sf set fill {\it fill color/pattern}}]
+\index{fill}
+Sets the color or pattern for filling shapes. This command works in combination with shapes such as circles, ellipses, and boxes. If the argument is a color, then shapes are filled with the given color (see ``set color´´). If it is a pattern, then the shapes are painted with the given pattern in black ink. Fig.~\ref{filpat:fig} lists a number of pre-defined patterns. To paint a shape in a color different from black, first set the color, then the pattern. That is,
+
+\begin{Verbatim}
+set background yellow
+set fill red
+set pattern shade
+box 2 2
+\end{Verbatim}
+
+\noindent{}will draw a box and paint is using the shade pattern and red ink on a yellow background. To draw shapes that are not filled, use the command ``set fill clear''. That is,
+
+\begin{Verbatim}
+set fill clear
+box 2 2
+\end{Verbatim}
+
+\noindent{}will draw an empty box.
+
+\item[{\sf set font {\it font-name}}]
+\index{font}
+\index{font}
+Sets the current font to {\it font-name}.  Valid {\it font-name}s are listed
+in Appendix A.2.
+
+There are three types of font: PostScript, \LaTeX \ and
+Plotter.  They will all work on any device, however \LaTeX \ fonts are
+drawn in outline on a plotter, and so may not look very nice.
+PostScript fonts will be emulated by \LaTeX \ fonts on non-PostScript
+printers.
+
+\item[{\sf set fontlwidth {\it line-width}}]
+\index{font (line width)} \index{fontlwidth} \index{fontlwidth}
+This sets the width of lines to be used to draw the stroked (Plotter fonts)
+on a PostScript printer.  This has a great effect on their appearance.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+set font pltr
+amove .2 .2 
+text Tester
+set fontlwidth .1 
+set cap round
+rmove 0 1.5
+text Tester
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_fontlwidth}}
+\end{minipage}
+
+\item[{\sf set hei {\it character-size}}]
+\label{shei:cmd}
+\index{hei}
+\index{character size}
+Sets the height of text.  For historical reasons, concerning lead type and printing conventions, a height of 10cm actually results in capital letters about 6.5cm tall.
+
+The default value of ``hei'' is 0.3633 (to mimic the default height of \LaTeX{} expressions).
+
+\item[{\sf set join {\sf mitre | round | bevel }}]
+\index{round (join)}
+\index{join}
+\index{join (set join)}
+\index{bevel}
+\index{round}
+\index{mitre}
+Defines how two wide lines will be joined together. With {\sf mitre}, the
+outside edges of the join are extended to a point and then chopped
+off at a certain distance from the intersection of the two lines.
+With {\bf round}, a curve is drawn between the outside edges.
+
+%%\graphin{gc_ljoin.eps}{12.0cm}{3.0cm}{1.0}
+\psgraphin{primitives/fig/gc_ljoin}{12.0}{3.0}{\sf set join}
+
+\item[{\sf set just left $|$ center $|$ right  $|$ tl $|$ etc...} ]
+\label{sjust:cmd}
+\index{just}
+\index{justify (set)}
+
+Sets the justification which will be used for {\sf text} commands.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+amove 0.5 3
+set just left
+box 1.5 0.6
+text Justify left
+rmove 2 0
+set just bl
+box 1.5 0.6
+text Justify bl
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_justify}}
+\end{minipage}
+
+\item[{\sf set lstyle {\it line-style}}]
+\label{lstyle:cmd}
+\index{lstyle (set)}
+\index{lstyle}
+Sets the current line style to line style number {\sf line-style}.  There are
+9 predefined line styles (1--9).  When a line style is given with more than
+one digit the first digit is read as a run length in black,
+the second a run length in white, the third a run length in black, etc.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+set just left 
+for z = 0 to 4
+   set lstyle z
+   rline 2 0
+   rmove 0.1 0
+   write z
+   rmove -2.1 -0.4
+next z
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_lstyle}}
+\end{minipage}
+
+\item[{\sf set lwidth {\it line-width}}]
+\index{lwidth}
+Sets the width of lines to {\it line-width} cm.  A value of zero will result in
+the device default of about 0.02 cm, so a lwidth of .0001 gives
+a thinner line than an lwidth of 0.
+
+\item[{\sf set pattern {\it fill pattern}}]
+\index{pattern}
+Specifies the filling pattern. A number of pre-defined patterns is listed in Fig.~\ref{filpat:fig}. See the description of ``set fill'' for more information.
+
+
+\item[{\sf set texscale {\it scale} $|$ {\it fixed} $|$ {\it none}}]
+\index{texscale}
+This setting controls the scaling of \LaTeX{} expressions (Sec.~\ref{latexexp:sec}): `\texttt{scale}' scales them to the value of `\texttt{hei}', `\texttt{fixed}' scales them to the closest \LaTeX{} default size to `\texttt{hei}', and `\texttt{none}' does not scale them. With `\texttt{none}', the font size in your graphics will be exactly the same as in your main document.
+
+\item[{\sf set titlescale {\it s}}]
+\index{titlescale}
+
+The graph title font size is set to `\texttt{titlescale}' times `\texttt{hei}'.
+
+\item[{\sf set ticksscale {\it s}}]
+\index{ticksscale}
+
+The size of the graph axis ticks is set to `\texttt{ticksscale}' times `\texttt{hei}'.
+
+\item[{\sf sub {\it sub-name parameter1 parameter2 etc.}}]
+\index{sub} Defines a subroutine. The end of the subroutine
+is denoted with {\sf end sub}.  Subroutines must
+be defined before they are used.
+
+Subroutines can be called inside any GLE expression, and can
+also return values.  The parameters of a subroutine become local variables.
+Subroutines are re-entrant.
+
+\begin{Verbatim}
+     sub tree x y a$
+        amove x y
+        rline 0 1
+        write a$
+        return x/y
+     end sub
+
+     tree 2 4 "mytree"           (Normal call to subroutine)
+     slope = tree(2,4,"mytree")  (Using subroutine in an expression)
+\end{Verbatim}
+
+\item[{\sf tex {\it string} [name {\it xxx}] [add {\it val}]}]
+\index{tex}
+Draw a \LaTeX{} expression at the current point using the current value of `justify'. See Sec.~\ref{latexexp:sec} for more information. Using the {\sf name} option, the \LaTeX{} expression can be named, just like a box. The size of the virtual named box can be increased with the {\sf add} option.
+
+\item[{\sf text {\it unquoted-text-string}}]
+\index{begin!text (single line)} \index{text} This is the simplest command for drawing text.  The current point
+is unmodified after the text is drawn so following one text command
+with another will result in the second line of text being drawn on
+top of the first.
+To generate multiple lines of text, use the {\sf begin text} \ldots {\sf  end
+text} construct.
+
+\preglecode{}
+\begin{Verbatim}
+     text "Hi, how's tricks", said Jack!
+\end{Verbatim}
+\postglecode{}
+
+\item[{\sf write {\it string\$} $\ldots$}]
+\index{write} This command is similar to {\sf text} except that it expects a quoted string,
+string variable, or string expression as a parameter. If write has more than one parameter, it will concatenate the values of all the parameters.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+a$ = "Hello there "
+xx = sqrt(10)
+t$ = time$()
+c$ = a$+t$ 
+write a$+t$ xx
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_write}}
+\end{minipage}
+
+The built in functions {\sf sqrt()} and {\sf time\$()} are described in
+Appendix~\ref{fct:sec}.
+
+\end{commanddescription}
+

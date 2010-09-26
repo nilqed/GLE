@@ -1,0 +1,123 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\thispagestyle{empty}
+\begin{center}
+\includegraphics{title/glelogo}
+
+{\Huge Graphics Layout Engine}
+
+\vspace{1cm}
+
+{\huge User Manual (v. 4.2.3)}
+
+\vspace{1cm}
+
+C. Pugmire, St.M. Mundt, V.P. LaBella, J. Struyf
+
+\vspace{1cm}
+
+\url{http://www.gle-graphics.org/}
+\vfill
+\today{}
+\end{center}
+
+\pagenumbering{roman}
+
+\tableofcontents
+
+\chapter{Preface}
+
+\section*{Abstract}
+
+GLE (Graphics Layout Engine) is a graphics scripting language designed for creating publication quality graphs, plots, diagrams, figures and slides. GLE supports various graph types (function plots, histograms, bar graphs, scatter plots, contour lines, color maps, surface plots, ...) through a simple but flexible set of graphing commands. More complex output can be created by relying on GLE's scripting language, which is full featured with subroutines, variables, and logic control. GLE relies on \LaTeX{} for text output and supports mathematical formulea in graphs and figures. GLE's output formats include EPS, PS, PDF, JPEG, and PNG. GLE is licenced under the BSD license. QGLE, the GLE user interface, is licenced under the GPL license.
+
+\subsection*{Trademark Acknowledgements}
+The following trademarks are used in this manual.
+
+\begin{tabular}{ll} % {p{7cm}}
+{Windows}	& Microsoft Corporation.\\
+{\TeX}		& Donald E. Knuth, A Typesetting System.\\
+{\LaTeX}	& Leslie Lamport, A Document Preparation System.\\
+{PostScript}	& Page Description Language, Adobe Systems Inc.\\
+\end{tabular}
+
+\subsection*{Typographic Conventions} 
+
+The following conventions will be used in command descriptions:
+
+\begin{tabular}{lp{10cm}}
+{\sf [option]} &  Specifies an optional keyword or parameter, the brackets
+	should not be typed.\\
+{\sf option1 $\mid$ option2} &
+	Pick one of the options listed.\\
+ {\sf keyword} &
+	Keywords are represented in a bold typewriter font.\\
+{\it exp,x,y,x1,y1} &
+  	Represent numbers or expressions.  E.g. 2.2 or 2*5.
+	Parameters to be entered by the user are given in italics.
+\end{tabular}
+
+\subsection*{Pathways}
+
+For those in a hurry:
+\begin{enumerate}
+ \item		Read Chapter~\ref{tut:chap}, The GLE Tutorial (beginners only).
+ \item		Examine the examples at \url{http://www.gle-graphics.org/examples/}.
+ \item		Browse through Chapter~\ref{graph:chap}, The Graph Module.
+\end{enumerate}
+	
+For those with time:
+\begin{itemize}	
+ \item {\bf Chapter~\ref{tut:chap}, GLE Tutorial:}\\
+	Covers installation and drawing a simple graph, highly
+	recommended if you have never used GLE before.
+ \item {\bf Chapter~\ref{prim:chap}, GLE Primitives:}\\
+	Describes the commands used for creating diagrams and slides and for annotating graphs.
+ \item {\bf Chapter~\ref{graph:chap}, The Graph Module:}\\
+	Describes the commands for drawing graphs.
+ \item {\bf Chapter~\ref{key:chap}, The Key Module:}\\
+	Describes the commands for producing keys for graphs.
+ \item {\bf Chapter~\ref{adv:chap}, Advanced Features of GLE:}\\
+	Covers advanced features of GLE. This includes programming constructs,
+	the \LaTeX{} interface, $\ldots$
+ \item {\bf Chapter~\ref{surf:chap}, Surface and Contour Plots:}\\
+	Describes the commands for drawing three-dimensional graphs.
+ \item {\bf Chapter~\ref{util:chap}, GLE Utilities:}\\
+	Describes FITLS and MANIP.
+\end{itemize}

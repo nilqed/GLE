@@ -1,0 +1,1349 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{The Graph Module}
+\index{graphing}\label{graph:chap}
+A graph should start with {\sf begin graph} and end with {\sf end graph}.
+The data to be plotted are organised into datasets.  A dataset consists of a
+series of (X,Y) coordinates, and has a name based on the letter ``d'' and a
+number between 1 and 1000, e.g. {\sf d1}
+
+The name {\sf dn} can be used to define a default for
+all datasets.  Many graph commands described below start with {\sf d}{\it n}.
+This would normally be replaced by a specific dataset number e.g.,
+
+\preglecode{}
+\begin{Verbatim}
+     d3 marker diamond
+\end{Verbatim}
+\postglecode{}
+
+For each {\sf xaxis} command there is a corresponding {\sf yaxis, y2axis
+and x2axis} command for setting the top left and right hand axes.  These
+commands are not explicitly mentioned in the following descriptions.
+
+\section{Graph Commands (a summary)}
+{\sf center} \\
+{\sf colormap {\it fct} {\it pixels-x} {\it pixels-y} [{\it color}] [{\it invert}] [{\it zmin} $z_1$]  [{\it zmax} $z_2$] [{\it palette} {\it pal}]} \\
+{\sf data {\it filename {\sf [}d1 d2 d3 ...{\sf ] [}d1=c1,c3 ...{\sf ]} } [ignore {\it n}] [comment {\it char}] } \\
+{\sf dn [deresolve m] [average] line} \\
+{\sf dn err {\it d5} errwidth {\it width-exp} errup {\it nn\%} errdown {\it d4}} \\
+{\sf dn herr {\it d5} herrwidth {\it width-exp} herrleft {\it nn\%} errright {\it d4}} \\
+{\sf dn key {\it "Dataset title"}}  \\
+{\sf dn line [impulses] [steps] [fsteps] [hist] [bar]}\\
+{\sf dn lstyle {\it line-style} lwidth {\it line-width} color {\it col}}  \\
+{\sf dn marker {\it marker-name} [color {\it c}] [msize {\it marker-size}] [mdata {\it dn}]}  \\
+{\sf dn nomiss}  \\
+{\sf dn smooth | smoothm}  \\
+{\sf dn svg\_smooth [m]} \\
+{\sf dn xmin {\it x-low} xmax {\it x-high} ymin {\it y-low} ymax {\it y-high}}  \\
+{\sf dn [x2axis] [y2axis]} \\
+{\sf dn file ``all.dat,xc,yc'' [marker {\sf mname}] [line]} \\
+{\sf fullsize } \\
+{\sf hscale h} \\
+{\sf key pos {\it tl} nobox hei {\it exp} offset {\it xexp yexp} }  \\
+{\sf let ds = {\it exp {\sf [from} low{\sf] [to} high{\sf] [step} exp{\sf] [where} exp{\sf]}}}  \\
+{\sf let ds = {\it x-exp, y-exp {\sf [from} low{\sf] [to} high{\sf] [step} exp{\sf] [where} exp{\sf]}}}  \\
+{\sf let dn = [routine] dm [options]} \\
+{\sf let ds = hist dm [from {\it x1}] [to {\it x2}] [bins {\it n}] [step {\it n}]} \\
+{\sf let ds = \ldots [nsteps {\it n}]} \\
+{\sf let ds = \ldots [range {\it dn}]} \\
+{\sf math } \\
+{\sf nobox } \\
+{\sf scale {\it h v}} \\
+{\sf scale auto} \\
+{\sf size {\it x y }}\\
+{\sf title {\it "title"}  [hei {\it ch-hei}] [color {\it col}] [font {\it font}] [dist {\it cm}]  }   \\
+{\sf under call} \\
+{\sf vscale v} \\
+{\sf x2labels on} \\
+{\sf xaxis | yaxis | x2axis | y2axis}\\
+{\sf xaxis angle $\alpha$} \\
+{\sf xaxis base {\it exp-cm}}  \\
+{\sf xaxis color {\it col} font {\it font-name}  hei {\it exp-cm} lwidth {\it exp-cm}} \\
+{\sf xaxis dsubticks {\it sub-distance} }  \\
+{\sf xaxis format {\it format-string} } \\
+{\sf xaxis grid }  \\
+{\sf xaxis log}  \\
+{\sf xaxis min {\it low} max {\it high}}  \\
+{\sf xaxis nofirst nolast}  \\
+{\sf xaxis nticks {\it number} dticks {\it distance} dsubticks {\it distance}} \\
+{\sf xaxis ftick {\it x0} dticks {\it distance}} \\
+{\sf xaxis off}  \\
+{\sf xaxis shift {\it cm-exp}}  \\
+{\sf xaxis symticks} \\
+{\sf xlabels font {\it font-name} hei {\it char-hei} color {\it col} }\\
+{\sf xnames {\it "name"  "name" ...}}  \\
+{\sf xnames from {\it dx}}  \\
+{\sf xnoticks {\it pos1 pos2 pos3 ...}}  \\
+{\sf xplaces {\it pos1 pos2 pos3 ...}}  \\
+{\sf xside color {\it col} lwidth {\it line-width} off  } \\
+{\sf xsubticks {\it {\sf lstyle} num  {\sf lwidth} exp {\sf length} exp  {\sf off}}} \\
+{\sf xticks {\it {\sf lstyle} num {\sf lwidth} exp {\sf length} exp {\sf off}}} \\
+{\sf xtitle {\it "title"} [hei {\it ch-hei}] [color {\it col}] [font {\it font}] [dist {\it cm}] [adist {\it cm}]}   \\
+{\sf y2title {\it "text-string"}  [rotate]  }  \\
+{\sf yaxis negate}  \\
+{\sf bar {\it dx,...} dist {\it spacing}}\\
+{\sf bar {\it dn,...} fill {\it f} pattern {\it p}} \\
+{\sf bar {\it dx,...} from {\it dy,...}}\\
+{\sf bar {\it dn,...} horiz} \\
+{\sf bar {\it dn,...} width {\it xunits,...} fill {\it col,...} color {\it col,...} }\\
+{\sf fill x1,{\it d3} color {\it green}  xmin {\it val} xmax {\it val}} \\
+{\sf fill {\it d4},x2 color {\it blue}   ymin {\it val} ymax {\it val}} \\
+{\sf fill {\it d3,d4} color {\it green}  xmin {\it val} xmax {\it val}} \\
+{\sf fill {\it d4} color {\it green}  xmin {\it val} xmax {\it val}} \\
+
+
+\section{Graph Commands (in detail)}
+
+\begin{commanddescription}
+\item[{\sf center}]
+\index{center}
+Centers the graph (including the title and axis labels) in the graph box. (The command `{\sf scale auto}' implicitly performs `{\sf center}'.)
+
+\item [{\sf colormap {\it fct} {\it pixels-x} {\it pixels-y} [{\it color}] [{\it invert}] [{\it zmin} $z_1$]  [{\it zmax} $z_2$] [{\it palette} {\it pal}]}]
+\index{colormap!graph block}
+
+The colormap command is discussed in Section~\ref{colormap}.
+
+\item[{\sf data {\it filename {\sf [}d1 d2 d3 ...{\sf ] [}d1=c1,c3 ...{\sf ]}} [ignore {\it n}] [comment {\it char}]}]
+\index{data}\label{cmd:data}
+Specifies the name of a file to read data from.  By default,
+the data will be read into the next free datasets unless the
+optional specific dataset names are specified.
+
+A dataset consists of a series of (X,Y) coordinates, and has a
+name based on the letter {\sf d} and a number between 1 and 1000,
+e.g. {\sf d1} or {\sf d4}. Up to 1000 datasets may be defined.
+
+From a file with 3 columns the command
+`{\sf data \verb+"+data.csv\verb+"+}' would read the first and second columns as the x and y values for dataset 1 (d1) and the first and third columns as the x and y values for dataset 2 (d2). The next {\sf data} command would use dataset 3 (d3).
+
+\index{files}
+\index{data (example file)}
+\index{example data file}
+Such a data file looks like this:
+
+\begin{Verbatim}
+1, 2.7, 3
+2, 5,   *
+3, 7.8, 7
+4, 9,   4
+\end{Verbatim}
+
+The first point of dataset {\bf d1} would then be ({\bf 1, 2.7}) and the first point of dataset {\bf d2} would be ({\bf 1, 3}). The data values can be space, tab, comma, or semi-colon separated.
+
+\index{missing value}\index{?}Missing values can be indicated with ``\verb+*+'', ``\verb+?+'', ``\verb+-+'', or ``\verb+.+''.
+
+The option {\sf d3=c2,c3} allows particular columns of data to be read into a dataset. In this example, d3 would read its x-values from column 2 and y-values from column 3.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+size 7 3.5
+begin graph
+   size   6 3
+   title  "Simple Graph"
+   xtitle "Time"
+   ytitle "Output"
+   data   "data.csv"
+   d1 line marker triangle color red
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{tutorial/fig/tut_graph.inc}}
+\end{minipage}
+
+{\bf Comments:}\index{comment}\index{"!} Comments can be included with the symbol ``\verb+!+''. All characters from ``\verb+!+'' until the end of the line of the data file are ignored. It is possible to change the symbol that indicates a comment with the option `comment'. E.g., with `{\sf data \verb+"+data.csv\verb+"+ comment \#}', lines starting with \# will be treated as comments.
+
+{\bf Ignore header:}\label{opt:ignore}\index{ignore} The option {\sf ignore {\it n}} makes GLE ignore the first $n$ lines of the data file. This is useful if the first $n$ lines do not contain data.
+
+{\bf Auto key:}\index{key!data based} If the first row of a data file does not contain actual data but instead contains column labels, then these labels are used by GLE to create a key for the graph (Chapter~\ref{key:chap}). GLE automatically detects this case by checking if all fields in the first row are valid numbers or not. If not, then GLE assumes that the first row contains column labels. Column labels that include a space or that could be incorrectly interpreted as a number should be double quoted. Fig.~\ref{fig:autokey} illustrates this with an example.
+
+\begin{figure}[tb]
+\begin{minipage}[t]{6.35cm}%
+\begin{Verbatim}
+begin graph
+  xtitle "Age"
+  ytitle "Weight"
+  data "age.csv"
+  key pos br compact
+  d1 line color red marker circle
+  d2 line color blue marker triangle
+  d3 line color green marker square
+end graph
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}[t]{3.5cm}%
+\begin{Verbatim}
+Age, John, Mary, Ken
+15,  73,   65,   77
+20,  80,   68,   77
+30,  82,   76,   80
+40,  85,   77,   82
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}[t]{6cm}%
+\vskip0pt%
+\mbox{\input{graph/fig/age.inc}}
+\end{minipage}
+\caption{\label{fig:autokey}Line graph with key taken from the column labels in the first data row. Left: the graph block; middle: the dataset ``age.csv''; right: the resulting graph.}
+\end{figure}
+
+{\bf Auto x-labels:} If the first column of a data file does not contain numeric data, but instead contains symbolic labels, then these labels are used to label the horizontal axis. For example, if the data file contains
+
+\begin{Verbatim}
+Mon, 1
+Tue, 4
+Wed, 3.5
+Thu, 2
+Fri, 1
+Sat, 5
+Sun, 4
+\end{Verbatim}
+
+\noindent{}then GLE creates an x-axis with one label for each day of the week, similar to that of the graph in Fig.~\ref{fig:weekday}. See also the `{\sf xnames}' command for more details on how to add labels to an axis.
+
+
+\item[{\sf dn [deresolve m] [average] line}]
+\index{dn!deresolve}\index{deresolve}
+
+The `{\sf deresolve}' option sub-samples a dataset. Given the parameter $m > 1$, it keeps only 1 out of every $m$ points (starting with the first point). If the option `{\sf average}' is given, then it will compute the average of the y-values of every window of $m$ points. This average value will be plotted at the middle (x-value) of the window. The `{\sf deresolve}' option never removes the first and last point in a dataset if it is used in conjunction with `{\sf dn line}'.
+
+\item[{\sf dn err {\it d5} errwidth {\it width-exp} dn errup {\it nn\%} errdown {\it d4}} ]
+\index{dn!err} \index{dn!errwidth} \index{dn!errup} \index{dn!errdown}
+\index{error bars (see dn err) }
+For drawing error bars on a graph. The error bars can be specified as
+an absolute value, as a percentage of the y value, or as a dataset.
+The up and down error bars can be specified separately e.g.,
+
+\preglecode{}
+\begin{Verbatim}
+     d3 err .1
+     d3 err 10%
+     d3 errup 10% errdown d2
+     d3 err d1 errwidth .2
+\end{Verbatim}
+\postglecode{}
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin graph
+   title "Error Bars"
+   dn lstyle 2 msize 1.5
+   d1 marker circle errup 30% errdown 1
+   d2 marker square err   30% errwidth .1
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_err.inc}}
+\end{minipage}
+
+\item[{\sf dn herr {\it d5} herrwidth {\it width-exp} 	dn herrleft {\it nn\%} errright {\it d4}} ]
+\index{dn!herr} \index{dn!herrwidth} \index{dn!herrleft} \index{dn!herrright}
+\index{horizontal error bars}
+These commands are identical to the error bar commands above except that
+they will draw bars in the horizontal plane.
+
+\item[{\sf dn key {\it "Dataset title"}}  ]
+\index{dn!key}
+\index{key}
+If a dataset is given a title like this a key will be drawn.  Use the
+{\sf key} command (below, after hscale) to set the size and
+position of the key.  Use the key module (Chapter~\ref{key:chap}) to draw
+more complex keys.
+
+\item[{\sf dn line [impulses] [steps] [fsteps] [hist] [bar]}]
+\index{dn}
+\index{dn!line}
+\index{line}
+\index{missing}
+This tells GLE to draw lines between the points of the dataset.  By
+default GLE will not draw lines or markers, this is often the reason
+for a blank graph.
+
+If a dataset has missing values GLE will not draw a line to the next
+real value, which leaves a gap in the curve.  To avoid this
+behavior simply use the {\sf nomiss} qualifier on the {\sf dn} command
+used to define the line. This simply throws away missing values so that
+lines are drawn from the last real value to the next real value.
+
+The options {\sf impulses}, {\sf steps}, {\sf fsteps}, {\sf hist}, and {\sf bar} draw lines as shown in Figure~\ref{linemode:fig}.
+\begin{itemize}
+\item {\sf impulses}: connects each point with the xaxis.
+
+\item {\sf steps}: connects consecutive points with two line segments: the first from (x1,y1) to (x2,y1) and the second from (x2,y1) to (x2,y2).
+
+\item {\sf fsteps}: connects consecutive points with two line segments: the first from (x1,y1) to (x1,y2) and the second from (x1,y2) to (x2,y2).
+
+\item {\sf hist}: useful for drawing histograms: assumes that each point is the center of a bin of the histogram.
+
+\item {\sf bar}: similar to `{\sf hist}', but now also separates the bins with vertical lines.
+\end{itemize}
+
+\begin{figure}[tb]
+\centering
+\input{graph/fig/linemode.inc}
+\caption{\label{linemode:fig}The {\sf impulses}, {\sf steps}, {\sf fsteps}, and {\sf hist} options of the line command.}
+\end{figure}
+
+\item[{\sf dn lstyle {\it line-style} lwidth {\it line-width} color {\it col}}  ]
+\index{dn!lstyle}
+\index{dn!lwidth}
+\index{dn!color}
+\index{color (graph lines)}
+\index{lstyle (graph lines)}
+\index{lwidth (graph lines)}
+These qualifiers are all fairly self explanatory.  See the {\sf lstyle} command
+in Chapter~\ref{prim:chap} (Page~\pageref{lstyle:cmd}) for details of specifying line styles.
+
+\item[{\sf dn marker {\it marker-name} [color {\it c}] [msize {\it marker-size}] [mdata {\it dn}]}]
+\index{dn!marker}
+\index{marker}
+Specifies the marker to be used for the dataset.  There is a set of pre-defined markers (refer to Appendix A.1 for a list)  which can be specified by name (e.g., {\sf circle, square, triangle, diamond, cross, ...}). The marker's color can be specified with the `{\sf color}' option.
+
+Markers can also be drawn using a user-defined subroutine (See the {\sf define marker} command in Chapter 2).  The {\sf mdata} option allows a secondary dataset to be defined which will be used to pass another parameter to the marker subroutine, this allows each marker to be drawn at a different and date dependent angle, size or colour.
+
+\index{dn!msize}
+The {\sf msize} qualifier sets the marker size for that dataset. The size is a character height in cm, so that the actual size of the markers will be about 0.7 of this value.
+
+\item[{\sf dn nomiss}  ]
+\index{dn!nomiss}
+\index{nomiss}
+If a dataset has missing values, GLE will not draw a line to the next
+real value, which leaves a gap in the curve.  To avoid this
+behavior simply use the {\sf nomiss} qualifier on the {\sf dn} command
+used to define the line. This simply ignores missing values.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin graph
+   title  "Ignore missing values (nomiss)"
+   xtitle "Time"
+   ytitle "Output"
+   data   "tut.dat"
+   d1 lstyle 2
+   d2 nomiss lstyle 1 marker diamond msize .2
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_nomiss.inc}}
+\end{minipage}
+
+\begin{figure}[tb]
+\centering
+\input{graph/fig/noisysine.inc}
+\caption{\label{smooth:fig}Various smooth options.}
+\end{figure}
+
+\item[{\sf dn [smooth] [smoothm] line}]
+\index{dn!smooth} \index{smooth} \index{smoothm}
+This will make GLE draw a smoothed line through the points.
+A third degree polynomial is fitted piecewise to the given points.
+
+The {\sf smoothm} alternative will work for multi valued functions,
+i.e., functions which have more than one y value for each x value.
+
+\item[{\sf dn [svg\_smooth] [m] line}]
+\index{dn!svg\_smooth}\index{svg\_smooth}\index{Savitsky Golay smoothing}
+
+The option {\sf svg\_smooth} performs a quadratic or cubic and 7 point Savitsky Golay smoothing on the data. The parameter $m$ specifies the number of iterations of smoothing, that is, the smoothing algorithm is run $m$ times on the dataset. Fig.~\ref{smooth:fig} shows an example.
+
+\item[{\sf dn xmin {\it x-low} xmax {\it x-high} ymin {\it y-low} ymax {\it y-high}}  ]
+\index{dn!xmin} \index{dn!xmax} \index{dn!ymin} \index{dn!ymax}
+These commands map the dataset onto the graph's boundaries.
+The data will be drawn as if the X axis was labeled from {\it x-low} to {\it
+x-high} (regardless of how the axis is actually labeled).  A point in the
+dataset at X = {\it x-low} will appear on the left hand edge of the graph.
+
+\item[{\sf dn [x2axis] [y2axis]}]
+\index{dn!x2axis} \index{dn!y2axis}
+Sometimes one needs to draw two or more curves on the same graph that have different scales or of which the values are measured in different units. In such cases, some of the curves may be associated to the x2axis and/or the y2axis.
+
+The example in Fig.~\ref{fig:y2scale} illustrates this for the parabola $y = x^2$ and the sine function $y = \sin{x}$. The former is scaled to the x/y axis as usual and the latter is scaled to the x2/y2 axis.
+
+\begin{figure}[tb]
+\begin{minipage}[c]{9.2cm}
+\begin{Verbatim}
+begin graph
+   let d1 = x^2 from -2 to 2
+   let d2 = sin(x) from 0 to 4*pi
+   d1 line color red key "$x^2$"
+   d2 x2axis y2axis line color blue key "$\sin(x)$"
+   x2axis format pi min 0 max 4*pi dticks pi
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/y2axis-scale.inc}}
+\end{minipage}
+\caption{\label{fig:y2scale}A parabola scaled to the x/y axis and the sine function scaled to the x2/y2 axis.}
+\end{figure}
+
+\item[{\sf dn file ``all.dat,xc,yc'' [marker {\sf mname}] [line]}   ]
+\index{file (dataset)}
+\index{dn!file}
+
+The `file' option specifies a file from which the dataset is to be loaded. This option is an alternative to the ``data'' command (p.~\pageref{cmd:data}).
+
+By default the first two columns of the data file will be read in, but other columns may be specified.
+E.g., \verb+"all.dat,3,2"+ would read $x$-values from column 3 and $y$-values from column 2. Or, to read the 4th dataset, specify the file as \verb+"all.dat,1,5"+.
+
+If the x column is specified as {\sf '0'} then GLE will generate the x data points. E.g., {\sf 1,2,3,4,5...}
+
+The file option also accepts variables in place of the file name, e.g.:
+
+\begin{Verbatim}
+	x$ = "test.dat,2,3"
+	d1 file x$ line color red
+\end{Verbatim}
+
+% The {\sf AUTOSCALE} option pre-reads the file to scale the axis,
+% which is slow but sometimes required, e.g.:
+% 
+% \begin{Verbatim}
+% 	d1 bigfile a.dat line autoscale
+% \end{Verbatim}
+% 
+% Many (but not all) of the normal dn commands can be used with the
+% {\sf bigfile} command.  E.g., {\sf marker, lstyle, xmin, xmax, ymin, ymax,
+% color and lwidth.}  You cannot use commands like {\sf let} or {\sf bar}
+% with the {\sf bigfile} command.
+
+\item[{\sf fullsize } ]
+\index{fullsize}
+This is equivalent to {\sf scale 1 1, noborder}. It makes the graph {\sf size} command specify the size and position of the axes instead of the size of the outside border. See Fig.~\ref{grscale:fig} (right) for an example.
+
+\item[{\sf hscale h} ]
+\index{hscale}
+Sets the length of the xaxis to $h$ times the size of the graph box (default is 0.7). $h$ can also be set to `{\sf auto}'. See {\sf scale} for more details.
+
+
+\item[{\sf key pos {\it tl} nobox hei {\it exp} offset {\it xexp yexp} }  ]
+\index{key!pos}
+\index{key!nobox}
+\index{key!offset}
+\index{key!hei}
+This command allows the features of a key to be specified.
+The {\sf pos}
+qualifier sets the position of the key.
+E.g., {\sf tl}=topleft, {\sf br}=bottomright, etc.
+
+\item[{\sf let ds = {\it exp {\sf [from} low{\sf] [to} high{\sf] [step} exp{\sf] [where} exp{\sf]}}}]
+\index{let}
+\index{graphing functions}
+This command defines a new dataset as the result of an expression on the variable x over a range of values. For example:
+
+\begin{Verbatim}
+     let d1 = sin(x)+log(x) from 1 to 100 step 1
+\end{Verbatim}
+
+{\bf NOTE: The lack of spaces inside the expression are necessary.}
+
+Here are some further examples:
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin graph
+   ...
+   let d1 = 1/x from 0.2 to 10
+   let d2 = sin(x)*2+2 from 0 to 10
+   let d3 = 10*(1/sqrt(2*pi))* &
+            exp(-2*(sqr(x-4)/sqr(2)))) &
+            from 0.2 to 10 step 0.1
+   dn line
+   d2 lstyle 2 color red
+   d3 lstyle 3 color blue
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_let.inc}}
+\end{minipage}
+\vspace{0.2cm}
+
+The let command also allows the use of other datasets. E.g., to generate an average of two datasets:
+
+\begin{Verbatim}
+     data "file.csv" d1 d2
+     let d3 = (d1+d2)/2
+\end{Verbatim}
+
+More precisely, this command creates a dataset with as $x$-values the union of the $x$-values from d1 and d2, and as $y$-values the average of the $y$-values of d1 and d2. That is, the let command first computes the set of $x$-values by taking the union of the sets of $x$-values of all datasets that appear in the expression together with the $x$-values generated by the from/to/step construct. Then it iterates over these $x$-values. In each iteration, it assigns the $x$-value to the variable `x', and, for each dataset included in the expression, it assigns its corresponding $y$-value to the dataset identifier. Then it evaluates the given expression {\it exp} and adds the resulting point (x,{\it exp}) to the target dataset. If the let expression includes more than one dataset, and the $x$-ranges of these datasets are different, then linear interpolation is used to compute the missing $y$-values.
+
+If the xaxis is a `log' axis then the `step' option is read as the number of steps to produce rather than the size of each step. The ``from'', ``to'', and ``step'' parameters are optional. The values of ``from'' and ``to'' default to the horizontal axis' range.
+
+This command can also be used to modify the values in a data set, e.g., `let d1 = 2*d1', will multiply all $y$-values in dataset d1 by 2.
+
+The option `where {\it exp}' can be used to select values from a dataset, e.g., `let d1 = d2 where ((x $>$ 10) and (x $<$ 20))' will select all points from d2 for which the $x$-value is between 10 and 20; `let d1 = d2 where d2 $<$ 10' will select all points for which the $y$-value is below 10.
+
+\item[{\sf let ds = {\it x-exp, y-exp {\sf [from} low{\sf] [to} high{\sf] [step} exp{\sf] [where} exp{\sf]}}}]
+
+This syntax for the `let' command is similar to the previous one, but now two expressions can be given: {\it x-exp} is used to compute the $x$-values of the points in the target dataset `ds' and {\it y-exp} is used to compute the $y$-values. The parameter that is modified by the from/to/step construct is still the variable `x'.
+
+This syntax can be used to perform transformations on both the $x$ and the $y$-values of the points in a dataset. For example,
+
+\begin{Verbatim}
+let d1 = 2*x, d1+4
+\end{Verbatim}
+
+will multiply the $x$-values of d1 by 2 and add 4 to the $y$-values. 
+
+This syntax can also be used to define datasets that are not functions. The following example defines a circle:
+
+\begin{Verbatim}
+let d1 = sin(x), cos(x) from 0 to 2*pi
+\end{Verbatim}
+
+\item[{\sf let {\it dn} = [routine] {\it dm} [options] [{\it slopevar}] [{\it offsetvar}] [{\it rsqvar}]}]
+
+GLE includes several fitting routines that allow an equation to be fit to a data series. These routines can be included in a `let' expression as shown above, where {\it dn} will contain results of fitting {\sf routine} to the data in {\it dm}.
+
+The following routines are available :
+\begin{itemize}
+\item \texttt{linfit}\index{linfit}: fits the data in \textit{dm} to the straight line equation $y = m \cdot x + b$.
+\item \texttt{logfit}\index{logfit}: fits the data in \textit{dm} to the equation $y = a \cdot \exp(b \cdot x)$.
+\item \texttt{log10fit}\index{log10fit}: fits the data in \textit{dm} to the equation $y = a \cdot 10^{b \cdot x}$.
+\item \texttt{powxfit}\index{powxfit}: fits the data in \textit{dm} to the equation $y = a \cdot x^b$.
+\end{itemize}
+
+The value for $a$ is stored in `{\it slopevar}' and the value for $b$ is stored in `{\it offsetvar}'. The $r^2$ value of the fit is stored in `{\it rsqvar}'. Note that these variables are optional.
+
+The following options are available :
+\begin{itemize}
+\item \texttt{from {\it xmin} to {\it xmax}} The range of the data in \textit{dn} extends from the \textit{xmin} to \textit{xmax} as specified by the user.
+
+\item \texttt{step {\it xstep}} Specifies the x-resolution of the fitted equation. Similar to the \texttt{step} option of the \texttt{let} command.
+
+\item \texttt{rsq {\it var}} The $r^2$ value of the fit will be stored in {\it var}.
+
+\item \texttt{xmin {\it x1}}, \texttt{xmax {\it x2}}, \texttt{ymin {\it y1}}, \texttt{ymax {\it y2}} Only use data points from dm in the given window to fit the equation. That is, only data points $(x,y)$ from dm are used for which $x_1 \le x \le x_2$ and $y_1 \le y \le y_2$.
+
+\item \texttt{limit\_data\_x} The range of the data in \textit{dn} extends from the minimum $x$ value in \textit{dm} to the maximum $x$ value in \textit{dm}.
+
+\item \texttt{limit\_data\_y} The range of the data in \texttt{dn} extends from the $x$ value of the minimum $y$ value in \textit{dm} to the $x$ value of the maximum $y$ value in \textit{dm}.
+
+\item \texttt{limit\_data} The range of the data in \textit{dn} extends from the greater of the $x$ value of the minimum $y$ value or the minimum $x$ value in \textit{dm} to the greater of the $x$ value of the maximum $y$ value or the maximum $x$ value in \textit{dm}.
+\end{itemize}
+
+\begin{figure}[tb]
+\begin{minipage}[c]{9.2cm}
+\begin{Verbatim}
+slope = 0; offs = 0; rsquare = 0
+
+set texlabels 1
+begin graph
+   title "Linear fit"
+   xtitle "$x$"
+   ytitle "$y = ax + b$"
+   data "data.csv"
+   let d2 = linfit d1 from 0 to 10 slope offset rsquare
+   d1 marker circle color blue
+   d2 line color red
+end graph
+
+begin key
+   pos br nobox
+   text "$y = "+format$(slope,"fix 2")+"x + "+format$(offset,"fix 2")+"$"
+   text "$r^2 = "+format$(rsquare,"fix 2")+"$"
+end key
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_fit.inc}}
+\end{minipage}
+\caption{\label{fig:fitlin}Fitting linear equations `let d2 = fitlin d1'.}
+\end{figure}
+
+\begin{figure}[tb]
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+a = 0; b = 0; c = 0; d = 0; r = 0
+
+set texlabels 1
+begin graph
+   xtitle "$x$"
+   ytitle "$f(x)$"
+   title "$f(x) = a\sin(bx)+cx^2+d$"
+   data "data.csv"
+   let d2 = fit d1 with a*sin(b*x)+c*x^2+d rsq r
+   d1 marker circle color blue
+   d2 line color red
+end graph
+
+fct$ = "$f(x) = "+format$(a,"fix 2")+ &
+       "\sin("+format$(b,"fix 2")+"x)+"+ &
+       format$(c,"fix 2")+"x^2+"+ &
+       format$(d,"fix 2")+"$"
+
+begin key
+   pos br nobox
+   text fct$
+   text "$r^2$ = "+format$(r,"fix 3")
+end key
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_fitfct.inc}}
+\end{minipage}
+\caption{\label{fig:fitfct}Fitting arbitrary curves `let d2 = fit d1 with $\ldots$'.}
+\end{figure}
+
+\item[{\sf let {\it dn} = fit {\it dm} with {\it eqn} [options]}]
+
+Fit the coefficients of a given equation so that it best fits the data in dataset dm. Fig.~\ref{fig:fitfct} shows an example. The equation to fit is given by the `\texttt{with}' option. In this example, it is $a\sin(bx)+cx^2+d$. GLE will search for values for the coefficients $a$, $b$, $c$, and $d$ such that the given equation fits dm best. Note that all used coefficients must be initialized to zero before the graph block (see figure).
+
+The fit command has the same options as the linfit command. In addition, it has the following settings.
+
+\begin{itemize}
+\item \texttt{with {\it eqn}} Gives the equation to fit.
+
+\item \texttt{eqstr {\it strvar\$}} Sets the string variable in which the string representation of the fitted equation is to be stored.
+
+\item \texttt{format {\it fmt\$}} Sets the numeric format to use while converting the fitted equation into its string representation. See the documentation of {\sf format\$} on page~\pageref{formatnum:pg} for a description of the syntax.
+\end{itemize}
+
+\item[{\sf let ds = hist dm [from {\it x1}] [to {\it x2}] [bins {\it n}] [step {\it n}]}]
+\index{histogram}\index{let!hist}
+
+Computes a histogram for the values in `dm' and store the result in `dn'. E.g., if the file `normal.csv' contains a single column with samples from the standard Gaussian distribution, then the graph block
+
+\begin{Verbatim}
+begin graph
+   ...
+   data "normal.csv"
+   let d2 = hist d1 step 0.5
+   d2 line bar color red 
+end graph
+\end{Verbatim}
+
+\noindent{}will result in the histogram shown in Fig.~\ref{hist:fig}.
+
+The option `{\sf bins}' specifies the number of bins in the histogram. Alternatively, the option `{\sf step}' can be used to specify the bin size.
+
+\begin{figure}[tb]
+\centering
+\mbox{\input{graph/fig/normal.inc}}
+\caption{\label{hist:fig}An example of `let dn = hist dn'.}
+\end{figure}
+
+\item[{\sf let ds = \ldots [nsteps {\it n}]}]
+\index{nsteps}\index{let!nsteps}
+
+The `nsteps' options is an alternative to the `step' option of the `let' command. It specifies the total number of steps rather than the step width. The default value for `nsteps' is 100.
+
+\item[{\sf let ds = \ldots [range {\it dn}]}]
+\index{range}\index{let!range}
+
+Takes the x-values for this `let' expression from dataset `dn'. This is useful if you need to define a function for the same x-values as the ones you have in a given dataset.
+
+\item[{\sf math}]
+Use this option to create a math mode graph, with the axis crossing at point $(0,0)$. Fig.~\ref{grmath:fig} shows an example. The corresponding GLE code is as follows:
+
+\begin{Verbatim}
+begin graph
+   math
+   title "f(x) = sin(x)"
+   xaxis min -2*pi max 2*pi ftick -2*pi dticks pi format "pi"
+   yaxis dticks 0.25 format "frac"
+   let d1 = sin(x)
+   d1 line color red
+end graph
+\end{Verbatim}
+
+\begin{figure}[tb]
+\centering
+\mbox{\input{graph/fig/gc_mathmode.inc}}
+\caption{\label{grmath:fig}Left: math mode graph. Right: graph illustrating the `{\sf origin}' option of `{\sf xaxis}'.}
+\end{figure}
+
+
+\item[{\sf nobox}]
+\index{nobox}
+\index{noborder}
+\index{border}
+This removes the outer border from the graph.
+
+\item[{\sf size {\it x y }}]
+\index{size}
+Defines the size of the graph in cm.  This is the size of the outside box of a graph. The default size of the axes of the graph will be 70\% of this, (see {\sf scale}). If no {\sf size} command is given, then the size of the graph is initialized to the size of the figure ({\sf pagewidth()} by {\sf pageheight()}).
+
+\item[{\sf scale {\it h v}}]
+\index{scale}
+Sets the length of the xaxis to $h$ times the width of the graph box, and the length of the yaxis to $v$ times the height of the graph box. For example, with `{\sf size 10 10}' and `{\sf scale 0.7 0.7}', the length of the $x$ and $y$ axis will be 7 centimeter. `{\sf scale 1 1}' makes the xaxis (yaxis) the same length as the width (height) of the graph box, which is useful for positioning some graphs (see `{\sf fullscale}'). The default value for $h$ and $v$ is 0.7.
+
+If {\it h} or {\it v} is set to the keyword {\sf auto}, then the graph is scaled automatically in that direction to fill the entire box. The command `{\sf scale auto}' automatically scales the graph in both directions. Note that autoscale also moves the graph, similar to the command `{\sf center}'.
+
+This {\sf size} command is equivalent to the two commands `{\sf hscale {\it h}}' and `{\sf vscale {\it v}}' and allows one to specify the two scale factors with one command.
+
+Fig.~\ref{grscale:fig} shows examples of the different axis scaling options: default, automatic, and `{\sf fullsize}'.
+
+\begin{figure}[tb]
+\centering
+\mbox{\input{graph/fig/gc_graphscale.inc}}
+\caption{\label{grscale:fig}Different axis scaling options: default, automatic, and `{\sf fullsize}'. The blue dot indicates the origin $(x,y)$ of the graph, that is, the graph is generated with `{\sf amove $x$ $y$}' followed by `{\sf begin graph}' ... `{\sf end graph}'. The xaxis is labeled using the option `{\sf format pi}'.}
+\end{figure}
+
+\item[{\sf title {\it "title"}  [hei {\it ch-hei}] [color {\it col}] [font {\it font}] [dist {\it cm}]  }   ]
+\index{title}
+\index{title!hei}
+\index{title!font}
+\index{title!dist}
+\index{title!color}
+\index{color (title)}
+\index{font (title)}
+This command gives the graph a centered title.  The list of optional keywords specifies features of it.  The {\sf dist} command is used for moving the title up or down. The default title font size is the value of the `\texttt{hei}' setting multiplied by the setting `\texttt{titlescale}'\index{titlescale} (default 1.16).
+
+\item[{\sf vscale v}]
+\index{vscale}
+Sets the length of the yaxis to $v$ times the size of the graph box (default is 0.7). $v$ can also be set to `{\sf auto}'. See {\sf scale} for more details.
+
+\item[{\sf under call}]
+\index{under}
+
+Executes subroutine `call' before drawing the graph. The output is clipped to the graph window and the subroutine can use the functions `xg()', 'yg()', and variables `xgmin', `ygmin', etc. This is useful for drawing a custom graph background. It is also possible to include subroutine calls in the graph block without the `under' keyword. In that case, they are executed after the graph is drawn and can be used to draw on top of the graph.
+
+\item[{\sf x2labels on}]
+\index{x2labels!on}
+This command `activates' the numbering of the x2axis.  There is a
+corresponding command `{\sf y2axis on}' which will activate y2axis numbering.
+
+\item[{\sf xaxis | yaxis | x2axis | y2axis}]
+\index{xaxis}
+\index{yaxis (see xaxis)}
+\index{x2axis (see xaxis)}
+\index{y2axis (see xaxis)}
+A graph is considered to have four axes:  The normal xaxis and
+yaxis as well as the top axis (x2axis) and the right axis (y2axis).
+
+Any command defining an xaxis setting will also define that setting
+for the x2axis.
+
+The secondary axes x2 and y2 can be modified individually by starting the
+axis command with the name of that axis. E.g.,
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+ begin graph
+    size 6 3 
+    xtitle  "X-axis"
+    ytitle  "Y-axis"
+    x2title "X2-axis"
+    y2title "Y2-axis"
+    x2ticks length 0.6
+    x2subticks color red
+ end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_axes.inc}}
+\end{minipage}
+
+\item[{\sf xaxis angle $\alpha$}]
+Rotate the labels by $\alpha$ degrees. Fig.~\ref{hbar:fig} gives an example.
+
+\item[{\sf xaxis base {\it exp-cm}} ]
+\index{xaxis!base}
+Scale the axis font and ticks by {\it exp-cm}. The default value of the `{\sf base}' setting is the value of `{\sf hei}'.
+
+\item[{\sf xaxis color {\it col} font {\it font-name}  hei {\it exp-cm} lwidth {\it exp-cm}} ]
+\index{xaxis!color}
+\index{xaxis!font}
+\index{xaxis!hei}
+\index{xaxis!lwidth}
+These axis qualifiers affect the colour, lstyle, lwidth, and font used for drawing the xaxis (and the x2axis).  These can be overridden with more specific commands. E.g., `{\sf xticks color blue}' would override the axis colour when drawing the ticks. The subticks would also be blue as they pick up tick settings by default.
+
+\item[{\sf xaxis dsubticks {\it sub-distance} }  ]
+\index{xaxis!dsubticks}
+See {\sf xaxis nticks} below.
+
+\item[{\sf xaxis format {\it format-string}} ]
+
+Specifies the number format for the labels. See the documentation of {\sf format\$} on page~\pageref{formatnum:pg} for a description of the syntax. Example:
+
+\preglecode{}
+\begin{Verbatim}
+	xaxis format "fix 1"
+\end{Verbatim}
+\postglecode{}
+
+\item[{\sf xaxis grid }  ]
+\index{grid}
+\index{xaxis!grid}
+This command makes the xaxis ticks long enough to reach the x2axis and the yaxis ticks long enough to reach the y2axis. When used with both the x and y axes this produces a grid over the graph. Use the {\sf xticks lstyle} command to create a faint grid.
+
+It is possible to have grid lines for subticks or to have normal subticks. Figure~\ref{gridmode:fig} shows the different options.
+
+\begin{figure}[tb]
+\centering
+\input{graph/fig/gridmode.inc}
+\caption{\label{gridmode:fig}Different grid options: no subticks, grid lines at each subtick, or grid lines at main ticks with regular subticks. The box on each graph indicates which GLE commands to use for each option.}
+\end{figure}
+
+\item[{\sf xaxis log}  ]
+\index{xaxis!log}
+\index{log}
+Draws the axis in logarithmic style, and scales the data logarithmically
+to match (on the x2axis or y2axis it does not affect the data, only the
+way the ticks and labeling are drawn)
+
+Be aware that a straight line should become curved
+when drawn on a log graph.  This will only happen if you have
+enough points or have used the {\sf smooth} option.
+
+\item[{\sf xaxis min {\it low} max {\it high}} ]
+\index{xaxis!min}
+\index{xaxis!max}
+Sets the minimum and maximum values on the xaxis.  This will determine both the
+labeling of the axis and the default mapping of data onto the graph.
+To change the mapping see the dataset {\sf dn} commands
+{\sf xmin}, {\sf ymin}, {\sf xmax}, and {\sf ymax}.
+
+\item[{\sf xaxis nofirst nolast}  ]
+\index{nolast}
+\index{nofirst}
+\index{xaxis!nolast}
+\index{xaxis!nofirst}
+These two switches simply remove the first or last (or both) labels from
+the graph.  This is useful when the first labels on
+the x and y axis are too close to each other.
+
+\index{xaxis!nticks}
+\index{xaxis!dticks}
+\index{xaxis!dsubticks}
+\index{xaxis!nsubticks}
+\index{dticks}
+\index{nticks}
+\index{dsubticks}
+\index{nsubticks}
+\item[{\sf xaxis nticks {\it number} dticks {\it distance} dsubticks {\it distance}} ]
+{\sf nticks} specifies the number of ticks along the axis.  {\sf dticks}
+specifies the distance between ticks and {\sf dsubticks}
+specifies the distance between subticks.  For example, to get one subtick
+between every main tick with main ticks 3 units apart, simply specify
+{\sf dsubticks 1.5}. Alternatively, one can also use {\sf nsubticks}.
+
+By default ticks are drawn on the inside of the graph.  To draw
+them on the outside use the command:
+
+\preglecode{}
+\begin{Verbatim}
+     xticks length -.2
+     yticks length -.2
+\end{Verbatim}
+\postglecode{}
+
+\item[{\sf xaxis ftick {\it x0} dticks {\it distance} nticks {\it number}}]
+Labels the xaxis starting from position `{\it x0}', with distance `{\it distance}' between the ticks. This will result in a tick at the positions $\mathit{x0} + i \times \mathit{distance}$, with $i$ ranging from 0 to $(\mathit{number}-1)$.
+
+\item[{\sf xaxis off}  ]
+\index{xaxis!off}
+Turns the whole axis off --- labels, ticks, subticks and line.
+Often the x2axis and y2axis are not required, they could be
+turned off with the following commands:
+
+\preglecode{}
+\begin{Verbatim}
+     x2axis off
+     y2axis off
+\end{Verbatim}
+\postglecode{}
+
+\item[{\sf xaxis shift {\it cm-exp}}  ]
+\index{xaxis!shift}
+This moves the labeling to the left or right, which is useful when
+the label refers to the data between the two values.
+
+\item[{\sf xaxis symticks}]
+\index{xaxis!symticks}
+By default, the axis ticks are drawn on the inside of the graph frame. To make them appear on the outside, use a negative ticks length. E.g., `{\sf xticks length -0.1}' will produce 1mm ticks on the outside of the graph frame. The `symticks' option enables tick on both the inside and outside of the graph frame. This option is the default in `math' mode. (See the `{\sf math}' command.)
+
+\item[{\sf xlabels [font {\it font-name}] [hei {\it char-hei}] [color {\it col}] [dist {\it dis}] [on] [off] [log {\it lgmode}]}]
+\index{xlabels}
+\index{xlabels!font}
+\index{xlabels!hei}
+\index{xlabels!color}
+\index{xlabels!dist}
+\index{xlabels!on}
+\index{xlabels!off}
+\index{xlabels!log}
+This command controls the appearance of the axis labels. The default label font size is the value of the `\texttt{hei}' setting multiplied by the setting `\texttt{alabelscale}'\index{alabelscale} (default 0.8). The default value for {\it dist} is controlled by the setting `\texttt{alabeldist}'\index{alabeldist}.
+
+The command `\texttt{xlabels off}' turns the labels for the xaxis off. Similarly, `\texttt{xlabels on}' turns them on (the default for the $x$ and $y$ axis, but not for the $x2$ and $y2$ axis).
+
+Possible values for {\it lgmode} are: `\texttt{off}', `\texttt{l1}', `\texttt{l25}', and `\texttt{l25b}'. These control the subticks for a log scale axis. The value `\texttt{off}' means no subticks (i.e., only main ticks at $10^k$), `\texttt{l1}' means 10 subticks, and `\texttt{l25}' means two subticks at the positions $2\cdot 10^k$ and $5\cdot 10^k$. The value `\texttt{l25b}' is identical to `\texttt{l25}' except that now the format function (given with the `\texttt{format}' option of the `\texttt{xaxis}' command) is used to label the subticks. In the other case, the subticks are labeled with the values `2' and `5' in a small font (0.7 times the size of the main tick labels). These settings are illustrated in Fig.~\ref{loglab:fig}.
+
+\begin{figure}[tb]
+\centering
+\mbox{\input{graph/fig/gc_loglabels.inc}}
+\caption{\label{loglab:fig}Possibilities for the `\texttt{log}' option of `\texttt{ylabels}'.}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+\mbox{\input{graph/fig/gc_logsubticks.inc}}
+\caption{\label{logsubt:fig}How log subticks and log sublabels interact.}
+\end{figure}
+
+\item[{\sf xnames {\it "name"  "name" ...}}  ]
+\index{xnames}
+\index{ynames (see xnames)}
+This command replaces the numeric labeling with text labels. Given data consisting of seven measurements, taken from Monday to Sunday, one per day then
+
+\begin{Verbatim}
+   xnames "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"
+   xaxis min 0 max 6 dticks 1
+\end{Verbatim}
+
+would give the desired result (Fig.~\ref{fig:weekday}).  Note it is essential to define a specific axis minimum, maximum, dticks, etc., otherwise the labels may not correspond to the data.
+
+If there isn't enough room on the line for all the names then simply use an extra {\sf xnames} command.
+
+\begin{figure}[tb]
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin graph
+   ytitle "Happyness"
+   title  "Names \& Places"
+   xnames "Mon" "Tue" "Wed" "Thu"
+   xnames "Fri" "Sat" "Sun"
+   xaxis  min 0 max 6 dticks 1
+   ...
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_names.inc}}
+\end{minipage}
+\caption{\label{fig:weekday}Example illustrating the ``xnames'' command.}
+\end{figure}
+
+\item[{\sf xnames from {\it dx}}]
+Takes the labels for the xaxis from dataset {\it dx}. For example, if the data file contains:
+
+\begin{Verbatim}
+0, Mercury, 0.382
+1, Venus,   0.949
+2, Mars,    0.532
+3, Jupiter, 11.21
+4, Saturn,  9.449
+5, Uranus,  4.007
+6, Neptune, 3.883
+\end{Verbatim}
+
+\noindent{}then `{\sf ynames from d1}' uses the data from the second column as labels for the yaxis (Fig.~\ref{hbar:fig}).
+
+\item[{\sf xnoticks {\it pos1 pos2 pos3 ...}}]
+\index{xnoticks}
+Disables the axis ticks at the given positions.
+
+\item[{\sf xplaces {\it pos1 pos2 pos3 ...}}  ]
+\index{xplaces}
+This is similar to the xnames command but it specifies a list of points
+which should be labeled.  This allows labeling which isn't equally
+spaced. For example:
+
+\begin{Verbatim}
+     xplaces 1    2     5     7
+     xnames "Mon" "Tue" "Fri" "Sun"
+\end{Verbatim}
+
+If there isn't enough room on the line for all the places then simply
+use an extra {\sf xplaces} command.
+
+\item[{\sf xside color {\it col} lwidth {\it line-width} off  } ]
+\index{xside}
+\index{yside (see xside)}
+\index{y2side (see xside)}
+\index{x2side (see xside)}
+\index{xside!lwidth}
+\index{xside!color}
+This command controls the appearance of the axis line, i.e. the line
+to which the ticks are attached.
+
+\item[{\sf xsubticks {\it {\sf lstyle} num  {\sf lwidth} exp {\sf length} exp  {\sf off}}} ]
+\index{xsubticks}
+\index{xsubticks!lstyle}
+\index{xsubticks!lwidth}
+\index{xsubticks!length}
+\index{xsubticks!off}
+This command gives fine control of the appearance of the axis subticks.
+
+\item[{\sf xticks {\it {\sf lstyle} num {\sf lwidth} exp {\sf length} exp {\sf off}}} ]
+\index{xticks}
+\index{yticks (see xticks)}
+\index{xticks!lstyle}
+\index{xticks!lwidth}
+\index{xticks!length}
+\index{xticks!off}
+This command gives fine control of the appearance of the axis ticks.
+Note: To get ticks on the outside of the graph, i.e. pointing outwards,
+specify a negative tick length:
+
+\preglecode{}
+\begin{Verbatim}
+     xticks length -.2
+     yticks length -.2
+\end{Verbatim}
+\postglecode{}
+
+\item[{\sf xtitle {\it "title"}  [hei {\it ch-hei}]  [color {\it col}] [font {\it font}] [dist {\it cm}] [adist {\it cm}]}]
+\index{ytitle (see xtitle)}
+\index{xtitle}
+\index{xtitle!hei}
+\index{xtitle!font}
+\index{xtitle!dist}
+\index{xtitle!adist}
+\index{xtitle!color}
+This command gives the axis a centered title.  The list of optional keywords specify features of it.  The {\sf dist} option is used for controlling the distance between the title and the axis labels. The default font size is the value of the `\texttt{hei}' setting multiplied by the setting `\texttt{atitlescale}'\index{atitlescale} (default 1.0). The default value for {\it dist} is controlled by the setting `\texttt{atitledist}'\index{atitledist}. The `{\sf adist}' option is an alternative to `{\sf dist}', but specifies the distance between the title and axis itself. This option is useful for perfectly aligning, e.g., the y-axis titles of multiple graphs (if the graphs are in one vertical column, but their y-axis labels have a different width).
+
+\item[{\sf xaxis negate}  ]
+\index{negate}
+\index{xaxis!neagte}
+This is reversed the numbering on the y axis.  For use with
+measurements below ground, where you want zero at the top and
+positive numbers below the zero.
+
+\item[{\sf y2title {\it "text-string"}  [rotate]  }  ]
+\index{y2title rotate}
+\index{rotate (y2title)}
+By default the y2title is written vertically upwards.  The optional
+{\sf rotate} keyword changes this direction to downwards.  The {\sf rotate} option
+is specific to the {\sf y2title} command.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin graph
+   xaxis min 0 max 9 nofirst nolast
+   xaxis hei 0.4 nticks 6 dsubticks 0.3
+   xaxis lwidth 0.05 color red
+   xticks length 0.2
+   ytitle "Log Yaxis"
+   yaxis log min 1 max 10
+   yticks length 0.2
+   y2axis min 1 max 10000 format "sci 0 10"
+   y2side color blue
+   y2title "Y2title rotated " hei 0.3 rotate
+   x2axis off
+   y2labels on
+   let d1 = sin(x)*4+5 from 0 to 9 
+   dn line color blue
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_axisall.inc}}
+\end{minipage}
+
+\end{commanddescription}
+
+\section{Bar Graphs}
+\index{bar graphs}
+Drawing a bar graph is a subcommand of the normal graph module. This allows
+bar and line graphs to be mixed.
+The bar command is quite complex as it allows a
+great deal of flexibility.  The same command allows stacked, overlapping and
+grouped bars.
+
+For stacked bars use separate bar commands as in the first
+example below:
+
+\preglecode{}
+\begin{Verbatim}
+     bar d1 fill black
+     bar d2 from d1 fill gray10
+\end{Verbatim}
+\postglecode{}
+
+For grouped bars put all the datasets in a list on a single bar
+command:
+
+\preglecode{}
+\begin{Verbatim}
+     bar d1,d2,d3 fill gray10,gray40,black
+\end{Verbatim}
+\postglecode{}
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin graph
+   title  "Bean stalk data" dist 0.1
+   xtitle "Year measured"
+   ytitle "Height of stalk"
+   xaxis dticks 1
+   yaxis min 0 max 6 dticks 2
+   data  "gc_bean.dat"
+   bar d1,d2,d3 fill blue,orange,red
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_bargraph2.inc}}
+\end{minipage}
+
+\begin{commanddescription}
+\item[{\sf bar {\it dx,...} dist {\it spacing}}]
+\index{bar!dist}
+Specifies the distance between bars in dataset(s) {\sf dx,...}.  The
+distance is measured from the left hand side of one bar to the left hand side
+of the next bar.  A distance of less than the width of a bar
+results in the bars overlapping.
+
+\item[{\sf bar {\it dx,...} from {\it dy,...}}]
+\index{bar!from}
+This sets the starting point of each bar in datasets {\sf dx,...} to be at
+the value in datasets {\sf dy,...}, and is used for creating stacked bar
+charts.  Each layer of the bar chart is created with an additional bar command.
+
+\preglecode{}
+\begin{Verbatim}
+     bar d1,d2
+     bar d3,d4 from d1,d2
+     bar d5,d6 from d3,d4
+\end{Verbatim}
+\postglecode{}
+
+Note 1: It is important that the values in d3 and d4 are greater than
+the values in d1 and d2.
+
+Note 2: Data files for stacked bar graphs should not have
+missing values, replace the * character with the number on its left in the
+data file.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin graph
+   ...
+   data "gc_bean.dat"
+   bar d1 fill gray20
+   bar d2 from d1 fill white
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_bargraph1.inc}}
+\end{minipage}
+
+\index{bar!width} \index{bar!fill}
+\index{bar!color}
+\item[{\sf bar {\it dn,...} width {\it xunits,...} fill {\it col,...} color {\it col,...} }]
+The rest of the bar qualifiers are fairly self explanatory.
+When several datasets are specified, separate them with commas
+(with no spaces between commas).
+
+\preglecode{}
+\begin{Verbatim}
+     bar d1,d2 width 0.2 dist 0.2 fill gray10,gray20 color red,green
+\end{Verbatim}
+\postglecode{}
+
+\item[{\sf bar {\it dn,...} fill {\it f} pattern {\it p}}]
+\index{pattern!bar}
+The `{\sf pattern}' option specifies the pattern used for filling the bars. Fig.~\ref{filpat:fig} gives an overview of the predefined patterns that can be used here. Fig.~\ref{hbar:fig} shows an example of the command `{\sf bar d2 horiz fill red pattern shade2}'.
+
+\item[{\sf bar {\it dn,...} horiz}]
+\index{horiz}
+The option `{\sf horiz}' makes the bars horizontal instead of vertical (Fig.~\ref{hbar:fig}).
+
+\begin{figure}[tb]
+\centering
+\input{graph/fig/gc_horizbar.inc}
+\caption{\label{hbar:fig}Illustration of the `{\sf horiz}' and `{\sf pattern}' keywords of the `{\sf bar}' command, and of the `{\sf angle}' option of the `{\sf yaxis}' command.}
+\end{figure}
+\end{commanddescription}
+
+\section{3D Bar Graphs}
+\index{bar graphs 3d}
+3d Bar graphs are now supported, the commands are:
+
+\preglecode{}
+\begin{Verbatim}
+        bar d1,d2  3d .5 .3  side red,green  notop
+        bar d3,d4  3d .5 .3  side red,green top black,white
+\end{Verbatim}
+\postglecode{}
+
+Take note of comma's.
+\begin{commanddescription}
+\item[{\sf bar {\it dx,...} 3d {\it xoffset} \  {\it yoffset} side {\it color list}\ top {\it color list} [notop]}]
+\index{3d bar!offset} \index{3d bar!side} \index{3d bar!top} \index{3d bar!notop}
+\index{xoffset} \index{yoffset}
+
+\item[{\sf 3d  {\it xoffset} {\it yoffset} }]
+Specifies the x and y vector used to draw the receding
+lines, they are defined as fractions of the width of the
+bar.
+A negative xoffset will draw the 3d bar on the left side
+of the bar instead of the right hand side.
+
+\item[{\sf side {\it color list} }]
+The color of the side of each of the bars in the group.
+
+\item[{\sf top {\it color list}}]
+The color of the top part of the bar
+
+\item[{\sf notop}]
+Turns off the top part of the bar, use this if you have
+a stacked bar graph so you only need sides on the lower parts
+of each stack.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin graph
+   ...
+   data "gc_bean.dat"
+   bar d1,d2,d3 dist 0.25 width 0.15 3d 1 0.25 &
+       fill red,blue,forestgreen &
+       side orange,dodgerblue,green
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_bargraph_3d.inc}}
+\end{minipage}
+\end{commanddescription}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Filling Between Lines}
+\begin{commanddescription}
+\index{fill!color} \index{fill!xmin} \index{fill!xmax}
+\index{fill!ymin} \index{fill!ymax}
+\item[{\sf fill x1,{\it d3} color {\it green}  xmin {\it val} xmax {\it val}} ]
+\index{filling areas}
+Fills between the xaxis and a dataset, use the optional
+{\sf xmin, xmax, ymin, ymax} qualifiers to clip the filling
+to a smaller region
+
+\item[{\sf fill {\it d4},x2 color {\it blue}   ymin {\it val} ymax {\it val}} ]
+This command fills from a dataset to the x2axis.
+
+\item[{\sf fill {\it d3,d4} color {\it green}  xmin {\it val} xmax {\it val}} ]
+This command fills between two datasets.
+
+\item[{\sf fill {\it d4} color {\it green}  xmin {\it val} xmax {\it val}} ]
+This command treats the dataset as a polygon and fills it. The dataset
+should be a closed polygon.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin graph
+   title  "Shading areas of the graph" dist 0.1
+   xtitle "Height of stalk"
+   ytitle "Year measured"
+   xaxis min 86 max 90
+   yaxis min 0  max 6
+   data "gc_fill.dat"
+   fill d2,x2 color gray40 
+   fill x1,d1 color gray10 xmin 85 xmax 88
+   fill x1,d1 color gray90 xmin 88 xmax 91
+   dn line
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/gc_fillgraph.inc}}
+\end{minipage}
+
+\end{commanddescription}
+
+\section{Notes on Drawing Graphs}
+
+\subsection{Importance of Order}
+\index{data (order)}
+\index{let (order)}
+Most of the graph commands can appear in any order, but in some
+cases order is significant.
+
+As some {\sf let} commands operate on data which has been read into datasets,
+the {\sf data} commands should precede the {\sf let} commands.
+
+The wildcard {\sf dn} command should appear before
+specific {\sf d1} commands which it will override.
+
+By default xaxis commands also change the x2axis, and xlabels commands
+also change x2labels, so to specify different settings for
+the x and x2 axes, put the x2 settings after the x settings.
+
+\preglecode{}
+\begin{Verbatim}
+     begin graph
+        size 10 10
+        data a.dat
+        let d2 = d1*3
+        dn marker square lstyle 3   ! sets d1 and d2
+        d2 marker dot
+        xaxis color green
+        xticks color blue
+        x2axis color black
+     end graph
+\end{Verbatim}
+\postglecode{}
+
+\subsection{Line Width}
+\index{line width (graphs)}
+\index{lwidth (graphs)}
+When scaling a graph up or down for publication the default
+line width may need changing. To do this simply
+specify a {\sf set lwidth} command before beginning the graph.
+
+\preglecode{}
+\begin{Verbatim}
+     size 10 10
+     set lwidth .1
+     begin graph
+        ...
+     end graph
+\end{Verbatim}
+\postglecode{}

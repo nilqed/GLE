@@ -1,0 +1,67 @@
+#
+# config file for gcc and make
+#
+
+EXTRA_DEFS	  =-D __WIN32__ -D __NOCYGWIN__ -Wreturn-type
+OBJ_SUFF	  =o
+CC		  =gcc
+CXX		  =gcc
+EXE_SUFF	  =.exe
+AR		  =ar
+RM		  =rm -rf
+RMDIR		  =rm -rf
+MKDIR		  =mkdir
+
+INSTALL_DIR       =C:\Program Files\gle4
+INSTALL_DIR2      =C:\\\\Program Files\\\\gle4
+PATH_SEP	=/
+
+ROOT_INSTALL_DIR  =$(GLE_RPM_ROOT)$(INSTALL_DIR)
+
+#
+# other global defines
+#
+PROJECT_BINDIR 	= ../../build
+PROJECT_LIBDIR 	= ../../lib
+PROJECT_INCDIR 	= ../../include
+
+#
+# GLE_TOP does not need to be defined anymore during compile
+#
+GLE_TOP         = ../../build
+
+EXTRA_INCLUDE_PATHS	=
+EXTRA_LIB_PATHS		=
+LIBS			=-lstdc++
+
+ifdef GNUWIN32DIR
+	EXTRA_INCLUDE_PATHS := $(EXTRA_INCLUDE_PATHS) -I"$(GNUWIN32DIR)/include"
+	EXTRA_LIB_PATHS	:= $(EXTRA_LIB_PATHS) -L"$(GNUWIN32DIR)/lib"
+endif
+
+ifdef HAVE_LIBTIFF
+	EXTRA_DEFS		:= $(EXTRA_DEFS) -D HAVE_LIBTIFF
+	ifdef LIBTIFFDIR
+		EXTRA_INCLUDE_PATHS	:= $(EXTRA_INCLUDE_PATHS) -I$(LIBTIFFDIR)
+		EXTRA_LIB_PATHS	:= $(EXTRA_LIB_PATHS) -L$(LIBTIFFDIR)
+	endif
+	LIBS			:= $(LIBS) -ltiff
+endif
+
+ifdef HAVE_LIBPNG
+	EXTRA_DEFS		:= $(EXTRA_DEFS) -D HAVE_LIBPNG
+	ifdef LIBPNGDIR
+		EXTRA_INCLUDE_PATHS	:= $(EXTRA_INCLUDE_PATHS) -I$(LIBPNGDIR) -I$(ZLIBDIR)
+		EXTRA_LIB_PATHS	:= $(EXTRA_LIB_PATHS) -L$(LIBPNGDIR)
+	endif
+	ifdef ZLIBDIR
+		EXTRA_LIB_PATHS	:= $(EXTRA_LIB_PATHS) -L$(ZLIBDIR)
+	endif
+	LIBS			:= $(LIBS) -lpng -lz -ljpeg
+endif
+
+-include extraconfig.nocygwin
+
+LINK_OPTS       =-mno-cygwin
+CXXFLAGS	=-O2 -I/home/jan/libs/install/include $(VERSION_INFO) $(EXTRA_INCLUDE_PATHS) $(EXTRA_DEFS) -mno-cygwin
+LINKFLAGS	=-L/home/jan/libs/install/lib $(EXTRA_LIB_PATHS) -static $(LIBS)

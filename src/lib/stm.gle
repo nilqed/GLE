@@ -1,0 +1,303 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Common subroutines for laying-out STM images
+! By: Vincent P. LaBella
+
+sub scale_bar llength texth a$ lx ly ap$ line_width text_offset fillpattern$ boxit x_buffer y_buffer
+!
+! draws a scale bar with text over it
+!
+! llenght ........ line length
+! a$.............. text
+! texth........... texht height
+! lx.............. x coordinate of box
+! ly.............. y coordinate of box
+! ap$............. anchor point (tl,tc,tr,lc,cc,rc,bl,bc,br)
+! line_width ..... width of line
+! text_offset .... offset of text from line
+! fillpattern$.... background
+! boxit........... =1 draws a black box=0 no box is drawn
+! x_buffer........ distance on both ends from line to box
+! y_buffer........ distance on top and bottom
+   !
+   ! -- calculate box height and width
+   !
+   boxw=llength+x_buffer*2
+   boxh=texth-0.1+line_width+text_offset+2*y_buffer
+
+   gsave
+   set hei   texth
+   set color BLACK
+   set just  bc
+   !
+   ! translate starting coordinates to lower left hand side
+   !
+   if ap$="tr" then
+      lx=lx-boxw
+      ly=ly-boxh
+   end if
+   if ap$="tc" then
+      lx=lx-boxw/2
+      ly=ly-boxh
+   end if
+   if ap$="tl" then
+      lx=lx
+      ly=ly-boxh
+   end if
+   if ap$="rc" then
+      lx=lx-boxw
+      ly=ly-boxh/2
+   end if
+   if ap$="cc" then
+      lx=lx-boxw/2
+      ly=ly-boxh/2
+   end if
+   if ap$="lc" then
+      lx=lx
+      ly=ly-boxh/2
+   end if
+   if ap$="br" then
+      lx=lx-boxw
+      ly=ly
+   end if
+   if ap$="bc" then
+      lx=lx-boxw/2
+      ly=ly
+   end if
+   if ap$="bl" then
+      lx=lx
+      ly=ly
+   end if
+   lstartx=lx+x_buffer
+   lstarty=ly+y_buffer
+   amove lx ly
+   if boxit=1 then
+      box boxw boxh fill fillpattern$ 
+   else
+      box boxw boxh fill fillpattern$ nobox
+   end if   
+   set lwidth line_width
+   amove lstartx lstarty
+   rline llength 0.0
+   amove lstartx+llength/2.0 lstarty+text_offset+line_width/2
+   write a$
+   grestore
+end sub
+
+
+sub textbox x1 y1 ap$ text_size string$ txbuffer tybuffer boxit bgcolor$ fgcolor$ lncolor$ lnwidth
+   !
+   ! draws a box around a piece of text and fills it with a color
+   !
+   ! (x1,y1) ........ x and y coordinates of box
+   ! ap$............. anchor point (tl,tc,tr,lc,cc,rc,bl,bc,br)
+   ! string$......... the string to put in the box
+   ! text_size....... the size of the text
+   ! t(x,y)buffer.... extra padding around text
+   ! boxit........... 1 draws box   0 no box is drawn
+   ! fg color........ text color
+   ! bgcolor ........ background color
+   ! lnwidth......... line width of surrounding box
+   ! lncolor......... line color of surrounding box
+   ! 
+   !
+   gsave
+   !
+   ! translate starting coordinates to lower left hand side
+   !
+   set hei text_size
+   textbox_boxw=2*txbuffer+TWIDTH(string$)
+   textbox_boxh=2*tybuffer+THEIGHT(string$)
+   if ap$="tr" then
+      x1=x1-textbox_boxw
+      y1=y1-textbox_boxh
+   end if
+   if ap$="tc" then
+      x1=x1-textbox_boxw/2
+      y1=y1-textbox_boxh
+   end if
+   if ap$="tl" then
+      x1=x1
+      y1=y1-textbox_boxh
+   end if
+   if ap$="rc" then
+      x1=x1-textbox_boxw
+      y1=y1-textbox_boxh/2
+   end if
+   if ap$="cc" then
+      x1=x1-textbox_boxw/2
+      y1=y1-textbox_boxh/2
+   end if
+   if ap$="lc" then
+      x1=x1
+      y1=y1-textbox_boxh/2
+   end if
+   if ap$="br" then
+      x1=x1-textbox_boxw
+      y1=y1
+   end if
+   if ap$="bc" then
+      x1=x1-textbox_boxw/2
+      y1=y1
+   end if
+   if ap$="bl" then
+      x1=x1
+      y1=y1
+   end if
+   amove x1 y1
+   set color  lncolor$
+   set lwidth lnwidth
+   if boxit=1 then
+      box textbox_boxw textbox_boxh fill bgcolor$
+   else
+      box textbox_boxw textbox_boxh fill bgcolor$ nobox
+   end if
+   set color fgcolor$
+   set just cc
+   
+   amove x1+textbox_boxw/2 y1+textbox_boxh/2
+   write string$
+   grestore
+end sub
+
+sub axis_dir x1 y1 dx dy x_text$ y_text$ text_height angle text_offset text_ap$
+!
+! draws and axis x and y and lables it called by axis_box
+!
+   gsave
+   amove x1 y1
+   set hei text_height
+
+   begin rotate angle
+      rline dx 0.0 arrow end
+      if angle>90 then
+         set just tl
+         begin rotate 180
+            rmove 0.0 -text_offset
+            write x_text$
+         end rotate
+      else
+         set just br
+         rmove 0.0 text_offset
+         write x_text$
+      end if
+      
+      amove x1 y1
+      rline 0.0 dy arrow end
+      !
+      ! for y text roate if necessary
+      !
+      if angle<0 then
+         set just bc
+         begin rotate 90
+            rmove 0.0 -text_offset
+            write y_text$
+         end rotate
+      else
+         set just bl
+         rmove text_offset 0.0
+         begin rotate -90
+            write y_text$         
+         end rotate
+      end if
+   end rotate
+   grestore
+end sub      
+
+sub axis_box lx ly textx$ texty$ angle xoffset yoffset axis_length ap$ boxit fgcolor$ bgcolor$ txtcolor$ text_height text_offset
+!
+!  draws a box and puts two axis 90 deg apart and lables them as you want
+!
+!  lx,ly........location of box
+!  textx$.......text to put on x axis
+!  texty$.......text to put on y axis
+!  angle........axis is rotated
+!  xoffset......location of origin relative to corner of box
+!  yoffset......"""""""     """ """            """
+!  axis_length..lenght of axis
+!  ap$..........anchor point  (does not work yet puts it at lower left
+!  boxit........1 draws box 0 no box
+!  text_offset....offset of text from axis
+!
+   gsave
+   amove lx ly
+   begin rotate angle
+   if boxit=1 then
+      set color fgcolor$
+      box axis_length+2*xoffset axis_length+2*yoffset fill bgcolor$
+   else
+      set color bgcolor$
+      box axis_length+2*xoffset axis_length+2*yoffset fill bgcolor$
+   end if
+   set color fgcolor$
+   end rotate
+   @axis_dir lx+xoffset ly+yoffset axis_length axis_length textx$ texty$ text_height angle text_offset "br"
+   grestore
+end sub
+
+sub axis_boxr lx ly textx$ texty$ angle xoffset yoffset axis_length ap$ boxit fgcolor$ bgcolor$ txtcolor$ text_height text_offset
+!
+!  draws a box and puts two axis 90 deg apart and lables them as you want
+!
+!  lx,ly........location of box
+!  textx$.......text to put on x axis
+!  texty$.......text to put on y axis
+!  angle........axis is rotated
+!  xoffset......location of origin relative to corner of box
+!  yoffset......"""""""     """ """            """
+!  axis_length..lenght of axis
+!  ap$..........anchor point  (does not work yet puts it at lower left
+!  boxit........1 draws box 0 no box
+!  text_offset....offset of text from axis
+!
+   gsave
+   amove lx ly
+   begin rotate angle
+   if boxit=1 then
+      set color fgcolor$
+      box axis_length+2*xoffset axis_length+2*yoffset fill bgcolor$
+   else
+      set color bgcolor$
+      box axis_length+2*xoffset axis_length+2*yoffset fill bgcolor$
+   end if
+   set color fgcolor$
+   @axis_dir lx+xoffset ly+yoffset axis_length axis_length textx$ texty$ text_height 0 text_offset "br"
+   end rotate
+   grestore
+end sub

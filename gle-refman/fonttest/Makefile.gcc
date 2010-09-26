@@ -1,0 +1,75 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+
+FONTS = \
+	psagbo.pdf psagb.pdf psagdo.pdf psagd.pdf psbdi.pdf psbd.pdf psbl.pdf psbli.pdf \
+	pshbo.pdf pshb.pdf pscbo.pdf pscb.pdf psco.pdf psc.pdf pshnb.pdf pshnbo.pdf \
+	pshno.pdf pshn.pdf psho.pdf psh.pdf psncsbi.pdf psncsb.pdf psncsi.pdf \
+	psncsr.pdf pspbi.pdf pspb.pdf pspi.pdf pspr.pdf pssym.pdf pstbi.pdf \
+	pstb.pdf psti.pdf pstr.pdf pszcmi.pdf pszd.pdf rmb.pdf rmi.pdf rm.pdf \
+	ssb.pdf ssi.pdf ss.pdf texcmb.pdf texcmex.pdf texcmitt.pdf texcmmi.pdf \
+	texcmr.pdf texcmssb.pdf texcmssi.pdf texcmss.pdf texcmsy.pdf texcmti.pdf \
+	texcmtt.pdf ttb.pdf tti.pdf tt.pdf
+
+FONTS_EXTRA = \
+	plba.pdf plcc.pdf plcg.pdf plci.pdf plcr.pdf plcs.pdf pldr.pdf plge.pdf \
+	plgg.pdf plgi.pdf plsa.pdf plsg.pdf plsr.pdf plss.pdf plsym1.pdf plsym2.pdf \
+	plti.pdf pltr.pdf pshc.pdf pshcb.pdf pshcdo.pdf pshcbo.pdf
+
+COMPILE_EXTRA_FONTS=
+ifeq ($(HAVE_EXTRA_FONTS),1)
+	COMPILE_EXTRA_FONTS=$(FONTS_EXTRA)
+endif
+
+ifeq ($(RUNBUILD),1)
+	GLE = ../../build/bin/gle
+else
+	GLE = gle
+endif
+
+all: $(FONTS) $(COMPILE_EXTRA_FONTS) extrafonts.tex
+
+%.pdf: font-table.gle
+	$(GLE) -d pdf -o $*.pdf font-table.gle $*
+
+extrafonts.tex:
+	../../build/bin/glebtool -latexdef extrafonts.tex extrafonts $(HAVE_EXTRA_FONTS)
+
+clean:
+	rm -f *.pdf extrafonts.tex
+

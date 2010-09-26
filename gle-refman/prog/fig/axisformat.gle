@@ -1,0 +1,73 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+size 13.5 7
+
+include "../../script/manual.gle"
+
+manual_graph_mode
+
+set hei 0.29
+
+sub demo_axis x0 x1 dt fmt1$ fmt2$ opt$
+   set just lc
+   local xp = xpos()
+   begin box round 0.1 add 0.1
+      write fmt2$
+   end box
+   amove xp+4.5 ypos()
+   set alabelscale 0.9
+   begin graph
+      size 8 1
+      fullsize
+      yaxis off
+      x2axis off
+      xaxis min x0 max x1 dticks dt \expr{opt$} format "\expr{fmt1$}"
+   end graph
+end sub
+
+dy = 1; oy = 0.5
+
+amove 0.2 0*dy+oy; demo_axis   -1    1  1/4  "fix 2"                        "fix 2"                            ""
+amove 0.2 1*dy+oy; demo_axis   -1    1  1/4  "frac"                         "frac"                             ""
+amove 0.2 2*dy+oy; demo_axis    0 2*pi  pi/2 "pi"                           "pi"                               ""
+amove 0.2 3*dy+oy; demo_axis 1e-6  1e6  2    "sci 0 10 expdigits 2 expsign" "sci 0 10 expdigits 2 expsign"     "log"
+amove 0.2 4*dy+oy; demo_axis 1e-6  1e6  2    "eng 3 append $\Omega$"        "eng 3 append $\backslash{}$Omega" "log"
+amove 0.2 5*dy+oy; demo_axis 1e-6  1e6  2    "eng 3 10 num"                 "eng 3 10 num"                     "log"
+amove 0.2 6*dy+oy; demo_axis    0 2000  500  "eng 3 append g"               "eng 3 append g"                   ""
+

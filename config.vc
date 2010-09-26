@@ -1,0 +1,101 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+#
+# config.vc for windows machines using vs.net and nmake
+#
+# include the global config file
+#
+!include config.i
+
+#
+# other global defines
+#
+PROJECT_BINDIR 	= ..\..\build
+PROJECT_LIBDIR 	= ..\..\lib
+PROJECT_INCDIR 	= ..\..\include
+INSTALL_DIR     =c:\\program files\\gle
+EXE_SUFF	=.exe
+OBJ_SUFF	=obj
+CC		=cl
+AR		=link
+RM		=erase
+RMDIR		=rmdir
+MKDIR		=mkdir
+PATH_SEP	=^\
+
+EXTRA_DEFS		=-D __WIN32__
+EXTRA_INCLUDE_PATHS	=-I$(BOOSTDIR)
+EXTRA_LIB_PATHS		=
+LIBS			=
+
+WINLIBS = advapi32.lib comctl32.lib comdlg32.lib gdi32.lib kernel32.lib odbc32.lib oldnames.lib ole32.lib oleaut32.lib rpcrt4.lib shell32.lib user32.lib uuid.lib winmm.lib winspool.lib wsock32.lib
+
+!ifdef HAVE_LIBTIFF
+EXTRA_INCLUDE_PATHS	= $(EXTRA_INCLUDE_PATHS) -I$(LIBTIFFDIR)
+EXTRA_DEFS		= $(EXTRA_DEFS) -D HAVE_LIBTIFF
+EXTRA_LIB_PATHS		= $(EXTRA_LIB_PATHS) -LIBPATH:$(LIBTIFFDIR)
+LIBS			= $(LIBS) libtiff.lib
+!endif
+
+!ifdef HAVE_LIBPNG
+EXTRA_DEFS		= $(EXTRA_DEFS) -D HAVE_LIBPNG
+EXTRA_INCLUDE_PATHS	= $(EXTRA_INCLUDE_PATHS) -I$(LIBPNGDIR) -I$(ZLIBDIR)
+EXTRA_LIB_PATHS		= $(EXTRA_LIB_PATHS) -LIBPATH:$(LIBPNGDIR) -LIBPATH:$(ZLIBDIR)
+LIBS			= $(LIBS) libpng.lib zlib.lib
+!endif
+
+!ifdef HAVE_LIBJPEG
+EXTRA_DEFS		= $(EXTRA_DEFS) -D __JPEG__
+EXTRA_INCLUDE_PATHS	= $(EXTRA_INCLUDE_PATHS) -I$(LIBJPEGDIR)
+EXTRA_LIB_PATHS		= $(EXTRA_LIB_PATHS) -LIBPATH:$(LIBJPEGDIR)
+LIBS			= $(LIBS) jpeg.lib
+!endif
+
+
+# multithreaded dll link to msvcrt.dll
+# this is the default on all the libs such as zlib, libtiff and lpng
+#
+#
+
+CPPFLAGS	=/nologo /MD /EHsc /Ox -I$(GLOBAL_INCDIR) -I$(PROJECT_INCDIR) $(EXTRA_INCLUDE_PATHS) $(VERSION_INFO) $(EXTRA_DEFS) -DINSTALL_DIR="\"$(INSTALL_DIR)\""
+LINKFLAGS	=/nologo -LIBPATH:$(GLOBAL_LIBDIR) $(EXTRA_LIB_PATHS)
+
+# for win32
+LIBS= $(LIBS) $(WINLIBS)
+
+

@@ -1,0 +1,112 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+12,rm,"Roman"
+12,rmb,"Roman Bold"
+12,rmi,"Roman Italic"
+12,ss,"San Serif"
+12,ssb,"San Serif Bold"
+12,ssi,"San Serif Italic"
+12,tt,"Typewriter"
+12,ttb,"Typewriter Bold"
+12,tti,"Typewriter Italic"
+12,texcmb,"\TeX Computer Modern Bold"
+12,texcmex,"\TeX Computer Modern Extensible"
+12,texcmitt,"\TeX Computer Modern Italic Typewriter"
+12,texcmmi,"\TeX Computer Modern Maths Italic"
+12,texcmr,"\TeX Computer Modern Roman"
+12,texcmss,"\TeX Computer Modern Sans Serif"
+12,texcmssb,"\TeX Computer Modern Sans Serif Bold"
+12,texcmssi,"\TeX Computer Modern Sans Serif Italic"
+12,texcmsy,"\TeX Computer Modern Symbol"
+12,texcmti,"\TeX Computer Modern Text Italic"
+12,texcmtt,"\TeX Computer Modern Typewriter Text"
+12,plba,"Plotter Block Ascii"
+12,plcc,"Plotter Complex Cartographic"
+12,plcg,"Plotter Complex Greek"
+12,plci,"Plotter Complex Italic"
+12,plcr,"Plotter Complex Roman"
+12,plcs,"Plotter Complex Script"
+12,pldr,"Plotter Duplex Roman"
+12,plge,"Plotter Gothic English"
+12,plgg,"Plotter Gothic German"
+12,plgi,"Plotter Gothic Italian"
+12,plsa,"Plotter Simplex Ascii"
+12,plsg,"Plotter Simplex Greek"
+12,plsr,"Plotter Simplex Roman"
+12,plss,"Plotter Simplex Script"
+14,plsym1,"Plotter Symbols one"
+14,plsym2,"Plotter Symbols two"
+12,plti,"Plotter Triplex Italic"
+12,pltr,"Plotter Triplex Roman"
+12,psagb,"PostScript AvantGarde-Book"
+12,psagbo,"PostScript AvantGarde-BookOblique"
+12,psagd,"PostScript AvantGarde-Demi"
+12,psagdo,"PostScript AvantGarde-DemiOblique"
+12,psbd,"PostScript Bookman-Demi"
+12,psbdi,"PostScript Bookman-DemiItalic"
+12,psbli,"PostScript Bookman-LightItalic"
+12,psc,"PostScript Courier"
+12,pscb,"PostScript Courier-Bold"
+12,pscbo,"PostScript Courier-BoldOblique"
+12,psco,"PostScript Courier-Oblique"
+12,psh,"PostScript Helvetica"
+12,pshb,"PostScript Helvetica-Bold"
+12,pshbo,"PostScript Helvetica-BoldOblique"
+12,psho,"PostScript Helvetica-Oblique"
+12,pshc,"PostScript Helvetica-Condensed"
+12,pshcb,"PostScript Helvetica-Condensed-Bold"
+12,pshcdo,"PostScript Helvetica-Condensed-BoldOblique"
+12,pshn,"PostScript Helvetica-Narrow"
+12,pshnb,"PostScript Helvetica-Narrow-Bold"
+12,pshnbo,"PostScript Helvetica-Narrow-BoldOblique"
+12,pshno,"PostScript Helvetica-NarrowOblique"
+12,psncsb,"PostScript NewCenturySchlbk-Bold"
+12,psncsbi,"PostScript NewCenturySchlbk-BoldItalic"
+12,psncsi,"PostScript NewCenturySchlbk-Italic"
+12,psncsr,"PostScript NewCenturySchlbk-Roman"
+12,pspb,"PostScript Palatino-Bold"
+12,pspbi,"PostScript Palatino-BoldItalic"
+12,pspi,"PostScript Palatino-Italic"
+12,pspr,"PostScript Palatino-Roman"
+14,pssym,"PostScript Symbol"
+12,pstb,"PostScript Times-Bold"
+12,pstbi,"PostScript Times-BoldItalic"
+12,psti,"PostScript Times-Italic"
+12,pstr,"PostScript Times-Roman"
+12,pszcmi,"PostScript ZapfChancery-MediumItalic"
+12,pszd,"PostScript ZapfDingbats"

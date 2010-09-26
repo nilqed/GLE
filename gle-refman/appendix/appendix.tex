@@ -1,0 +1,184 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix                                                        
+\chapter{Tables}
+\section{Markers}
+\index{markers}
+\mbox{\input{primitives/fig/gc_marker.inc}}
+
+\section{Functions and Variables}
+\index{functions}
+\label{fct:sec}
+
+\begin{supertabular}{ll} \hline
+Function name     & Returns \ldots \\ \hline
+{\tt abs(exp)} \index{abs()}         	& absolute value of  expression \\
+{\tt acos(exp)} \index{acos()}       	& arccosine \\
+{\tt acosh(exp)} \index{acosh()}     	& inverse hyperbolic cosine \\
+{\tt acot(exp)} \index{acot()}       	& 1/atan(exp) \\
+{\tt acoth(exp)} \index{acoth()}     	& 1/atanh(exp) \\
+{\tt acsc(exp)} \index{acsc()}	     	& 1/asin(exp) \\
+{\tt acsch(exp)} \index{acsch()}     	& 1/asinh(exp) \\
+{\tt arg(i)} \index{arg()}       	& i-th command line argument \\
+{\tt arg\$(i)} \index{arg()}       	& i-th command line argument \\
+{\tt asec(exp)} \index{asec()}       	& 1/acos(exp) \\
+{\tt asech(exp)} \index{asech()}     	& 1/acosh(exp) \\
+{\tt asin(exp)} \index{asin()}       	& arcsine \\
+{\tt asinh(exp)} \index{asinh()}     	& inverse hyperbolic sine \\
+{\tt atan(exp)} \index{atan()}       	& arctan \\
+{\tt atanh(exp)} \index{atanh()}     	& inverse hyperbolic tangent \\
+{\tt atn(exp)} \index{atn()}         	& same as ATAN(exp) \\
+{\tt cos(exp)} \index{cos()}         	& cosine \\
+{\tt cosh(exp)} \index{cosh()}       	& hyperbolic cosine \\
+{\tt cot(exp)} \index{cot()}         	& 1/tan(exp) \\
+{\tt coth(exp)} \index{coth()}       	& 1/tanh(exp) \\
+{\tt csc()} \index{csc()}            	& 1/sin(exp) \\
+{\tt csch(exp)} \index{csch()}       	& 1/sinh(exp) \\
+{\tt dataxvalue(ds,i)} \index{dataxvalue} & $x$-value of $i$-th point in ds (p.~\pageref{dataxvalue})\\
+{\tt datayvalue(ds,i)} \index{datayvalue} & $y$-value of $i$-th point in ds (p.~\pageref{datayvalue})\\
+{\tt date\$()} \index{date\$()}      	& current date e.g. ``Tue Apr 09 1991'' \\
+{\tt device\$()} \index{device\$()}  	& available devices e.g. ``HARDCOPY, PS''\\
+{\tt getenv(str)} \index{getenv{}}      & returns environment variable ``str''\\
+{\tt eval(str)} \index{eval()}         	& evaluates given GLE expression \\
+{\tt exp(exp)} \index{exp()}         	& exponent \\
+{\tt $\backslash{}$expr(exp)} \index{$\backslash{}$expr(exp)} & substitute result of evaluating ``exp'' \\
+{\tt file\$()} \index{file\$()}         & returns GLE file name (without extension) \\
+{\tt fix(exp)} \index{fix()}         	& {\tt exp} rounded towards 0 \\
+{\tt format\$(exp,format)} \index{format\$()} & format {\tt exp} as specified in {\tt format} (p.~\pageref{formatnum:pg})\\
+{\tt height(name\$)} \index{height()} 	& the height of the object {\tt name\$} \\
+{\tt int(exp)} \index{int()}         	& integer part of {\tt exp} \\
+{\tt left\$(str\$,exp)} \index{left\$()}       & left {\tt exp} characters of {\tt str\$} \\
+{\tt len(str\$)} \index{len()}       	& the length of {\tt str\$} \\
+{\tt log(exp)} \index{log()}         	& log to base $e$ of {\tt exp} \\
+{\tt log10(exp)} \index{log10()}     	& log to base 10 of {\tt exp} \\
+{\tt nargs()} \index{nargs()}       	& number of command line arguments \\
+{\tt ndata(ds)} \index{ndata}           & number of points in data set ds (p.~\pageref{ndata})\\
+{\tt not(exp)} \index{not()}         	& logical not of {\tt exp} \\
+{\tt num1\$(exp)} \index{num1\$()}   	& as above but with no spaces \\
+{\tt num\$(exp)} \index{num\$()}     	& string representation of {\tt exp} \\
+{\tt pageheight()} \index{pageheight()} & the height of the page (from size command) \\
+{\tt pagewidth()} \index{pagewidth()}	& the width of the page (from size command) \\
+{\tt path\$()} \index{path\$()}         & returns the directory where the script is located \\
+{\tt pointx(pt)} \index{pointx()}    	& the x value of named point pt \\
+{\tt pointy(pt)} \index{pointy()}    	& the y value of named point pt \\
+{\tt pos(str1\$,str2\$,exp)} \index{pos()}     & position of {\tt str2\$} in {\tt str1\$} from {\tt exp} \\
+{\tt ptx(pt)} \index{ptx()}          	& the x value of named point pt (abbreviation for pointx) \\
+{\tt pty(pt)} \index{pty()}         	& the y value of named point pt (abbreviation for pointy)\\
+{\tt rgb(red,green,blue)} \index{rgb()}  & create color given RGB values \\
+{\tt rgb255(red,green,blue)} \index{rgb255()}  & create color given RGB values \\
+{\tt right\$(str\$,exp)} \index{right\$()}     & rest of {\tt str\$} starting at {\tt exp} \\
+{\tt rnd(exp)} \index{rnd()}         	& random number between 0 and {\tt exp} \\
+{\tt sdiv(x,y)} \index{sdvi()}	     	& return x/y or 0 if y = 0 \\
+{\tt sec(exp)} \index{sec()}	     	& 1/cos(exp) \\
+{\tt sech(exp)} \index{sech()}       	& 1/cosh(exp) \\
+{\tt seg\$(str\$,exp1,exp2)} \index{seg\$()}   & {\tt str\$} from {\tt exp1} to {\tt exp2} \\
+{\tt sgn(exp)} \index{sgn()}         	& returns 1 if {\tt exp} is positive, -1 if {\tt exp} is negative \\
+{\tt sin(exp)} \index{sin()}         	& sine of {\tt exp} \\
+{\tt sinh(exp)} \index{sinh()}       	& hyperbolic sine \\
+{\tt sqr(exp)} \index{sqr()}         	& {\tt exp} squared  \\
+{\tt sqrt(exp)} \index{sqrt()}       	& square root of {\tt exp} \\
+{\tt tan(exp)} \index{tan()}         	& tangent of {\tt exp} \\	 
+{\tt tanh(exp)} \index{tanh()}       	& hyperbolic tangent \\
+{\tt tdepth(str\$)} \index{tdepth()} 	& the depth of {\tt str\$} assuming current the font, size \\
+{\tt theight(str\$)} \index{theight()}  & the height of {\tt str\$} assuming  current font, size \\
+{\tt time\$()} \index{time\$()}      	& current time e.g. ``11:44:27'' \\
+{\tt todeg(exp)} \index{todeg()}     	& convert from radians to degrees \\
+{\tt torad(exp)} \index{torad()}     	& convert from degrees to radians \\
+{\tt twidth(str\$)} \index{twidth()} 	& the width of {\tt str\$} assuming current font, size \\
+{\tt val(str\$)} \index{val()}       	& value of the string {\tt str\$} \\
+{\tt width(name\$)} \index{width()} 	& the width of the object {\tt name\$} \\
+{\tt xbar(x,i)} \index{xbar()}        	& the absolute x coordinate of the i-th bar at point x on the graph \\
+{\tt xend()} \index{xend()}          	& the x end point of a text string when drawn \\
+{\tt xg(xexp)} \index{xg()}             & converts units of last graph to abs cm. \\
+{\tt xpos()} \index{xpos()}          	& the current x point \\
+{\tt xy2angle(dx,dy)} \index{xy2angle()}& convert rectangular coordinates to polar angle (in degrees)\\
+{\tt yend()} \index{yend()}          	& the y end point of a text string when drawn \\
+{\tt yg(yexp)} \index{yg()}             & converts units of last graph to abs cm. \\
+{\tt ypos()} \index{ypos()}          	& the current y point \\
+\end{supertabular}
+
+\begin{supertabular}{ll} \hline
+Variable name     & Returns \ldots \\ \hline
+{\tt pi} \index{pi} & 3.14... \\
+{\tt xgmin} \index{xgmin} & the minimum x-coordinate of the graph \\
+{\tt xgmax} \index{xgmax} & the maximum x-coordinate of the graph \\
+{\tt xg2min} \index{xg2min} & the minimum x2-coordinate of the graph \\
+{\tt xg2max} \index{xg2max} & the maximum x2-coordinate of the graph \\
+{\tt ygmin} \index{ygmin} & the minimum y-coordinate of the graph \\
+{\tt ygmax} \index{ygmax} & the maximum y-coordinate of the graph \\
+{\tt yg2min} \index{yg2min} & the minimum y2-coordinate of the graph \\
+{\tt yg2max} \index{yg2max} & the maximum y2-coordinate of the graph \\
+\end{supertabular}
+
+\input{appendix/sym}
+\newpage
+
+\section{Installing GLE}
+\label{install:app}
+
+\section{Fonts}
+
+\index{fonts} \index{font-examples}
+\resizebox{!}{22cm}{\includegraphics{appendix/fig/ap_fonts}}
+\newpage
+
+%%
+% \clearpage
+% \input{appendix/sm_single}
+%%
+% \clearpage
+% \input{appendix/sm_stack2}
+%
+% \clearpage
+% \input{appendix/sm_stack4b}
+%%
+% \clearpage
+% \input{appendix/sm_stack1}
+%%
+% \clearpage
+% \input{appendix/sm_loop}
+%%
+% \clearpage
+% \input{appendix/sm_join}
+%%
+% \clearpage
+% \input{appendix/sm_clip}
+%%
+%%\cleardoublepage
+

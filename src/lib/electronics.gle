@@ -1,0 +1,1340 @@
+! Electronic Circuit diagrams with GLE
+! Author: A. S. Budden <abudden@NOSPAMgataki.co.uk>
+
+! Date:	 17th August 2007
+! Version: 1.3
+
+! Copyright:	 Copyright (C) 2005 A. S. Budden
+!					 Permission is hereby granted to use and distribute this code,
+!					 with or without modifications, provided that this copyright
+!					 notice is copied with it. Like anything else that's free,
+!					 electronics.gle is provided *as is* and comes with no warranty
+!					 of any kind, either expressed or implied. By using this
+!					 plugin, you agree that in no event will the copyright
+!					 holder be liable for any damages resulting from the use
+!					 of this software.
+
+! Documentation ** gle_electronics.pdf **
+
+! A simple function to draw a grid for reference
+sub drawgrid gridscale
+	default gridscale 1
+	gsave
+	set lwidth 0.005
+	set lstyle 2
+	for i = 0 to pageheight()/gridscale
+		amove 0 i
+		rline pagewidth()/gridscale 0
+	next i
+
+	for i = 0 to pagewidth()/gridscale
+		amove i 0
+		rline 0 pageheight()/gridscale
+	next i
+
+	grestore
+end sub
+
+! Connection point
+sub connection
+	circle 0.1 fill black
+end sub
+
+!===================================
+! Resistors
+!===================================
+
+! Resistor base device
+sub resistor
+	gsave
+	rline 1 0
+	rline 0 0.5
+	rline 2 0
+	rline 0 -1
+	rline -2 0
+	rline 0 0.5
+	rmove 2 0
+	rline 1 0
+	grestore
+end sub
+
+! Resistor base device
+sub rresistor
+	gsave
+	rline 1 0
+	rline 0.125 0.5
+	rline 0.25 -1.0
+	rline 0.25 1.0
+	rline 0.25 -1.0
+	rline 0.25 1.0
+	rline 0.25 -1.0
+	rline 0.25 1.0
+	rline 0.25 -1.0
+	rline 0.125 0.5
+	rline 1 0
+	grestore
+end sub
+
+
+! Horizontal resistor
+sub rresistor_h rlabel$
+	gsave
+	@rresistor
+	rmove 2 0.75
+	set just BC
+	set hei 0.8
+	write rlabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Vertical resistor
+sub rresistor_v rlabel$
+	gsave
+	begin rotate -90
+		@rresistor
+	end rotate
+	rmove 0.75 -2
+	set just LC
+	set hei 0.8
+	write rlabel$
+	grestore
+	rmove 0 -4
+end sub
+
+
+! Horizontal resistor
+sub resistor_h rlabel$
+	gsave
+	@resistor
+	rmove 2 0.75
+	set just BC
+	set hei 0.8
+	write rlabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Vertical resistor
+sub resistor_v rlabel$
+	gsave
+	begin rotate -90
+		@resistor
+	end rotate
+	rmove 0.75 -2
+	set just LC
+	set hei 0.8
+	write rlabel$
+	grestore
+	rmove 0 -4
+end sub
+
+! Horizontal potentiometer
+sub potentiometer_hb rlabel$
+	gsave
+	@resistor
+	rmove 2 -2
+	rline 0 1.5 arrow end
+	rmove 0 1.5
+	set just BC
+	set hei 0.8
+	write rlabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Vertical potentiometer
+sub potentiometer_vr rlabel$
+	gsave
+	begin rotate -90
+		@resistor
+	end rotate
+	rmove 2 -2
+	rline -1.5 0 arrow end
+	rmove -1.5 0
+	set just RC
+	set hei 0.8
+	write rlabel$
+	grestore
+	rmove 0 -4
+end sub
+
+! Horizontal variable resistor
+sub vresistor_h rlabel$
+	gsave
+	@resistor
+	rmove 1 -1
+	rline 2 2 arrow end
+	rmove -1 0
+	set just BC
+	set hei 0.8
+	write rlabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Vertical Variable resistor
+sub vresistor_v rlabel$
+	gsave
+	begin rotate -90
+		@resistor
+	end rotate
+	rmove -1 -3
+	rline 2 2 arrow end
+	rmove 0 -1
+	set just LC
+	set hei 0.8
+	write rlabel$
+	grestore
+	rmove 0 -4
+end sub
+
+!===================================
+! Transistors
+!===================================
+
+! BJT Base
+sub bjt leg direction
+	gsave
+	rline 1 0
+	rmove 0 1
+	rline 0 -2
+	rmove 0 0.5
+	if leg = 1 then
+		if direction = 1 then
+			rline 1 -0.5 arrow end
+		else
+			rline 1 -0.5 arrow start
+		end if
+		rmove -1 1.5
+		rline 1 0.5
+	else
+		rline 1 -0.5
+		rmove -1 1.5
+		if direction = 1 then
+			rline 1 0.5 arrow end
+		else
+			rline 1 0.5 arrow start
+		end if
+	end if
+	grestore
+end sub
+
+! NPN BJT
+sub npn_bjt bjtlabel$
+	gsave
+	bjt 1 1
+	rmove 2 0
+	set just LC
+	set hei 0.8
+	write bjtlabel$
+	grestore
+end sub
+
+! PNP BJT
+sub pnp_bjt bjtlabel$
+	gsave
+	bjt 0 0
+	rmove 2 0
+	set just LC
+	set hei 0.8
+	write bjtlabel$
+	grestore
+end sub
+
+! Base MOSFET
+sub mosfet channel
+	! 0 is N channel, 1 is P channel
+	gsave
+	rline 1 0
+	rmove 0 1
+	rline 0 -2
+	rmove 0.25 0
+	rline 0 2/4
+	rmove 0 1/4
+	rline 0 2/4
+	rmove 0 1/4
+	rline 0 2/4
+	rmove 0 -1/4
+	rline 0.75 0
+	rline 0 1/4
+	rmove 0 -2
+	rline 0 1/4
+	rline -0.75 0
+	rmove 0.75 0
+	@connection
+	rline 0 3/4
+	if channel = 0 then
+		rline -0.75 0 arrow end
+	else
+		rline -0.75 0 arrow start
+	end if
+	grestore
+end sub
+
+! N-Channel MOSFET
+sub n_mosfet mlabel$
+	gsave
+	mosfet 0
+	rmove 2.5 0
+	set hei 0.8
+	set just LC
+	write mlabel$
+	grestore
+end sub
+
+! P-Channel MOSFET
+sub p_mosfet mlabel$
+	gsave
+	mosfet 1
+	rmove 2.5 0
+	set hei 0.8
+	set just LC
+	write mlabel$
+	grestore
+end sub
+
+! IGBT
+sub igbt igbtlabel$
+	gsave
+	rline 0.75 0
+	rline 0 0.75
+	rmove 0 -0.75
+	rline 0 -0.75
+	rmove 0.25 0.75
+	rline 0 1
+	rmove 0 -1
+	rline 0 -1
+	rmove 0 0.5
+	rline 1 -0.5 arrow end
+	rmove -1 1.5
+	rline 1 0.5
+	rmove 0 -1
+	set hei 0.8
+	set just LC
+	write igbtlabel$
+	grestore
+end sub
+
+!===================================
+! Inductors
+!===================================
+
+! Single coil
+sub coil
+	gsave
+	rmove 0.25 0
+	arc 0.25 0 180
+	grestore
+	rmove 0.5 0
+end sub
+
+! Single double size coil
+sub large_coil dot
+	gsave
+	rmove 0.5 0
+	arc 0.5 0 180
+	if dot = 1 then
+		circle 0.1 fill black
+	end if
+	grestore
+	rmove 1 0
+end sub
+
+! Base inductor
+sub inductor core
+	gsave
+	rline 1 0
+	for i = 1 to 4
+		@coil
+	next i
+	rline 1 0
+	if core = 1 then
+		rmove -1 0.5
+		rline -2 0
+		rmove 0 0.2
+		rline 2 0
+	end if
+	grestore
+end sub
+
+sub large_inductor dot_position
+	gsave
+	if dot_position = 1 then ! Dot at start
+		@large_coil 1
+	else
+		@large_coil 0
+	end if
+	@large_coil 0
+	@large_coil 0
+	if dot_position = 2 then ! Dot at end
+		@large_coil 1
+	else
+		@large_coil 0
+	end if
+	grestore
+end sub
+
+! Horizontal Inductor
+sub inductor_h core ilabel$
+	gsave
+	@inductor core
+	if core = 1 then
+		rmove 2 1
+	else
+		rmove 2 0.5
+	end if
+	set hei 0.8
+	set just BC
+	write ilabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Vertical Inductor
+sub inductor_v core ilabel$
+	gsave
+	begin rotate -90
+		@inductor core
+	end rotate
+	if core = 1 then
+		rmove 1 -2
+	else
+		rmove 0.5 -2
+	end if
+	set hei 0.8
+	set just LC
+	write ilabel$
+	grestore
+	rmove 0 -4
+end sub
+
+! Transformer Base
+sub xformer core type n1$ n2$
+	gsave
+	! Select type
+	! 0: no dots
+	! 1: no invert
+	! 2: invert
+	if type = 0 then
+		leftdot = 0
+		rightdot = 0
+	end if
+	if type = 1 then
+		leftdot = 1
+		rightdot = 2
+	end if
+	if type = 2 then
+		leftdot = 1
+		rightdot = 1
+	end if
+	begin rotate -90
+		@large_inductor leftdot
+	end rotate
+	rmove 2 -4
+	begin rotate 90
+		@large_inductor rightdot
+	end rotate
+	if core = 1 then
+		rmove -1.2 0
+		rline 0 4
+		rmove 0.4 0
+		rline 0 -4
+	end if
+	grestore
+
+	! Number of turns
+	gsave
+	rmove 0.25 0.25
+!	rmove 0.5 0.5
+	set just BC
+	set hei 0.5
+	write n1$
+	rmove 1.5 0
+	write n2$
+	grestore
+end sub
+
+! Transformer with a double secondary
+sub xformer_dblsecondary type location
+	gsave
+	! Select type (as xformer)
+	if type = 0 then
+		leftdot = 0
+		rightdot = 0
+	end if
+	if type = 1 then
+		leftdot = 1
+		rightdot = 2
+	end if
+	if type = 2 then
+		leftdot = 1
+		rightdot = 1
+	end if
+	begin rotate -90
+		@large_inductor leftdot
+	end rotate
+
+	! If location = 0, then balance
+	! If location = 1, then draw above
+	! If location = 2, then draw below
+	if location = 0 then
+		rmove 2 -1
+	end if
+	if location = 1 then
+		rmove 2 2
+	end if
+	if location = 2 then
+		rmove 2 -4
+	end if
+
+	! We are now at the bottom of the top coil
+	begin rotate 90
+		@large_inductor rightdot
+	end rotate
+	rmove 0 -6
+	begin rotate 90
+		@large_inductor rightdot
+	end rotate
+	rmove -1.2 0
+	rline 0 10
+	rmove 0.4 0
+	rline 0 -10
+	grestore
+end sub
+
+
+
+
+!===================================
+! Capacitors
+!===================================
+
+! Base capacitor
+sub capacitor
+	gsave
+	rline 1.75 0
+	rline 0 1
+	rmove 0 -2
+	rline 0 1
+	rmove 0.5 0
+	rline 0 1
+	rmove 0 -2
+	rline 0 1
+	rline 1.75 0
+	grestore
+end sub
+
+! Base polarised capacitor
+sub p_capacitor polarity
+	! Polarity gives location of + side
+	! polarity = 0: on left (and therefore top)
+	! polarity = 1: on right
+	gsave
+	rline 1.5+1/8 0
+	rmove 0 -1
+	if polarity = 1 then
+		box 0.25 2 fill black
+	else
+		box 0.25 2
+	end if
+	rmove 0.5 0
+	if polarity = 1 then
+		box 0.25 2
+	else
+		box 0.25 2 fill black
+	end if
+	rmove 0.25 1
+	rline 1.5+1/8 0
+	grestore
+end sub
+
+! Horizontal L Polarised Capacitor
+sub p_capacitor_hl clabel$
+	gsave
+	@p_capacitor 0
+	rmove 1 0.75
+	rline 0.5 0
+	rmove -0.25 -0.25
+	rline 0 0.5
+	rmove -1.25 -1
+
+	rmove 2 1.25
+	set hei 0.8
+	set just BC
+	write clabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Horizontal R Polarised Capacitor
+sub p_capacitor_hr clabel$
+	gsave
+	@p_capacitor 1
+	rmove 2.75 0.75
+	rline 0.5 0
+	rmove -0.25 -0.25
+	rline 0 0.5
+	rmove -3 -1
+
+	rmove 2 1.25
+	set hei 0.8
+	set just BC
+	write clabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Vertical Top Polarised Capacitor
+sub p_capacitor_vt clabel$
+	gsave
+	begin rotate -90
+		@p_capacitor 0
+	end rotate
+	rmove -1 -1.25
+	rline 0.5 0
+	rmove -0.25 -0.25
+	rline 0 0.5
+	rmove 0.75 1
+
+	rmove 1.25 -2
+	set hei 0.8
+	set just LC
+	write clabel$
+	grestore
+	rmove 0 -4
+end sub
+
+
+! Vertical Bottom Polarised Capacitor
+sub p_capacitor_vb clabel$
+	gsave
+	begin rotate -90
+		@p_capacitor 1
+	end rotate
+	rmove -1 -3
+	rline 0.5 0
+	rmove -0.25 -0.25
+	rline 0 0.5
+	rmove 0.75 2.75
+
+	rmove 1.25 -2
+	set hei 0.8
+	set just LC
+	write clabel$
+	grestore
+	rmove 0 -4
+end sub
+
+
+
+! Horizontal capacitor
+sub capacitor_h clabel$
+	gsave
+	@capacitor
+	rmove 2 1.25
+	set hei 0.8
+	set just BC
+	write clabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Vertical capacitor
+sub capacitor_v clabel$
+	gsave
+	begin rotate -90
+		@capacitor
+	end rotate
+	rmove 1.25 -2
+	set hei 0.8
+	set just LC
+	write clabel$
+	grestore
+	rmove 0 -4
+end sub
+
+! Horizontal varicap
+sub vcapacitor_h clabel$
+	gsave
+	@capacitor
+	rmove 1 -1
+	rline 2 2 arrow end
+	rmove -3 -1
+	rmove 2 1.25
+	set hei 0.8
+	set just BC
+	write clabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Vertical varicap
+sub vcapacitor_v clabel$
+	gsave
+	begin rotate -90
+		@capacitor
+	end rotate
+	rmove -1 -3
+	rline 2 2 arrow end
+	rmove -1 1
+	rmove 1.25 -2
+	set hei 0.8
+	set just LC
+	write clabel$
+	grestore
+	rmove 0 -4
+end sub
+
+!===================================
+! Crystals
+!===================================
+sub crystal
+	crystalgap = 0.25
+	crystalboxw = 0.5
+	crystalleglength = (4-(crystalgap*2 + crystalboxw))/2
+	rline crystalleglength 0
+	rmove 0 1
+	rline 0 -2
+	rmove crystalgap 0
+	box crystalboxw 2
+	rmove crystalboxw+crystalgap 0
+	rline 0 2
+	rmove 0 -1
+	rline crystalleglength 0
+end sub
+
+sub crystal_h label$
+	@crystal
+	gsave
+	rmove -2 1.2
+	set just BC
+	set hei 0.8
+	write label$
+	grestore
+end sub
+
+sub crystal_v label$
+	gsave
+	gsave
+	begin rotate -90
+		@crystal
+	end rotate
+	grestore
+	rmove 1.2 -2
+	set just LC
+	set hei 0.8
+	write label$
+	grestore
+	rmove 0 -4
+end sub
+
+
+!===================================
+! Diodes
+!===================================
+
+DIODE_NORMAL = 0
+DIODE_SCHOTTKY = 1
+DIODE_ZENER = 2
+DIODE_THYRISTOR = 3
+
+! Base diode
+sub diode type
+	default type DIODE_NORMAL
+	gsave
+	rline 1.5 0
+	rline 0 0.5
+	rline 1 -0.5
+	rline -1 -0.5
+	rline 0 0.5
+	rmove 1 -0.5
+	rline 0 1
+	rmove 0 -0.5
+	gsave
+	if type = DIODE_SCHOTTKY then
+		schottky_depth = 0.15
+		schottky_width = 0.25
+		gsave
+		rmove 0 0.5
+		rline schottky_depth 0
+		rline 0 -schottky_width
+		grestore
+		rmove 0 -0.5
+		rline -schottky_depth 0
+		rline 0 schottky_width
+	else if type = DIODE_ZENER then
+		zener_depth = 0.15
+		gsave
+		rmove 0 0.5
+		rline zener_depth 0
+		grestore
+		rmove 0 -0.5
+		rline -zener_depth 0
+	else if type = DIODE_THYRISTOR then
+		rline 0.5 -0.5
+		rline 0 -0.5
+	end if
+	grestore
+	rline 1.5 0
+	grestore
+end sub
+
+! Horizontal right-facing Diode
+sub diode_hr dlabel$ type
+	default type DIODE_NORMAL
+	gsave
+	@diode type
+	rmove 2 1
+	set hei 0.8
+	set just BC
+	write dlabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Horizontal left-facing Diode
+sub diode_hl dlabel$ type
+	default type DIODE_NORMAL
+	gsave
+	rmove 4 0
+	begin rotate 180
+		@diode type
+	end rotate
+	rmove -2 1
+	set hei 0.8
+	set just BC
+	write dlabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Vertical downward Diode
+sub diode_vd dlabel$ type
+	default type DIODE_NORMAL
+	gsave
+	begin rotate -90
+		@diode type
+	end rotate
+	rmove 1 -2
+	set hei 0.8
+	set just LC
+	write dlabel$
+	grestore
+	rmove 0 -4
+end sub
+
+! Vertical upward Diode
+sub diode_vu dlabel$ type
+	default type DIODE_NORMAL
+	gsave
+	rmove 0 -4
+	begin rotate 90
+		@diode type
+	end rotate
+	rmove 1 2
+	set hei 0.8
+	set just LC
+	write dlabel$
+	grestore
+	rmove 0 -4
+end sub
+
+! Vertical downward LED
+sub led_vd label$
+	@diode_vd label$ DIODE_NORMAL
+	gsave
+	arroffset = 0.15
+	set arrowsize 0.3
+	set arrowangle 20
+	!	rmove 0.65 1.85
+	rmove 0.6 1.75
+	rmove 0 arroffset
+	rline 0.5 -0.5 arrow end
+
+	rmove 0 -2*arroffset
+	rline -0.5 0.5 arrow start
+	grestore
+end sub
+
+
+sub bridge_rectifier blabel$
+	gsave
+	d_offset = (3 - sqrt(8)) / 2
+	d_length = sqrt(8)
+	@connection
+	rline d_offset d_offset
+	begin rotate 45
+		@diode DIODE_NORMAL
+	end rotate
+	rmove d_length d_length
+	rline d_offset d_offset
+	@connection
+	rline d_offset -d_offset
+	begin rotate -45
+		@diode DIODE_NORMAL
+	end rotate
+	rmove d_length -d_length
+	rline d_offset -d_offset
+	@connection
+	rmove -6 0
+	rline d_offset -d_offset
+	begin rotate -45
+		@diode DIODE_NORMAL
+	end rotate
+	rmove d_length -d_length
+	rline d_offset -d_offset
+	@connection
+	rline d_offset d_offset
+	begin rotate 45
+		@diode DIODE_NORMAL
+	end rotate
+	rmove d_length d_length
+	rline d_offset d_offset
+	rmove -3 0
+	set hei 0.8
+	set just CC
+	write blabel$
+	grestore
+end sub
+
+! Opto Isolator
+sub optocoupler optolabel$
+	@diode_vd "" DIODE_NORMAL
+	gsave
+	rmove 3 0
+	rline 0 1
+	rline -1 0.5 arrow start
+	rmove 0 -0.5
+	rline 0 2
+	rmove 0 -0.5
+	rline 1 0.5
+	rline 0 1
+	set just LC
+	rmove 0 -2
+	set hei 0.8
+	write optolabel$
+	optoarrowoffset = 0.25
+	optoarrowlength = 1
+	set arrowsize 0.4
+	set arrowangle 20
+	rmove -1.2 optoarrowoffset
+	rline -optoarrowlength 0 arrow start
+	rmove 0 -optoarrowoffset*2
+	rline optoarrowlength 0 arrow end
+	grestore
+end sub
+
+
+! Need to add triacs, thyristors etc
+
+!===================================
+! Op-amps
+!===================================
+sub opamp supply ulabel$
+	gsave
+	rline 1 0
+	rline 0 1
+	rline 3 -2
+	rline -3 -2
+	rline 0 1
+	rline -1 0
+	rmove 1 0
+	rline 0 2
+	! Draw the "-"
+	rmove 0.2 0
+	rline 0.5 0
+
+	! Draw the "+"
+	rmove -0.5 -2
+	rline 0.5 0
+	rmove -0.25 -0.25
+	rline 0 0.5
+	rmove -0.25 -0.25
+	rmove 2.8 1
+	rline 1 0
+	rmove -3 0
+	set just CC
+	set hei 0.8
+	write ulabel$
+	if supply = 1 then
+		rmove 2 0
+		rmove -2 4/3
+		rline 0 2/3
+		rmove 0 -4
+		rline 0 2/3
+	end if
+	grestore
+end sub
+
+!===================================
+! Power supplies etc
+!===================================
+
+! Ground
+sub ground
+	gsave
+	rline 0 -1
+	rmove -0.75 0
+	rline 1.5 0
+	rmove -0.25 -0.25
+	rline -1 0
+	rmove 0.25 -0.25
+	rline 0.5 0
+	grestore
+end sub
+
+! Power connection
+sub power label$
+	gsave
+	rline 0 1
+	rline -0.25 -0.25
+	rmove 0.5 0
+	rline -0.25 0.25
+	rmove 0.1 0.1
+	set just BL
+	write label$
+	grestore
+end sub
+
+sub supply_centre type
+	if type = 1 then
+		! Supply with voltage
+		rmove 0 -0.6
+		rline 0 1.2 arrow end
+		rmove 0 -0.6
+	end if
+	if type = 2 then
+		! +/- Supply
+		rmove 0 0.5
+		rline 0.25 0
+		rmove -0.25 0
+		rline -0.25 0
+		rmove 0.25 0
+		rline 0 0.25
+		rmove 0 -0.25
+		rline 0 -0.25
+		rmove 0 0.25
+
+		rmove 0 -1
+		rmove -0.25 0
+		rline 0.5 0
+		rmove -0.25 0.5
+	end if
+	if type = 3 then
+		! Sine source
+		rmove -0.5 0
+		rbezier 0.25 0.5 0.25 0.5 0.5 0
+		rbezier 0.25 -0.5 0.25 -0.5 0.5 0
+		rmove -0.5 0
+	end if
+end sub
+
+! Horizontal Power supply
+sub supply_h type
+	! Type gives central drawing
+	! 0: Nothing
+	! 1: Voltage Arrow
+	! 2: +/-
+	! 3: Crude Sinusoid
+	gsave
+	rline 1 0
+	rmove 1 0
+	circle 1
+	begin rotate -90
+		@supply_centre type
+	end rotate
+	rmove 1 0
+	rline 1 0
+	grestore
+	rmove 4 0
+end sub
+
+! Vertical Power supply (probably more usual)
+sub supply_v type
+	! Type gives central drawing
+	! 0: Nothing
+	! 1: Voltage Arrow
+	! 2: +/-
+	! 3: Crude Sinusoid
+	gsave
+	rline 0 -1
+	rmove 0 -1
+	circle 1
+	@supply_centre type
+	rmove 0 -1
+	rline 0 -1
+	grestore
+	rmove 0 -4
+end sub
+
+!===================================
+! Cells
+!===================================
+
+! Base cell
+sub cell
+	gsave
+	rline 1.8 0
+	rmove 0 -1
+	rline 0 2
+	rmove 0.4 -1
+	gsave
+	set lwidth 0.2
+	rmove 0 -0.5
+	rline 0 1
+	rmove 0 -0.5
+	grestore
+!	set lwidth 0.02
+	rline 1.8 0
+	grestore
+end sub
+
+! Horizontal cell (perhaps should have hr & hl?)
+sub cell_h elabel$
+	gsave
+	@cell
+	rmove 2 1.25
+	set just BC
+	set hei 0.8
+	write elabel$
+	grestore
+	rmove 4 0
+end sub
+
+! Vertical cell
+sub cell_v elabel$
+	gsave
+	begin rotate -90
+		@cell
+	end rotate
+	rmove 1.25 -2
+	set just LC
+	set hei 0.8
+	write elabel$
+	grestore
+	rmove 0 -4
+end sub
+
+!===================================
+! Logic Gates
+!===================================
+
+! Left side of gate (for and/nand)
+sub and_left_gate
+	gsave
+	rmove 0 1
+	rline 1 0
+	rmove 0 1
+	rline 0 -4
+	rmove 0 1
+	rline -1 0
+	grestore
+end sub
+
+! Left side of gate (for not/buffer)
+sub not_left_gate
+	gsave
+	rline 1 0
+	rmove 0 -2
+	rline 0 4
+	grestore
+end sub
+
+! Curved left gate (for OR)
+sub or_left_gate
+	gsave
+	! Draw the connection lines
+	linelength = 1.59
+	rmove 0 -1
+	rline linelength 0
+	rmove 0 2
+	rline -linelength 0
+	rmove 1 1
+
+	! Draw the curve
+	cx = xpos()
+	cy = ypos()
+	bezier cx+1 cy-1 cx+1 cy-3 cx cy-4
+	grestore
+end sub
+
+! Double Curved left gate (for XOR)
+sub xor_left_gate
+	gsave
+	! Draw the connection lines
+	linelength = 1.09
+	rmove 0 -1
+	rline linelength 0
+	rmove 0 2
+	rline -linelength 0
+	rmove 1 1
+
+	! Draw the curves
+	for i = 0 to 0.5 step 0.5
+		rmove -i 0
+		cx = xpos()
+		cy = ypos()
+		bezier cx+1 cy-1 cx+1 cy-3 cx cy-4
+		amove cx cy
+	next i
+	grestore
+end sub
+
+! Non-inverted output
+sub non_inverted_output
+	gsave
+	rmove 5 0
+	rline 1 0
+	grestore
+end sub
+
+! Inverted output
+sub inverted_output
+	gsave
+	rmove 5 0
+	invrad = 0.25
+	rmove invrad 0
+	circle invrad
+	rmove invrad 0
+	rline 1-2*invrad 0
+	grestore
+end sub
+
+! Curved edges for AND/OR
+sub curved_edges
+	gsave
+	rmove 1 2
+	cx = xpos()
+	cy = ypos()
+	! Draw the top curve
+	bezier cx+3 cy cx+4 cy-1 cx+4 cy-2
+	! Draw the bottom curve
+	cx = xpos()
+	cy = ypos()
+	bezier cx cy-1 cx-1 cy-2 cx-4 cy-2
+	grestore
+end sub
+
+! Straight edges for Buffer/Not
+sub straight_edges
+	gsave
+	rmove 1 2
+	rline 4 -2
+	rline -4 -2
+	grestore
+end sub
+
+! XOR Gate
+sub xor
+	gsave
+	rmove 0 -1
+	@xor_left_gate
+	@curved_edges
+	@non_inverted_output
+	grestore
+end sub
+
+! XNOR Gate
+sub xnor
+	gsave
+	rmove 0 -1
+	@xor_left_gate
+	@curved_edges
+	@inverted_output
+	grestore
+end sub
+
+! OR Gate
+sub or
+	gsave
+	rmove 0 -1
+	@or_left_gate
+	@curved_edges
+	@non_inverted_output
+	grestore
+end sub
+
+! NOR Gate
+sub nor
+	gsave
+	rmove 0 -1
+	@or_left_gate
+	@curved_edges
+	@inverted_output
+	grestore
+end sub
+
+! AND Gate
+sub and
+	gsave
+	rmove 0 -1
+	@and_left_gate
+	@curved_edges
+	@non_inverted_output
+	grestore
+end sub
+
+! NAND Gate
+sub nand
+	gsave
+	rmove 0 -1
+	@and_left_gate
+	@curved_edges
+	@inverted_output
+	grestore
+end sub
+
+! NOT Gate
+sub not
+	gsave
+	@not_left_gate
+	@straight_edges
+	@inverted_output
+	grestore
+	rmove 6 0
+end sub
+
+! BUFFER
+sub buffer
+	gsave
+	@not_left_gate
+	@straight_edges
+	@non_inverted_output
+	grestore
+	rmove 6 0
+end sub
+
+! Schmitt Trigger symbol
+sub schmitt
+	gsave
+	sw = 0.5
+	sh = 1
+	h = 0.5
+	rmove -(sw/2+h) sh/2
+	rline h+sw 0
+	rline 0 -sh
+	rmove h 0
+	rline -(h+sw) 0
+	rline 0 sh
+	grestore
+end sub
+
+! NAND Schmitt Trigger
+sub nand_schmitt
+	gsave
+	rmove 2.5 -1
+	@schmitt
+	grestore
+	@nand
+end sub
+
+! Inverter Schmitt Trigger
+sub not_schmitt
+	gsave
+	rmove 2.25 0
+	@schmitt
+	grestore
+	@not
+end sub
+

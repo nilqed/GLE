@@ -1,0 +1,317 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+amove 9 9 
+set hei 0.3
+set color BLACK
+set lstyle 1
+set color BLACK
+set lstyle 1
+amove 2.25333 0.642857 
+aline 2.85333 0.783363 
+amove 2.85333 0.783363 
+aline 3.45333 0.92387 
+amove 3.45333 0.92387 
+aline 4.06 1.06438 
+amove 2.25333 0.642857 
+aline 1.9 0.79754 
+amove 2.85333 0.783363 
+aline 2.50667 0.938046 
+amove 3.45333 0.92387 
+aline 3.10667 3.89544 
+amove 4.06 1.06438 
+aline 3.70667 1.21906 
+amove 1.9 0.79754 
+aline 2.5 0.9365 
+amove 2.50667 0.938046 
+aline 3.10667 3.89544 
+amove 3.10667 3.89544 
+aline 3.7 1.24879 
+amove 1.9 0.79754 
+aline 1.55333 0.952223 
+amove 2.50667 0.938046 
+aline 2.15333 2.50117 
+amove 3.10667 3.89544 
+aline 3.10667 3.89544 
+amove 3.70667 1.21906 
+aline 3.70667 1.21906 
+amove 1.55333 0.952223 
+aline 2.14667 2.48396 
+amove 2.15333 2.50117 
+aline 2.62 1.515 
+amove 1.55333 0.952223 
+aline 1.20667 1.1069 
+amove 2.15333 2.50117 
+aline 2.15333 2.50117 
+amove 1.20667 1.1069 
+aline 1.65333 1.2115 
+amove 1.20667 1.1069 
+aline 0.853333 1.26159 
+amove 1.68667 1.29994 
+aline 1.45333 1.40209 
+amove 0.853333 1.26159 
+aline 1.45333 1.40209 
+amove 1.45333 1.40209 
+aline 1.75333 1.47157 
+amove 2.55333 1.65813 
+aline 2.65333 1.68154 
+set color BLACK
+set lstyle 1
+set color BLACK
+set lstyle 1
+amove 4.06 1.06438 
+aline 3.7 1.24879 
+amove 4.06 1.06438 
+aline 4.05333 1.06283 
+amove 2.65333 1.68154 
+aline 2.54667 1.66997 
+amove 1.75333 1.47157 
+aline 1.74667 1.47003 
+amove 1.74 1.46849 
+aline 1.73333 1.46694 
+amove 1.72667 1.4654 
+aline 1.72 1.46385 
+amove 1.71333 1.46231 
+aline 1.70667 1.46077 
+amove 1.7 1.45922 
+aline 1.69333 1.45768 
+amove 0.96 1.28657 
+aline 0.953333 1.28501 
+amove 0.946667 1.28344 
+aline 0.94 1.28188 
+amove 0.933333 1.28032 
+aline 0.926667 1.27876 
+amove 0.92 1.2772 
+aline 0.913333 1.27564 
+amove 0.906667 1.27408 
+aline 0.9 1.27252 
+amove 0.893333 1.27095 
+aline 0.886667 1.26939 
+amove 0.88 1.26783 
+aline 0.873333 1.26627 
+amove 0.866667 1.26471 
+aline 0.86 1.26315 
+amove 0.853333 1.26159 
+aline 0.853333 1.26159 
+amove 0.853333 1.26158 
+aline 0.853333 1.26159 
+amove 0.853333 1.26159 
+aline 0.853333 4.07848 
+amove 0.853333 4.07848 
+aline 2.66 4.5 
+amove 2.66 1.69383 
+aline 2.66 4.5 
+amove 2.66 4.5 
+aline 4.06 3.88127 
+amove 4.06 1.06438 
+aline 4.06 3.88127 
+amove 0.857142 1.26159 
+aline 2.25611 0.642857 
+amove 2.25611 0.642857 
+aline 4.06094 1.06438 
+set just BC
+set color BLACK
+set hei 0.0833333
+set just TC
+amove 0.857142 1.26159 
+aline 0.85512 1.25701 
+amove 0.814672 1.16556 
+rotate -23.8587 
+text 1
+rotate 23.8587 
+amove 1.03201 1.18425 
+aline 1.02999 1.17967 
+amove 0.989543 1.08822 
+rotate -23.8587 
+text 1.5
+rotate 23.8587 
+amove 1.20689 1.1069 
+aline 1.20486 1.10233 
+amove 1.16441 1.01088 
+rotate -23.8587 
+text 2
+rotate 23.8587 
+amove 1.38176 1.02956 
+aline 1.37973 1.02499 
+amove 1.33929 0.933537 
+rotate -23.8587 
+text 2.5
+rotate 23.8587 
+amove 1.55663 0.952223 
+aline 1.55461 0.94765 
+amove 1.51416 0.856196 
+rotate -23.8587 
+text 3
+rotate 23.8587 
+amove 1.7315 0.874881 
+aline 1.72948 0.870308 
+amove 1.68903 0.778853 
+rotate -23.8587 
+text 3.5
+rotate 23.8587 
+amove 1.90637 0.79754 
+aline 1.90435 0.792967 
+amove 1.8639 0.701512 
+rotate -23.8587 
+text 4
+rotate 23.8587 
+amove 2.08124 0.720199 
+aline 2.07922 0.715626 
+amove 2.03877 0.624171 
+rotate -23.8587 
+text 4.5
+rotate 23.8587 
+amove 2.25611 0.642857 
+aline 2.25409 0.638284 
+amove 2.21364 0.546829 
+rotate -23.8587 
+text 5
+rotate 23.8587 
+set just TC
+set color BLACK
+set hei 0.125
+amove 1.43766 0.683239 
+rotate -23.8587 
+text Xaxis
+rotate 23.8587 
+set color BLACK
+set hei 0.0833333
+set just TC
+amove 2.25611 0.642857 
+aline 2.25725 0.637988 
+amove 2.27999 0.540608 
+rotate 13.1459 
+text 1
+rotate -13.1459 
+amove 2.55692 0.71311 
+aline 2.55805 0.708241 
+amove 2.5808 0.610862 
+rotate 13.1459 
+text 1.5
+rotate -13.1459 
+amove 2.85772 0.783363 
+aline 2.85886 0.778494 
+amove 2.8816 0.681115 
+rotate 13.1459 
+text 2
+rotate -13.1459 
+amove 3.15853 0.853617 
+aline 3.15966 0.848748 
+amove 3.18241 0.751368 
+rotate 13.1459 
+text 2.5
+rotate -13.1459 
+amove 3.45933 0.92387 
+aline 3.46047 0.919001 
+amove 3.48321 0.821622 
+rotate 13.1459 
+text 3
+rotate -13.1459 
+amove 3.76013 0.994123 
+aline 3.76127 0.989254 
+amove 3.78401 0.891874 
+rotate 13.1459 
+text 3.5
+rotate -13.1459 
+amove 4.06094 1.06438 
+aline 4.06208 1.05951 
+amove 4.08482 0.962128 
+rotate 13.1459 
+text 4
+rotate -13.1459 
+set just TC
+set color BLACK
+set hei 0.125
+amove 3.22542 0.567207 
+rotate 13.1459 
+text Yaxis
+rotate -13.1459 
+set color BLACK
+set hei 0.0833333
+set just RC
+amove 0.857142 1.26159 
+aline 0.852142 1.26159 
+amove 0.752142 1.26159 
+text 1
+amove 0.857142 1.54328 
+aline 0.852142 1.54328 
+amove 0.752142 1.54328 
+text 1.1
+amove 0.857142 1.82497 
+aline 0.852142 1.82497 
+amove 0.752142 1.82497 
+text 1.2
+amove 0.857142 2.10666 
+aline 0.852142 2.10666 
+amove 0.752142 2.10666 
+text 1.3
+amove 0.857142 2.38835 
+aline 0.852142 2.38835 
+amove 0.752142 2.38835 
+text 1.4
+amove 0.857143 2.67003 
+aline 0.852143 2.67003 
+amove 0.752143 2.67003 
+text 1.5
+amove 0.857143 2.95172 
+aline 0.852143 2.95172 
+amove 0.752143 2.95172 
+text 1.6
+amove 0.857143 3.23341 
+aline 0.852143 3.23341 
+amove 0.752143 3.23341 
+text 1.7
+amove 0.857143 3.5151 
+aline 0.852143 3.5151 
+amove 0.752143 3.5151 
+text 1.8
+amove 0.857143 3.79679 
+aline 0.852143 3.79679 
+amove 0.752143 3.79679 
+text 1.9
+amove 0.857143 4.07848 
+aline 0.852143 4.07848 
+amove 0.752143 4.07848 
+text 2
+set just BC
+set color BLACK
+set lstyle 1
+set color BLACK
+set lstyle 1
+set color BLACK
+set lstyle 1

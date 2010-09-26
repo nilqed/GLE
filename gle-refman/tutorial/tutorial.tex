@@ -1,0 +1,343 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%\def\tb{\hspace*{1cm}\sf} %% sm
+\def\tb{\hspace*{0.0cm}\sf}
+\chapter{Tutorial}
+\label{tut:chap}
+
+\section{Installing GLE}
+
+This tutorial assumes that GLE is correctly installed. Information about how to install GLE can be found at the following URLs. The GLE distribution also includes a README with brief installation instructions.
+
+\begin{itemize}
+\item Installation on Windows: \url{http://www.gle-graphics.org/tut/windows.html}.
+
+\item Installation on Linux: \url{http://www.gle-graphics.org/tut/linux.html}.
+
+\item Installation on Mac OS/X: \url{http://www.gle-graphics.org/tut/mac.html}.
+\end{itemize}
+
+Feel free to post any questions or comments you might have about installing GLE on the GLE mailing list, which is available here:
+
+\begin{itemize}
+\item Mailing list: \url{https://lists.sourceforge.net/lists/listinfo/glx-general}.
+\end{itemize}
+
+\section{Running GLE}
+
+GLE is essentially a command line application; this tutorial will show you how to run it from the command prompt. GLE can also be run from your favorite text editor or from QGLE, GLE's graphical user interface. More information about running GLE from a text editor is given in the installation instructions.
+
+On Windows, you run GLE from the Windows Command Prompt. Normally the GLE installer should have added an entry labeled ``Command Prompt'' to GLE's folder in the start menu. On Unix-like operating systems, GLE runs from an X-terminal, such as ``konsole'' on Linux / KDE.
+
+Once you have opened the command prompt or terminal, try running GLE by entering the following command.
+
+\preglecode{}
+\begin{Verbatim}
+   gle
+\end{Verbatim}
+\postglecode{}
+
+As a result, GLE displays the following message.
+
+\preglecode{}
+\begin{Verbatim}
+   GLE version x.y.z
+   Usage: gle [options] filename.gle
+   More information: gle -help
+\end{Verbatim}
+\postglecode{}
+
+If this message does not appear and you see an error message instead, then GLE is not correctly installed. Refer to the installation instructions (Appendix \ref{install:app}) for more information. In the following, we will show how to construct a simple drawing with GLE.
+
+\section{Drawing a Line on a Page}
+
+Let's start with drawing a line on the page. GLE needs to know the size of the drawing you wish to make. This is accomplished with the {\sf size} command:
+
+\preglecode{}
+\begin{Verbatim}
+    size  8 2
+\end{Verbatim}
+\postglecode{}
+
+This specifies that the output will be 8cm wide and 2cm high. Next we define a ``current point'' by moving to somewhere on the page:
+
+\preglecode{}
+\begin{Verbatim}
+    amove 0.25 0.25
+\end{Verbatim}
+\postglecode{}
+
+The origin (0,0) is at the bottom left hand corner of the page. Suppose we wish to draw a line from this point 5 cm across and 1 cm up:
+
+\preglecode{}
+\begin{Verbatim}
+    size  8 2
+    amove 0.25 0.25
+    rline 5 1
+\end{Verbatim}
+\postglecode{}
+
+This is a {\bf relative} movement as the x and y values are given as distances from the current point, alternatively we could have used {\bf absolute} coordinates:
+
+\preglecode{}
+\begin{Verbatim}
+    size  8 2
+    amove 0.25 0.25
+    aline 5.25 1.25
+\end{Verbatim}
+\postglecode{}
+
+To draw some text on the page at the current point, use the {\sf write} command:
+
+\preglecode{}
+\begin{Verbatim}
+     write "Hi there"
+\end{Verbatim}
+\postglecode{}
+
+Or, alternatively, you could include arbitrary \LaTeX{} expressions using the {\sf tex} command:
+
+\preglecode{}
+\begin{Verbatim}
+    tex "$(1,\sqrt{2})$"
+\end{Verbatim}
+\postglecode{}
+
+Now we have constructed complete GLE script, which looks as follows:
+
+\preglecode{}
+\begin{Verbatim}
+    size 8 2 box
+    amove 0.25 0.25
+    rline 5 1
+    tex "$(1,\sqrt{2})$"
+\end{Verbatim}
+\postglecode{}
+
+\begin{figure}
+\centering
+\input{tutorial/fig/tut_simple.inc}
+\caption{\label{firstgle:fig}Result of your first GLE script.}
+\end{figure}
+
+Enter the above GLE script using a text editor and save it to disk (any editor that saves in UTF8 or ASCII format will work). The following assumes that you have saved the file under the name ``\texttt{test.gle}'' in the folder \texttt{C:$\backslash$GLE} on Windows, or \texttt{/home/john/gle} on a Unix-like operating system. Now open a command prompt and go to the folder where you saved the file. Then, run GLE on the file.
+
+On Windows, you do this as follows (\texttt{C:$\backslash$>} is the prompt):
+
+\preglecode{}
+\begin{Verbatim}
+   C:\> cd C:\GLE
+   C:\GLE> gle test.gle
+\end{Verbatim}
+\postglecode{}
+
+Or on Unix:
+
+\preglecode{}
+\begin{Verbatim}
+   cd ~/gle
+   gle test.gle
+\end{Verbatim}
+\postglecode{}
+
+GLE produces by default an Encapsulated PostScript (.eps) file:
+
+\preglecode{}
+\begin{Verbatim}
+     GLE x.y.z [test.gle]-C-R-[test.eps]
+\end{Verbatim}
+\postglecode{}
+
+Try viewing the resulting ``\texttt{test.eps}'' with a PostScript viewer such as GhostView, and compare it to the output shown in Fig.~\ref{firstgle:fig}. You can also preview it with QGLE, GLE's graphical user interface. After you've started QGLE, enter the following command at the command prompt.
+
+\preglecode{}
+\begin{Verbatim}
+gle -p test.gle
+\end{Verbatim}
+\postglecode{}
+
+This will preview the output in the QGLE previewer window. GLE can also create PDF files. This is accomplished by setting the output device to ``pdf''.
+
+\preglecode{}
+\begin{Verbatim}
+gle -device pdf test.gle
+\end{Verbatim}
+\postglecode{}
+
+Try viewing the resulting ``\texttt{test.pdf}'' with Acrobat Reader or similar. Other output formats supported by GLE (eps, ps, pdf, svg, jpg, png, x11) can also be obtained with the -device command line option (which can be abbreviated to -d). For example, to create a JPEG bitmap file, one can use:
+
+\preglecode{}
+\begin{Verbatim}
+gle -d jpg -r 200 test.gle
+\end{Verbatim}
+\postglecode{}
+
+Help about the available command line options can be obtained with:
+
+\preglecode{}
+\begin{Verbatim}
+gle -help
+\end{Verbatim}
+\postglecode{}
+
+\noindent{}and to obtain more information about a particular option, use:
+
+\preglecode{}
+\begin{Verbatim}
+gle -help option
+\end{Verbatim}
+\postglecode{}
+
+The following command line options are supported by GLE:
+
+\preglecode{}
+\begin{Verbatim}
+ -help           Shows help about command line options
+ -info           Outputs software version, build date, GLE_TOP, GLE_BIN, etc.
+ -verbosity      Sets the verbosity level of GLE console output
+ -device         Selects output device(s)
+ -resolution     Sets the resolution for bitmap and PDF output
+ -fullpage       Selects full page output
+ -output         Specifies the name of the output file
+ -preview        Previews the output with QGLE
+ -gs             Previews the output with GhostScript
+ -version        Selects a GLE version to run
+ -compatibility  Selects a GLE compatibility mode
+ -calc           Runs GLE in "calculator" mode
+ -tex            Indicates that the script includes LaTeX expressions
+ -inc            Creates an .inc file with LaTeX code
+ -texincprefix   Adds the given subdirectory to the path in the .inc file
+ -mkinittex      Creates "inittex.ini" from "init.tex"
+ -nocolor        Forces grayscale output
+ -transparent    Creates transparent output (with -d png)
+ -noctrl-d       Excludes CTRL-D from the PostScript output
+ -nomaxpath      Disables the upper-bound on the drawing path complexity
+ -safemode       Disables reading/writing to the file system
+ -allowread      Allows reading from the given path
+ -allowwrite     Allows writing to the given path
+\end{Verbatim}
+\postglecode{}
+
+\section{Drawing a Simple Graph}
+
+This section shows how to go about drawing a simple graph. Enter the following data in a new file and save it as ``test.csv''. Note that you can export files in CSV (comma separated values) format with most spread sheet programs.
+
+\preglecode{}
+\begin{Verbatim}
+1,2
+2,6
+3,2
+4,5
+5,9
+\end{Verbatim}
+\postglecode{}
+
+\index{data} \index{files}
+The data is in two columns with a comma separating each column of numbers. The following commands will draw a simple line graph of the data.
+
+\preglegraph{}
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+size 7 4
+begin graph
+   title  "Simple Graph"
+   xtitle "Time"
+   ytitle "Output"
+   data   "test.csv"
+   d1 line marker triangle color red
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{tutorial/fig/tut_graph.inc}}
+\end{minipage}
+\postglegraph{}
+
+The commands {\sf title}, {\sf xtitle}, and {\sf ytitle} specify the graph title and the axis titles. The command {\sf data} loads the data file and the {\sf d1} command specifies how the first curve on the graph should look like. These commands are discussed in detail in Chapter~\ref{graph:chap}. Possible values for the {\sf marker} option can be found on the GLE wall reference chart in Appendix~\ref{wallref:sec}.
+
+The axis ranges can be specified with ``{\sf xaxis min $v_0$ max $v_1$}'' and ``{\sf yaxis min $v_0$ max $v_1$}''. A smooth line can be drawn through the data points by changing the d1 command to: ``{\sf d1 line smooth}'' as in the following example.
+
+\preglegraph{}
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+size 7 4
+begin graph
+   title  "Smooth Graph"
+   xtitle "Time"
+   ytitle "Output"
+   data   "test.csv"
+   yaxis min 0 max 10
+   d1 line smooth color red
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{tutorial/fig/tut_graph2.inc}}
+\end{minipage}
+\postglegraph{}
+
+Note that the order of the commands is not important, except that {\sf circle} is a parameter for the option {\sf marker} and therefore must come right after it. The same holds for line and smooth and color and blue in the example ``d1 marker circle line smooth color blue''.
+
+It is simple to change to a bar graph and include last year's measurements:
+
+\preglegraph{}
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+size 7 4
+begin graph
+   title  "Bar Graph"
+   xtitle "Measurement"
+   ytitle "Output"
+   data   "year-2000.csv"
+   data   "year-2001.csv"
+   key pos tl
+   bar d1,d2 fill red,blue
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{tutorial/fig/tut_graph3.inc}}
+\end{minipage}
+\postglegraph{}
+
+Adding min and max values on the axis commands is highly recommended because by default GLE won't start from the origin unless the data happens to be very close to zero. It is also difficult to compare graphs unless they all have the same axis ranges. More information about the graph module is available in Chapter~\ref{graph:chap}.
+

@@ -1,0 +1,107 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%\psgraphin{stack4b}{15.0}{25.0}{Stack of 4 Graphs}
+\graphin{appendix/fig/stack4b}{13.0cm}{25.0cm}{1}
+\addcontentsline{toc}{section}{Stack of Four Graphs}
+\clearpage
+\begin{center}
+\begin{minipage}[t]{12.0cm}
+%%\input{stack4b.gle}
+{\scriptsize %\footnotesize
+\begin{verbatim}
+size 17 26  ! box  (uncomment box for measuring with ruler) STACK4B.GLE
+set font ss
+amove 3.5 19
+begin graph
+	size 10 5
+	data TEST.DAT
+	title "Top graph, stack4b.gle" hei .5 dist 1
+	fullsize
+	xaxis min -1 max 6 dticks 1 hei .3 nofirst nolast
+	yaxis min 0 max 20 hei .3 dticks 5 
+	x2labels on
+	d1 marker wsquare  msize .4 lstyle 1
+	d2 marker dot  msize 1 lstyle 2
+	fill x1,d1 color grid4 xmax 3
+	fill x1,d1 color grey20 xmin 3
+end graph
+
+rmove 0 -5
+begin graph
+	size 10 5
+	data TEST.DAT
+	fullsize
+	xaxis min -1 max 6 dticks 1 hei .3 nofirst nolast
+	yaxis min 0 max 20 hei .3 dticks 5 nolast
+	bar d1,d2 width .2 dist .2 fill grey10,grid3 color black,black
+end graph
+
+rmove 0 -5
+begin graph
+	data TEST.DAT
+	fullsize
+	size 10 5
+	xaxis min -1 max 6 dticks 1 hei .3 nofirst nolast
+	yaxis min 0 max 20 hei .3 dticks 5 nolast
+	xlabels off
+	y2labels on
+	d1 marker dot lstyle 2 err 10%
+	d2 marker dot lstyle 1 err 10%
+end graph
+
+rmove 0 -5
+begin graph
+	data TEST.DAT
+	title "Bottom graph" hei .4 dist 0.0
+	fullsize
+	size 10 5
+	xaxis min -1 max 6 dticks 1 hei .3 nofirst nolast grid
+	yaxis min 0 max 20 hei .3 dticks 5 nolast grid
+	xticks lstyle 2 lwidth 0.0001  	! sets the grid line style
+	yticks lstyle 2 lwidth 0.0001
+	d1 marker wsquare  msize .4 lstyle 2 key "Age"
+	key hei .5
+	d2 marker dot  msize 1 lstyle 1 key "Width"
+end graph
+\end{verbatim}
+}
+\hfill {\small stack4b.gle}\\
+\end{minipage}
+\end{center}
+\vfill

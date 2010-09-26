@@ -1,0 +1,53 @@
+! nx 15 ny 15 xmin 0 xmax 4.5 ymin 0 ymax 4.5
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 0.943856 0.893036 0.866349 0.873519 0.916502 0.990809 1.08683 1.19115 1.28788 1.35997 1.39051 1.36411 1.26816 1.09418 
+1.17731 1.14366 1.13457 1.10171 1.08472 1.1155 1.16893 1.23632 1.30576 1.36347 1.39505 1.38684 1.32725 1.20808 1.02594 
+1.31767 1.28227 1.29064 1.40552 1.48922 1.50502 1.4597 1.39475 1.37764 1.40216 1.39992 1.36044 1.2759 1.14241 0.9625 
+1.43027 1.419 1.33696 1.44853 1.65317 1.83111 1.93014 1.9328 1.84758 1.70013 1.5245 1.35439 1.21432 1.07505 0.904688 
+1.52038 1.53375 1.39873 1.4128 1.61088 1.82272 1.96043 1.99984 1.94272 1.80802 1.62309 1.4149 1.20128 1.01232 0.853063 
+1.59009 1.61103 1.4845 1.38952 1.57858 1.85156 2.04794 2.13525 2.10425 1.9629 1.72754 1.42712 1.14454 0.953027 0.811418 
+1.63913 1.66237 1.5809 1.39148 1.55565 1.83929 2.01552 2.0957 2.07872 1.93607 1.6648 1.34335 1.1008 0.881495 0.782872 
+1.66562 1.68608 1.65799 1.41489 1.54303 1.79905 1.92354 1.96802 1.9389 1.7789 1.51507 1.24497 1.05807 0.798603 0.768357 
+1.66686 1.67998 1.67464 1.44479 1.53045 1.73101 1.79952 1.79277 1.70632 1.54604 1.33535 1.15947 0.976293 0.710258 0.7672 
+1.64009 1.64218 1.62799 1.46034 1.50183 1.62947 1.64008 1.56667 1.43712 1.29286 1.15907 1.0517 0.871753 0.62548 0.71729 
+1.58329 1.57189 1.54659 1.44027 1.44057 1.48828 1.4336 1.31854 1.18905 1.08056 1 0.91348 0.761947 0.554489 0.599693 
+1.49597 1.47014 1.43299 1.36817 1.335 1.30578 1.20947 1.09747 1.00498 0.932012 0.860578 0.778167 0.663657 0.50679 0.476827 
+1.37991 1.34059 1.29272 1.23788 1.18368 1.10851 1.02124 0.946306 0.8788 0.814257 0.74776 0.674618 0.59104 0.489267 0.408486 
+1.23997 1.19032 1.13504 1.07533 1.01157 0.946081 0.883998 0.826525 0.773068 0.721907 0.670873 0.618021 0.562308 0.504263 0.449928 
+1.08485 1.03063 0.97375 0.914375 0.855139 0.80994 0.788222 0.791876 0.81712 0.803 0.722751 0.620971 0.543156 0.536378 0.64996 

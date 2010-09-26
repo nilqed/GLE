@@ -1,0 +1,9 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+gle_top=@GLE_INSTALL_DATA@
+
+Name: GLE
+Description: Graphics Layout Engine
+Version: @GLE_VERSION@

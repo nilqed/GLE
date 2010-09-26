@@ -1,0 +1,160 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Contour}
+\index{contour}
+\index{.z file}
+
+The contour block produces contour lines of a function $z = f(x,y)$.
+
+The function $f(x,y)$ is given by a .z file. The .z file format is discussed on page~\pageref{zfile:pg}. Recall that a .z file can be created from sample data points, that is $(x,y,z)$ tuples, with the {\sf fitz} block (Section~\ref{fitz:sec}), or from an implicit definition of $f(x,y)$ with a {\sf letz} block (Section~\ref{letz:sec}).
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+include "contour.gle"
+
+begin contour
+   data "saddle.z"
+   values 0.5 1 1.5 2 3
+end contour
+
+begin graph
+   title "Saddle Plot Contour Lines"
+   data  "saddle-cdata.dat"
+   d1 line color blue
+end graph
+
+contour_labels "saddle-clabels.dat" "fix 1"
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{utilities/fig/saddle-contour.inc}}
+\end{minipage}
+
+The contour block can contain the following commands:
+
+\begin{commanddescription}
+\item[{\sf data {\it file\$}}]\index{data} Specifies the name of the .z file.
+
+\item[{\sf values $v_1,\ldots, v_n$}]\index{values} Specifies the z-values to contour at.
+
+\item[{\sf values from $v_1$ to $v_n$ step $s$}] Specifies the z-values to contour at by means of from/to/step.
+
+\item[{\sf smooth {\it integer}}]\index{smooth} Specifies the smoothing parameter.
+\end{commanddescription}
+
+The contour block creates the files ``data-clabels.dat'' and ``data-cdata.dat'' with the prefix ``data'' the name of the .z file. The file ``data-clabels.dat'' contains information for drawing labels on the contour plot. This is done by the subroutine {\sf contour\_labels} defined in the library ``contour.gle'' in the example above. The file ``data-cdata.dat'' contains the $(x,y)$ values of the contour lines. This file can be used as input to a graph block and plotted with the ``d1 line'' command as shown in the example above.
+
+\section{Color Maps}
+\label{colormap}
+\index{colormap}
+
+Color maps plot a function $z = f(x,y)$ by mapping $z$ to a color range. The following example combines a color map with a contour plot.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin contour
+   data "volcano.z"
+   values from 130 to 190 step 10
+end contour
+
+begin graph
+   title "Auckland's Maunga Whau Volcano"
+   data "volcano-cdata.dat"
+   xaxis min 0 max 20
+   yaxis min 0 max 20
+   d1 line color black
+   colormap "volcano.z" 100 100
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{utilities/fig/volcano.inc}}
+\end{minipage}
+
+The options to the colormap command are as follows:
+
+\begin{commanddescription}
+\item[{\sf colormap {\it fct} {\it pixels-x} {\it pixels-y} [color] [invert] [zmin $z_1$]  [zmax $z_2$] [palette {\it pal}]}]
+
+\mbox{}\\
+\begin{itemize}
+\item {\it fct} specifies the function to map. This can either be the name of a .z file, or it can be a function definition $f(x,y)$.
+
+\item {\it pixels-x}, {\it pixels-x} specify the dimension of the color map. A color map is a stored as a bitmap image and ({\it pixels-x}, {\it pixels-x}) are the resolution of this bitmap. A larger resolution yields more detail, but at the cost of longer computation time and a larger file size.
+
+\item {\it color} is an optional argument and indicates that the color map should be drawn in color (as opposed to grayscale).
+
+\item {\it invert} is an optional argument that inverts the color map. That is, large function values will be drawn in black and small function values in white.
+
+\item {\it zmin}, {\it zmax} are optional arguments that specify the range of the function.
+
+\item {\it palette} is an optional argument that specifies the palette to use. A palette is a subroutine that maps $z$ values to colors. A number of example palette subroutines are included in the library ``color.gle''.
+\end{itemize}
+\end{commanddescription}
+
+The following example is a color map of a two dimensional Gaussian.
+
+\preglegraph{}
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+include "color.gle"
+
+sub gauss x y
+   s = 0.75
+   return exp(-(x^2+y^2)/(2*s^2))
+end sub
+
+begin graph
+   title "2D Gaussian"
+   xaxis min -2 max 2
+   yaxis min -2 max 2
+   colormap gauss(x,y) 200 200 zmin 0 zmax 1 color
+end graph
+
+amove xg(xgmax)+0.3 yg(ygmin)
+color_range_vertical zmin 0 zmax 1 zstep 0.1 format "fix 1"
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{utilities/fig/gaussian.inc}}
+\end{minipage}
+\postglegraph{}

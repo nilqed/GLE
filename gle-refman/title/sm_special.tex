@@ -1,0 +1,137 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{ifpdf}
+
+\ifpdf
+  \usepackage[pdftex]{graphics}
+  \usepackage[pdftex]{geometry}
+  \pdfinfo{
+  /Title    (GLE User Manual)
+  /Author   (C. Pugmire, St.M. Mundt, V.P. LaBella, J. Struyf)
+  }
+\else
+  \usepackage[dvips]{graphics}
+  \usepackage[dvips]{geometry}
+\fi
+
+% Put include packages here (before hyperref!!!)
+\usepackage{makeidx}
+\usepackage{cmd}
+\usepackage{supertabular}
+\usepackage{fancyvrb}
+\usepackage{rotating}
+\usepackage{color}
+
+\ifpdf
+\usepackage[
+	pdfpagelabels=true,
+	plainpages=false,
+	colorlinks=true,
+	breaklinks=true,
+	linktocpage=true,
+	pdfstartview=FitV,
+	linkcolor=black,
+	citecolor=black,
+	urlcolor=black
+]{hyperref}
+\newcommand{\myaddtoc}[1]{\phantomsection{}\addcontentsline{toc}{chapter}{#1}}
+\else
+\usepackage{url}
+\newcommand{\myaddtoc}[1]{}
+\newcommand{\texorpdfstring}[2]{#1}
+\fi
+
+% Correctly defines pdf bounding box
+\geometry{%
+	a4paper,
+	left = 2.5cm,
+	right = 2.5cm,
+	top = 2.5cm,
+	bottom = 2.5cm,
+	% Note centering requires recent version of geometry
+	centering
+}
+
+%\pagestyle{headings}
+\sloppy
+\setlength{\parindent}{0in}
+% \setlength{\topmargin}{-2.0cm}
+% \setlength{\textwidth}{15.0cm}
+% \setlength{\textheight}{22.6cm}
+% \setlength{\oddsidemargin}{1.5cm}%{0.0cm}%{1.5cm}
+% \setlength{\evensidemargin}{-.5cm}%{1.5cm}%{-.5cm}
+% \setlength{\footskip}{1.0cm}
+%
+\setcounter{totalnumber}{5}               %vgl. wonneberger s.73  + kopka
+\renewcommand{\floatpagefraction}{.25}     %vgl. wonneberger s.73 figure & table
+\renewcommand{\dblfloatpagefraction}{.25}  % auf einer seite
+%
+%\makeglossary
+%
+%-------------- sm --------- \psgraphin mit dvips
+\newcommand{\psgraphin}[4]{
+\begin{center}
+\unitlength1.0cm
+\begin{picture}(#2,#3)
+\unitlength1.0cm
+%%fclipon
+%%fxsize=#2cm
+\put(0.0,0.0){
+\includegraphics{#1}}
+%%\put(#2,0.0){\makebox(0,0)[tl]{ {\tt{\small $ \verb+ #1+ $ }} }}
+\addtocontents{lof}{#4}
+\end{picture}
+%
+%%\begin{figure}[hbt]
+%%\vspace*{-.5cm}
+%%\caption[#4]{#4}
+%%\end{figure}
+%
+\end{center}
+}
+
+\fvset{baselinestretch=1}
+\fvset{fontsize=\small}
+\fvset{fontshape=n}
+
+\newcommand{\preglecode}{}
+\newcommand{\postglecode}{}
+\newcommand{\preglegraph}{\vspace{3mm}}
+\newcommand{\postglegraph}{\vspace{3mm}}
+

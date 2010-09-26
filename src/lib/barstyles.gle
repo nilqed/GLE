@@ -1,0 +1,72 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Subroutines to draw customized bar plots
+
+bar_colormap_pixels = 200
+bar_gridline_width = 0.01
+
+sub bar_colormap x1 y1 x2 y2 b g
+   amove x1 y1
+   begin clip
+      begin path clip
+          box x2-x1 y2-y1
+      end path
+      colormap y 0 1 0 1 1 bar_colormap_pixels x2-x1 yg(ygmax)-yg(ygmin) color
+   end clip
+   box x2-x1 y2-y1 fill clear
+end sub
+
+sub bar_colormap_palette_labels x1 y1 x2 y2 value palette$ fmt$
+  if value >= 0 then
+    y1 = y1 + bar_gridline_width
+    y2 = y2 + bar_gridline_width
+  else
+    y1 = y1 - bar_gridline_width
+    y2 = y2 - bar_gridline_width
+  end if
+  amove x1 y1
+  colormap y 0 1 0 1 1 bar_colormap_pixels x2-x1 y2-y1 palette palette$
+  ! draw data labels
+  gsave
+  set just bc hei 0.23
+  if value < 0 then y2 = yg(0)
+  amove (x1+x2)/2 y2+0.1
+  write format$(value, fmt$)
+  grestore
+end sub

@@ -1,0 +1,133 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+size 12 3 box
+scale .5 .5
+amove 9 9
+set just left hei .7
+set hei 1.2
+set lwidth .1
+
+gsave
+translate -2 -13.5
+begin path fill gray10
+amove  5  19 
+aline  5  14  
+aline  11  14 
+aline  11  19 
+closepath 
+amove  6  18 
+aline  10  18 
+aline  10  15 
+aline  6  15  
+closepath 
+end path
+
+amove  5  19 
+aline  5  14  arrow end 
+aline  11  14  arrow end 
+aline  11  19  arrow end 
+aline  5  19  arrow end 
+amove  6  18 
+aline  10  18  arrow end 
+aline  10  15  arrow end 
+aline  6  15  arrow end 
+aline  6  18  arrow end 
+
+
+amove  3  16 
+aline  13  16  arrow end 
+set hei .7 just center
+amove  4  16.5 
+text 0
+amove  5.5  16.5 
+text 1
+amove  7  16.5 
+text 0
+amove  10.5  16.5 
+text 1
+amove  12  16.5 
+text 0
+grestore 
+
+! second one 
+
+translate 9 -5.5
+
+begin path fill gray10
+amove  5  11 
+aline  5  6  
+aline  11  6 
+aline  11  11
+aline  5  11 
+amove  6  10 
+aline  6  7  
+aline  10  7  
+aline  10  10 
+aline  6  10  
+end path
+
+amove  5  11 
+aline  5  6  arrow end 
+aline  11  6  arrow end 
+aline  11  11  arrow end 
+aline  5  11  arrow end 
+amove  6  10 
+aline  6  7  arrow end 
+aline  10  7  arrow end 
+aline  10  10  arrow end 
+aline  6  10  arrow end 
+
+set lwidth 0 
+amove  3  8 
+aline  13  8  arrow end 
+
+set hei .7 just center
+amove  4  8.5 
+text 0
+amove  5.5  8.5 
+text 1
+amove  7  8.5 
+text 2
+amove  10.5  8.5 
+text 1
+amove  12  8.5 
+text 0
+
+
+

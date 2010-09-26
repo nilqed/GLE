@@ -1,0 +1,132 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+
+#
+# global makefile for gle
+# for microsoft visual C++
+#
+!include "config.vc"
+
+ZIP_SRC_NAME = $(BASE_NAME)_$(VERSION_NUMBER).$(BUILD_NUMBER)_src.zip
+TAR_SRC_NAME = $(BASE_NAME)_$(VERSION_NUMBER).$(BUILD_NUMBER)_src.tar
+ZIP_EXE_NAME = $(BASE_NAME)_$(VERSION_NUMBER).$(BUILD_NUMBER)_exe_win32.zip
+INSTALL_NAME = GLE-$(VERSION_NUMBER).$(BUILD_NUMBER)-exe-win32.exe
+RELEASE_DIR = .\release
+NSIS_SCRIPT_DIR = .\contrib\packagers\nsis
+
+SRC_FILES = gle4/Makefile* gle4/config* gle4/README gle4/src/gle/* gle4/src/fonts/* gle4/src/makefmt/* gle4/src/fbuild/* gle4/src/samples/* gle4/src/TeX/*
+EXE_FILES = gle4/README gle4/bin/*.exe gle4/bin/font.dat gle4/bin/inittex.ini gle4/bin/font/*
+
+all:
+	-mkdir build
+	-mkdir build\bin
+	cd src\gle\bitmap & nmake -f makefile.vc /nologo
+	cd src\gle\surface & nmake -f makefile.vc /nologo
+	cd src\gle\letzfitz & nmake -f makefile.vc /nologo
+	cd src\gle\tokens & nmake -f makefile.vc /nologo
+	cd src\gle & nmake -f makefile.vc /nologo
+	cd src\fbuild & nmake -f makefile.vc /nologo
+	cd src\makefmt & nmake -f makefile.vc /nologo
+	cd src\fonts & nmake -f makefile.vc /nologo
+	cd src\tex & nmake -f makefile.vc /nologo
+	cd src\samples & nmake -f makefile.vc /nologo
+
+clean:
+	cd src\gle\bitmap & nmake -f makefile.vc /nologo clean
+	cd src\gle\surface & nmake -f makefile.vc /nologo clean
+	cd src\gle\letzfitz & nmake -f makefile.vc /nologo clean
+	cd src\gle\tokens & nmake -f makefile.vc /nologo clean
+	cd src\gle & nmake -f makefile.vc /nologo clean
+	cd src\fbuild & nmake -f makefile.vc /nologo clean
+	cd src\makefmt & nmake -f makefile.vc /nologo clean
+	cd src\fonts & nmake -f makefile.vc /nologo clean
+	cd src\tex & nmake -f makefile.vc /nologo clean
+	cd src\samples & nmake -f makefile.vc /nologo clean
+	-rmdir /S /Q build
+	-rmdir /S /Q build\bin
+
+full: clean all zipsrc tarsrc zipexe
+
+commit:
+	cvs commit -m "commit via nmake working on version $(TAG)"
+#
+# to tag a release
+#
+tagall:
+	cvs rtag $(TAG) $(MODULE_NAME) $(DEPENDANT_MODULES)
+
+#
+# for testing not a true install
+#
+install:
+	copy bin\gle_ps.exe "c:\program files\gle"
+
+#
+# for building distributions
+#
+zipsrc:
+	cd .. & zip $(ZIP_SRC_NAME) -9 $(SRC_FILES) -x *.obj *.cvsignore *.eps */CVS/ *.fve *.fmt */gle4.4D/
+	move ..\$(ZIP_SRC_NAME) .
+
+tarsrc:
+	cd .. & tar -cvf $(TAR_SRC_NAME) $(SRC_FILES) --exclude=*.obj --exclude=*.zip --exclude=*.cvsignore --exclude=*.eps --exclude=*CVS* --exclude=*.fve --exclude=*.fmt --exclude=*gle4.4D*
+	move ..\$(TAR_SRC_NAME) .
+	bzip2 -9k $(TAR_SRC_NAME)
+	gzip  -9 $(TAR_SRC_NAME)
+
+zipexe:
+	cd .. & zip $(ZIP_EXE_NAME) -9 $(EXE_FILES)
+	move ..\$(ZIP_EXE_NAME) .
+
+#compress the executables
+upx:
+	upx -9 --force build\bin\*.exe
+
+
+NSIS_VERSIONS = /DGLE_VERSION=$(MAJOR_VERSION_NUMBER).$(MINOR_VERSION_NUMBER).$(BUILD_NUMBER)
+
+installer:
+	-mkdir $(RELEASE_DIR)
+	-del $(RELEASE_DIR)\$(INSTALL_NAME)
+	-makensis /V1 $(NSIS_VERSIONS) /DOUTPUT_FILENAME=$(INSTALL_NAME) $(NSIS_SCRIPT_DIR)\gle.nsi
+	-move $(NSIS_SCRIPT_DIR)\$(INSTALL_NAME) $(RELEASE_DIR)
+
+
+
+
+

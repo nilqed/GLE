@@ -1,0 +1,110 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{32bit DOS Version of GLE}
+\index{DOS!32bit}
+Axel Rohde has compiled a 32bit DOS version of GLE in 1994 
+( email: rohde@physik.uni-kiel.d400.de)\\
+On any 386 or better machine this version of GLE should 
+run without problems, it's main features are these:
+1) No 640K memory restrictions. 2) Much faster.\\
+\clearpage
+Properties of GLE 32:
+\begin{verbatim}
+ - All programs are running in the 386-protected-mode and therefore there is
+   neither a limited 640kB adress-range nor a 64kB segmentation.
+ - 32-bit programs are running faster than their 16-bit-counterparts.
+ - There exists a multitude of GRX-graphics-drivers, e.g. for
+   TSENG ET4000(W32), S3, 8514A, Cirrus Logic GD 542x, Trident 8900,
+   Diamond Viper, ATI Ultra, ATI VGA and EGA. These drivers are highly
+   configureable and can use flicker-free high resolution modes.
+\end{verbatim}
+Installation Quick guide:
+\begin{verbatim}
+    1) FTP the binary distribution
+           ftp tui.marc.cri.nz
+           cd pub/gle/gle32
+           binary
+           mget gle32bi*.zip
+    2) Unzip them keeping the directory structure
+           cd c:\
+           pkunzip gle32bi1.zip -d
+           pkunzip gle32bi2.zip -d
+           pkunzip gle32bi3.zip -d
+           pkunzip gle32bi4.zip -d
+           pkunzip gle32bi5.zip -d
+           pkunzip gle32bi6.zip -d
+    3) Edit the batch file which tells gle where to find it's fonts
+       and also what sort of graphics card you have.  
+           edit setgle32.bat
+       (change the disk and directory as appropriate)
+    4) Run the batch script
+           setgle32
+    5) Try out the new version
+            gle_vga
+    6) Note most of the programs have been renamed to avoid conflicts!!!
+\end{verbatim}
+
+To avoid name-conflicts between a 16-bit and a 32-bit version of GLE, 
+all the programs and the environment-variables were renamed. 
+All GLE-programs have now unix-style names like \verb#gle_ps# (='psgle'-
+Postscript-output), \verb#gle_vga# (='cgle' - VGA-Preview) etc. The names 
+of the utilities end with '32' -  \verb#manip32#, \verb#contou32# \dots
+
+Restrictions and Bugs:
+\begin{description}		
+\item[1.] The vector-fonts of the 32-bit-version are NOT compatible to their 
+16-bit-counterparts. They may be compatible to fonts that were created 
+under other 32-bit operating-systems.
+\item[2.] The on-line-help of \verb#gle_vga# is usable but may sometimes look different 
+compared to the original.
+\item[3.] Makefmt and fbuild are missing. DJGPP's Library lacks ecvt(). 
+Both programs are used to calculate vector-fonts in the Unix-version 
+from the source-distribution. Both programs are NOT included in the 
+16-bit DOS-version, too. This package includes all (allready calculated) 
+fonts from the Unix-source distribution. They were calculated under Linux, 
+a free Unix-implementation for i386-PC's and higher.
+\item[4.] The DVI-drivers are not testet! 
+\item[5.] Surface (\verb#surf_vga#) hanged under unknown circumstances while loading 
+one data-file. \verb#surf_vga# can be stopped by pressing Control-Pause. 
+If this happens, load the data-file into an editor, save it, and try it 
+again.
+\end{description}
+
+In \verb#gle32b.txt# are the more detailed instructions provided by Axel Rohde.
+Read these carefully if you have any problems.

@@ -1,0 +1,118 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+
+#
+# global makefile for gle
+# for gcc
+#
+include config.i
+include config.os2
+
+all:
+	-$(MKDIR) build
+	-$(MKDIR) build/bin
+	-$(MKDIR) build/lib
+	-$(CP) src/config.h.os2 src/config.h
+	make -C src/gle/bitmap -f Makefile.os2
+	make -C src/gle/surface -f Makefile.os2
+	make -C src/gle/letzfitz -f Makefile.os2
+	make -C src/gle/tokens -f Makefile.os2
+	make -C src/gle -f Makefile.os2
+	make -C src/fbuild -f Makefile.os2
+	make -C src/makefmt -f Makefile.os2
+	make -C src/fonts -f Makefile.os2
+	make -C src/lib -f Makefile.os2
+	make -C src/TeX -f Makefile.os2
+
+clean:
+	make -C src/gle/bitmap -f Makefile.os2 clean
+	make -C src/gle/surface -f Makefile.os2 clean
+	make -C src/gle/letzfitz -f Makefile.os2 clean
+	make -C src/gle/tokens -f Makefile.os2 clean
+	make -C src/gle -f Makefile.os2 clean
+	make -C src/fbuild -f Makefile.os2 clean
+	make -C src/makefmt -f Makefile.os2 clean
+	make -C src/fonts -f Makefile.os2 clean
+	make -C src/TeX -f Makefile.os2 clean
+	make -C src/manip -f Makefile.os2 clean
+	-$(RM) src/config.h
+	-$(RMDIR) include
+	-$(RMDIR) lib
+	-$(RMDIR) build
+	
+manip:
+	-$(CP) src/config.h.os2 src/config.h
+	make -C src/manip -f Makefile.os2
+
+install: clean_install
+	-$(MKDIR) $(INSTALL_DIR)
+	-$(CP) -R build/* $(INSTALL_DIR)/
+	-$(CP) $(INSTALL_DIR)/gle.exe $(INSTALL_BIN)/gle.exe
+	@echo Please add "SET GLE_TOP=$(INSTALL_DIR)" to your CONFIG.SYS
+
+
+clean_install:
+	-$(RM) $(INSTALL_BIN)/bin/gle.exe
+	-$(RMDIR) $(INSTALL_DIR)/font
+	-$(RM) $(INSTALL_DIR)/bin/gle.exe
+	-$(RM) $(INSTALL_DIR)/bin/fbuild.exe
+	-$(RM) $(INSTALL_DIR)/bin/makefmt.exe
+	-$(RM) $(INSTALL_DIR)/inittex.ini
+
+full: clean all
+
+distrib:
+	-$(RM) $(BASE_NAME)-os2-$(VERSION_NUMBER).$(BUILD_NUMBER).zip
+	-$(MKDIR) gle
+	-$(MKDIR) gle/doc
+	-$(CP) -R bin/* gle/.
+	-$(CP) $(ADD_DLLS) gle/.
+	-$(CP) $(ADD_DOCS) gle/doc/.
+	-$(CP) contrib/samplecfg/*.os2 gle/.
+	-$(ZIP) -r $(BASE_NAME)-os2-$(VERSION_NUMBER).$(BUILD_NUMBER).zip gle/*
+	-$(RMDIR) gle
+
+lxlite:
+	lxlite bin/*.exe
+
+commit:
+	cvs commit -m "commit via make working on version $(TAG)"
+
+tagall:
+	cvs rtag $(TAG) $(MODULE_NAME) $(DEPENDANT_MODULES)
+

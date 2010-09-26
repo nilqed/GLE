@@ -1,0 +1,131 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! QGLE/AutoCAD Keyboard layout
+
+! CONFIGURATION:
+keys$ = "QGLE" ! AutoCAD or QGLE
+tbh = 2 ! The height of the text box in centimetres
+boxsize = 1.9 ! The width of a single function key
+boxheight = 2 ! The height of a single function key
+lb = 1 ! The left border
+rb = 0.5 ! The right border
+bb = 0.5 ! The bottom border
+tb = 0 ! The top border
+mb = 1.025 ! The border between f4 & f5
+
+! Everything else is automatic, so nothing
+! needs to be changed from here on (unless you want
+! to define keys for a different program.
+
+! Set up the QGLE keys
+f1$ = "ABOUT"
+f2$ = ""
+f3$ = "OSNAP"
+f4$ = ""
+f5$ = ""
+f6$ = "COORD"
+f7$ = "GRID"
+f8$ = "ORTHO"
+f9$ = "SNAP"
+f10$ = "POLAR"
+f11$ = ""
+f12$ = ""
+
+! Page size (4.5 by 26.35):
+size bb+boxheight+tbh+tb lb+3*4*boxsize+2*mb+rb
+
+! If we're doing an AutoCAD layout, then
+! change the keys that differ
+if keys$ = "AutoCAD" then
+	f1$ = "HELP"
+	f2$ = "TEXTSCR"
+	f4$ = "TABLET"
+	f5$ = "ISOPLANE"
+	f11$ = "OTRACK"
+end if
+
+! Create a box for the key text
+sub fblock f$
+	box boxsize tbh
+	rmove boxsize/2 boxheight/2
+	write f$
+	rmove boxsize/2 -boxheight/2
+end sub
+
+! Rotate the page so that it fits
+! on a portrait A4 sheet
+amove pagewidth()/2 pagewidth()/2
+begin rotate 90
+	! Draw the outside box
+	amove 0 0
+	rline pageheight() 0
+	rline 0 pagewidth()
+	rline -pageheight() 0
+	rline 0 -pagewidth()
+	! Now back at 0 0
+
+	set just cc
+
+	! Draw the F1-F4 boxes
+	amove lb bb
+	box boxsize*4 boxheight
+	rmove 0 boxheight
+	fblock f1$
+	fblock f2$
+	fblock f3$
+	fblock f4$
+
+	! Draw the F5-F8 boxes
+	rmove mb -boxheight
+	box boxsize*4 boxheight
+	rmove 0 boxheight
+	fblock f5$
+	fblock f6$
+	fblock f7$
+	fblock f8$
+
+	! Draw the F9-F12 boxes
+	rmove mb -boxheight
+	box boxsize*4 boxheight
+	rmove 0 boxheight
+	fblock f9$
+	fblock f10$
+	fblock f11$
+	fblock f12$
+end rotate

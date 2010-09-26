@@ -1,0 +1,164 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Colors from GLE 4.0.12 and before
+defcolor "AQUA" #70DB93
+defcolor "AQUAMARINE" #70DB93
+defcolor "BAKERS_CHOCOLATE" #5C3317
+defcolor "BLUE_VIOLET" #9F5F9F
+defcolor "BRASS" #B5A642
+defcolor "BRIGHT_GOLD" #D9D919
+defcolor "BRONZE" #8C7853
+defcolor "BRONZE_II" #A67D3D
+defcolor "BROWN_WEB" #A62A2A
+defcolor "CADET_BLUE" #5F9F9F
+defcolor "COOL_COPPER" #D98719
+defcolor "COPPER" #B87333
+defcolor "CORAL" #FF7F00
+defcolor "CORN_FLOWER_BLUE" #42426F
+defcolor "DARK_BROWN" #5C4033
+defcolor "DARK_GREEN" #2F4F2F
+defcolor "DARK_GREEN_COPPER" #4A766E
+defcolor "DARK_OLIVE_GREEN" #4F4F2F
+defcolor "DARK_ORCHID" #9932CD
+defcolor "DARK_PURPLE" #871F78
+defcolor "DARK_SLATE_BLUE" #6B238E
+defcolor "DARK_SLATE_GRAY" #2F4F4F
+defcolor "DARK_SLATE_GREY" #2F4F4F
+defcolor "DARK_TAN" #97694F
+defcolor "DARK_TURQUOISE" #7093DB
+defcolor "DARK_WOOD" #855E42
+defcolor "DIM_GRAY" #545454
+defcolor "DIM_GREY" #545454
+defcolor "DUSTY_ROSE" #856363
+defcolor "FELDSPAR" #D19275
+defcolor "FIREBRICK" #8E2323
+defcolor "FOREST_GREEN" #228B22
+defcolor "FOREST_GREEN_WEB" #238E23
+defcolor "GOLD" #CD7F32
+defcolor "GOLDENROD" #DBDB70
+defcolor "GRAY" #7F7F7F
+defcolor "GRAY1" #FDFDFD
+defcolor "GRAY10" #C8C8C8
+defcolor "GRAY20" #AFAFAF
+defcolor "GRAY30" #969696
+defcolor "GRAY40" #7D7D7D
+defcolor "GRAY5" #F0F0F0
+defcolor "GRAY50" #646464
+defcolor "GRAY60" #4B4B4B
+defcolor "GRAY70" #323232
+defcolor "GRAY80" #191919
+defcolor "GRAY90" #060606
+defcolor "GRAY_WEB" #C0C0C0
+defcolor "GREEN" #00FF00
+defcolor "GREEN_COPPER" #527F76
+defcolor "GREEN_YELLOW" #93DB70
+defcolor "GREY" #7F7F7F
+defcolor "GREY1" #FDFDFD
+defcolor "GREY10" #C8C8C8
+defcolor "GREY20" #AFAFAF
+defcolor "GREY30" #969696
+defcolor "GREY40" #7D7D7D
+defcolor "GREY5" #F0F0F0
+defcolor "GREY50" #646464
+defcolor "GREY60" #4B4B4B
+defcolor "GREY70" #323232
+defcolor "GREY80" #191919
+defcolor "GREY90" #060606
+defcolor "GREY_WEB" #C0C0C0
+defcolor "HUNTER_GREEN" #215E21
+defcolor "INDIAN_RED" #4E2F2F
+defcolor "KHAKI" #9F9F5F
+defcolor "LAWN_GREEN" #7CFC00
+defcolor "LIGHT_BLUE" #C0D9D9
+defcolor "LIGHT_GRAY" #A8A8A8
+defcolor "LIGHT_GREY" #A8A8A8
+defcolor "LIGHT_STEEL_BLUE" #8F8FBD
+defcolor "LIGHT_WOOD" #E9C2A6
+defcolor "LIME" #00FF01
+defcolor "LIME_GREEN" #32CD32
+defcolor "MANDARIAN_ORANGE" #E47833
+defcolor "MAROON_WEB" #8E236B
+defcolor "MEDIUM_AQUAMARINE" #32CD99
+defcolor "MEDIUM_BLUE" #3232CD
+defcolor "MEDIUM_FOREST_GREEN" #6B8E23
+defcolor "MEDIUM_GOLDENROD" #EAEAAE
+defcolor "MEDIUM_ORCHID" #9370DB
+defcolor "MEDIUM_SEA_GREEN" #426F42
+defcolor "MEDIUM_SLATE_BLUE" #7F00FF
+defcolor "MEDIUM_SPRING_GREEN" #7FFF00
+defcolor "MEDIUM_TURQUOISE" #70DBDB
+defcolor "MEDIUM_VIOLET_RED" #DB7093
+defcolor "MEDIUM_WOOD" #A68064
+defcolor "MIDNIGHT_BLUE" #2F2F4F
+defcolor "NAVY_BLUE" #23238E
+defcolor "NEON_BLUE" #4D4DFF
+defcolor "NEON_PINK" #FF6EC7
+defcolor "NEW_MIDNIGHT_BLUE" #00009C
+defcolor "NEW_TAN" #EBC79E
+defcolor "OLD_GOLD" #CFB53B
+defcolor "ORANGE" #FF7F10
+defcolor "ORANGE_RED" #FF2400
+defcolor "ORANGE_WEB" #FF7F00
+defcolor "ORCHID" #DB70DB
+defcolor "PALE_GREEN" #8FBC8F
+defcolor "PINK_WEB" #BC8F8F
+defcolor "PLUM" #EAADEA
+defcolor "QUARTZ" #D9D9F3
+defcolor "RICH_BLUE" #5959AB
+defcolor "SALMON" #6F4242
+defcolor "SCARLET" #8C1717
+defcolor "SEA_GREEN" #238E68
+defcolor "SEMI_SWEET_CHOCOLATE" #6B4226
+defcolor "SIENNA" #8E6B23
+defcolor "SILVER_WEB" #E6E8FA
+defcolor "SKY_BLUE" #3299CC
+defcolor "SLATE_BLUE" #007FFF
+defcolor "SPICY_PINK" #FF1CAE
+defcolor "SPRING_GREEN" #00FF7F
+defcolor "STEEL_BLUE" #236B8E
+defcolor "SUMMER_SKY" #38B0DE
+defcolor "TAN_COLOR" #008080
+defcolor "TURQUOISE" #ADEAEA
+defcolor "VERY_DARK_BROWN" #5C4033
+defcolor "VERY_LIGHT_GRAY" #CDCDCD
+defcolor "VERY_LIGHT_GREY" #CDCDCD
+defcolor "VIOLET_RED" #CC3299
+defcolor "VIOLET_WEB" #4F2F4F
+defcolor "WHEAT" #D8D8BF
+defcolor "YELLOW_GREEN" #99CC32

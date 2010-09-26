@@ -1,0 +1,100 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter {GLE Utilities}
+\label{util:chap}
+\section{Fitls}
+\index{Fitls}
+The FITLS utility allows an equation with $n$ unknown constants to 
+be fitted to experimental data.
+
+For example to fit a simple least squares regression line to a set of 
+points you would give FITLS the equation: \verb# a*x+b#
+
+FITLS would then solve the equation to find the {\em best} values for
+the constants $a$ and $b$. 
+
+FITLS can work with non linear equations, it will ask for initial
+values for the parameters so that a solution around those initial
+guesses will be found.
+
+FITLS writes out a GLE file containing commands to draw the data
+points and the equation it has fitted to them.
+
+Here is a sample FITLS session:
+\begin{verbatim}
+$ fitls
+Input data file (x and y columns optional) [test.dat,1,2] ? fitls.dat
+Loading data from file, fitls.dat,  xcolumn=1, ycolumn=2
+Valid operators: +, -, *, /, ^ (power) 
+Valid functions:
+        abs(), atn(), cos(), exp(), fix(), int()
+        log(), log10(), not(), rnd(), sgn(), sin()
+        sqr(), sqrt(), tan()
+
+ Enter a function of 'x' using constants 'a'...'z' 
+ e.g.    a + b*x   (standard linear least squares fit) 
+         sin(x)*a+b 
+         a + b*x + c*x^2 + d*x^3  
+         log(a*x)+(b+x)*c+a 
+
+Equation ? sin(a*x)*b+c*x^2+d
+
+Output file name to write gle file [fitls.gle] ?
+Precision of fit required, [1e-4] ?
+Initial value for constant a [1.0] ? 
+Initial value for constant b [1.0] ? 
+Initial value for constant c [1.0] ? 
+Initial value for constant d [1.0] ? 
+0 evaluations, 1 1 1 1 , fit = 1355.36 
+20 evaluations, 1.97005 1 1 1 , fit = 1281.95 
+40 evaluations, 1.97005 10.228 0.151285 1 , fit = 54.7694 
+60 evaluations, 2.01053 10.228 0.151285 1.06365 , fit = 54.1771 
+.
+.
+.
+440 evaluations, -0.640525 -2.81525 0.13997 1.13871 , fit = 0.940192 
+460 evaluations, -0.638055 -2.82934 0.140971 1.10502 , fit = 0.93842 
+480 evaluations, -0.63808 -2.82357 0.140993 1.10452 , fit = 0.938389 
+a = -0.638262 b = -2.81719 c = 0.140722 d = 1.11256 
+
+10 Iterations, sum of squares devided by n = 0.938389
+y = sin(-0.638262*x)*-2.81719+0.140722*x^2+1.11256
+\end{verbatim}
+\vspace*{1.0cm}
+\psgraphin{utilities/fig/fitls}{8.0}{5.0}{\sf fitls}             

@@ -1,0 +1,482 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Advanced Features}
+\label{adv:chap}
+
+This chapter covers the advanced features of GLE. 
+	
+\section{Diagrams}
+\index{diagrams}
+
+\subsection{Named Boxes and the Join Command}
+\label{join:sec}
+\index{joining}
+
+GLE can name objects using the ``begin/end name'' (p.~\pageref{cmd:beginname}), ``begin/end box'' (p.~\pageref{cmd:beginbox}), and ``begin/end object'' (p.~\pageref{cmd:beginobject}) constructs, and using the ``name'' option supported by some drawing commands. The name is always associated with the rectangular region on the figure that corresponds to the bounding box of the object (the smallest rectangle that surrounds all points of the object). The following example shows how to create a blue rectangle named ``square'' and a box with the text ``Title'' named ``titlebox''.
+
+\begin{verbatim}
+   amove 1 1
+   box 1 1 fill blue name square
+   
+   amove 5 5 
+   begin box add 0.1 name titlebox
+      write "Title"
+   end box
+\end{verbatim}	 
+
+The ``join'' command (p.~\pageref{cmd:join}) can now be used to draw lines or curves (optinally with arrows) between designated points of the named objects. The following example shows how to draw an arrow from the top-right (``.tr'') point of the blue square to the bottom-centre point (``.bc'') of the object named ``titlebox''.
+
+\begin{verbatim}	 
+   join square.tr -> titlebox.bc
+\end{verbatim}
+
+The ``\verb+->+'' in the join command indicates that the arrow should go from the first object towards the second. The symbol ``\verb+<-+'' is used to draw the arrow in the opposite direction. A bidirectional arrow is obtained with ``\verb+<->+'' and a line without an arrow is obtained with ``\verb+-+''. The join command can also create Bezier curves instead of straight lines. See the command's description on p.~\pageref{cmd:join} for more information.
+
+\begin{verbatim}	 
+   join square.tr ->  titlebox.bc
+   join square.tr <-  titlebox.bc
+   join square.tr <-> titlebox.bc
+   join square.tr -   titlebox.bc
+\end{verbatim}
+
+The named points (corners, centre points, ...) on each named object are indicated as defined in Table~\ref{tab:justopt}. ``.box'' clipping is the default and can be omitted.
+
+\begin{table}[tb]
+\caption{\label{tab:justopt}Justify options for the join command.}
+\centering
+\begin{tabular}{ll}\hline
+.tr	 & Top right \\
+.tc	 & Top centre \\
+.tl	 & Top left \\
+.bl	 & Bottom left \\
+.bc	 & Bottom centre \\
+.br	 & Bottom right \\
+.rc	 & Right centre  \\
+.lc	 & Left centre  \\
+.cc	 & Centre \\
+.v 	 & Vertical line \\
+.h 	 & Horizontal line \\
+.c	 & Circle/ellipse clipping (for drawing lines to, e.g., a circle) \\
+.box & Box clipping \\ \hline
+\end{tabular}
+\end{table}
+
+It is also possible to name an individual point (instead of an object). To do so, simply move there and save that point as a named object.
+
+\begin{verbatim}
+   amove 2 3; save apoint
+   join apoint - square
+\end{verbatim}
+
+The functions ``pointx'' (abbreviated to ``ptx'', see p.~\pageref{fct:pointxy}), ``pointy'' (abbreviated to ``pty''), ``width'', and ``height'' (p.~\pageref{fct:wdhi}) apply to named points and objects. They retrieve the ``x'' respectively ``y'' coordinate of a named point, and the width and height of a named object. For example:
+
+\begin{verbatim}
+   print ptx(square.tr)
+   print pty(square.tr)
+   print width(square)
+   print height(square)
+\end{verbatim}
+
+\subsubsection{Complete Example}
+
+Below is a complete example that makes use of the constructs described above. The resulting figure is shown in Fig.~\ref{fig:joindiag}.
+
+\begin{verbatim}
+begin name line
+   amove 8 18
+   rline 0 -6
+end name
+
+begin name main
+   amove 9.5 6.5
+   ellipse 2 0.8
+   write "Main"
+end name
+
+amove 3 16
+begin box name grv add 0.3 round 0.3 fill lightcyan
+   write "GRV"
+end box
+
+amove 12.5 16.5
+begin box name cheese add 0.3 fill lightcyan
+   write "Cheese"
+end box
+
+amove 15.5 11.5
+begin box name chv add 0.3 fill lightcyan
+   write "CHV"
+end box
+
+amove 3 10
+begin box name goats add 0.3 fill lightcyan
+   write "Goats"
+end box
+
+amove 13 1.5
+begin box name hi add 0.3 fill lightcyan
+   write "Hi there"
+end box
+
+join chv -> goats                           ! ".box" is default and can be omitted
+join grv -> line.h                          ! ".h" means to join horizontally
+join line.h <-> cheese.tl
+join cheese.rc -> chv.tc curve 0 90 1.5 1
+join main.c <- hi                           ! ".c" is used for circles
+join main.c <- chv
+join main.c <- goats
+\end{verbatim}
+
+\begin{figure}[tb]
+\centering
+\scalebox{0.4}{\includegraphics{advanced/fig/join}}
+\caption{\label{fig:joindiag}Joining named points.}
+\end{figure}
+
+\subsection{Object Blocks and Hierarchically Named Points}
+\label{sec:objblocks}
+
+The ``begin/end name'' (p.~\pageref{cmd:beginname}) construct names the object that results from the drawing commands in this block. The ``begin/end object'' (p.~\pageref{cmd:beginobject}) is similar, but it does not actually draw the object. It rather defines an object that can be drawn later by means of the ``draw'' command (p.~\pageref{cmd:draw}). An object block is therefore very similar to a subroutine. It actually works in the same way as a subroutine, but it is `executed' by the ``draw'' command rather than by a regular subroutine call. An object block can also have parameters. Here is an example of an object block that defines a house.
+
+\begin{verbatim}
+begin object house
+   ! draw a house with a named door and window
+   set join round
+   ! draw the roof
+   begin path stroke fill lightsalmon
+      amove 0 1.625
+      aline 1.25 2.5
+      aline 2.5 1.625
+      closepath
+   end path
+   ! draw the brick wall
+   amove 0 0
+   box 2.5 1.625 fill cornsilk
+   ! draw the door
+   amove 1.5 0
+   box 0.75 1.375 fill burlywood name door
+   ! draw the window
+   amove 0.25 0.625
+   box 1 0.75 fill skyblue name window
+end object
+\end{verbatim}
+
+To draw the house defined by the above block, one uses the following draw command. The first argument of the command is the name of the object followed by a dot followed by a justify option (Table~\ref{tab:justopt}). The justify option is used to position the object. In this case, the house is drawn such that its bottom-centre point is horizontally in the middle of the figure and at a height of 1.5 cm.
+
+\begin{verbatim}
+amove pagewidth()/2 1.5
+draw house.bc
+\end{verbatim}
+
+The ``draw'' command names the object using the same name as the name of the object block by default. An alternative name can be given using its ``name'' option. In this example, the resulting object on the figure will be called ``house''. Note that the object definition for the house also includes names for the sub-objects ``door'' and ``window''. These names can be accessed using the ``dot'' notation as follows:
+
+\begin{verbatim}
+print ptx(house.door.cc)
+print pty(house.door.cc)
+\end{verbatim}
+
+These so-called hierarchical object names can also be used to position the object. The following example draws the house such that its door's centre point is at position (5, 5).
+
+\begin{verbatim}
+amove 5 5
+draw house.door.cc
+\end{verbatim}
+
+By using the ``draw'' command inside an object's definition, names can be arbitrary nested. For example, if ``door'' would be defined as an object block that includes the name ``handle'', and if the object block defining ``house'' would include a draw command to draw the object ``door'', then the global name of the door's handle becomes ``house.door.handle''.
+
+The hierarchical object names can be used to refer to points on the object. The following example shows how these can be used with the pointx and pointy function to draw labels on the figure.
+
+\begin{verbatim}
+set just lc
+amove pointx(house.rc)+0.5 pointy(house.door.cc)
+begin name doorlabel add 0.05
+   write "house.door.cc"
+end name
+
+set just rc
+amove pointx(house.lc)-0.5 pointy(house.window.cc)
+begin name windowlabel add 0.05
+   write "house.window.cc"
+end name
+
+join windowlabel.rc -> house.window.cc
+join doorlabel.lc -> house.door.cc
+\end{verbatim}
+
+The resulting figure is shown in Fig.~\ref{fig:house}. The file ``shape.gle'' that is distributed with GLE contains object block definitions for many useful shapes.
+
+\begin{figure}[tb]
+\centering
+\includegraphics{advanced/fig/house}
+\caption{\label{fig:house}Drawing objects and hierarchically named points.}
+\end{figure}
+
+\section{\texorpdfstring{\LaTeX{} Interface}{LaTeX Interface}}	
+\index{\LaTeX{} expression}
+\index{tex}
+\label{latexexp:sec}
+
+\subsection{Example}
+\index{}
+
+GLE files can include arbitrary \LaTeX{} expressions using the \LaTeX{} interface. There are two ways to include a \LaTeX{} expression. The first one is by using the `\texttt{tex}' primitive. The second one is by using the `\texttt{$\backslash{}$tex\{\}}' macro in a string.
+
+\preglegraph{}
+\begin{minipage}[c]{5cm}
+\begin{Verbatim}[baselinestretch=1,fontsize=\small,fontshape=n]
+set texlabels 1
+begin graph
+  ...
+  title "Plot of $f(x) = 
+         \frac{x-\sqrt{5}}{(x-1)\cdot(x-4)}$"
+  xtitle "$x$"
+  ytitle "$y = f(x)$"
+  ...
+end graph
+
+set just bc
+amove xg(sqrt(5)) yg(2.5)
+tex "$\sqrt{5}$" add 0.1 name sq5b
+
+amove xg(sqrt(5)) yg(0); save sq50
+join sq5b.bc -> sq50
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\input{advanced/fig/texgraph.inc}
+\end{minipage}
+\postglegraph{}
+
+\LaTeX{} expressions are drawn on top of all other graphics and cannot clipped (Sec.~\ref{clip:sec}).
+
+\LaTeX{} expressions respect the `\texttt{just}' setting and, depending on the value of `\texttt{texscale}', also the `\texttt{hei}' setting (the font size). If `\texttt{set texscale scale}' is used, then \LaTeX{} expressions are scaled to the value of `\texttt{hei}'. If `\texttt{set texscale none}' is used, then \LaTeX{} expressions are not scaled. As a result, the font sizes in your graphics will be exactly the same as in your main document. To obtain different font sizes, use the font size primitives provided by \LaTeX{} (e.g., \texttt{$\backslash$large}, $\ldots$). Finally, if `\texttt{set texscale fixed}' is used, then the default \LaTeX{} size that most closely matches the value of `\texttt{hei}' is selected.
+
+\subsection{Using LaTeX Packages}\index{LaTeX packages}
+
+If your \LaTeX{} expressions require special \LaTeX{} packages, these can be loaded using the \texttt{texpreamble} block. E.g., put the following near the beginning of your GLE file:
+
+\begin{verbatim}
+begin texpreamble
+    \documentclass{llncs}
+    \usepackage{amsmath}
+    \usepackage{amssymb}
+    \DeclareMathSymbol{\R}{\mathbin}{AMSb}{"52}
+end texpreamble
+\end{verbatim}
+
+\subsection{Using UTF-8 Encoding in GLE Scripts with LaTeX Expressions}\index{UTF-8}\index{Unicode}
+
+If you save your .gle files in Unicode (UTF-8) encoding, then you can type accented characters (such as \'e, \"u, \v{z}, \ldots) directly into your GLE script. In order to also allow such encoded characters in \LaTeX{} expressions, add the following `texpreamble' to your GLE script:
+
+
+\verb+size 4 4+\\
+\verb+begin texpreamble+\\
+\verb+   \usepackage[utf8]{inputenc}+\\
+\verb+end texpreamble+\\
+\texttt{amove 1 2; tex "\'e\"u\v{z}"}
+
+\subsection{Import a GLE Figure in a LaTeX Document}
+
+There are two methods for importing the output of a GLE file with \TeX{} expressions in your \LaTeX{} document. The most obvious one is by just importing the .eps/.pdf file generated by GLE with \texttt{$\backslash$includegraphics}. E.g., if you have a GLE script `sin.gle' and you run `gle -d eps -d pdf sin.gle' to produce the .eps/.pdf output, then you could include this in a LaTeX document as follows:
+
+\begin{verbatim}
+\documentclass{article}
+\usepackage{graphics}
+\begin{document}
+   \begin{figure}
+      \includegraphics{sin}
+      \caption{\label{sin}The sine function.}
+   \end{figure}
+\end{document}
+\end{verbatim}
+
+An alternative method is by using GLE's command line option `\texttt{-inc}'. If this option is supplied, then GLE will create besides the usual .eps or .pdf file also an .inc file.  This .inc file can be imported in a \LaTeX{} document as follows.
+
+\begin{verbatim}
+\input{myfile.inc}
+\end{verbatim}
+
+The .inc file tells \texttt{latex} (or \texttt{pdflatex}) to include the .eps/.pdf output file created by GLE. It also includes \TeX{} draw commands for drawing the \LaTeX{} expressions on top of the GLE output. Note that the .eps/.pdf file created by GLE does not include these if \texttt{-inc} is used (you can check this by viewing it with GhostView).
+
+To be able to include .inc files, the following must be included in the preamble of your \LaTeX{} document.
+
+\begin{verbatim}
+\usepackage{graphics}
+\usepackage{color}
+\end{verbatim}
+
+\begin{sloppypar}
+If you place your .gle files in a subdirectory of the directory where your \LaTeX{} document resides, the .inc file created by GLE should include the path to this subdirectory in the `\texttt{$\backslash$includegraphics}' primitive it uses for including the .eps/.pdf file generated by GLE. To add this path, use the `\texttt{-texincprefix}' command line option of GLE. For example, if your GLE files are in a subdirectory called `plots' then one should run GLE as follows.
+\end{sloppypar}
+
+\begin{verbatim}
+gle -texincprefix "plots/" -inc myfile.gle
+\end{verbatim}
+
+GLE can color and rotate \LaTeX{} expressions (use `\texttt{set color}' and `\texttt{begin rotate}'). Note however that `\texttt{xdvi}' does not support these effects, so you will not be able to see them if you use this viewer. In the final PostScript or PDF output, they will of course be displayed correctly.
+
+The main advantage of using the \texttt{-inc} method is that the resulting file size will be smaller because the \LaTeX{} fonts are not included in the .eps/.pdf file generated by GLE.
+
+\subsection{The .gle Directory}
+
+If your source includes \LaTeX{} expressions, then GLE will construct a subdirectory called `.gle' for storing temporary files (e.g., used for measuring the printed size of the \LaTeX{} expressions). After you are finished you can safely delete the .gle directory. GLE will recreate it automatically if required.
+
+\section{Filling, Stroking and Clipping Paths}
+\index{paths}
+\index{stroking}
+\index{clip}
+\index{clipping}
+\label{clip:sec}
+It is possible to set up arbitrary clipping regions.  To do
+this draw a shape and make it into a path by putting 
+a {\sf begin path clip} ... {\sf end path},  around it.  Then draw the things to 
+be clipped by that region.  To clear a clipping path 
+surround the whole section of GLE commands with  {\sf begin clip ... end clip}
+
+	Characters can be used to make up clipping paths, but only the
+PostScript fonts will currently work for this purpose.
+
+\begin{verbatim}
+     size 10 5 
+     begin clip       ! Save current clipping path
+        begin path clip stroke  ! Define new clipping region
+           amove 2 2 
+           box 3 3 
+           amove 6 2 
+           box 3 3 
+        end path
+        amove 2 2 
+        set hei 3
+        text Here is clipped text
+     end clip         ! Restore original clipping path
+\end{verbatim}
+
+\psgraphin{advanced/fig/gc_clip}{10.0}{5.0}{\sf begin clip}
+
+\section{Colour}
+\index{fill patterns}
+\index{color (variables)} 
+
+Internally GLE treats color and fill identically, they are simply an intensity of red, green and blue. Each of the predefined color names (yellow, grey20, orange, red) simply define the ratio of red, green and blue. A sample of the predefined color names is included in Appendix~\ref{colors:sec}.
+
+\index{color-variables}
+There are two ways to use variables to show color, one is for shades of grey:
+\begin{verbatim}
+     for i = 0 to 10
+        box 3 .2 fill (i/10)
+        rmove 0 .2
+     next i
+\end{verbatim}
+The other is for passing a color {\bf name} as a variable:
+\begin{verbatim}
+     sub stick c$
+        box .2 2 fill c$
+     end sub
+     stick "green"	
+\end{verbatim}
+
+\index{cvtrgb()}\index{rgb255()}\index{RGB}
+A color can also be defined based on its RGB values with the \texttt{rgb255} primitive.
+\begin{verbatim}
+mycolor$ = "rgb255(38,38,134)"
+\end{verbatim}
+
+\index{filling}
+Remember a fill pattern completely obscures what is behind it, 
+so the following command would produce a box with a shadow:
+\begin{verbatim}
+     amove 4 4 
+     box 3 2 fill grey10
+     rmove -.1 .1
+     box 3 2 fill white
+     rmove .4 .4
+     text hellow
+\end{verbatim}
+
+\section{GLE's Configuration File} \label{conffile:sec}
+
+GLE reads two configuration files during initialization. The first configuration file is the file ``glerc'' located in the root of your GLE installation. This location is usually referred to as \$GLE\_TOP. To find out where your \$GLE\_TOP is, run ``\texttt{gle -info}''. The second configuration file is the file ``.glerc'' located in your home directory (Unix and Mac OS/X only). The commands in this second file override the commands in \$GLE\_TOP/glerc.
+
+The configuration files can be used to set various options, such as the paper size and margins.
+
+To set the paper size and margins, add the following block to the configuration file.
+
+\preglecode{}
+\begin{verbatim}
+begin config paper
+     size = letterpaper
+     margins = 2.54 2.54 2.54 2.54
+end config
+\end{verbatim}
+\postglecode{}
+
+The supported paper sizes are listed with the description of the ``\texttt{papersize}'' command on page~\pageref{papsiz:cmd}.
+
+The configuration file can also be used to override default locations of external tools such as GhostScript and LaTeX.
+
+\preglecode{}
+\begin{verbatim}
+begin config tools
+     ghostscript = $HOME/bin/gs
+     pdflatex = /usr/bin/pdflatex
+     latex = /usr/bin/latex
+     dvips = /usr/bin/dvips
+     dvips_options = "-j0"
+end config
+\end{verbatim}
+\postglecode{}
+
+Note that GLE expands environment variables in the tool locations. If I'm john, then GLE will search for GhostScript in \verb+/home/john/bin/gs+ in the above example. It is also possible to specify additional command line options to be passed to the tools by means of \verb+ghostscript_options+, \verb+pdflatex_options+, \verb+latex_options+, and \verb+dvips_options+. In the above example, the option ``\verb+-j0+'' will be passed to dvips. As a result, it will not subset fonts.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

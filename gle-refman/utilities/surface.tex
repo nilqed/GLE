@@ -1,0 +1,383 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Surface and Contour Plots}
+\label{surf:chap}
+
+\section{Surface Primitives}
+
+\subsection{Overview}
+
+\index{Surface}
+Surface plots three dimensional data using a wire frame with hidden line removal.
+
+The simplist surface code would look like this.
+\preglecode{}
+\begin{Verbatim}
+begin surface
+   data "myfile.z" 5 5
+end surface
+\end{Verbatim}
+\postglecode{}
+
+The surface block can contain the following commands:\\
+{\sf size {\it x }  {\it y }}\\	
+{\sf cube [off]  [xlen {\it v}\ ] [ylen {\it v}\ ] [zlen {\it v}\ ] [nofront]  [lstyle {\it l\ }]  [color {\it c\ }]  }\\	
+{\sf data {\it myfile.z}  [xsample {\it n1}\ ] [ysample {\it n2}\ ] [sample {\it n3}\ ]  [nx {\it n1}\ ] [ny {\it n2}\ ] }\\
+{\sf harray {\it n} \ }\\
+{\sf xlines ---  ylines [off]}\\
+{\sf xaxis  --- yaxis --- zaxis [min {\it v}\ ]  [max {\it v}\ ]  [step {\it v}\ ]  [color {\it c}\ ] [lstyle {\it l}\ ] [hei {\it v}\ ] [off] }\\
+{\sf xtitle ---	ytitle --- ztitle "{\sf title}"  [dist {\it v}\ ] [color {\it c}\ ] [hei {\it v}\ ] }\\
+{\sf title "{\it main title}"  [dist {\it v}\ ] [color {\it c}\ ] [hei {\it v}\ ] }\\
+{\sf rotate $\theta$\  $\phi$\  x}\\
+{\sf view x y p}\\
+{\sf top --- underneath \  [off]\ [lstyle {\it n} \ ]\ [color {\it c}\ ]}\\
+{\sf back [zstep {\it v}\ ] [ystep {\it v}\ ] [lstyle {\it l}\ ] [color {\it c}\ ] [nohidden] }\\
+{\sf base [xstep {\it v}\ ] [ystep {\it v}\ ] [lstyle {\it l}\ ] [color {\it c}\ ] [nohidden] }\\
+{\sf right [zstep {\it v}\ ] [xstep {\it v}\ ] [lstyle {\it l}\ ] [color {\it c}\ ] [nohidden] }\\
+{\sf skirt on}\\
+{\sf points {\it myfile.dat} }\\
+{\sf marker {\it circle}\  [hei {\it v} \ ] [color {\it c} \ ] }\\
+{\sf droplines --- riselines \ [color {\it c}\ ] [lstyle {\it n}\ ]}\\
+{\sf zclip [min {\it v1}\ ]  [max {\it v2}\ ]}\\
+%
+%
+
+\subsection{Surface Commands}
+\begin{commanddescription}
+\item[{\sf size {\it x} \  {\it y}}]
+\index{size}
+Specifies the size in cm to draw the surface.  The 3d cube
+will fit inside this box.  The default is 18cm x 18cm 
+e.g. \verb# size 10 10#
+
+\item[{\sf cube [off]  [xlen {\it v}\ ] [ylen {\it v}\ ] [zlen {\it v}\ ] [nofront]  [lstyle {\it l}\ ]  [COLOR {\it c}\ ]  }]
+Surface is drawing a 3d cube.
+
+\begin{tabular}{ll}
+off     & Stops GLE from drawing the cube.\\
+xlen    & The length of the cubes x dimension in cm.\\
+nofront & Removes the front three lines of the cube.\\
+lstyle  & Sets the line style to use drawing the cube.\\
+color   & Sets the color of lines to use drawing the cube.\\
+\end{tabular}
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin surface
+   size 7 7
+   data "jack.z"
+   cube zlen 13
+   top color orange
+   underneath color red
+end surface
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{utilities/fig/surf5}}
+\end{minipage}
+
+\item[{\sf data {\it myfile.z}  [xsample {\it n1}\ ] [ysample {\it n2}\ ] [sample {\it n3}\ ]  [nx {\it n1}\ ] [ny {\it n2}\ ]}]
+\index{data}\label{zfile:pg}
+Loads a file of Z values in.  The NX and NY dimensions
+are optional, normally the dimensions of the data will
+be defined on the first line of the data file. e.g.
+\begin{verbatim}
+	! nx 10  ny 20    xmin 1 xmax 10 ymin 1 ymax 20
+	1 2 42 4 5 2 31 4 3 2 4
+	1 2 42 4 5 2 31 4 3 2 4 etc...
+	
+	y1,x1, y1,x2	...	y1,xn
+	y2,x1, y2,x2	...	y2,xn
+        .
+	.
+	.
+	yn,x1, yn,x2	...	yn,xn
+\end{verbatim}
+
+Data files can be created using LETZ or FITZ.
+LETZ will create a data file from an x,y function.
+FITZ will create a data file from a list of x,y,z data points.
+
+\begin{tabular}{ll}
+xsample & Tells surface to only read every n'th data point from\\
+        & the data file.  This speeds things up while you are\\
+        & messing around.\\[1.5ex]
+ysample & Tells surface to only read every n'th line from the\\
+        & data file.\\[1.5ex]
+sample  & Sets both xsample and ysample\\
+\end{tabular}
+(see also POINTS)
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin surface
+   size 5 5 
+   xtitle "X-axis"
+   ytitle "Y-axis"
+   data   "surf1.z"
+end surface
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{utilities/fig/surf1}}
+\end{minipage}
+
+\item[{\sf harray {\it n}}]
+\index{harray}
+The hidden line removal is accomplished with the help of
+an array of heights which record the current horizon,  the
+quality of the output is proportional to the width of this
+array.  (also the speed of output)
+
+To get good quality you may want to increase this from
+the default of about 900 to 2 or 3 thousand. 
+e.g. \verb# harray 2000#
+
+\item[{\sf xlines off}]
+\index{xlines}
+Stops SURF from drawing lines of constant X.
+
+\item[{\sf ylines off}]
+\index{ylines}
+Stops SURF from drawing lines of constant Y.
+
+\item[{\sf xaxis [min {\it v}\ ]  [max {\it v}\ ]  [step {\it v}\ ]  [color {\it
+c}\ ] [lstyle {\it l}\ ] [hei {\it v}\ ] [off] }]
+\index{xaxis}
+
+\item[{\sf zaxis [min {\it v}\ ]  [max {\it v}\ ]  [step {\it v}\ ]  [color {\it
+c}\ ] [lstyle {\it l}\ ] [hei {\it v}\ ] [off] }]
+\index{zaxis}
+
+\item[{\sf yaxis [min {\it v}\ ]  [max {\it v}\ ]  [step {\it v}\ ]  [color {\it
+c}\ ] [lstyle {\it l}\ ] [hei {\it v}\ ] [off] }]
+\index{yaxis}
+
+\begin{tabular}{ll}
+min,max & Set the range used for labelling the axis.\\
+step    & The distance between labels on the axis.\\
+color   & The color of the axis ticks and labels.\\
+lstyle  & The line style used for drawing the ticks.\\
+ticklen & The length of the ticks.\\
+hei     & The height of text used for labelling.\\
+off     & Stops GLE from drawing the axis.\\
+\end{tabular}
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin surface
+   size 5 5 
+   data "surf1.z"
+   zaxis min -1 max 3
+   base xstep 0.5 ystep 0.5
+   back ystep 1 zstep 1 
+   right xstep 0.5 zstep 0.5 lstyle 2
+   xtitle "X-axis" hei 0.3
+   ytitle "Y-axis" hei 0.3
+end surface
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{utilities/fig/surf2}}
+\end{minipage}
+
+\item[{\sf xtitle "{\sf x title}"  [dist {\it v}\ ] [color {\it c}\ ] [hei {\it v}\ ]}]
+\index{xtitle}
+
+\item[{\sf ytitle "{\sf y title}"  [dist {\it v}\ ] [color {\it c}\ ] [hei {\it v}\ ]}]
+\index{ytitle}
+
+\item[{\sf ztitle "{\sf z title}"  [dist {\it v}\ ] [color {\it c}\ ] [hei {\it v}\ ]}]
+\index{ztitle}
+
+\begin{tabular}{ll}
+dist 	& Moves the title further away from the axis.\\
+color	& Sets the color of the title.\\
+hei  	& Sets the hei in cm of the text used for the title.\\
+\end{tabular}
+
+\item[{\sf title "{\it main title}"  [dist {\it v}\ ] [color {\it c}\ ] 
+[hei {\it v}\ ] }]
+\index{title}
+
+\begin{tabular}{ll}	
+dist   & Moves the title further away from the axis.\\
+color  & Sets the color of the title.\\
+hei    & Sets the hei in cm of the text used for the title.\\
+\end{tabular}
+
+\item[{\sf rotate\  $\theta$\  $\phi$\  x }]
+\index{rotate}
+\begin{verbatim}
+rotate 10 20 30
+\end{verbatim}
+Imagine the unit cube is sitting on the front of your
+terminal screen, x along the bottom, y up the left hand
+side, and z coming towards you.
+
+The first number (10) rotates the cube along the xaxis, ie
+hold the right hand side of the cube and rotate your hand
+clockwise 10 degrees.
+
+The second number (20) rotates the cube along the yaxis, ie
+hold the top of the cube and rotate it 20 degrees clockwise.
+
+The third number is currently ignored.
+
+The default setting is 60 50 0.
+
+\item[{\sf view x y p }]
+\index{view}
+Sets the perspective, this is where the cube gets smaller
+as the lines dissappear towards infinity.
+
+x and y are the position of infinity on your screen.
+p is the degree of perspective, 0 = no perspective
+and with 1 the back edge of the box will be touching
+infinitiy.  Good values are between 0 and 0.6
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin surface
+   size 5 5
+   data "surf1.z"
+   zaxis min -1
+   rotate 85 85 0
+   view 0 5 0.7
+end surface
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{utilities/fig/surf4}}
+\end{minipage}
+
+\item[{\sf top [off]\ [lstyle {\it n} \ ]\ [color {\it c}\ ] }]
+\index{top}
+Sets the features of the top of the surface.
+By default the top is on.
+
+(see also {\sf UNDERNEATH, XLINES, YLINES})
+
+\item[{\sf underneath [off]\ [lstyle {\it n} \ ]\ [color {\it c}\ ] }]
+\index{underneath}
+Sets the features of the under side of the surface.
+By default the underneath is off.
+
+(see also TOP, XLINES, YLINES)
+
+\item[{\sf back [zstep {\it v}\ ] [ystep {\it v}\ ] [lstyle {\it l}\ ] [color {\it c}\ ] [nohidden] }]
+\index{back}
+Draws a grid on the back face of the cube.
+
+By default hidden lines are removed but {\sf NOHIDDEN} will
+stop this from happenning.
+
+\item[{\sf base [xstep {\it v}\ ] [ystep {\it v}\ ] [lstyle {\it l}\ ] [color {\it c}\ ] [nohidden] }]
+\index{base}
+Draws a grid on the base of the cube.
+
+By default hidden lines are removed but {\sf NOHIDDEN} will
+stop this from happenning.
+
+\item[{\sf right [zstep {\it v}\ ] [xstep {\it v}\ ] [lstyle {\it l}\ ] [color {\it c}\ ] [nohidden] }]
+\index{right}
+Draws a grid on the right face of the cube.
+
+By default hidden lines are removed but {\sf NOHIDDEN} will
+stop this from happenning.
+
+\item[{\sf skirt on}]
+\index{skirt}
+Draws a skirt from the edge of the surface to {\sf ZMIN}.
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+begin surface
+   size 5 5 
+   data "surf1.z"
+   zaxis min -1 max 3
+   xtitle "X-axis"
+   ytitle "Y-axis"
+   ztitle "Z-axis"
+   points "surf3.dat"
+   riselines lstyle 2
+   marker fcircle
+   skirt on
+   rotate 60 35 0
+   view 2.5 3 0.6
+end surface
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{utilities/fig/surf3}}
+\end{minipage}
+
+\item[{\sf points {\it myfile.dat} }]
+\index{points}
+Reads in a data file which must have 3 columns (x,y,z)
+
+This is then used for plotting markers and
+rise and drop lines.
+
+\item[{\sf marker {\it circle}\  [hei {\it v} \ ] [color {\it c} \ ]}]
+\index{marker}
+Draws markers at the co-ordinates read from the {\sf POINTS} file.
+
+\item[{\sf droplines [color {\it c}\ ] [lstyle{\it n}\ ] }]
+\index{droplines}
+Draws lines from the co-ordinates read from the {\sf POINTS} file
+down to zmin.
+
+\item[{\sf riselines [color {\it c}\ ] [lstyle {\it n}\ ]}]
+\index{riselines}
+Draws lines from the co-ordinates read from the {\sf POINTS} file
+up to zmax.
+
+\item[{\sf zclip  [min {\it v1}\ ]  [max {\it v2}\ ] }]
+\index{zclip}
+{\sf ZCLIP} goes through the Z array and sets any Z value smaller
+than {\sf MIN} to {\it v1} and sets any value greater 
+than {\sf MAX} to {\it v2}.
+
+\end{commanddescription}

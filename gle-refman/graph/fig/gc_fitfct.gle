@@ -1,0 +1,35 @@
+size 7 7
+
+include "../../script/manual.gle"
+
+a = 0; b = 0; c = 0; d = 0; r = 0
+
+manual_graph_mode
+set atitlescale 1
+amove 0 1.5
+begin graph
+   size 7 5.5
+   scale  auto
+   xtitle "$x$"
+   ytitle "$f(x)$"
+   title  "$f(x) = a\sin(bx)+cx^2+d$"
+   xaxis min 0  max 10
+   yaxis min -4 max 14
+   data   "gc_fitfct.csv"
+   let d2 = fit d1 with a*sin(b*x)+c*x^2+d rsq r eqstr eq$
+   d1 marker circle msize 0.15 color blue
+   d2 line color red
+end graph
+
+set texscale scale
+
+fct$ = "$f(x) = "+format$(a,"fix 2")+ &
+       "\sin("+format$(b,"fix 2")+"x)+"+ &
+       format$(c,"fix 2")+"x^2+"+ &
+       format$(d,"fix 2")+"$"
+
+begin key
+   pos br nobox hei 0.3 offset 0.05 0.1
+   text fct$
+   text "$r^2$ = "+format$(r,"fix 3")
+end key

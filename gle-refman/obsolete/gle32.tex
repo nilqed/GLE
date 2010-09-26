@@ -1,0 +1,326 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{center}
+\begin{minipage}[t]{11.0cm}
+{\scriptsize
+\begin{verbatim}
+	32 bit DOS version of GLE by Axel Rohde
+	---------------------------------------
+Introduction: (By Chris)
+	For a long time I have been explaining to people that a 32bit 
+	dos version of GLE was not possible with currently available 
+	compilers and libraries.
+	Clearly Axel has no appreciation for the impossible and has gone
+	ahead and compiled a version anyway (with absolutely no asistance
+	from me).  On any 386 or better machine this version of GLE should 
+	run without problems, it's main features are these:
+		1) No 640K memory restrictions.
+		2) Much faster.
+
+Installation Quick guide:       (By Chris)
+
+	1) FTP the binary distribution
+		ftp tui.marc.cri.nz
+		cd pub/gle/gle32
+		binary
+		mget gle32bi*.zip
+	2) Unzip them keeping the directory structure
+		cd c:\
+		pkunzip gle32bi1.zip -d
+		pkunzip gle32bi2.zip -d
+		pkunzip gle32bi3.zip -d
+		pkunzip gle32bi4.zip -d
+		pkunzip gle32bi5.zip -d
+		pkunzip gle32bi6.zip -d
+	3) Edit the batch file which tells gle where to find it's fonts
+	and also what sort of graphics card you have.  
+		edit setgle32.bat
+			(change the disk and directory as appropriate)
+	4) Run the batch script
+		setgle32
+	5) Try out the new version
+		gle_vga
+	6) Note most of the programs have been renamed to avoid conflicts!!!
+
+
+	Below are the more detailed instructions provided by Axel Rohde.
+	Read these carefully if you have any problems.
+\end{verbatim}
+}
+\end{minipage}
+\end{center}
+\clearpage
+\begin{center}
+\begin{minipage}[t]{11.0cm}
+{\scriptsize
+\begin{verbatim}
+                 Installation-manual and documentation 
+                     for the 32-Bit DOS version of
+                                GLE 3.3 b 
+
+                               by Axel Rohde
+
+
+ The source-Code of GLE is free and available from many FTP-sites
+ (e.g. nic.funet.fi, ftp.informatik.uni-stuttgart.de). GLE 32 is a
+ implementation of GLE for MS-DOS. It was compiled with the free port
+ of the GNU C-compiler DJGPP by D.J. Delorie. The compiler itself and
+ the DJGPP-compiled executables are running with the 32-bit DOS-extender
+ GO32 by the same author. Thus, GLE 32 runs only on i386SX and above CPUs.
+ GO32 comes with a co-processor-emulator for those without a i387xx
+ Real-mode co-prozessor-emulators don't work with GO32. 
+
+ GLE was compiled using Borland-C compatible libraries for text and
+ graphics-modes and some filesystem calls.
+ There exists for the DJGPP specific graphics-library GRX from Csaba Biegl
+ a emulation-library called BCCGRX from Hartmut Schirmer
+ to replace calls of the Borland-Graphics-Interface (BGI) with GRX-calls.
+ Hartmut has implemented the mouse-functionality, too, with GRX-calls.
+ Copyright statements are at the end of this file.
+
+                      Properties of GLE 32
+
+ - All programs are running in the 386-protected-mode and therefore there is
+   neither a limited 640kB adress-range nor a 64kB segmentation.
+ - 32-bit programs are running faster than their 16-bit-counterparts.
+ - There exists a multitude of GRX-graphics-drivers, e.g. for
+   TSENG ET4000(W32), S3, 8514A, Cirrus Logic GD 542x, Trident 8900,
+   Diamond Viper, ATI Ultra, ATI VGA and EGA. These drivers are highly
+   configureable and can use flicker-free high resolution modes.
+
+   
+                            Installation
+
+  To understand the next lines, you should have a basic knowledge of
+  the MS-DOS operating system and PC-hardware. Take a look into
+  your DOS-manual and your hardware documentation in case of doubt.
+  
+  The DOS-Extender GO32 1.11 has different modes of operation:
+
+  1) VCPI: VCPI is an extension to EMS. EMS can be installed by
+     the driver EMM386.EXE of MS-DOS 5.0 and higher.
+     The (unoptimized) entry in the system-file CONFIG.SYS looks
+     like the follwing lines:
+     
+        DOS=high,umb
+        device=c:\dos\himem.sys
+        device=c:\dos\emm386.exe RAM 2048
+     
+     This entry installs 
+     a) 2 MB EMS in the memory area above 1MB,
+     b) a page-frame with a size of 64kB between the memory area
+        of the graphics-board and the BIOS (upper memory).
+     Programs, that use VCPI-calls, can NOT run under Windows or the
+     DOS-emulation of OS/2 2.x. Other products, such as QEMM386 can
+     also be used.
+\end{verbatim}
+}
+\end{minipage}
+\end{center}
+\clearpage
+\begin{center}
+\begin{minipage}[t]{11.0cm}
+{\scriptsize
+\begin{verbatim}
+     2) DPMI: DPMI can be installed with special drivers like QDPMI (along 
+     with QEMM 6.0 or higher) or 386ToTheMax 7.x. Both the DOS-emulation 
+     of OS/2 2.x and Windows 3.x provide DPMI as a default. The
+     DPMI-interface does not allows direct access to (graphics-)hardware.
+     Only those programs, that don't use graphic-mode, can run with
+     DPMI. I had a lot of total system crashes while running
+     some of the text-mode programs of GLE under OS/2 2.1. I recommend
+     to run GLE 32 under plain DOS.
+
+
+   To avoid name-conflicts between a 16-bit and a 32-bit version of GLE,
+   all the programs and the environment-variables were renamed.
+   All GLE-programs have now unix-style names like 'gle_ps' (='psgle'-
+   Postscript-output), 'gle_vga' (='cgle' - VGA-Preview) etc. The names
+   of the utilities end with '32' -  'manip32', 'contou32'.... 
+  
+   In the example on the following lines, the progams are installed in the
+   directory d:\gle32, the fonts are in d:\gle32\fonts. GLE 32 searches for
+   its vector-fonts in the directory GLE_TOP. Don't forget the trailing slash.
+   In addition to this, GL32FONT points to the directory where the bitmap-fonts
+   (you can see them in the status-line of the preview) can be found.
+   The directory with the DOS-Extender GO32 and, if there's no
+   numeric-prozessor installed, the co-prozessor-emulator, must be in the
+   path-environment.
+
+     set GLE_TOP=d:/gle32/
+     set gle32font=d:/gle32/grxfont
+     path=..your normal path..;d:\gle;
+     go32=driver d:/gle32/driver/vesa_s3.grn gw 1024 gh 768 tw 80 th 25 nc 256 
+
+   The configuration of graphics-drivers is a little bit more complicated.
+   Please study the documentation of the Libraries GRX und BCCGRX and
+   the README of GO32 in their directories.
+   The environment GO32 sets den path-name and the mode of the driver
+   an. This example installs the driver for an S3 graphics-board with a
+   resolution of 1024 horizontal 768 vertical pixels and 256 colors.
+
+   There's a second way to install a graphics-mode. If the environment-
+   variables GLE32WIDTH, GLE32HEIGHT and GLE32COLORS are set, the graphics-
+   mode in the GO32 variable is overridden. You still have to specify a
+   driver in the GO32 environment.
+
+       set GLE32WIDTH=800
+       set GLE32HEIGHT=600
+       set GLE32COLORS=16
+
+   There's a prepared batch-file 'setgle32.bat' to set all the environment-
+   variables in the directory gle32.
+
+   To figure out, which modes are supported, try to run the program
+   modetest in the directory gle32\driver\doc
+                          !!!! WARNING !!!!
+   A wrong installed graphics-mode can DESTROY your MONITOR (and/or graphics
+   board) if the refresh rate is too high!
+                       USE THIS ON YOUR OWN RISK!!!
+   You should take a look into the manuals of your monitor and your
+   graphics-adapter to figure out, which horizontal frequencies are supported.
+   If the horizontal frequency of the monitor is 64 kHz or higher,
+   you MAY feel save. (MY Monitor has a horizontal frequency of 64 kHz and
+   supports a resolution of 1024x768 with a refresh rate up to 80Hz.)
+   If you want to go save, don't set the environment go32 at all!
+   This will use the normal (flickering) VGA-mode on a VGA-compatible
+   adapter.
+\end{verbatim}
+}
+\end{minipage}
+\end{center}
+%%\clearpage
+\begin{center}
+\begin{minipage}[t]{11.0cm}
+{\scriptsize
+\begin{verbatim}
+		       RESTRICTIONS and BUGS
+		
+   1) The vector-fonts of the 32-bit-version are NOT compatible to their
+      16-bit-counterparts. They may be compatible to fonts that were created
+      under other 32-bit operating-systems.
+   2) The on-line-help of gle_vga is usable but may sometimes look different
+      compared to the original.
+   3) Makefmt and fbuild are missing. DJGPP's Library lacks ecvt().
+      Both programs are used to calculate vector-fonts in the Unix-version
+      from the source-distribution. Both programs are NOT included in the
+      16-bit DOS-version, too. This package includes all (allready calculated)
+      fonts from the Unix-source distribution. They were calculated under Linux,
+      a free Unix-implementation for i386-PC's and higher. Since a few months,
+      there exists an archive with my patches (at the ftp-sites sunsite.unc.edu
+      and nic.funet.fi) to compile GLE 3.3b under Linux. 
+   4) The DVI-drivers are not testet! (I use Ghostscript or HP2XX for printing
+      and converting. Both programs are freely avaiable. Gle_ps and gle_hpgl
+      run properly.)
+   5) Surface (surf_vga) hanged under unknown circumstances while loading
+      one data-file. surf_vga can be stopped by pressing Control-Pause.
+      If this happens, load the data-file into an editor, save it, and try it
+      again.
+
+
+		Access to the DJGPP patches for the Source
+
+       I'll release them in the near future after contacting Chris Pugmire.
+       You need a fixed version of Hartmut Schirmers BCC2GRX-library
+       to (properly) compile gle_vga and surf_vga. This will be released soon. 
+
+
+			Postscript Documentation
+			
+       The complete Postscript documentaion is in the directory
+       gle32\postscri.doc. I made diff-files to patch them in a
+       Ghostscript-printable state. For further information, take
+       a look into the file gle32\postscri.doc\readme.pat. The 'patch'
+       utility from the 1.11 release of DJGPP is included in this package.
+
+
+\end{verbatim}
+}
+\end{minipage}
+\end{center}
+%%\clearpage
+\begin{center}
+\begin{minipage}[t]{11.0cm}
+{\scriptsize
+\begin{verbatim}
+                           LEGAL STUFF
+
+Copyright-holders are:
+
+GLE:             unknown to me, take a look into the original
+                 documentation in the directory gle32\gle.doc\ and ask
+                 Chris Pugmire
+
+DJGPP and GO32:  D. J. Delorie, GNU LIBRARY GENERAL PUBLIC LICENSE and
+                 GNU PUBLIC LICENSE,
+                 see the files in the directory gle32\go32.doc
+
+GRX:             Csaba Biegl, GNU LIBRARY GENERAL PUBLIC LICENSE,
+                 (see gle32\driver\doc\grx.doc)
+		  
+BCC2GRX:          Hartmut Schirmer, GNU LIBRARY GENERAL PUBLIC LICENSE,
+                  (see gle32\driver\doc\bccgrx.doc)
+
+MS-DOS:          Microsoft Corporation (if you haven't guessed...)
+
+DJGPP, GRX and BCC2GRX are available from many ftp-sites. For examples see
+the file gle32\driver\doc\bccgrx.doc.
+
+
+LIKE ANYTHING ELSE THAT'S FREE, GLE 32 AND ITS ASSOCIATED UTILITIES ARE
+PROVIDED AS IS AND COME WITH NO WARRANTY OF ANY KIND, EITHER EXPRESSED OR
+IMPLIED. IN NO EVENT WILL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY DAMAGES
+RESULTING FROM THE USE OF THIS SOFTWARE.
+ 
+These programs are distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Bug-reports are wellcome (to me and Chris Pugmire). It can not be guaranteed
+that they can be fixed.
+
+
+       Axel Rohde, 19.1.94,    email: rohde@physik.uni-kiel.d400.de
+
+       Chris Pugmire's email adress: chrisp@marc.cri.nz 
+\end{verbatim}
+}
+\hfill {\small gle32b.txt}\\
+\end{minipage}
+\end{center}

@@ -1,0 +1,59 @@
+! nx 31 ny 21 xmin 0 xmax 30 ymin 0 ymax 20
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+325 296 269 244 221 200 181 164 149 136 125 116 109 104 101 100 101 104 109 116 125 136 149 164 181 200 221 244 269 296 325 
+306 277 250 225 202 181 162 145 130 117 106 97 90 85 82 81 82 85 90 97 106 117 130 145 162 181 202 225 250 277 306 
+289 260 233 208 185 164 145 128 113 100 89 80 73 68 65 64 65 68 73 80 89 100 113 128 145 164 185 208 233 260 289 
+274 245 218 193 170 149 130 113 98 85 74 65 58 53 50 49 50 53 58 65 74 85 98 113 130 149 170 193 218 245 274 
+261 232 205 180 157 136 117 100 85 72 61 52 45 40 37 36 37 40 45 52 61 72 85 100 117 136 157 180 205 232 261 
+250 221 194 169 146 125 106 89 74 61 50 41 34 29 26 25 26 29 34 41 50 61 74 89 106 125 146 169 194 221 250 
+241 212 185 160 137 116 97 80 65 52 41 32 25 20 17 16 17 20 25 32 41 52 65 80 97 116 137 160 185 212 241 
+234 205 178 153 130 109 90 73 58 45 34 25 18 13 10 9 10 13 18 25 34 45 58 73 90 109 130 153 178 205 234 
+229 200 173 148 125 104 85 68 53 40 29 20 13 8 5 4 5 8 13 20 29 40 53 68 85 104 125 148 173 200 229 
+226 197 170 145 122 101 82 65 50 37 26 17 10 5 2 1 2 5 10 17 26 37 50 65 82 101 122 145 170 197 226 
+225 196 169 144 121 100 81 64 49 36 25 16 9 4 1 0 1 4 9 16 25 36 49 64 81 100 121 144 169 196 225 
+226 197 170 145 122 101 82 65 50 37 26 17 10 5 2 1 2 5 10 17 26 37 50 65 82 101 122 145 170 197 226 
+229 200 173 148 125 104 85 68 53 40 29 20 13 8 5 4 5 8 13 20 29 40 53 68 85 104 125 148 173 200 229 
+234 205 178 153 130 109 90 73 58 45 34 25 18 13 10 9 10 13 18 25 34 45 58 73 90 109 130 153 178 205 234 
+241 212 185 160 137 116 97 80 65 52 41 32 25 20 17 16 17 20 25 32 41 52 65 80 97 116 137 160 185 212 241 
+250 221 194 169 146 125 106 89 74 61 50 41 34 29 26 25 26 29 34 41 50 61 74 89 106 125 146 169 194 221 250 
+261 232 205 180 157 136 117 100 85 72 61 52 45 40 37 36 37 40 45 52 61 72 85 100 117 136 157 180 205 232 261 
+274 245 218 193 170 149 130 113 98 85 74 65 58 53 50 49 50 53 58 65 74 85 98 113 130 149 170 193 218 245 274 
+289 260 233 208 185 164 145 128 113 100 89 80 73 68 65 64 65 68 73 80 89 100 113 128 145 164 185 208 233 260 289 
+306 277 250 225 202 181 162 145 130 117 106 97 90 85 82 81 82 85 90 97 106 117 130 145 162 181 202 225 250 277 306 
+325 296 269 244 221 200 181 164 149 136 125 116 109 104 101 100 101 104 109 116 125 136 149 164 181 200 221 244 269 296 325 

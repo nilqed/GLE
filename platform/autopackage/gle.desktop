@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Categories=Graphics;2DGraphics;VectorGraphics;
+Type=Application
+Name=GLE
+Comment=A package for creating graphs, plots, and diagrams
+TryExec=qgle
+Exec=qgle %F
+MimeType=text/x-gle;
+Icon=gle

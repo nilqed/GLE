@@ -1,0 +1,89 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+size 18 18.5
+
+! This is JOIN.GLE, demonstrates the join commands.
+
+set hei 0.8 just cc font psh arrowsize 0.6 arrowangle 16
+
+set lwidth 0.05 fill lightcyan
+
+begin name line
+   amove 8 18
+   rline 0 -6
+end name
+
+begin name main
+   amove 9.5 6.5
+   ellipse 2 0.8
+   write "Main"
+end name
+
+amove 3 16
+begin box name grv add 0.3 round 0.3 fill lightcyan
+   write "GRV"
+end box
+
+amove 12.5 16.5
+begin box name cheese add 0.3 fill lightcyan
+   write "Cheese"
+end box
+
+amove 15.5 11.5
+begin box name chv add 0.3 fill lightcyan
+   write "CHV"
+end box
+
+amove 3 10
+begin box name goats add 0.3 fill lightcyan
+   write "Goats"
+end box
+
+amove 13 1.5
+begin box name hi add 0.3 fill lightcyan
+   write "Hi there"
+end box
+
+join chv -> goats                           ! ".box" is default and can be omitted
+join grv -> line.h                          ! ".h" means to join horizontally
+join line.h <-> cheese.tl
+join cheese.rc -> chv.tc curve 0 90 1.5 1
+join main.c <- hi                           ! ".c" is used for circles
+join main.c <- chv
+join main.c <- goats

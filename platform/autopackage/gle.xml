@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+  <mime-type type="text/x-gle">
+    <comment>GLE Script File</comment>
+    <glob pattern="*.gle"/>
+  </mime-type>
+</mime-info>

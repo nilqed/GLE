@@ -1,0 +1,170 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+size 15 6
+
+include "../../script/manual.gle"
+manual_graph_mode
+
+include "shape.gle"
+
+sc = 0.13; dx = 3.75
+
+pagew = 21.0; pageh = 29.7
+
+!papersize a4paper
+!orientation landscape
+!margins 2 2 2 2
+!size 10 10
+
+sub measure_hb x0 x1 y0 del str$
+	amove x0 y0
+	rline 0 -del
+	amove x1 y0
+	rline 0 -del
+	amove x0 y0-0.75*del 
+	aline x1 y0-0.75*del arrow both
+	set just tc
+	amove (x0+x1)/2 y0-del
+	tex str$
+end sub
+
+sub measure_vl y0 y1 x0 del str$
+	amove x0 y0
+	rline del 0
+	amove x0 y1
+	rline del 0
+	amove x0+0.75*del y0 
+	aline x0+0.75*del y1 arrow both
+	set just tc
+	amove x0+del (y0+y1)/2
+	begin rotate 90
+		tex str$
+	end rotate
+end sub
+
+!include "../../script/manual.gle"
+!manual_std_mode
+
+sub draw_page pw ph
+	xp = xpos(); yp = ypos()
+	box pw*sc ph*sc
+	measure_hb xp xp+pw*sc yp 0.3 num$(pw)+" cm"
+	measure_vl yp yp+ph*sc xp+pw*sc 0.3 num$(ph)+" cm"
+	amove xp yp
+end sub
+
+sub content pw ph ang
+	xp = xpos(); yp = ypos()
+	box pw*sc ph*sc fill gray20
+	rmove pw/2*sc ph/2*sc
+	gsave
+	set fill lightsalmon
+	draw big_arrow_both_angle.cc pw/2*sc ph/2*sc ang
+	grestore
+	measure_hb xp xp+pw*sc yp 0.3 num$(pw)+" cm"
+	measure_vl yp yp+ph*sc xp+pw*sc 0.3 num$(ph)+" cm"
+end sub
+
+sub content_m pw ph ang
+	xp = xpos(); yp = ypos()
+	box pw*sc ph*sc fill gray20
+	rmove pw/2*sc ph/2*sc
+	gsave
+	set fill lightsalmon
+	draw big_arrow_both_angle.cc pw/2*sc ph/2*sc ang
+	grestore
+end sub
+
+amove 0.25 0.7
+draw_page pagew pageh
+rmove sc*(pagew/2-5) sc*(pageh/2-5)
+content 10 10 0
+
+amove 0.25+dx 0.7
+draw_page pagew pageh
+rmove sc*(pagew/2-5) sc*(pageh/2-5)
+content 10 10 90
+
+w1 = pagew-4
+h1 = pageh-4
+
+amove 0.25+2*dx 0.7
+draw_page pagew pageh
+rmove sc*2 sc*2
+content_m w1 h1 0
+
+amove 0.25+3*dx 0.7
+draw_page pagew pageh
+rmove sc*2 sc*2
+content_m w1 h1 90
+
+set just tl
+amove 0.05 pageheight()-0.05
+begin tex
+\begin{tabular}{l}
+papersize a4paper\\
+size 10 10 \\
+\end{tabular}
+end tex
+
+amove 0.05+dx pageheight()-0.05
+begin tex
+\begin{tabular}{l}
+papersize a4paper\\
+orientation landscape\\
+size 10 10 \\
+\end{tabular}
+end tex
+
+amove 0.05+2*dx pageheight()-0.05
+begin tex
+\begin{tabular}{l}
+papersize a4paper\\
+margins 2 2 2 2\\
+\end{tabular}
+end tex
+
+amove 0.05+3*dx pageheight()-0.05
+begin tex
+\begin{tabular}{l}
+papersize a4paper\\
+orientation landscape\\
+margins 2 2 2 2\\
+\end{tabular}
+end tex

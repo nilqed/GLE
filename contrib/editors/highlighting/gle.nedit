@@ -1,0 +1,64 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Syntax highlighting patterns for GLE <http://glx.sourceforge.net>
+! "The graphics language for creating complex diagrams from simple scripts"
+!
+! INSTALLATION
+!
+! Load this pattern by starting nedit with:
+!
+!       nedit -import gle.nedit
+!
+! Then, check that the patterns were loaded correctly, and choose Save Defaults
+! from the Preferences menu.  The new patterns will now be incorporated into
+! your own .nedit file, so the next time you start NEdit, you will no longer
+! need to use -import.
+!
+! This file is maintained by: Jan Struyf <jan.struyf@cs.kuleuven.ac.be>
+!
+! These comments will not appear in your ~/.nedit
+!
+nedit.highlightPatterns: GLE:1:0{\n\
+		Linecomment:"!":"$"::Comment::\n\
+		String:"""":""""::String::\n\
+		Keywords:"<(?:add|arc|arcto|[ar]line|[ar]move|arrow|bar|begin|bevel|bezier|bigfile|both|box|butt|cap|center|circle|clip|closepath|color|command|curve|dashlen|data|define|dist|dpoints|dsubticks|dticks|ellipse|elliptical_arc|elliptical_narc|else|end|err|errdown|errright|errup|errwidth|fill|font|fontlwidth|for|from|fullsize|graph|grestore|grid|gsave|hei|herr|herrleft|herrwidth|hscale|if|include|join|just|justify|key|left|let|line|log|lstyle|lwidth|marker|max|mdata|min|mitre|msize|name|narc|next|nobox|nofirst|nolast|nomiss|nticks|off|offset|origin|path|pos|postscript|psbbtweak|pscomment|rad|radius|rbezier|return|reverse|right|rline|rmove|rotate|round|save|scale|sep|separator|set|shift|size|smooth|smoothm|square|start|step|stroke|sub|svg_smooth|table|text|then|tiff|title|to|translate|vscale|width|write|[xy]2*axis|[xy]2*g|[xy]2*labels|[xy]2*max|[xy]2*min|[xy]2*names|[xy]2*places|[xy]2*pos|[xy]2*side|[xy]2*subticks|[xy]2*ticks|[xy]2*title)>":::Keyword::\n\
+		Keywords:"<(?:d[0-9]+)>":::Storage Type::\n\
+		Float:"<(\\d)*\\.?(\\d)*(\\d[eE][+-]?\\d+)?>":::Numeric Const::\n\
+	}
+nedit.languageModes: GLE:.gle::Auto:::3:

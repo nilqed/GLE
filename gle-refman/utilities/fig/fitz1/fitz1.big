@@ -1,0 +1,797 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+amove 2.5 3 
+set hei 0.3
+set color BLACK
+set lstyle 1
+set color BLACK
+set lstyle 1
+amove 2.38889 2.12305 
+aline 2.53333 2.08167 
+amove 2.53333 2.08167 
+aline 2.67222 2.0471 
+amove 2.67222 2.0471 
+aline 2.81111 2.02005 
+amove 2.81111 2.02005 
+aline 2.94444 2.00089 
+amove 2.94444 2.00089 
+aline 3.07778 1.99375 
+amove 3.07778 1.99375 
+aline 3.20556 2.0018 
+amove 3.20556 2.0018 
+aline 3.33333 2.02566 
+amove 3.33333 2.02566 
+aline 3.46111 2.06415 
+amove 3.46111 2.06415 
+aline 3.58333 2.04739 
+amove 3.58333 2.04739 
+aline 3.69444 1.9564 
+amove 3.69444 1.9564 
+aline 3.81111 1.86209 
+amove 3.81111 1.86209 
+aline 3.92222 1.82835 
+amove 3.92222 1.82835 
+aline 4.03889 1.91161 
+amove 4.03889 1.91161 
+aline 4.16111 2.16261 
+amove 2.38889 2.12305 
+aline 2.28333 2.39516 
+amove 2.53333 2.08167 
+aline 2.42778 2.36062 
+amove 2.67222 2.0471 
+aline 2.57222 2.32016 
+amove 2.81111 2.02005 
+aline 2.71111 2.27866 
+amove 2.94444 2.00089 
+aline 2.84444 2.2436 
+amove 3.07778 1.99375 
+aline 2.97778 2.21336 
+amove 3.20556 2.0018 
+aline 3.10556 2.16977 
+amove 3.33333 2.02566 
+aline 3.22778 2.11437 
+amove 3.46111 2.06415 
+aline 3.35 2.05424 
+amove 3.58333 2.04739 
+aline 3.58333 2.04739 
+amove 3.69444 1.9564 
+aline 3.69444 1.9564 
+amove 3.81111 1.86209 
+aline 3.81111 1.86209 
+amove 3.92222 1.82835 
+aline 3.81667 1.96786 
+amove 4.03889 1.91161 
+aline 3.93333 2.02144 
+amove 4.16111 2.16261 
+aline 4.04444 2.09219 
+amove 2.28333 2.39516 
+aline 2.42778 2.36062 
+amove 2.42778 2.36062 
+aline 2.56667 2.32171 
+amove 2.57222 2.32016 
+aline 2.70556 2.28032 
+amove 2.71111 2.27866 
+aline 2.84444 2.2436 
+amove 2.84444 2.2436 
+aline 2.97778 2.21336 
+amove 2.97778 2.21336 
+aline 3.10556 2.16977 
+amove 3.10556 2.16977 
+aline 3.22222 2.11689 
+amove 3.22778 2.11437 
+aline 3.34444 2.05697 
+amove 3.35 2.05424 
+aline 3.35 2.05424 
+amove 3.70556 1.94918 
+aline 3.81111 1.96692 
+amove 3.81667 1.96786 
+aline 3.93333 2.02144 
+amove 3.93333 2.02144 
+aline 4.04444 2.09219 
+amove 2.28333 2.39516 
+aline 2.18333 2.56714 
+amove 2.42778 2.36062 
+aline 2.32778 2.55921 
+amove 2.57222 2.32016 
+aline 2.46667 2.53395 
+amove 2.71111 2.27866 
+aline 2.60556 2.49707 
+amove 2.84444 2.2436 
+aline 2.74444 2.51827 
+amove 2.97778 2.21336 
+aline 2.87222 2.488 
+amove 3.10556 2.16977 
+aline 3.00556 2.47339 
+amove 3.22778 2.11437 
+aline 3.13333 2.46025 
+amove 3.35 2.05424 
+aline 3.25556 2.4034 
+amove 3.45 2.0713 
+aline 3.37222 2.32267 
+amove 3.55556 2.05338 
+aline 3.48889 2.23823 
+amove 3.69444 1.96119 
+aline 3.60556 2.16827 
+amove 3.81667 1.96786 
+aline 3.71667 2.1272 
+amove 3.93333 2.02144 
+aline 3.82778 2.13309 
+amove 4.04444 2.09219 
+aline 3.93889 2.14885 
+amove 2.18333 2.56714 
+aline 2.32778 2.55921 
+amove 2.32778 2.55921 
+aline 2.46111 2.53496 
+amove 2.46667 2.53395 
+aline 2.6 2.49855 
+amove 2.60556 2.49707 
+aline 2.73889 2.51742 
+amove 2.74444 2.51827 
+aline 2.87222 2.488 
+amove 2.87222 2.488 
+aline 3.00556 2.47339 
+amove 3.00556 2.47339 
+aline 3.13333 2.46025 
+amove 3.13333 2.46025 
+aline 3.25556 2.4034 
+amove 3.25556 2.4034 
+aline 3.37222 2.32267 
+amove 3.37222 2.32267 
+aline 3.48333 2.24225 
+amove 3.48889 2.23823 
+aline 3.6 2.1716 
+amove 3.60556 2.16827 
+aline 3.71667 2.1272 
+amove 3.71667 2.1272 
+aline 3.82778 2.13309 
+amove 3.82778 2.13309 
+aline 3.93889 2.14885 
+amove 2.18333 2.56714 
+aline 2.08333 2.65048 
+amove 2.32778 2.55921 
+aline 2.22778 2.68201 
+amove 2.46667 2.53395 
+aline 2.36667 2.68557 
+amove 2.60556 2.49707 
+aline 2.50556 2.7133 
+amove 2.74444 2.51827 
+aline 2.64444 2.81938 
+amove 2.87222 2.488 
+aline 2.77778 2.86695 
+amove 3.00556 2.47339 
+aline 2.90556 2.80168 
+amove 3.13333 2.46025 
+aline 3.03333 2.72125 
+amove 3.25556 2.4034 
+aline 3.15556 2.65738 
+amove 3.37222 2.32267 
+aline 3.27778 2.57026 
+amove 3.48889 2.23823 
+aline 3.39444 2.45207 
+amove 3.60556 2.16827 
+aline 3.50556 2.3402 
+amove 3.71667 2.1272 
+aline 3.61667 2.26481 
+amove 3.82778 2.13309 
+aline 3.72778 2.24022 
+amove 3.93889 2.14885 
+aline 3.83889 2.2778 
+amove 2.08333 2.65048 
+aline 2.22778 2.68201 
+amove 2.22778 2.68201 
+aline 2.36111 2.68543 
+amove 2.36667 2.68557 
+aline 2.5 2.71219 
+amove 2.50556 2.7133 
+aline 2.63889 2.81514 
+amove 2.64444 2.81938 
+aline 2.77222 2.86497 
+amove 2.77778 2.86695 
+aline 2.90556 2.80168 
+amove 2.90556 2.80168 
+aline 3.03333 2.72125 
+amove 3.03333 2.72125 
+aline 3.15 2.66028 
+amove 3.15556 2.65738 
+aline 3.27778 2.57026 
+amove 3.27778 2.57026 
+aline 3.39444 2.45207 
+amove 3.39444 2.45207 
+aline 3.50556 2.3402 
+amove 3.50556 2.3402 
+aline 3.61111 2.26858 
+amove 3.61667 2.26481 
+aline 3.72778 2.24022 
+amove 3.72778 2.24022 
+aline 3.83333 2.27592 
+amove 2.08333 2.65048 
+aline 1.98889 2.66287 
+amove 2.22778 2.68201 
+aline 2.12778 2.74034 
+amove 2.36667 2.68557 
+aline 2.27222 2.78051 
+amove 2.50556 2.7133 
+aline 2.40556 2.96232 
+amove 2.64444 2.81938 
+aline 2.54444 3.11152 
+amove 2.77778 2.86695 
+aline 2.67778 3.26615 
+amove 2.90556 2.80168 
+aline 2.81111 3.2208 
+amove 3.03333 2.72125 
+aline 2.93333 3.07554 
+amove 3.15556 2.65738 
+aline 3.06111 2.9005 
+amove 3.27778 2.57026 
+aline 3.17778 2.73464 
+amove 3.39444 2.45207 
+aline 3.29444 2.59245 
+amove 3.50556 2.3402 
+aline 3.40556 2.47525 
+amove 3.61667 2.26481 
+aline 3.51667 2.38913 
+amove 3.72778 2.24022 
+aline 3.62778 2.34239 
+amove 3.83889 2.2778 
+aline 3.73889 2.42937 
+amove 1.98889 2.66287 
+aline 2.12222 2.73724 
+amove 2.12778 2.74034 
+aline 2.27222 2.78051 
+amove 2.27222 2.78051 
+aline 2.4 2.95475 
+amove 2.40556 2.96232 
+aline 2.53889 3.10555 
+amove 2.54444 3.11152 
+aline 2.67222 3.25971 
+amove 2.67778 3.26615 
+aline 2.80556 3.22269 
+amove 2.81111 3.2208 
+aline 2.92778 3.08214 
+amove 2.93333 3.07554 
+aline 3.05556 2.90811 
+amove 3.06111 2.9005 
+aline 3.17778 2.73464 
+amove 3.17778 2.73464 
+aline 3.29444 2.59245 
+amove 3.29444 2.59245 
+aline 3.4 2.48111 
+amove 3.40556 2.47525 
+aline 3.51667 2.38913 
+amove 3.51667 2.38913 
+aline 3.62222 2.34472 
+amove 3.62778 2.34239 
+aline 3.73333 2.42502 
+amove 1.98889 2.66287 
+aline 1.89444 2.62546 
+amove 2.12778 2.74034 
+aline 2.03333 2.74997 
+amove 2.27222 2.78051 
+aline 2.17222 2.82935 
+amove 2.40556 2.96232 
+aline 2.31111 3.21503 
+amove 2.54444 3.11152 
+aline 2.44444 3.37321 
+amove 2.67778 3.26615 
+aline 2.57778 3.58631 
+amove 2.81111 3.2208 
+aline 2.71111 3.58015 
+amove 2.93333 3.07554 
+aline 2.83889 3.4212 
+amove 3.06111 2.9005 
+aline 2.96111 3.18057 
+amove 3.17778 2.73464 
+aline 3.08333 2.92569 
+amove 3.29444 2.59245 
+aline 3.19444 2.724 
+amove 3.40556 2.47525 
+aline 3.31111 2.59634 
+amove 3.51667 2.38913 
+aline 3.42222 2.50433 
+amove 3.62778 2.34239 
+aline 3.52778 2.44077 
+amove 3.73889 2.42937 
+aline 3.64444 2.55643 
+amove 1.89444 2.62546 
+aline 2.03333 2.74997 
+amove 2.03333 2.74997 
+aline 2.17222 2.82935 
+amove 2.17222 2.82935 
+aline 2.30556 3.19961 
+amove 2.31111 3.21503 
+aline 2.44444 3.37321 
+amove 2.44444 3.37321 
+aline 2.57778 3.58631 
+amove 2.57778 3.58631 
+aline 2.70556 3.5804 
+amove 2.71111 3.58015 
+aline 2.83333 3.42811 
+amove 2.83889 3.4212 
+aline 2.96111 3.18057 
+amove 2.96111 3.18057 
+aline 3.08333 2.92569 
+amove 3.08333 2.92569 
+aline 3.18889 2.73408 
+amove 3.19444 2.724 
+aline 3.30556 2.60242 
+amove 3.31111 2.59634 
+aline 3.42222 2.50433 
+amove 3.42222 2.50433 
+aline 3.52222 2.44412 
+amove 3.52778 2.44077 
+aline 3.64444 2.55643 
+amove 1.89444 2.62546 
+aline 1.80556 2.56045 
+amove 2.03333 2.74997 
+aline 1.94444 2.72881 
+amove 2.17222 2.82935 
+aline 2.08333 2.84578 
+amove 2.31111 3.21503 
+aline 2.21111 3.43109 
+amove 2.44444 3.37321 
+aline 2.35 3.57189 
+amove 2.57778 3.58631 
+aline 2.48333 3.79086 
+amove 2.71111 3.58015 
+aline 2.61667 3.78425 
+amove 2.83889 3.4212 
+aline 2.74444 3.64361 
+amove 2.96111 3.18057 
+aline 2.86667 3.40085 
+amove 3.08333 2.92569 
+aline 3.08333 2.92569 
+amove 3.19444 2.724 
+aline 3.19444 2.724 
+amove 3.31111 2.59634 
+aline 3.21111 2.71693 
+amove 3.42222 2.50433 
+aline 3.32222 2.61545 
+amove 3.52778 2.44077 
+aline 3.43333 2.53746 
+amove 3.64444 2.55643 
+aline 3.54444 2.61363 
+amove 1.80556 2.56045 
+aline 1.93889 2.72207 
+amove 1.94444 2.72881 
+aline 2.07778 2.8411 
+amove 2.08333 2.84578 
+aline 2.21111 3.43109 
+amove 2.21111 3.43109 
+aline 2.35 3.57189 
+amove 2.35 3.57189 
+aline 2.48333 3.79086 
+amove 2.48333 3.79086 
+aline 2.61667 3.78425 
+amove 2.61667 3.78425 
+aline 2.74444 3.64361 
+amove 2.74444 3.64361 
+aline 2.86111 3.41188 
+amove 2.86667 3.40085 
+aline 2.86667 3.40085 
+amove 3.13889 2.82515 
+aline 3.21111 2.71693 
+amove 3.21111 2.71693 
+aline 3.31667 2.62052 
+amove 3.32222 2.61545 
+aline 3.43333 2.53746 
+amove 3.43333 2.53746 
+aline 3.54444 2.61363 
+amove 1.80556 2.56045 
+aline 1.72222 2.48885 
+amove 1.94444 2.72881 
+aline 1.85556 2.69478 
+amove 2.08333 2.84578 
+aline 1.98889 2.90973 
+amove 2.21111 3.43109 
+aline 2.11667 3.56982 
+amove 2.35 3.57189 
+aline 2.25556 3.67515 
+amove 2.48333 3.79086 
+aline 2.38889 3.86045 
+amove 2.61667 3.78425 
+aline 2.51667 3.83669 
+amove 2.74444 3.64361 
+aline 2.74444 3.64361 
+amove 2.86667 3.40085 
+aline 2.86667 3.40085 
+amove 3.21111 2.71693 
+aline 3.12222 2.856 
+amove 3.32222 2.61545 
+aline 3.23333 2.72768 
+amove 3.43333 2.53746 
+aline 3.33889 2.63472 
+amove 3.54444 2.61363 
+aline 3.45 2.6298 
+amove 1.72222 2.48885 
+aline 1.85556 2.69478 
+amove 1.85556 2.69478 
+aline 1.98333 2.90077 
+amove 1.98889 2.90973 
+aline 2.11111 3.54112 
+amove 2.11667 3.56982 
+aline 2.25 3.67093 
+amove 2.25556 3.67515 
+aline 2.38889 3.86045 
+amove 2.38889 3.86045 
+aline 2.51667 3.83669 
+amove 2.51667 3.83669 
+aline 2.51667 3.83669 
+amove 3.1 2.89545 
+aline 3.12222 2.856 
+amove 3.12222 2.856 
+aline 3.22778 2.73409 
+amove 3.23333 2.72768 
+aline 3.33889 2.63472 
+amove 3.33889 2.63472 
+aline 3.45 2.6298 
+amove 1.72222 2.48885 
+aline 1.63889 2.42888 
+amove 1.85556 2.69478 
+aline 1.77222 2.66408 
+amove 1.98889 2.90973 
+aline 1.9 3.02697 
+amove 2.11667 3.56982 
+aline 2.02778 3.60203 
+amove 2.25556 3.67515 
+aline 2.16111 3.66269 
+amove 2.38889 3.86045 
+aline 2.29444 3.7893 
+amove 2.51667 3.83669 
+aline 2.51667 3.83669 
+amove 3.12222 2.856 
+aline 3.12222 2.856 
+amove 3.23333 2.72768 
+aline 3.13889 2.84562 
+amove 3.33889 2.63472 
+aline 3.25 2.73429 
+amove 3.45 2.6298 
+aline 3.35556 2.66719 
+amove 1.63889 2.42888 
+aline 1.77222 2.66408 
+amove 1.77222 2.66408 
+aline 1.9 3.02697 
+amove 1.9 3.02697 
+aline 2.02222 3.57703 
+amove 2.02778 3.60203 
+aline 2.16111 3.66269 
+amove 2.16111 3.66269 
+aline 2.29444 3.7893 
+amove 2.29444 3.7893 
+aline 2.29444 3.7893 
+amove 3.07778 2.9379 
+aline 3.13889 2.84562 
+amove 3.13889 2.84562 
+aline 3.24444 2.73986 
+amove 3.25 2.73429 
+aline 3.35 2.67072 
+amove 1.63889 2.42888 
+aline 1.56111 2.39477 
+amove 1.77222 2.66408 
+aline 1.68889 2.64981 
+amove 1.9 3.02697 
+aline 1.81111 3.1196 
+amove 2.02778 3.60203 
+aline 1.93889 3.52145 
+amove 2.16111 3.66269 
+aline 2.16111 3.66269 
+amove 2.29444 3.7893 
+aline 2.29444 3.7893 
+amove 3.13889 2.84562 
+aline 3.13889 2.84562 
+amove 3.25 2.73429 
+aline 3.15556 2.83676 
+amove 3.35556 2.66719 
+aline 3.26111 2.72895 
+amove 1.56111 2.39477 
+aline 1.68333 2.63872 
+amove 1.68889 2.64981 
+aline 1.81111 3.1196 
+amove 1.81111 3.1196 
+aline 1.93333 3.50398 
+amove 1.93889 3.52145 
+aline 1.93889 3.52145 
+amove 3.07778 2.93808 
+aline 3.15 2.84399 
+amove 3.15556 2.83676 
+aline 3.26111 2.72895 
+amove 1.56111 2.39477 
+aline 1.47778 2.39579 
+amove 1.68889 2.64981 
+aline 1.60556 2.66083 
+amove 1.81111 3.1196 
+aline 1.72778 3.14142 
+amove 1.93889 3.52145 
+aline 1.85556 3.35393 
+amove 3.15556 2.83676 
+aline 3.15556 2.83676 
+amove 3.26111 2.72895 
+aline 3.26111 2.72895 
+amove 1.47778 2.39579 
+aline 1.6 2.64931 
+amove 1.60556 2.66083 
+aline 1.72778 3.14142 
+amove 1.72778 3.14142 
+aline 1.85556 3.35393 
+amove 1.85556 3.35393 
+aline 1.85556 3.35393 
+amove 1.47778 2.39579 
+aline 1.4 2.43539 
+amove 1.60556 2.66083 
+aline 1.52778 2.72356 
+amove 1.72778 3.14142 
+aline 1.65 3.08737 
+amove 1.85556 3.35393 
+aline 1.85556 3.35393 
+amove 1.4 2.43539 
+aline 1.52778 2.72356 
+amove 1.52778 2.72356 
+aline 1.64444 3.07083 
+amove 1.65 3.08737 
+aline 1.65 3.08737 
+amove 1.4 2.43539 
+aline 1.32222 2.51026 
+amove 1.52778 2.72356 
+aline 1.44444 2.80207 
+amove 1.65 3.08737 
+aline 1.57222 3.00099 
+amove 1.32222 2.51026 
+aline 1.44444 2.80207 
+amove 1.44444 2.80207 
+aline 1.56667 2.99234 
+amove 1.57222 3.00099 
+aline 1.57222 3.00099 
+amove 1.32222 2.51026 
+aline 1.24444 2.60923 
+amove 1.44444 2.80207 
+aline 1.36667 2.85348 
+amove 1.57222 3.00099 
+aline 1.49444 3.03129 
+amove 1.67778 3.11572 
+aline 1.62222 3.2059 
+amove 1.78889 3.25872 
+aline 1.74444 3.35563 
+amove 1.88889 3.42959 
+aline 1.87222 3.46376 
+amove 1.24444 2.60923 
+aline 1.36667 2.85348 
+amove 1.36667 2.85348 
+aline 1.49444 3.03129 
+amove 1.49444 3.03129 
+aline 1.62222 3.2059 
+amove 1.62222 3.2059 
+aline 1.74444 3.35563 
+amove 1.74444 3.35563 
+aline 1.86667 3.45906 
+amove 1.87222 3.46376 
+aline 1.92778 3.49973 
+amove 1.24444 2.60923 
+aline 1.16667 2.71194 
+amove 1.36667 2.85348 
+aline 1.29444 2.92985 
+amove 1.49444 3.03129 
+aline 1.41667 3.10749 
+amove 1.62222 3.2059 
+aline 1.53889 3.25433 
+amove 1.74444 3.35563 
+aline 1.66667 3.37596 
+amove 1.87222 3.46376 
+aline 1.78889 3.47467 
+amove 1.96111 3.54588 
+aline 1.91111 3.55037 
+amove 1.16667 2.71194 
+aline 1.29444 2.92985 
+amove 1.29444 2.92985 
+aline 1.41667 3.10749 
+amove 1.41667 3.10749 
+aline 1.53333 3.24766 
+amove 1.53889 3.25433 
+aline 1.66667 3.37596 
+amove 1.66667 3.37596 
+aline 1.78333 3.47019 
+amove 1.78889 3.47467 
+aline 1.91111 3.55037 
+amove 1.91111 3.55037 
+aline 2.01667 3.59438 
+set color BLACK
+set lstyle 1
+set color BLACK
+set lstyle 1
+amove 4.12222 1.4826 
+aline 3.13889 1.9976 
+amove 2.52778 2.08327 
+aline 1.21111 1.6906 
+amove 1.16111 2.81201 
+aline 1.11667 3.80881 
+amove 1.21111 1.6906 
+aline 1.11667 3.80881 
+amove 1.11667 3.80881 
+aline 2.84444 4.09087 
+amove 1.11667 3.80881 
+aline 1.16111 3.81607 
+amove 2.84444 4.09087 
+aline 2.83333 3.46705 
+amove 2.84444 4.09087 
+aline 4.24444 3.68445 
+amove 4.16667 3.70703 
+aline 4.24444 3.68445 
+amove 4.24444 3.68445 
+aline 4.15556 2.15926 
+amove 4.24444 3.68445 
+aline 4.16111 2.16261 
+amove 4.15556 2.1512 
+aline 4.12222 1.4826 
+amove 1.21631 1.6906 
+aline 2.39531 0.829544 
+amove 2.39531 0.829544 
+aline 4.12386 1.4826 
+set just BC
+set color BLACK
+set hei 0.2
+set just TC
+amove 1.21631 1.6906 
+aline 1.21336 1.68656 
+amove 1.15439 1.6058 
+rotate -36.1417 
+text 0 
+rotate 36.1417 
+amove 1.44599 1.52286 
+aline 1.44304 1.51882 
+amove 1.38407 1.43806 
+rotate -36.1417 
+text 1 
+rotate 36.1417 
+amove 1.69245 1.34286 
+aline 1.68951 1.33882 
+amove 1.63053 1.25807 
+rotate -36.1417 
+text 2 
+rotate 36.1417 
+amove 1.95761 1.14921 
+aline 1.95466 1.14517 
+amove 1.89568 1.06442 
+rotate -36.1417 
+text 3 
+rotate 36.1417 
+amove 2.24366 0.940299 
+aline 2.24071 0.936261 
+amove 2.18173 0.855505 
+rotate -36.1417 
+text 4 
+rotate 36.1417 
+set just TC
+set color BLACK
+set hei 0.2
+set just TC
+amove 2.39531 0.829544 
+aline 2.39708 0.824866 
+amove 2.43242 0.73132 
+rotate 20.697 
+text 0 
+rotate -20.697 
+amove 2.8176 0.989086 
+aline 2.81936 0.984409 
+amove 2.8547 0.890863 
+rotate 20.697 
+text 1 
+rotate -20.697 
+amove 3.21657 1.13982 
+aline 3.21833 1.13514 
+amove 3.25368 1.0416 
+rotate 20.697 
+text 2 
+rotate -20.697 
+amove 3.59411 1.28246 
+aline 3.59587 1.27778 
+amove 3.63122 1.18423 
+rotate 20.697 
+text 3 
+rotate -20.697 
+amove 3.95189 1.41763 
+aline 3.95366 1.41296 
+amove 3.989 1.31941 
+rotate 20.697 
+text 4 
+rotate -20.697 
+set just TC
+set color BLACK
+set hei 0.2
+set just RC
+amove 1.21631 1.6906 
+aline 1.21132 1.69037 
+amove 1.11142 1.6859 
+text 0 
+amove 1.19382 2.19232 
+aline 1.18883 2.1921 
+amove 1.08893 2.18762 
+text 0.5 
+amove 1.17053 2.71194 
+aline 1.16554 2.71171 
+amove 1.06564 2.70723 
+text 1 
+amove 1.1464 3.25042 
+aline 1.1414 3.25019 
+amove 1.0415 3.24571 
+text 1.5 
+amove 1.12137 3.80881 
+aline 1.11638 3.80859 
+amove 1.01648 3.80411 
+text 2 
+set just BC
+set color BLACK
+set lstyle 1
+set color BLACK
+set lstyle 1
+set color BLACK
+set lstyle 1
+set color BLACK
+set hei 0.0833333
+amove 1.17053 2.71194 
+marker CIRCLE
+amove 1.80496 3.21871 
+marker CIRCLE
+amove 2.93054 2.94741 
+marker CIRCLE
+amove 3.81176 2.02473 
+marker CIRCLE
+amove 2.66861 2.22423 
+marker CIRCLE
+amove 2.47626 3.75495 
+marker CIRCLE
+amove 3.14986 2.60065 
+marker CIRCLE
+amove 4.18439 2.54248 
+marker CIRCLE
+set color BLACK
+set lstyle 1
+amove 1.17053 2.71194 
+aline 1.21631 1.6906 
+amove 1.80496 3.21871 
+aline 1.84119 1.6459 
+amove 2.93054 2.94741 
+aline 2.91662 1.98071 
+amove 3.81176 2.02473 
+aline 3.78831 1.50661 
+amove 2.66861 2.22423 
+aline 2.66208 1.0937 
+amove 2.47626 3.75495 
+aline 2.47792 1.60035 
+amove 3.14986 2.60065 
+aline 3.12684 1.55393 
+amove 4.18439 2.54248 
+aline 4.12386 1.4826 

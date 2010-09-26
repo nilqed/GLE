@@ -1,0 +1,355 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Subroutines for drawing graphs
+
+sub graph_line x1 y1 x2 y2
+   ! Function to draw a line on a graph
+   ! x1, y2 = start point
+   ! x2, y2 = end point
+   default x1 xgmin
+   default y1 ygmin
+   default x2 xgmax
+   default y2 ygmax
+   amove xg(x1) yg(y1)
+   aline xg(x2) yg(y2)
+end sub
+
+sub graph_hline y x1 x2
+   ! Function to draw a horizontal line on a graph
+   ! y = y-point of line
+   ! x1, x2 = range of line
+   default x1 xgmin
+   default x2 xgmax
+   amove xg(x1) yg(y)
+   aline xg(x2) yg(y)
+end sub
+
+sub graph_vline x y1 y2
+   ! Function to draw a vertical line on a graph
+   ! x = x-point of line
+   ! y1, y2 = range of line
+   default y1 ygmin
+   default y2 ygmax
+   amove xg(x) yg(y1)
+   aline xg(x) yg(y2)
+end sub
+
+sub invxg x
+   local s = (xg(xgmax)-xg(xgmin))/(xgmax - xgmin)
+   return (x - xg(xgmin) + s*xgmin)/s
+end sub
+
+sub invyg y
+   local s = (yg(ygmax)-yg(ygmin))/(ygmax - ygmin)
+   return (y - yg(ygmin) + s*ygmin)/s
+end sub
+
+sub graph_textbox xp yp label$ dx dy add
+   default dx 0
+   default dy 0
+   default xp xgmin
+   default yp ygmin
+   default add 0.1
+   amove xg(xp)+dx+add yg(yp)+dy+add
+   begin box add add fill white
+      write label$
+   end box
+end sub
+
+sub graph_text xp yp label$ dx dy
+   default dx 0
+   default dy 0
+   default xp xgmin
+   default yp ygmin
+   amove xg(xp)+dx yg(yp)+dy
+   write label$
+end sub
+
+sub graph_del wd sca
+   ! Function returning the offset of the drawing area of a graph
+   ! wd = width of the graph
+   ! sca = hscale parameter of the graph
+   return (wd-wd*sca)/2
+end sub
+
+sub graph_select wd hi hsc vsc xmn xmx ymn ymx
+   ! Initialize graph variables and functions such as xg() and yg()
+   ! wd = width of graph
+   ! hi = height of graph
+   ! hsc = hscale parameter of graph
+   ! vsc = vscale parameter of graph
+   ! xmn, xmx = minimum and maximum xaxis value
+   ! ymn, ymx = minimum and maximum yaxis value
+   begin graph
+      size wd hi
+      nobox
+      hscale hsc
+      vscale vsc
+      xaxis min xmn max xmx off
+      yaxis min ymn max ymx off
+   end graph
+   graphx = xpos()
+   graphy = ypos()
+end sub
+
+sub graph_hgrid nb color$
+   ! Function to draw an horizontal equidistant grid on a graph
+   ! (use 'under graph_hgrid 5 "red"' in your graph block)
+   ! nb = number of lines in grid
+   ! color$ = color for grid lines
+   gsave
+   local i
+   set color color$
+   for i = 1 to nb
+      local yp = yg(ygmin+(ygmax-ygmin)/(nb+1)*i)
+      amove xg(xgmin) yp
+      aline xg(xgmax) yp
+   next i
+   grestore
+end sub
+
+sub graph_vgrid nb color$
+   ! Function to draw a vertical equidistant grid on a graph
+   ! (use 'under graph_vgrid 5 "red"' in your graph block)
+   ! nb = number of lines in grid
+   ! color$ = color for grid lines
+   gsave
+   local i
+   set color color$
+   for i = 1 to nb
+      local xp = xg(xgmin+(xgmax-xgmin)/(nb+1)*i)
+      amove xp yg(ygmin)
+      aline xp yg(ygmax)
+   next i
+   grestore
+end sub
+
+sub graph_grid nbh nbv color$
+   ! Function to draw an equidistant grid on a graph
+   ! (use 'under graph_grid 5 "red"' in your graph block)
+   ! nb = number of lines in grid
+   ! color$ = color for grid lines
+   graph_hgrid nbh color$
+   graph_vgrid nbv color$
+end sub
+
+sub graph_origin
+   ! Go to the origin of a graph selected with selectgraph
+   amove graphx graphy
+end sub
+
+sub graph_zeroaxis style color$
+   gsave
+   tickw = 0.3*0.3+0.1
+   set lstyle style color color$
+   amove xg(xgmin)+tickw yg(0)
+   aline xg(xgmax)-tickw yg(0)
+   amove xg(0) yg(ygmin)+tickw
+   aline xg(0) yg(ygmax)-tickw
+   grestore
+end sub
+
+sub graph_print_inv x y
+   print "xg("+format$(invxg(x),"fix 2")+") yg("+format$(invyg(y),"fix 2")+")"
+end sub
+
+sub dmaxx ds$
+   ! Function to compute the maximum x-value of a dataset
+   local i
+   local crmax = dataxvalue(ds$,1)
+   for i = 2 to ndata(ds$)
+      crmax = max(crmax, dataxvalue(ds$,i))
+   next i
+   return crmax
+end sub
+
+sub dmaxy ds$
+   ! Function to compute the maximum y-value of a dataset
+   local i
+   local crmax = datayvalue(ds$,1)
+   for i = 2 to ndata(ds$)
+      crmax = max(crmax, datayvalue(ds$,i))
+   next i
+   return crmax
+end sub
+
+sub dminx ds$
+   ! Function to compute the minimum x-value of a dataset
+   local i
+   local crmin = dataxvalue(ds$,1)
+   for i = 2 to ndata(ds$)
+      crmin = min(crmin, dataxvalue(ds$,i))
+   next i
+   return crmin
+end sub
+
+sub dminy ds$
+   ! Function to compute the minimum y-value of a dataset
+   local i
+   local crmin = datayvalue(ds$,1)
+   for i = 2 to ndata(ds$)
+      crmin = min(crmin, datayvalue(ds$,i))
+   next i
+   return crmin
+end sub
+
+sub dmeany ds$
+   ! Function to compute the mean y-value of a dataset
+   local i
+   local sum = 0
+   for i = 1 to ndata(ds$)
+      sum = sum + datayvalue(ds$,i)
+   next i
+   return sum/ndata(ds$)
+end sub
+
+sub darea ds$
+   ! Function to compute the area between a dataset and the x-axis
+   local i
+   local area = 0
+   local prev_x = dataxvalue(ds$,1)
+   local prev_y = datayvalue(ds$,1)
+   for i = 2 to ndata(ds$)
+      local x = dataxvalue(ds$,i)
+      local y = datayvalue(ds$,i)
+      area = area + (x-prev_x)*(prev_y+y)/2
+      prev_x = x; prev_y = y
+   next i
+   return area
+end sub
+
+sub dmeany_x d$ x
+   ! compute average y-value for given x-value x for dataset d$
+   local i   
+   local nb_y = 0
+   local sum_y = 0
+   for i = 1 to ndata(d$)
+      if dataxvalue(d$,i) = x then
+         nb_y = nb_y + 1
+         sum_y = sum_y + datayvalue(d$,i)
+      end if
+   next i
+   return sum_y / nb_y
+end sub
+
+sub derry_up_x d$ x
+   ! compute maximum upward deviation from the mean y-value
+   local i
+   local max_err = -1e300
+   local mean = dmeany_x(d$, x)
+   for i = 1 to ndata(d$)
+      if dataxvalue(d$,i) = x then
+         max_err = max(max_err, datayvalue(d$,i)-mean)
+      end if
+   next i
+   return max_err
+end sub
+
+sub derry_down_x d$ x
+   ! compute maximum downward deviation from the mean y-value
+   local i
+   local max_err = -1e300
+   local mean = dmeany_x(d$, x)
+   for i = 1 to ndata(d$)
+      if dataxvalue(d$,i) = x then
+         max_err = max(max_err, mean-datayvalue(d$,i))
+      end if
+   next i
+   return max_err
+end sub
+
+sub bar_draw_error_interval bar xval yval error
+   ! Function to draw an error interval on a bar dataset with multiple bars
+   amove xbar(xval,bar)-0.1 yg(yval+error)
+   aline xbar(xval,bar)+0.1 yg(yval+error)
+   amove xbar(xval,bar) yg(yval+error)
+   aline xbar(xval,bar) yg(yval-error)
+   amove xbar(xval,bar)-0.1 yg(yval-error)
+   aline xbar(xval,bar)+0.1 yg(yval-error)
+end sub
+
+sub bar_draw_error_intervals data$ err$ bar
+   ! Function to draw error intervals on a bar dataset with multiple bars
+   ! E.g.,
+   !
+   ! begin graph
+   !   data "mydata.csv"
+   !   bar d1,d3 fill grey50,grey20
+   ! end graph
+   !
+   ! bar_draw_error_intervals "d1" "d2" 1
+   ! bar_draw_error_intervals "d3" "d4" 2
+   local nb = ndata(data$)
+   for i = 1 to nb
+      local xval = dataxvalue(data$,i)
+      local yval = datayvalue(data$,i)
+      local error = datayvalue(err$,i)
+      bar_draw_error_interval bar xval yval error
+   next i
+end sub
+
+sub draw_box_plot ds0
+   default ds0 1
+   set cap round
+   for i = 1 to ndata("d"+num$(ds0))
+      local x = dataxvalue("d"+num$(ds0), i)
+      ! avg min Q.25 Q.5 Q.75 max
+      ! 0   1   2    3   4    5
+      local meanv = datayvalue("d"+num$(ds0), i)
+      local minv = datayvalue("d"+num$(ds0+1), i)
+      local q25 = datayvalue("d"+num$(ds0+2), i)
+      local q50 = datayvalue("d"+num$(ds0+3), i)
+      local q75 = datayvalue("d"+num$(ds0+4), i)
+      local maxv = datayvalue("d"+num$(ds0+5), i)
+      amove xg(x)-boxwidth/2 yg(minv)
+      aline xg(x)+boxwidth/2 yg(minv)
+      amove xg(x) yg(minv)
+      aline xg(x) yg(q25)
+      amove xg(x)-boxwidth/2 yg(q25)
+      box boxwidth yg(q75)-yg(q25)
+      amove xg(x)-boxwidth/2 yg(q50)
+      aline xg(x)+boxwidth/2 yg(q50)
+      amove xg(x) yg(q75)
+      aline xg(x) yg(maxv)
+      amove xg(x)-boxwidth/2 yg(maxv)
+      aline xg(x)+boxwidth/2 yg(maxv)
+      amove xg(x) yg(meanv)
+      marker fdiamond 1.5*boxwidth
+   next i
+end sub

@@ -1,0 +1,192 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+
+#
+# makefile.gcc for GLE v4.0
+# for compilation with gcc
+#
+
+include ../../config.i
+include ../../config.aconf
+
+include files.txt
+
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+datarootdir=@datarootdir@
+docdir=@docdir@
+
+TOMAKE=
+GLE_ELIBS=
+LIBGLE_ELIBS=
+
+CXX=@CXX@
+LIBS=@LIBS@
+
+CPPFLAGS=@CPPFLAGS@
+LDFLAGS=@LDFLAGS@
+
+LIBGLE_CPPFLAGS=@LIBGLE_CPPFLAGS@@CPPFLAGS@
+LIBGLE_LDFLAGS=@LIBGLE_LDFLAGS@@LDFLAGS@
+
+SIMPLE_LDFLAGS=@SIMPLE_LDFLAGS@
+SIMPLE_LIBS=@SIMPLE_LIBS@
+SIMPLE_LIBS_DL=@SIMPLE_LIBS_DL@
+
+INSTALL_LIB=@libdir@
+INSTALL_BIN=@GLE_INSTALL_BIN@
+INSTALL_DIR=@GLE_INSTALL_DATA@
+
+ifeq (@HAVE_LIBTIFF@,1)
+	OBJECTS := $(OBJECTS) $(TIFFOBJS)
+endif
+
+ifeq (@HAVE_LIBPNG@,1)
+	OBJECTS := $(OBJECTS) $(PNGOBJS)
+endif
+
+ifeq (@HAVE_LIBJPEG@,1)
+	OBJECTS := $(OBJECTS) $(JPEGOBJS)
+endif
+
+MAKESCRIPTS :=
+ifeq (@HAVE_NOSCRIPTS@,0)
+	MAKESCRIPTS := $(PROJECT_BINDIR)/bin/rungle
+endif
+
+ifeq (@HAVE_WIN32@,1)
+	GLE_ELIBS := -lwsock32
+	ifeq (@HAVE_LIBGLE@,1)
+		LIBGLE_ELIBS := -lwsock32
+	endif
+endif
+
+UTILOBJS=cutils.$(OBJ_SUFF) file_io.$(OBJ_SUFF)
+
+ifeq (@HAVE_LIBGLE_CPPFLAGS@,1)
+	UTILOBJS=cutils.static.$(OBJ_SUFF) file_io.static.$(OBJ_SUFF)
+endif
+
+ifeq (@HAVE_LIBGLE@,1)
+	TOMAKE := $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.so
+	GLEOBJ := glec.cpp $(UTILOBJS) $(SIMPLE_LIBS_DL)
+	ifeq (@HAVE_WIN32@,1)
+		TOMAKE :=  $(PROJECT_BINDIR)/bin/libgle-graphics-@GLE_VERSION@.dll
+		GLEOBJ := glec.cpp $(UTILOBJS)
+	endif
+	ifeq (@HAVE_MAC@,1)
+		TOMAKE := $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.dylib
+	endif
+	GLEIN := glec.cpp $(UTILOBJS)
+	GLEOPT := $(CPPFLAGS)
+else
+	GLEIN := $(GLEOBJS) $(OBJECTS) $(LINKOBJS)
+	GLEOBJ := $(OBJECTS) $(LINKOBJS) $(LIBS)
+	GLEOPT := $(LINK_OPTS) $(LDFLAGS)
+endif
+
+TOMAKE := $(TOMAKE) $(PROJECT_BINDIR)/bin/gle
+
+ifeq (@HAVE_LIBGLE_STATIC@,1)
+	TOMAKE := $(TOMAKE) $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.a
+	GLEIN := $(GLEOBJS) $(OBJECTS) $(LINKOBJS)
+	GLEOBJ := $(OBJECTS) $(LINKOBJS) $(LIBS)
+	GLEOPT := $(LINK_OPTS) $(LDFLAGS)
+endif
+
+LIBGLE_CPPFLAGS := $(strip $(LIBGLE_CPPFLAGS))
+CPPFLAGS := $(strip $(CPPFLAGS))
+
+all: $(OBJECTS) $(TOMAKE)
+
+make_glebtool: $(PROJECT_BINDIR)/bin/glebtool $(PROJECT_BINDIR)/glerc $(MAKESCRIPTS)
+
+$(filter %.static.$(OBJ_SUFF),$(UTILOBJS)): %.static.$(OBJ_SUFF): %.cpp $(INCLUDES)
+	$(CXX) $(CPPFLAGS) -c $< -o $@
+
+$(OBJECTS): %.$(OBJ_SUFF): %.cpp $(INCLUDES)
+	$(CXX) $(LIBGLE_CPPFLAGS) -c $< -o $@
+
+$(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.dylib: $(GLEOBJS) $(OBJECTS) $(LINKOBJS)
+	$(CXX) -dynamiclib -install_name libgle-graphics-@GLE_VERSION@.dylib $(LINK_OPTS) $(LIBGLE_LDFLAGS) -o $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.dylib $(OBJECTS) $(LINKOBJS) $(LIBS) $(LIBGLE_ELIBS)
+
+$(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.so: $(GLEOBJS) $(OBJECTS) $(LINKOBJS)
+	$(CXX) -shared -Wl,-soname,libgle-graphics-@GLE_VERSION@.so $(LINK_OPTS) $(LIBGLE_LDFLAGS) -o $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.so $(OBJECTS) $(LINKOBJS) $(LIBS) $(LIBGLE_ELIBS)
+
+$(PROJECT_BINDIR)/bin/libgle-graphics-@GLE_VERSION@.dll: $(GLEOBJS) $(OBJECTS) $(LINKOBJS)
+	$(CXX) -shared $(LINK_OPTS) $(LIBGLE_LDFLAGS) -o $(PROJECT_BINDIR)/bin/libgle-graphics-@GLE_VERSION@.dll $(OBJECTS) $(LINKOBJS) $(LIBS) $(LIBGLE_ELIBS)
+
+$(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.a: $(GLEOBJS) $(OBJECTS) $(LINKOBJS)
+	rm -f $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.a
+	ar rvu $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.a $(OBJECTS) $(LINKOBJS)
+	ranlib $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.a
+
+$(PROJECT_BINDIR)/bin/gle: $(GLEIN)
+	$(CXX) $(GLEOPT) $(SIMPLE_LDFLAGS) -o $(PROJECT_BINDIR)/bin/gle $(GLEOBJ) $(GLE_ELIBS) $(SIMPLE_LIBS)
+
+$(PROJECT_BINDIR)/glerc:
+	echo "begin config gle" > $(PROJECT_BINDIR)/glerc
+	echo "   current = $(VERSION_NUMBER).$(BUILD_NUMBER)" >> $(PROJECT_BINDIR)/glerc
+	echo "end config" >> $(PROJECT_BINDIR)/glerc
+
+$(PROJECT_BINDIR)/bin/glebtool: glebtool.cpp $(UTILOBJS) Makefile
+	$(CXX) $(CPPFLAGS) $(SIMPLE_LDFLAGS) glebtool.cpp $(UTILOBJS) $(GLE_ELIBS) $(SIMPLE_LIBS) -o $(PROJECT_BINDIR)/bin/glebtool
+	$(PROJECT_BINDIR)/bin/glebtool -setrelpath $(INSTALL_BIN) $(INSTALL_LIB) $(INSTALL_DIR) $(docdir) ../config.h
+
+$(PROJECT_BINDIR)/bin/rungle:
+	echo "#!/bin/sh" > $(PROJECT_BINDIR)/bin/rungle
+	echo "GLE_TOP=../../build" >> $(PROJECT_BINDIR)/bin/rungle
+	echo "export GLE_TOP" >> $(PROJECT_BINDIR)/bin/rungle
+	echo "../../build/bin/gle \$$@" >> $(PROJECT_BINDIR)/bin/rungle
+	chmod a+x $(PROJECT_BINDIR)/bin/rungle
+
+dofonts:
+	$(MAKE) -C font
+
+# simple test to make the sample and compare it to
+# the eps file that is included in the distribution
+# -- if you get this far chances are it working allready ;-)
+# you should only get an error on the Creation date
+
+test: # do this after make install!
+	gle sample.gle /eps
+	diff sample.eps sample_compare.eps
+
+clean:
+	-$(RM) $(OBJECTS) $(PROJECT_BINDIR)/bin/gle* $(PROJECT_BINDIR)/bin/glebtool* *.static.$(OBJ_SUFF)

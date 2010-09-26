@@ -1,0 +1,606 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Programming Facilities}
+
+\section{Expressions}
+\index{variables}
+\index{expressions}
+Wherever GLE is expecting a number it can be replaced with an expression.  For
+example
+
+\preglecode{}
+\begin{Verbatim}
+     rline 3 2
+\end{Verbatim}
+\postglecode{}
+
+and
+
+\preglecode{}
+\begin{Verbatim}
+     rline 9/3 sqrt(4)
+\end{Verbatim}
+\postglecode{}
+
+will produce the same result.
+
+An expression in GLE is delimited by white space, so it may not contain any
+spaces - `{\sf rline 3*3 2}' is valid but `{\sf rline 3 * 3 2}' will not work.
+
+Or `{\sf let d2 = 3+sin(d1)}' will work and `{\sf let d2= 3 + sin(d1)}' won't.
+
+Expressions may contain numbers, arithmetic operators ({\sf +}, {\sf -}, {\sf *},
+{\sf /}, \verb+^+ (to the power of)), relational operators ($>$, $<$, $=>$, $<=$,
+$=$, $<>$) Boolean operators ({\sf and}, {\sf or}), variables and built-in functions.
+
+When GLE is expecting a colour or marker name (like `green' or `circle')
+it can be given a string variable, or an expression enclosed in braces.
+
+\section{Functions Inside Expressions}
+
+\begin{figure}[tb]
+\centering
+\mbox{\includegraphics{prog/fig/axisformat}}
+\caption{\label{axformat:fig}Examples of number formatting options.}
+\end{figure}
+
+\begin{commanddescription}
+
+\item[{\sf eval(str)}]
+\index{eval()}
+Evaluates the given string as if it was a GLE expression and returns the result. E.g., \texttt{eval("3+4")} returns 7.
+
+\item[{\sf arg(i), arg\$(i), nargs()}]
+\label{args:cmd}
+\index{arg()}
+\index{arg\$()}
+\index{nargs()}
+Provide access to the command line arguments that are passed to GLE. This is useful for generating multiple similar plots from a single script. arg(i) returns the i-the argument (as a number), arg\$(i) returns the i-the argument as a string, and nargs() returns the number of arguments. Only arguments that come after the name of the GLE script are counted. For example, if GLE is run as:
+
+\begin{Verbatim}
+     gle -o graph-1.eps graph.gle "Title" 0.5
+\end{Verbatim}
+
+\noindent{}then nargs() returns 2, arg\$(1) returns ``Title'', and arg(2) returns 0.5.
+
+The typical use of these functions is to create a script ``graph.gle'' as follows:
+
+\begin{Verbatim}
+size 10 10
+begin graph
+   title arg$(1)
+   data arg$(2)
+   d1 line color red
+end graph
+\end{Verbatim}
+
+\noindent{}and then creating different graphs by running GLE multiple times:
+
+\begin{Verbatim}
+     gle -o beans.eps graph.gle "Beans" "beans.csv"
+     gle -o peas.eps graph.gle "Peas" "peas.csv"
+\end{Verbatim}
+
+\noindent{}This will create two graphs: ``beans.eps'' and ``peas.eps''. The arg() functions can be used at all places in the script where an expression is expected. They can even be used in place of GLE commands in a graph block by means of the $\backslash{}$expr() function. For example,
+
+\begin{Verbatim}
+     data "file.csv"
+     d\expr{arg(1)} line color red
+\end{Verbatim}
+
+\noindent{}in the graph block will allow one to draw different datasets from a single file on multiple graphs. To do so, run:
+
+\begin{Verbatim}
+     gle -o d1.eps graph.gle 1
+     gle -o d2.eps graph.gle 2
+\end{Verbatim}
+
+\item[{\sf dataxvalue({\it ds},{\it i}), datayvalue({\it ds},{\it i}), ndata({\it ds})}]
+\index{dataxvalue}\label{dataxvalue}
+\index{datayvalue}\label{datayvalue}
+\index{ndata}\label{ndata}
+
+These functions can be used to retrieve the data values from a given dataset. They only work after data has been loaded by means of a graph block (Ch.~\ref{graph:chap}).
+
+A dataset is specified with a dataset identifier {\it ds} (a string of the form ``d$i$'', with $i$ an integer). The function `{\sf ndata}' returns the number of points in the dataset, and the functions `{\sf dataxvalue}' and `{\sf datayvalue}' return the $x$ and $y$ values of point {\it i}, where {\it i} ranges from 1 to {\sf ndata({\it ds})}.
+
+The following example shows how these functions can be used to compute the maximum of a dataset:
+
+\begin{Verbatim}
+sub dmaxy ds$
+   local crmax = datayvalue(ds$,1)
+   for i = 2 to ndata(ds$)
+      crmax = max(crmax, datayvalue(ds$,i))
+   next i
+   return crmax
+end sub
+\end{Verbatim}
+
+This subroutine together with other subroutines for computing the minimum, mean, area, etc. of a dataset are defined in the include file `graphutil.gle', which is distributed together with GLE.
+
+\item[{\sf format\$({\it exp},{\it format})}]
+\index{format\$()} \label{formatnum:pg}
+
+Returns a string representation of {\it exp} formatted as specified in {\it format}.
+
+Basic formats:
+\begin{itemize}
+\item {\sf append {\it s}}: appends the string $s$ after the formatted number. This can be used to add a unit.
+
+\item {\sf dec}, {\sf hex [upper|lower]}, {\sf bin}: format as decimal, hexadecimal (upper-case or lower-case), or binary.
+
+\item {\sf fix} {\it places}: format with {\it places} decimal places.
+
+\item {\sf sci} {\it sig} {\sf [e,E,10]} {\sf [expdigits {\it num}]} {\sf [expsign]}: format in scientific notation with {\it sig} significant digits. Use `e', `E', or `10' as notation for the exponent. With the option {\sf expdigits} the number of digits in the exponent can be set and {\sf expsign} forces a sign in the exponent.
+
+\item {\sf eng} {\it digits} {\sf [e,E,10]} {\sf [expdigits {\it num}]} {\sf [expsign]} {\sf [num]}: format in engineering notation. The options are similar to `sci'. If the option `num' is given, then numeric notation is used instead of, e.g., $\mu$, m, k, M.
+
+\item {\sf round} {\it sig}: format a number with {\it sig} significant digits.
+
+\item {\sf frac}: format the number as a fraction.
+
+\item {\sf pi}: format the number as a fraction times $\pi$ (E.g., xaxis labels of Fig.~\ref{grscale:fig}).
+\end{itemize}
+
+Options for all formats:
+\begin{itemize}
+\item {\sf nozeroes}: remove unnecessary zeroes at the end of the number.
+
+\item {\sf sign}: also include a sign for positive numbers.
+
+\item {\sf pad {\it nb} [left] [right]}: pad the result with spaces from the left or right.
+
+\item {\sf prefix {\it nb}}: prefix the number with zeroes so that {\it nb} digits are obtained.
+
+\item {\sf prepend {\it s}}: prepends the string $s$ before the formatted number.
+
+\item {\sf min {\it val}}: use format for numbers $\ge$ {\it val}.
+
+\item {\sf max {\it val}}: use format for numbers $\le$ {\it val}.
+\end{itemize}
+
+Examples:
+\begin{itemize}
+\item format\$(3.1415, ``fix 2'') = 3.14
+\item format\$(3756, ``round 2'') = 3800
+\item format\$(3756, ``sci 2 10 expdigits 2'') = $3.8\cdot10^{03}$
+\end{itemize}
+
+Several formats can be combined into one string: "sci 2 10 min 1e2 fix 0" uses scientific notations for numbers above $10^2$ and decimal notation for smaller numbers. See Fig.~\ref{axformat:fig} for more examples.
+
+\item[{\sf pagewidth(), pageheight()}]
+\index{pagewidth()} \index{pageheight()}
+These functions return the width and height of the output. These are the values set with the `\texttt{size}' command.
+
+\item[{\sf pointx(), pointy()}]\label{fct:pointxy}
+These functions return the x and y values of a named point.
+
+\preglecode{}
+\begin{Verbatim}
+     begin box add 0.1 name mybox
+         write "Hello"
+     end box
+     amove pointx(mybox.bc) pointy(mybox.bc)
+     rline 0 -2 arrow end
+\end{Verbatim}
+\postglecode{}
+
+\item[{\sf twidth(str), theight(str), tdepth(str)}]
+\index{twidth()} \index{theight()}
+These functions return the width, depth and height of a string, if it was
+printed in the current font and size.
+
+\item[{\sf width(obj), height(obj)}]\label{fct:wdhi}
+\index{width()} \index{height()}
+These functions return the width and height of a named object.
+
+\item[{\sf xend(), yend()}]
+\index{xend()} \index{yend()}
+These functions return the end point of the last thing drawn. This is
+of particular interest when drawing text.
+
+\preglecode{}
+\begin{Verbatim}
+     text abc
+     set color blue
+     text def
+\end{Verbatim}
+\postglecode{}
+
+This would draw the {\sf def} on top of the {\sf abc}.  To draw the {\sf def}
+immediately following the {\sf abc} simply do the following (Note that
+absolute move is used, not relative move):
+
+\begin{minipage}[c]{8cm}
+\begin{Verbatim}
+set just left
+text abc
+set color gray20 
+amove xend() yend() 
+text def            
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\includegraphics{primitives/fig/gc_xend}}
+\end{minipage}
+
+\item[{\sf xg(), yg()}]
+\index{xg()} \index{yg()}
+\index{functions}
+With these functions it is possible to move to a position on a graph
+using the graph's axis units.
+To draw a filled box on a graph, at position x=948, y=.004  measured
+on the graph axis:
+
+\preglecode{}
+\begin{Verbatim}
+     begin graph
+        xaxis min 100 max 2000
+        yaxis min -.01 max .01
+        ...
+     end graph
+     amove xg(948) yg(.004)
+     box 2 2 fill gray10
+\end{Verbatim}
+\postglecode{}
+
+\item[{\sf xpos(), ypos()}]
+\index{xpos()} \index{ypos()}
+Returns the current x and y points.
+\end{commanddescription}
+
+\noindent{}See Appendix~\ref{fct:sec} for an overview of all functions provided by GLE.
+
+\section{Using Variables}
+\index{variables}
+\index{string!variables}
+
+GLE has two types of variables,  floating point and string. String 
+variables always end with a dollar sign.  A string variable contains
+text like ``Hello, this is text'', a floating point variable can
+only store numbers like 1234.234.
+
+\preglecode{}
+\begin{Verbatim}
+name$ = "Joe"
+height = 6.5   ! Height of person
+shoe = 0.05    ! shoe adds to height of person
+amove 1 1
+box 0.2 height+shoe
+write name$
+\end{Verbatim}
+\postglecode{}
+
+\section{String constants}
+\index{string!constants}
+
+String constants can be double quoted or single quoted. To include a double quote character in a double quoted string it should be doubled. The same holds for a single quoted string. Backslash characters are not interpreted in a special way by GLE's parser. (They are, however, interpreted by the built-in \TeX{} system used in the `{\sf write}' command.) Here are some examples:
+
+\preglecode{}
+\begin{Verbatim}
+print "Double quoted string"
+print 'Single quoted string'
+print "Between ""double quotes"""
+print "{\it hello}"
+print "Three double quotes """""""
+print """"
+\end{Verbatim}
+\postglecode{}
+
+The result of these print commands is:
+
+\preglecode{}
+\begin{Verbatim}
+Double quoted string
+Single quoted string
+Between "double quotes"
+{\it hello}
+Three double quotes """
+"
+\end{Verbatim}
+\postglecode{}
+
+\section{Programming Loops}
+\index{loops}
+\index{for}
+\index{next}
+
+The simple way to draw a 6 $\times$ 8 grid would be to use a whole mass 
+of line commands:
+
+\preglecode{}
+\begin{Verbatim}
+amove 0 0 
+rline 0 8 
+amove 1 0 
+rline 1 8 
+...
+amove 6 0 
+rline 6 8
+\end{Verbatim}
+\postglecode{}
+
+this would be laborious to type in, and would become 
+impossible to manage with several grids.  By using a simple loop
+this can be avoided:
+
+\preglecode{}
+\begin{Verbatim}
+for x = 0 to 6
+   amove x 0 
+   rline x 8 
+next x
+for y = 0 to 8
+   amove 0 y 
+   rline 6 y 
+next y 
+\end{Verbatim}
+\postglecode{}
+
+Besides for-next loops, GLE also supports while and until loops:
+
+\index{while}
+\preglecode{}
+\begin{Verbatim}
+i = 0
+while i <= 10
+   print "Value: " i
+   i = i + 1
+next
+\end{Verbatim}
+\postglecode{}
+
+\index{until}
+\preglecode{}
+\begin{Verbatim}
+i = 0
+until i > 10
+   print "Value: " i
+   i = i + 1
+next
+\end{Verbatim}
+\postglecode{}
+
+\section{If-then-else}
+\index{if}
+\index{then}
+\index{else}
+
+GLE supports if-then-else statements as follows:
+
+\preglecode{}
+\begin{Verbatim}
+if a < 1 then print a "is smaller than 1"
+else if a < 2 then print a "is smaller than 2 but larger than 1"
+else if a < 3 then print a "is smaller than 3 but larger than 2"
+else print a "is larger than 3"
+\end{Verbatim}
+\postglecode{}
+
+\noindent{}to create blocks of code for the `then' and `else' branches, instead use:
+
+\preglecode{}
+\begin{Verbatim}
+if a < 1 then
+   print a "is smaller than 1"
+   ...
+else
+   ...
+end if
+\end{Verbatim}
+\postglecode{}
+
+More complex conditions can be created with the logic connectives `{\sf and}', `{\sf or}', and `{\sf not}' (note the parenthesis around the logical expressions):
+
+\preglecode{}
+\begin{Verbatim}
+if (a >= 1) and (a <= 10) then print "a is between 1 and 10"
+\end{Verbatim}
+\postglecode{}
+
+\section{Subroutines}
+\index{subroutines}
+
+To draw lots of grids all of different dimensions a subroutine can
+be defined and then used again and again:
+
+\preglecode{}
+\begin{Verbatim}
+sub grid nx ny 
+   local x, y
+   begin origin
+      for x = 0 to nx
+         amove x 0 
+         aline x ny 
+      next x
+      for y = 0 to ny
+         amove 0 y 
+         aline nx y 
+      next y 
+   end origin
+end sub
+     
+amove 2 4
+grid  6 8
+amove 2 2
+grid  9 5
+\end{Verbatim}
+\postglecode{}
+
+Inside a subroutine, the keyword `\texttt{local}'\index{local} can be used to define local variables. E.g., `\texttt{local x = 3}', defines the local variable `x' and assigns it the value 3. It is also possible to define several local variables at once, as is shown in the `grid' example above.
+
+The keyword `\texttt{return}'\index{return} can be used to return a value from a subroutine. E.g.,
+
+\preglecode{}
+\begin{Verbatim}
+sub gaussian x mu sigma
+   return 1/(sigma*sqrt(2*pi))*exp(-((x-mu)^2)/(2*sigma^2))
+end sub
+\end{Verbatim}
+\postglecode{}
+
+The main GLE file will be much easier to manage if subroutine definitions are moved into a separate file:
+
+\preglecode{}
+\begin{Verbatim}
+include "griddef.gle"
+
+amove 2 4
+grid  2 4
+amove 2 2
+grid  9 5
+\end{Verbatim}
+\postglecode{}
+
+More information about the ``include''\index{include} command can be found on page~\pageref{incl:cmnd}.
+
+\subsection{Default Arguments}
+
+Given the following subroutine definition:
+
+\preglecode{}
+\begin{Verbatim}
+sub mysub x y color$ fill$
+   default color  "black"
+   default fill   "clear"
+   print "Color: " color$
+   print "Fill:  " fill$
+end sub
+\end{Verbatim}
+\postglecode{}
+
+\noindent{}the following calls are valid:
+
+\preglecode{}
+\begin{Verbatim}
+mysub 1 0
+mysub 1 0 red
+mysub 1 0 red green
+mysub 1 0 fill blue
+mysub 1 0 color red
+mysub 1 0 color red fill blue
+\end{Verbatim}
+\postglecode{}
+
+\section{Forward Declarations}
+
+A forward declaration of a subroutine is possible with:
+
+\preglecode{}
+\begin{Verbatim}
+declare sub mysub x y
+\end{Verbatim}
+\postglecode{}
+
+\noindent{}Forward declarations are required for declaring mutually recursive subroutines.
+
+\section{I/O Functions}
+\index{I/O-functions}
+\index{fopen} \index{fread} \index{freadln}
+\index{fclose} \index{fwrite} \index{fwriteln}
+\index{fgetline} \index{ftokenizer}
+
+The following I/O functions are available:
+
+\begin{commanddescription}
+\item[{\sf fopen {\it name} {\it file} [read$|$write]}]
+
+Open the file ``{\it name}'' for reading or for writing. The resulting file handle is stored in variable ``{\it file}'' and must be passed to all other I/O functions.
+
+\item[{\sf fclose {\it file}}]
+
+Close the given file.
+
+\item[{\sf fread {\it file} {\it x1} $\ldots$}]
+\item[{\sf freadln {\it file} {\it x1} $\ldots$}]
+
+Read entries from ``{\it file}'' into given arguments {\it x1} $\ldots$
+
+\item[{\sf fwrite {\it file} {\it x1} $\ldots$}]
+
+Write given arguments to ``{\it file}''.
+
+\item[{\sf fwriteln {\it file} {\it x1} $\ldots$}]
+
+Write given arguments to ``{\it file}'' and start a new line.
+
+\item[{\sf fgetline {\it file} {\it line\$}}]
+
+Read an entire line from ``{\it file}'' and store it in the string ``{\it line\$}''.
+
+\item[{\sf ftokenizer {\it file} {\it commentchar spacetokens singletokens}}]
+
+Sets up the parameters of the tokenizer that controls the reading of ``{\it file}''. The {\it commentchar} parameter specifies the characters that are to be interpreted as line comments. It is a string, but each character of the string is assumed to be a separate comment character. The default is ``!''. If one would write ``!\%'', then both ``!'' and ``\%'' would be comment indicators. The {\sf fread} functions skip everything after a comment character to the end of the line. The {\it spacetokens} string represents the set of characters that are interpreted as spaces or delimiters. The default value is `` ,$\backslash$t$\backslash$r$\backslash$n'', i.e., space, comma, tab, carriage return, and newline are delimiters by default. Finally, the {\it singletokens} string identifies characters that should be returned as separate tokens, even if they are glued to other tokens. For example, if ``@'' would be a single char token, then the string ``me@myself.com'' would be returned in three tokens: ``me'', ``@'', and ``myself.com''. 
+
+\end{commanddescription}
+
+For example:
+
+\preglecode{}
+\begin{Verbatim}
+fopen "file.dat" f1 read
+fopen "file.out" f2 write
+until feof(f1)
+        fread f1 x y z
+        aline x y
+        rline x z
+        fwriteln f2 x*2 "y =" y
+next
+fclose f1
+fclose f2
+\end{Verbatim}
+\postglecode{}
+
+\section{Device Dependent Control}
+\index{device control}
+A built in function which returns a string describing 
+the device is available. \\e.g. \verb# DEVICE$() = "HARDCOPY, PS,"#\\
+on the postscript driver.
+
+This can be used to use particular fonts etc on appropriate
+devices. E.g.:
+
+\preglecode{}
+\begin{Verbatim}
+                if pos(device$(),"PS,",1)>0 then
+                        set font psncsb
+                end if 
+\end{Verbatim}
+\postglecode{}

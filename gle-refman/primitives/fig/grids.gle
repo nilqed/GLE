@@ -1,0 +1,73 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+size 13.25 4.5
+
+include "../../script/manual.gle"
+manual_graph_mode
+
+wd = 1.75; hi = 1; yd = 0.15; del = 0.4
+
+sub dobox x y grid$
+	amove del+(wd+del)*x pageheight()-del-(hi+del)*y-hi-yd
+	set fill gray50 pattern grid$	
+	box wd hi name "bx"
+	set just bc
+	amove ptx(bx.tc) pty(bx.tc)+0.1
+	tex grid$
+end sub
+
+dobox 0 0 "GRID"
+dobox 1 0 "GRID1"
+dobox 2 0 "GRID2"
+dobox 3 0 "GRID3"
+dobox 4 0 "GRID4"
+dobox 5 0 "GRID5"
+dobox 0 1 "SHADE"
+dobox 1 1 "SHADE1"
+dobox 2 1 "SHADE2"
+dobox 3 1 "SHADE3"
+dobox 4 1 "SHADE4"
+dobox 5 1 "SHADE5"
+dobox 0 2 "RSHADE"
+dobox 1 2 "RSHADE1"
+dobox 2 2 "RSHADE2"
+dobox 3 2 "RSHADE3"
+dobox 4 2 "RSHADE4"
+dobox 5 2 "RSHADE5"
+

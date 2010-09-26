@@ -1,0 +1,104 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! GLE logo for web page
+! by: V.P. LaBella vlabella@albany.edu
+!
+psbbtweak
+size 12 6
+set font psagb
+name$="Professional Graphics Language"
+dx=12
+dy=6
+boxw=dx/7
+boxh=dy
+amove 0 0
+set color white
+box dx dy fill white
+
+sub draw_box dx dy clr$
+	gsave
+	set color clr$
+	box dx dy fill clr$
+	grestore
+end sub
+
+amove dx/2 dy/2+0.5
+set just cc
+begin clip			! Save default clipping region
+	begin path clip	! Set up the clipping region
+		set hei 6.0
+		text GLE
+	end path
+	amove 0 0
+	@draw_box boxw boxh red
+	rmove boxw 0
+	@draw_box boxw boxh orange
+	rmove boxw 0
+	@draw_box boxw boxh yellow
+	rmove boxw 0
+	@draw_box boxw boxh lime
+	rmove boxw 0
+	@draw_box boxw boxh blue
+	rmove boxw 0
+	@draw_box boxw boxh navy
+	rmove boxw 0
+	@draw_box boxw boxh violet
+	rmove boxw 0
+	gsave
+	set hei 0.67
+	delta=0.8
+	amove dx/2 dy-delta	
+	set color black
+	for i=1 to 10
+		write name$
+		rmove 0.0 -delta
+	next i
+	grestore
+end clip
+
+!
+! version number
+!
+amove 9.4 1.8
+gsave
+set hei 1.0
+set just bl
+set color gray40
+text v4.2
+grestore

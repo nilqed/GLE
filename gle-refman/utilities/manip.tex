@@ -1,0 +1,470 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%\chapter {GLE Utilities}
+\section{Manip}
+\index{Manip}
+%
+Manip is a data manipulation package.  It reads in a text
+file of numbers and displays them like a spreadsheet.
+You can then do simple operations on the columns and write
+them out in any format you like.
+
+\subsection{Usage}
+\index{Manip!usage}
+\begin{verbatim}
+    MANIP infile.dat -recover -step -commands c.log -single -size x y
+\end{verbatim}
+
+\begin{commanddescription}
+\item[{\sf --recover}]
+\index{recover}
+Manip logs everything you type to a file called \verb#MANIP_.J1#
+When you use the {\sf -RECOVER} option on the manip command it then
+reads keys from that file as if they were typed at the keyboard.
+
+This will restore you to the 
+point just before your pc crashed.
+The last three journal files are stored (.j1 .j2 .j3)
+simply copy the one you want to (.j1) to use it.
+
+\item[{\sf --step}]
+\index{step}
+Used with recover,  press a space for each key you
+want to read from the journal file,  press any other
+key to stop reading the journal.
+
+\item[{\sf --commands {\it filename.man}}]
+\index{commands}    
+This reads the commands in {\it filename.man} as if they
+were typed at the keyboard.
+
+\item[{\sf --single}]
+\index{single}
+This makes {\sf MANIP} use single precision arithmetic
+and doesn't store strings at all, this enables
+three times as much data in the same amount of memory
+
+\item[{\sf --size {\it x y}}]
+\index{size {\it x y}}
+Sets the initial size of the spreadsheet.  Use this
+with large datasets as it prevents the heap from
+becoming fragmented and thus lets you use much
+larger datasets.
+\end{commanddescription}
+
+\subsubsection{Range}
+\index{Manip!Range}
+Most manip commands accept a range as one or more of there
+parameters.  A range is a rectangular section of your
+spreadsheet.  A range can ether start with a 'c' or an
+'r' and this will affect how the command operates.
+
+If your spreadsheet has 5 columns and 10 rows then.
+\begin{verbatim}
+		c1 ==  c1c1r1r10  == 1,1  1,2  1,3  1,4  1,5  1,6 ...
+		r1 ==  r1r1c1c5   == 1,1  2,1  3,1  4,1  5,1
+		c1c2 ==c1c2r1r10  == 1,1  2,1  1,2  2,2  3,1  3,2 ...
+		r1r2c3=r1r2c3c5   == 3,1  3,2  4,1  4,2  5,1  5,2
+\end{verbatim}
+
+\subsubsection{Arrows}
+\index{Manip!Arrows}
+The arrow keys normally move the data cursor, however if you are half
+way thru typing a command then, the left and right arrow keys allow you
+to edit the command.  Use the {\sf PAGE-UP} and {\sf PAGE-DOWN} keys to recall
+your last command.
+
+{\sf SHIFT} arrow keys will jump 7 cells at a time for fast movement.\\
+
+Further help is available on the following toppics via
+the HELP command e.g. "HELP COPY"
+
+\subsection{Manip Primitives (a summary)}
+%
+%%{\sf xplaces {\it pos1 pos2 pos3 ...}}  \\
+%
+{\sf @{\it mycmds}}\\
+{\sf Arrows}\\
+{\sf BLANK}\\
+{\sf CLEAR}\\
+{\sf CLOSE}\\
+{\sf COPY [{\it range}] [{\it range}] IF [{\it exp}]}\\
+{\sf DATA [{\it range}]}\\
+{\sf DELETE [{\it range}] IF [{\it exp}]}\\
+{\sf EXIT {\it filename} [{\it range}] --TAB --SPACE --COMMA}\\
+{\sf FIT {\it c3}}\\
+{\sf Functions}\\
+{\sf GENERATE [{\it pattern}] [{\it destination}]}\\
+{\sf GOTO {\it x y}}\\
+{\sf INSERT [C{\it n}] or [R{\it n}]}\\
+{\sf LOAD {\it filename} [{\it range}] --0}\\
+{\sf LOAD {\it filename} [{\it range}]}\\
+{\sf LOGGING {\it mycmds.man}}\\
+{\sf MOVE [{\it range}] [{\it range}] IF [{\it exp}]}\\
+{\sf NEW}\\
+{\sf PARSUM [{\it range1}] [{\it range2}]}\\
+{\sf PROP [{\it range}] [{\it range}]}\\
+{\sf QUIT}\\
+{\sf Recover (recovering from power failure or crash)}\\
+{\sf SAVE {\it filename} [{\it range}] --TAB --SPACE --COMMA}\\
+{\sf SET SIZE {\it ncols nrows} }\\
+{\sf SET BETWEEN "  "}\\
+{\sf SET COLTYPE}\\ 
+{\sf SET COLWIDTH}\\
+{\sf SET NCOL {\it n}}\\
+{\sf SET DPOINTS {\it n}}\\
+{\sf SET DIGITS {\it n}}\\
+{\sf SET WIDTH {\it n}}\\
+{\sf SHELL}\\
+{\sf SORT [{\it range}] on [{\it exp}]}\\
+{\sf SUM [{\it range}]}\\
+{\sf SWAP C{\it n}C{\it n} | R{\it n}R{\it n}}
+
+\subsection{Manip Primitives (in detail)}
+%
+\begin{commanddescription}
+%%\item[{\sf data {\it filename {\sf [}d1 d2 d3 ...{\sf ] [}d1=c1,c3{\sf ]} }
+%%} ]
+%% \index{data}
+\item[{\sf COPY [{\it range1}] [{\it range2}]  if [{\it exp}]}]
+\index{copy}
+
+For copying a section to another section.
+They do not have to be the same shape. The pointers to both rangers
+are increased even if the number is not coppied  e.g.
+\begin{verbatim} 
+	"% COPY r4r2 r1r2"
+	"% COPY c1c3r6r100  c6c8 if c1<c2"
+
+	"% COPY C1 C2 IF C1<4"
+	c1 	c2
+	1       1
+	2       2
+	5       -
+	3       3
+	9       -
+\end{verbatim}
+
+\item[{\sf DELETE [{\it range}] IF [{\it exp}]}]
+\index{delete}
+For deleteing entire rows or columns. e.g.
+\begin{verbatim}
+	"% DELETE c1c3 IF r1>3.and.r2=0
+	"% DELETE r1"
+\end{verbatim}
+Numbers are shuffled in from the right to take the place of the
+deleted range.
+
+\item[{\sf DATA [{\it range}]}]
+\index{data}
+Data entry mode is usefull for entering data.  After typing in
+\verb#"% DATA c1c3"# or \verb#"% DATA C2"# you can then enter data and pressing
+{\sf <cr>} will move you to the next valid data position.
+In this mode text or numbers can be entered.
+Press {\sf ESC} to get back to command mode.
+
+\item[{\sf FIT {\it c3}}]
+\index{fit}
+\verb#"FIT C3"# will fit a least squares regression line to the data
+in columns c3 and c4 (x values taken from c3) and print
+out the results.
+
+\item[{\sf EXIT}]
+\index{exit}
+EXIT saves the data in your input file spec and exits to DOS.  You
+can optionally specify an output file as well. eg. 
+\verb#"% EXIT myfile.dat"#
+
+The command \verb#"EXIT myfile.dat c3c5r1r3"# will write out that range of
+numbers to the file.
+
+By default manip will write columns seperated by spaces.
+
+The command \verb#"EXIT myfile.dat -TAB"# will put a single tab between
+each column of numbers and \verb#"EXIT myfile.dat -COMMA"# will put a
+comma and a space between each number.  (these two options are
+usefull if your data file is very big and you don't want to waste
+diskspace with the space characters.)  
+Note: The settings stay in effect for future saves and exits.
+
+You can make it line up the columns on the decimal point by typing in the
+command. \verb#"SET DPOINTS 3"#
+
+You change the width of each column or completely remove the spaces
+between columns with the command. \verb#"SET WIDTH 10"#  (or set width 0)
+
+You can change the number of significant digits displayed with
+the command \verb#"SET DIGITS 4"#
+
+\item[{\sf SAVE {\it myfile.dat}}]
+\index{save}
+Saves all or part of your data.
+The command \verb#"SAVE myfile.dat c3c5r1r3"# will write out that range of
+numbers to the file.
+
+By default manip will write columns seperated by spaces.
+
+The command \verb#"SAVE myfile.dat -TAB"# will put a single tab between
+each column of numbers and \verb#"SAVE myfile.dat -COMMA"# will put a
+comma and a space between each number.  (these two options are
+usefull if your data file is very big and you don't want to waste
+diskspace with the space characters).
+
+Further options are the same like {\sf EXIT}  
+
+\item[{\sf GOTO}]
+\index{goto}
+For moving the cursor directly to a point in your array.
+e.g. \verb#"% GOTO x y"#
+
+\item[{\sf CLEAR}]
+\index{clear}
+\verb#"% CLEAR C2C3"# Clears the given range of all values
+
+\item[{\sf BLANK}]
+\index{BLANK}
+\verb#"% BLANK C2C3"# Clears the given range of all values
+
+\item[{\sf NEW}]
+\index{new}
+Clears the spread sheet of all data and frees memory.
+
+\item[{\sf INSERT}]
+\index{insert}
+Inserts a new column or row and shifts all others over.
+e.g.\verb#"% INSERT c5" or "% INSERT r2"#.
+
+\item[{\sf LOAD}]
+\index{load}
+Load data into columns. eg. \verb#"% LOAD filename"# loads all 
+data into corresponding columns. \verb#"% LOAD filename c3"#
+load first column of data into c3 etc.
+
+\verb# "LOAD myfile.dat c3 -LIST"#
+This commmand will load the the data into a single column or range
+(even if it is several columns wide in the data file)
+
+\item[{\sf MOVE [{\it range1}] [{\it range2}] if [{\it exp}]}]
+\index{move}
+For copying a section to another section. They do not have to be the 
+same shape. The pointer to the destination is only increased if 
+the line or column is coppied e.g.
+\begin{verbatim}
+	"% MOVE c1 c2c3"
+	"% MOVE r4r2 r1r2"
+	"% MOVE c1c3r6r100  c6c8 if c1<c2"
+
+	"% MOVE C1 C2 IF C1<4"
+	c1 	c2
+	1       1
+	2       2
+	5       3
+	3       -
+	9       -
+
+	(See COPY command)
+\end{verbatim}
+
+\item[{\sf SORT [{\it range}] ON [{\it exp}]}]
+\index{sort}
+Sort entire rows of the data based on the data in a particular column. e.g.
+\begin{verbatim}
+	"% SORT c8 on c9"
+	"% SORT c1c8 on -c8"
+	"% SORT c1c3 on c2  " 	!for sorting strings
+
+\end{verbatim}
+This command works out how to sort the column (or exp) specified
+in the {\sf ON} part of the command.  It then does that operation to
+the range specified. e.g. \verb#"SORT C1 ON C1"#  will sort column one.
+
+Use the additional qualifier \verb#-STRINGS# if you want to sort a
+column with strings in it. e.g. \verb#"sort c1 on c2 -strings"#
+
+\item[{\sf SWAP}]
+\index{swap}
+Swap over two columns or rows. e.g.
+\begin{verbatim}
+ 	"% SWAP c1c2"
+	"% SWAP r3r1"
+\end{verbatim}
+
+\item[{\sf SET SIZE {\it ncols nrows}}]
+\index{set size}
+\verb#"SIZE 3 4"# Truncates the spreadsheet to 3 columns and 4 rows.  This
+also sets the values to use for default ranges.
+
+\item[{\sf SET BETWEEN " "}]
+\index{set between}
+\verb$"SET BETWEEN "##"$ Defines the string to be printed 
+between each column of numbers when written to a file. 
+This is normally set to a single space.
+
+\item[{\sf SET COLWIDTH}]
+\index{set colwidth}
+Set the width of each column when displayed.
+e.g. \verb#"% SET COLWIDTH 12"#
+
+\item[{\sf SET COLTYPE [{\it n}] DECIMAL | EXP | BOTH | DPOINTS {\it n}}]
+\index{set coltype}
+This commands allows all or individual columns to be set to
+different output types.  If colnumber is missing then that
+setting is applied to all columns.
+
+\verb#SET COLTYPE Ccolnumber TYPE#  Where {\sf TYPE} is one of:
+\begin{verbatim}
+	DECIMAL    produces 	123.456
+	EXP	   produces	1.23456e02
+	BOTH       produces whichever is more suitable
+	DPOINTS n  produces a fixed number of decimal places.
+ e.g.
+	SET COLTYPE c2 DECIMAL
+	SET COLTYPE c1 EXP
+	SET COLTYPE c3 DPOINTS 4
+\end{verbatim}
+Would print out: \verb# 1.2e02 	  1.2    1.2000#
+\begin{verbatim}
+	SET COLTYPE EXP   (column number missed out)
+\end{verbatim}
+Would print out: \verb# 1.2e02    1.2e02  1.2e02#
+
+\item[{\sf SET NCOL {\it n}}]
+\index{set ncol}
+ Set the number of columns to display.  e.g.\verb#"% SET NCOL 3"#
+
+\item[{\sf SET DPOINTS {\it n}}]
+\index{set dpoints}
+Sets the number of decimal places to print.  This is used for
+producing columns which line up on the decimal point.
+e.g. with \verb#DPOINTS 3#.
+\begin{verbatim}
+	2.2   ->   2.200
+	234   -> 234.000
+\end{verbatim}
+(See also {\sf SET COLTYPE}) 
+
+\item[{\sf SET DIGITS {\it n}}]
+\index{set digits}
+Sets the number of significat digits to be displayed, e.g.
+with \verb#DIGITS 3#.
+\begin{verbatim}
+	123456    becomes   123000
+	0.12345   becomes   0.123
+\end{verbatim}
+
+\item[{\sf SET WIDTH {\it n}}]
+\index{set width}
+Sets the width of padding to use for the columns when they
+are written to a file.
+The columns usually one space wider than this setting as
+the {\sf BETWEEN} string is usually set to one space by default.
+
+\item[{\sf LOGGING}]
+\index{logging}
+For creating command files. e.g.
+\begin{verbatim}
+	"% LOG sin.man"
+	"% c2=sin(c1)
+	"% c3=c2+2
+	"% close"
+\end{verbatim}
+Then type in \verb#"@sin"# to execute these commands.
+
+\item[{\sf PROPAGATE [{\it source}] [{\it destination}]}]
+\index{propagate}
+This command has the same format as move. 
+The difference is that the source is coppied as many times as 
+possible to fill up the destination. 
+e.g. \verb#"% PROP c1r1r7 c2"#
+
+\item[{\sf SUM [{\it range}]}]
+\index{sum}
+Adds up all the numbers in a range and displays the total and average.
+e.g. \verb#"% SUM C1C3"#
+
+\item[{\sf PARSUM [{\it range1}] [{\it range2}]}]
+\index{parsum}
+Adds up one coloumn, putting the partial sum's into another coloumn. 
+e.g. \verb# 1,2,3,4# becomes \verb# 1,3,6,10#.
+
+\item[{\sf GENERATE [{\it pattern}] [{\it destination}]}]
+\index{generate}
+For generating a patter of data e.g. \verb# 1 1 2 2 5 5 1 1 2 2 5 5# etc.
+\begin{verbatim}
+	"% GEN 2(1,2,5)30 c4"	!1 1 2 2 5 5  repeated 30 times
+	"% GEN (1:100:5)5 c1"	!1 to 100 step 5,  5 times
+	"% GEN (1,2,*,3:5)5 c1"	!missing values included
+\end{verbatim}
+
+\item[Functions]
+\index{Functions}
+Calculations can be performed on rows or columns. eg \verb#"% C1=C2*3+R"# 
+where "R" stands for row-number and C1 and C2 are columns. 
+They can also be performed on {\sf ROWS}. eg 
+\begin{verbatim}
+	r1=sin(r2)+log10(c)
+	c1 = cell(c+1,r)+cell(c+2,r)
+	cell(1,3) = 33.3
+	3+4*COS(PI/180)^(3+1/30)+C1+R
+\end{verbatim}
+ Valid operators and functions:
+%%\begin{verbatim}
+{\tt
+\begin{center}
+\begin{tabular}{ccccccc}
+ $,$   & $+$  & $-$  & \verb#^#  & $*$  & $/$  & $<=$  \\
+ $>=$  & $<>$ & $<$  & $>$  & $=$  & )AND(& )OR(  \\
+ ABS(  & ATN( & COS( & EXP( & FIX( & INT( & LOG(  \\
+LOG10( & SGN( & SIN( & SQR( & TAN( & NOT( & RND(   \\
+ SQRT( & .NE. & .EQ. & .LT. & .GT. & .LE. & .GE. \\
+ .NOT. & .AND.& .OR. &      &      &      &       \\
+\end{tabular}
+\end{center}
+}
+%%\end{verbatim}
+
+\item[{\sf QUIT}]
+\index{quit}
+Abandon file.
+
+
+\item[{\sf SHELL}]
+\index{shell}
+Gives access to DOS.
+\end{commanddescription}

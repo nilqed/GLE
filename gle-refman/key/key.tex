@@ -1,0 +1,266 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{The Key Module}
+\label{key:chap}
+\index{key (module)}
+
+The key module is used for drawing keys. The key can be either specified through a separate key block or directly in the graph block (by prefixing the key commands with the keyword ``key''). This chapter first discusses how to define the key using a key block. Section~\ref{kgrb:sec} shows how to include the key commands directly in a graph block.
+
+The key block usually comes directly after the graph block as follows:
+
+\preglecode{}
+\begin{Verbatim}
+begin graph
+   ...
+end graph
+
+begin key 
+   position tr
+   offset 0.2 0.2
+   text "Blue"    marker circle   fill blue
+   text "Red"     marker triangle fill red    lstyle 2
+   text "Orange"  marker square   fill orange lstyle 3
+end key
+\end{Verbatim}
+\postglecode{}
+\mbox{\input{key/fig/k_key.inc}}
+
+The key block consists of two parts: (a) global commands, and (b) the definitions of the entries. Global commands appear at the beginning of the key and define, e.g., the position of the key. In the example, ``position'' and ``offset'' are global commands. Multiple global commands are allowed on a given line. The entry definitions start after the global commands. All commands relevant to a given entry must appear on the same line. In the example, there are three entry definitions and each definition starts with the ``text'' command. Entries can be organized into columns using the ``separator'' command.
+
+There are two possible ways to set the position of a key: (a) the key can be positioned relative to the graph, and (b) it can be positioned at given coordinates. To position the key relative to the graph, use the commands ``position'' and (optionally) ``offset''. For example,
+
+\preglecode{}
+\begin{Verbatim}
+position tr
+offset 0.2 0.2
+\end{Verbatim}
+\postglecode{}
+
+\noindent{}places the key at the top-right corner of the graph 0.2 cm from each side. To position the key at given coordinates use the ``justify'' and ``absolute'' commands. For example,
+
+\preglecode{}
+\begin{Verbatim}
+justify bc
+absolute 5 0.1
+\end{Verbatim}
+\postglecode{}
+
+\noindent{}places the bottom-center of the key at position (5 cm, 0.1 cm). Fig.~\ref{keypos:fig} gives some examples of positioning the key.
+
+\begin{figure}[tb]
+\centering
+\mbox{\input{key/fig/keypos.inc}}
+\caption{\label{keypos:fig}Various positions for the key.}
+\end{figure}
+
+\section{Global Commands}
+
+Global commands appear at the start of the key block. They control the position of the key and various other properties of the key. Several global key commands may appear on one line in the script.
+
+\begin{commanddescription}
+\item[{\sf absolute} {\it x} {\it y}]
+\index{key module!absolute}
+Places the key at position $(x, y)$ on the figure. The anchor point of the key is specified with the ``justify'' command.
+
+\item[{\sf base} {\it h} or {\sf row} {\it h}]
+\index{key module!row}
+Sets the base scale of the entries. The sizes of all components are initialized based on this. E.g., to change the size of the filled box in an entry, use this command.
+
+\item[{\sf boxcolor} {\it c}]
+\index{key module!boxcolor}
+Set the background color of the key to $c$.
+
+\item[{\sf coldist} {\it d}]
+\index{key module!coldist}
+Sets the distance between columns. (To obtain a key with multiple columns, use the ``separator'' command.)
+
+\item[{\sf compact}]
+\index{key module!compact}
+Creates a more compact key by combining the ``line'' and ``marker'' fields into one field. The effect of this is shown in Fig.~\ref{grkey:fig}.
+
+\item[{\sf dist} {\it d}]
+\index{key module!dist}
+Sets the distance between the different components of an entry (the marker, the line, the fill, and the text).
+
+\item[{\sf hei} {\it h}]
+\index{key module!hei}
+Sets the height of the text in the entries of the key. If this command is not given, then the current height is used. (To set the current height, use ``set hei'', see page~\pageref{shei:cmd}.)
+
+\item[{\sf justify} {\it x}]
+\index{key module!justify}
+Sets the anchor point of the key. Possible values: tl, bl, tr, br, tc, bc, lc, rc, cc. These stand for top-left, bottom-left, top-right, bottom-right, top-center, bottom-center, left-center, right-center, and center. Use this command in combination with the ``absolute'' command. Fig.~\ref{keypos:fig} gives some examples.
+
+\item[{\sf llen} {\it x}]
+\index{key module!llen}
+Sets the length of the line in the entries.
+
+\item[{\sf lpos} {\it x}]
+\index{key module!lpos}
+Sets the vertical position of the line in the entries. (This is normally set automatically.)
+
+\item[{\sf margins} {\it x} {\it y}]
+\index{key module!margins}
+Sets the margins of the key block. (The space between the border and the entries.)
+
+\item[{\sf nobox}]
+\index{key module!nobox}
+Do not draw a border around the key.
+
+\item[{\sf off}]
+\index{key module!off}
+Disable this key.
+
+\item[{\sf offset} {\it x y}]
+\index{key module!offset}
+Specifies the distance in cm between the position specified with the ``position'' or ``pos'' command and the actual key. A negative offset places the key outside of the graph (Fig.~\ref{keypos:fig}).
+
+\item[{\sf position} {\it x} or {\sf pos} {\it x}]
+\index{key module!position}
+Specifies the position of the key on the graph. Possible values: tl, bl, tr, br, tc, bc, lc, rc, cc. These stand for top-left, bottom-left, top-right, bottom-right, top-center, bottom-center, left-center, right-center, and center. Optionally, the ``offset'' command can be combined with this command. Fig.~\ref{keypos:fig} gives some examples.
+
+\end{commanddescription}
+
+\section{Entry Definition Commands}
+
+Each entry in the key is represented by one line in the key block, and all commands for a given entry must appear on that line. The following commands can be used to define key entries.
+
+\begin{commanddescription}
+
+\item[{\sf color} {\it  c}]
+\index{key module!color}
+Sets the color of the line and marker. The other components of the key are drawn in the default color. (To set the default color, use ``set color'', see page~\pageref{scol:cmd}.)
+
+\item[{\sf fill} {\it p}]
+\index{key module!fill}
+Sets the fill color or pattern.
+
+\item[{\sf line}]
+\index{key module!line}
+Shorthand for ``lstyle 1''.
+
+\item[{\sf lstyle} {\it s}]
+\index{key module!lstyle}
+Sets the line style.
+
+\item[{\sf lwidth}]
+\index{key module!lwidth}
+Sets the width of the line.
+
+\item[{\sf marker} {\it m}]
+\index{key module!marker}
+Sets the marker.
+
+\item[{\sf mscale} {\it x}]
+\index{key module!mscale}
+Sets the scale of the marker.
+
+\item[{\sf msize} {\it x}]
+\index{key module!msize}
+Sets the size of the marker.
+
+\item[{\sf pattern} {\it x}]
+\index{key module!pattern}
+Sets the filling pattern. Fig.~\ref{filpat:fig} shows examples of filling patterns.
+
+\item[{\sf separator} {\sf [lstyle {\it s}]} ]
+\index{key module!separator}
+Use this command to divide the key into multiple columns. If the ``lstyle'' option is given, then a line is drawn between the columns in the given style. Possible values are given with the description of the ``set lstyle'' command on page~\pageref{lstyle:cmd}. The ``separator'' command should be inserted between the key entries that should go in different columns. For example,
+\vspace{3mm}
+\preglecode{}
+\begin{Verbatim}
+begin key
+   position bl
+   line color red    text "Red"
+   line color green  text "Green" 
+   line color blue   text "Blue"
+   separator
+   line color orange text "Orange"
+   line color purple text "Purple"
+   line color black  text "Black"
+end key
+\end{Verbatim}
+\postglecode{}
+\vspace{3mm}
+\noindent{}will result in the key shown in Fig.~\ref{multicolkey:fig}.
+
+\item[{\sf text} {\it s}]
+\index{key module!text}
+The text for the entry.
+
+\end{commanddescription}
+
+\begin{figure}[tb]
+\centering
+\mbox{\input{key/fig/multicolkey.inc}}
+\caption{\label{multicolkey:fig}Defining a key with multiple columns.}
+\end{figure}
+
+\section{Defining the Key in the Graph Block}\label{kgrb:sec}
+
+\begin{figure}[tb]
+\centering
+\mbox{\input{key/fig/grkey.inc}}
+\caption{\label{grkey:fig}Defining the key together with the graph block.}
+\end{figure}
+
+It is also possible to define the key in the graph block itself. This is accomplished by prefixing global key commands with the keyword ``key''. The entries are in this case defined with the ``dn'' commands and the labels are set with the ``key'' option to these commands.
+
+The following presents an example:
+
+\preglecode{}
+\begin{Verbatim}
+begin graph
+   title "Implicitly defined key"
+   let d1 = sin(x)
+   let d2 = cos(x)
+   xaxis min 0 max 2*pi dticks pi/2 format "pi"
+   key compact pos bl
+   d1 line color red  marker triangle mdist 1 key "Sine"
+   d2 line color blue marker circle   mdist 1 lstyle 2 key "Cosine"
+end graph
+\end{Verbatim}
+\postglecode{}
+
+\noindent{}Fig.~\ref{grkey:fig} shows the result.
+
+If you plot data from a data file, and the first row of the file contains column labels, then these labels will be used automatically to construct the key. However, if you prefer to construct the key manually instead by defining a key block, then you can override this behavior by making GLE ignore the row with the labels using the ``ignore'' option of the ``data'' command. E.g., \verb+data "myfile.csv" ignore 1+ (see p.~\pageref{opt:ignore}). Alternatively, you can accomplish the same by adding the command ``key off'' to the graph block to disable the automatically generated key.
+
+
+
+

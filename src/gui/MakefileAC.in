@@ -1,0 +1,120 @@
+###################################################################################
+# QGLE - A Graphical Interface to GLE                                             #
+# Copyright (C) 2006  A. S. Budden & J. Struyf                                    #
+#                                                                                 #
+# This program is free software; you can redistribute it and/or                   #
+# modify it under the terms of the GNU General Public License                     #
+# as published by the Free Software Foundation; either version 2                  #
+# of the License, or (at your option) any later version.                          #
+#                                                                                 #
+# This program is distributed in the hope that it will be useful,                 #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of                  #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                   #
+# GNU General Public License for more details.                                    #
+#                                                                                 #
+# You should have received a copy of the GNU General Public License               #
+# along with this program; if not, write to the Free Software                     #
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. #
+#                                                                                 #
+# Also add information on how to contact you by electronic and paper mail.        #
+###################################################################################
+
+include ../../config.i
+include ../../config.aconf
+
+QMAKE_PROG=@QMAKE_PROG@
+MAKE_PROG=$(MAKE)
+
+.PHONY : all
+.PHONY : clean
+.PHONY : qmake
+.PHONY : domake
+.PHONY : repmake
+.PHONY : doclean
+.PHONY : dosed
+
+ifeq (@HAVE_MINGW@,1)
+	MAKE_PROG=mingw32-make
+endif
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+INSTALL_LIB=@libdir@
+INSTALL_BIN=@GLE_INSTALL_BIN@
+INSTALL_DIR=@GLE_INSTALL_DATA@
+
+CXX=@CXX@
+CPPFLAGS=@CPPFLAGS@
+SIMPLE_LDFLAGS=@SIMPLE_LDFLAGS@
+SIMPLE_LIBS=@SIMPLE_LIBS@
+CPPFLAGS := $(strip $(CPPFLAGS))
+
+TOMAKE=
+TOCLEAN=
+QMAKE_OPTS=
+ifeq (@HAVE_QT@,1)
+	TOMAKE=Makefile
+	ifeq (@HAVE_AUTOPACKAGE@,1)
+		TOMAKE:=$(TOMAKE) repmake
+	endif
+	ifeq (@HAVE_WIN32@,0)
+		TOMAKE:=$(TOMAKE) domake
+	endif
+	TOCLEAN=doclean
+	ifeq (@HAVE_MAC@,1)
+		QMAKE_OPTS:=-spec macx-g++
+		TOMAKE:=$(TOMAKE) install_qgle_name_mac
+	endif
+	ifeq (@HAVE_FREEBSD@,1)
+		QMAKE_OPTS:=-spec freebsd-g++
+	endif
+endif
+ifeq (@HAVE_MAC@,1)
+	TOMAKE:=$(TOMAKE) $(PROJECT_BINDIR)/bin/glegs
+endif
+
+all: $(TOMAKE)
+
+clean: $(TOCLEAN)
+
+Makefile: qgle.pro
+	$(QMAKE_PROG) $(QMAKE_OPTS)
+
+qmake:
+	$(QMAKE_PROG) $(QMAKE_OPTS)
+
+domake:
+	$(MAKE_PROG)
+
+repmake:
+	perl ../../platform/autopackage/qt-replace.pl Makefile
+
+doclean:
+	-$(MAKE_PROG) clean
+	-@$(RM) qgle install_qgle_name_mac Makefile
+	-@$(RMDIR) moc
+	-@$(RMDIR) objects
+
+SEDCMD = sed -i -e \
+	 's@\\([^-]\\)g\\(cc\\|++\\)@\\1/mnt/c/mingw/bin/g\\2@' -e \
+	 's@\\([A-Za-z0-9:]\\)\\\\\\([A-Za-z0-9:]\\)@\\1/\\2@g' -e \
+	 's@^DEL_FILE.*@DEL_FILE = rm -f@' -e 's@^MOVE.*@MOVE = mv -f@' -e  \
+	 's@^COPY[ =].*@COPY = cp -f@' -e 's@^COPY_DIR.*@COPY_DIR = \$(COPY)  \
+	 -r@' -e 's@^CHK_DIR_EXISTS.*@CHK_DIR_EXISTS = test -d@' -e  \
+	 's@^MKDIR.*@MKDIR = mkdir -p@' -e 's@debug[\\\\]@debug/@' Makefile*
+
+dosed:
+	$(SEDCMD)
+
+EXTRA_OBJS := ../gle/cutils.$(OBJ_SUFF) ../gle/file_io.$(OBJ_SUFF)
+ifeq (@HAVE_LIBGLE_CPPFLAGS@,1)
+	EXTRA_OBJS := ../gle/cutils.static.$(OBJ_SUFF) ../gle/file_io.static.$(OBJ_SUFF)
+endif
+
+$(PROJECT_BINDIR)/bin/glegs: glegs.cpp $(EXTRA_OBJS)
+	$(CXX) glegs.cpp $(CPPFLAGS) $(SIMPLE_LDFLAGS) -o $(PROJECT_BINDIR)/bin/glegs $(EXTRA_OBJS) $(SIMPLE_LIBS) -ldl
+
+install_qgle_name_mac: $(PROJECT_BINDIR)/bin/QGLE.app/Contents/MacOS/QGLE
+	install_name_tool -change libgle-graphics-@GLE_VERSION@.dylib $(DESTDIR)$(INSTALL_LIB)/libgle-graphics-@GLE_VERSION@.dylib $(PROJECT_BINDIR)/bin/QGLE.app/Contents/MacOS/QGLE
+	touch install_qgle_name_mac

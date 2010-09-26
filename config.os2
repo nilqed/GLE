@@ -1,0 +1,96 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+#
+# config file for gcc and make
+# tested with gcc 3.2.1
+#
+
+INSTALL_DIR     = D:/TOOLS/gle
+INSTALL_BIN     = D:/TOOLS/bin
+
+PATH_SEP	= /
+
+# additional files for the distribution
+ADD_DLLS	= D:/GCC/3.2.1/usr/lib/gcc321m.dll
+ADD_DOCS	= readme ../gle-refman/gle-manual.pdf
+
+ZIP		= zip.exe
+
+# used by default; disable them
+CFLAGS          =
+CPPFLAGS        =
+LDFLAGS         =
+
+#
+# OS/2 didn't like something like "\"..\""
+#
+VERSION_INFO	=-DGLEVN=\"$(VERSION_NUMBER).$(BUILD_NUMBER)\"
+
+#
+# latest version of GCC 3.3.5 has its own isnumber() function
+#
+HAS_ISNUMBER    =-D_EMXGCC_HAS_ISNUMBER_
+
+EXTRA_DEFS	=-DHAVE_CONFIG_H -D__OS2__ -D__EMX__ -DOS2 -D__ST_MT_ERRNO__ $(WHICH_TEX) $(HAS_ISNUMBER)
+EXTRA_LIBS      =-lpng -ltiff -lsocket
+EXTRA_INCS	=-IX:/usr/include/ncurses
+OBJ_SUFF	=o
+CC		=g++
+EXE_SUFF	=.exe
+AR		=ar.exe
+RM		=rm.exe -f
+RMDIR		=rm.exe -rf
+MKDIR		=mkdir.exe
+CP		=cp.exe -f
+MV		=mv.exe
+CXXFLAGS	=-s -O2 -Zmtd -Zcrtdll -Zexe -Zbin-files $(EXTRA_INCS) $(VERSION_INFO) $(EXTRA_DEFS) -DINSTALL_DIR=\"$(INSTALL_DIR)\"
+LINK_OPTS	=-s -O2 -Zmtd -Zcrtdll -Zexe -Zbin-files -D__ST_MT_ERRNO__
+
+#
+# other global defines
+#
+PROJECT_DIR     = E:/Work/Projects/GLE/gle4
+PROJECT_BINDIR 	= $(PROJECT_DIR)/build
+PROJECT_LIBDIR 	= $(PROJECT_BINDIR)/lib
+PROJECT_INCDIR 	= $(PROJECT_BINDIR)/include
+
+#
+# GLE_TOP does not need to be defined anymore during compile
+#
+GLE_TOP          = $(PROJECT_BINDIR)
+

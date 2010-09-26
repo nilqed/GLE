@@ -1,0 +1,184 @@
+#
+#  QGLE - A Graphical Interface to GLE
+#  Copyright (C) 2006  A. S. Budden & J. Struyf
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+#  Also add information on how to contact you by electronic and paper mail.
+#
+
+TEMPLATE = app
+TARGET +=
+DEPENDPATH += .
+INCLUDEPATH += .
+CONFIG += qt
+unix:MOC_DIR = ./moc
+unix:OBJECTS_DIR = ./objects
+QT += network
+QT += opengl
+
+macx {
+    TARGET = "QGLE"
+}
+
+@QT_CONFIG@
+
+# If in debug mode, show the console in Windows
+# Otherwise, stop qDebug from outputting anything.
+CONFIG(debug, debug|release) {
+#    win32 {
+#       The following is automatically set to
+#       "windows" in release mode, we override it here
+#       in debug mode so that we can see the debugging output.
+#       for a release build, change "CONFIG += debug" above
+#       to "CONFIG += release".
+#        CONFIG += console
+#    }
+    win32 {
+        DEFINES += QT_NO_DEBUG_OUTPUT
+    }
+} else {
+    # No debug mode -> no debug output!
+    DEFINES += QT_NO_DEBUG_OUTPUT
+}
+
+# Input
+HEADERS += about.h \
+           amove.h \
+           arc.h \
+           circle.h \
+           colourbutton.h \
+           colourpicker.h \
+           component.h \
+           consolewindow.h \
+           drawingobject.h \
+           ellipse.h \
+           fileinfo.h \
+           gledrawing.h \
+           grid.h \
+           gsinc/*.h \
+           line.h \
+           mainwindow.h \
+           newfile.h \
+           polararray.h \
+           propertyeditor.h \
+           propertymodel.h \
+           qgle_definitions.h \
+           qgle_statics.h \
+           qgs.h \
+           serverthread.h \
+           settings.h \
+           settings_dialogue.h \
+           snapline.h \
+           text.h \
+           variantdelegate.h \
+           objectblocks.h \
+           dialogues.h \
+           3dviewer.h
+SOURCES += about.cpp \
+           amove.cpp \
+           arc.cpp \
+           circle.cpp \
+           colourbutton.cpp \
+           colourpicker.cpp \
+           component.cpp \
+           consolewindow.cpp \
+           drawingobject.cpp \
+           ellipse.cpp \
+           fileinfo.cpp \
+           gledrawing.cpp \
+           grid.cpp \
+           line.cpp \
+           main.cpp \
+           mainwindow.cpp \
+           newfile.cpp \
+           polararray.cpp \
+           propertyeditor.cpp \
+           propertymodel.cpp \
+           qgle_statics.cpp \
+           qgs.cpp \
+           qgslibloader.cpp \
+           serverthread.cpp \
+           settings.cpp \
+           settings_dialogue.cpp \
+           snapline.cpp \
+           text.cpp \
+           variantdelegate.cpp \
+           objectblocks.cpp \
+           dialogues.cpp \
+           3dviewer.cpp
+RESOURCES += qgle.qrc
+
+win32 {
+    RC_FILE   += qgle.rc
+}
+
+macx {
+    ICON      += images/gle.icns
+    SOURCES   += macspecific.cpp
+#   LIBS      += -framework Cocoa
+}
+
+DISTFILES += readme.txt \
+             gpl.txt \
+             gsinc/LICENSE \
+             images/amove.png \
+             images/arc_3p.png \
+             images/circle.png \
+             images/edit_mode.png \
+             images/editor.png \
+             images/gle.ico \
+             images/gle.png \
+             images/grid.png \
+             images/gle.icns \
+             images/grid_snap.png \
+             images/line.png \
+             images/new.png \
+             images/open.png \
+             images/orthosnap.png \
+             images/osnap.png \
+             images/perp_line.png \
+             images/pointer.png \
+             images/polarsnap.png \
+             images/polartrack.png \
+             images/preview_mode.png \
+             images/save.png \
+             images/tan_line.png \
+             images/zoom_in.png \
+             images/zoom_out.png \
+             images/reload.png \
+             images/reload_red.png
+
+linux-g++ {
+	LIBS += -ldl
+}
+
+# link against the GLE library (unix -> Linux and Mac OS/X)
+unix {
+	LIBS += -lgle-graphics-@GLE_VERSION@ -L../../build/lib/
+}
+win32 {
+	LIBS += -lgle-graphics-@GLE_VERSION@ -L../../build/bin/
+}
+
+# place the resulting QGLE executable in the "bin" subdirectory of "build"
+DESTDIR = ../../build/bin
+
+# add the "lib" directory to the search path of the linker
+unix {
+	LIBS += @QT_RPATH@
+}
+
+# vim:et

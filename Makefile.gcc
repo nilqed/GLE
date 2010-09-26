@@ -1,0 +1,163 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+
+#
+# global makefile for gle
+# for gcc
+#
+include config.i
+include config.gcc
+
+ZIP_SRC_NAME = $(BASE_NAME)-$(VERSION_NUMBER).$(BUILD_NUMBER)$(GLE_SNAPSHOT)-src.zip
+TAR_SRC_NAME = gle-graphics-$(VERSION_NUMBER).$(BUILD_NUMBER)$(GLE_SNAPSHOT)-src.tar.gz
+TAR_SRCF_NAME = gle-graphics-$(VERSION_NUMBER).$(BUILD_NUMBER)f$(GLE_SNAPSHOT)-src.tar.gz
+TAR_BASE_DIR = gle-graphics-$(VERSION_NUMBER).$(BUILD_NUMBER)
+
+FILTER_CVS  := grep -P -v "(\.svn|CVS|\.cvsignore)"
+FILTER_SRC  := $(FILTER_CVS) | grep -P -v "\.($(OBJ_SUFF)|e*ps)$$" | grep -v "moc_"
+FILTER_FNTS := $(FILTER_CVS) | grep -P -v "\.(fve|fmt)$$"
+
+all:
+	-mkdir -p build
+	-mkdir -p build/bin
+	-mkdir -p build/lib
+	-mkdir -p build/gleinc
+	$(MAKE) -C src/gle/bitmap -f Makefile.gcc
+	$(MAKE) -C src/gle/surface -f Makefile.gcc
+	$(MAKE) -C src/gle/letzfitz -f Makefile.gcc
+	$(MAKE) -C src/gle/tokens -f Makefile.gcc
+	$(MAKE) -C src/gle -f Makefile.gcc
+	$(MAKE) -C src/fbuild -f Makefile.gcc
+	$(MAKE) -C src/makefmt -f Makefile.gcc
+	$(MAKE) -C src/fonts -f Makefile.gcc
+	$(MAKE) -C src/lib -f Makefile.gcc
+	$(MAKE) -C src/TeX -f Makefile.gcc
+	@echo ""
+	@echo "**********************************************************"
+	@echo "Type \"make install\" to install GLE $(VERSION_NUMBER).$(BUILD_NUMBER)"
+	@echo "Install data into: $(INSTALL_DIR)"
+	@echo "Install binary into: $(INSTALL_BIN)"
+	@echo "**********************************************************"
+	@echo ""
+
+clean:
+	$(MAKE) -C src/gle/bitmap -f Makefile.gcc clean
+	$(MAKE) -C src/gle/surface -f Makefile.gcc clean
+	$(MAKE) -C src/gle/letzfitz -f Makefile.gcc clean
+	$(MAKE) -C src/gle/tokens -f Makefile.gcc clean
+	$(MAKE) -C src/gle -f Makefile.gcc clean
+	$(MAKE) -C src/fbuild -f Makefile.gcc clean
+	$(MAKE) -C src/makefmt -f Makefile.gcc clean
+	$(MAKE) -C src/fonts -f Makefile.gcc clean
+	$(MAKE) -C src/TeX -f Makefile.gcc clean
+	$(MAKE) -C src/manip -f Makefile.gcc clean
+	-$(RMDIR) build
+
+manip:
+	$(MAKE) -C src/manip -f Makefile.gcc
+
+install: clean_install
+	-mkdir -p $(INSTALL_DIR)
+	-mkdir -p $(INSTALL_BIN)
+	-cp -r build/* $(INSTALL_DIR)
+	-strip $(INSTALL_DIR)/bin/gle*
+	-strip $(INSTALL_DIR)/bin/fbuild*
+	-strip $(INSTALL_DIR)/bin/makefmt*
+	-strip $(INSTALL_DIR)/bin/manip*
+	-echo "#!/bin/sh" > $(INSTALL_BIN)/gle
+	-echo "export GLE_TOP=$(INSTALL_DIR)" >> $(INSTALL_BIN)/gle
+	-echo "$(INSTALL_DIR)/bin/gle \$$@" >> $(INSTALL_BIN)/gle
+	-chmod 755 $(INSTALL_BIN)/gle
+	-echo "#!/bin/sh" > $(INSTALL_BIN)/manip
+	-echo "export GLE_TOP=$(INSTALL_DIR)" >> $(INSTALL_BIN)/manip
+	-echo "$(INSTALL_DIR)/bin/manip \$$@" >> $(INSTALL_BIN)/manip
+	-chmod 755 $(INSTALL_BIN)/manip
+	@echo ""
+	@echo "****************************************************************"
+	@echo "GLE $(VERSION_NUMBER).$(BUILD_NUMBER) has been installed"
+	@echo "You can use GLE now by entering the command \"gle\""
+	@echo "(Provided that $(INSTALL_BIN) is in your PATH.)"
+	@echo "****************************************************************"
+	@echo ""
+
+linklib:
+	rm -rf $(INSTALL_DIR)/gleinc
+	ln -s `pwd`/src/lib $(INSTALL_DIR)/gleinc
+
+clean_install:
+	-$(RM) $(INSTALL_BIN)/gle
+	-$(RM) $(INSTALL_DIR)/bin/*
+	-$(RMDIR) $(INSTALL_DIR)/bin
+	-$(RM) $(INSTALL_DIR)/font/*
+	-$(RMDIR) $(INSTALL_DIR)/font
+	-$(RM) $(INSTALL_DIR)/*.ini
+
+full: clean all
+
+coll:
+	perl platform/script/collectsrcfiles.pl platform/script/srcfiles.csv
+
+zipsrc:
+	perl platform/script/correctfilemodes.pl
+	-rm -f $(ZIP_SRC_NAME)
+	perl platform/script/collectsrcfiles.pl platform/script/srcfiles.csv > srcfiles.txt
+	(cd ..; cat gle4/srcfiles.txt | sed -e s/^/gle4\\// | xargs zip gle4/$(ZIP_SRC_NAME))
+	-@echo "$(ZIP_SRC_NAME) has been created!"
+
+tarsrc:
+	perl platform/script/correctfilemodes.pl
+	-rm -f $(TAR_SRC_NAME)
+	perl platform/script/collectsrcfiles.pl platform/script/srcfiles.csv > srcfiles.txt
+	tar czfv $(TAR_SRC_NAME) --files-from srcfiles.txt --transform 's|^|$(TAR_BASE_DIR)/|' --group 0 --owner 0
+	-@echo "$(TAR_SRC_NAME) has been created!"
+
+tarsrcf:
+	perl platform/script/correctfilemodes.pl
+	-rm -f $(TAR_SRCF_NAME)
+	-touch src/fonts/extrafonts.inf
+	perl platform/script/collectsrcfiles.pl -all platform/script/srcfiles.csv > srcfiles.txt
+	tar czfv $(TAR_SRCF_NAME) --files-from srcfiles.txt --transform 's|^|$(TAR_BASE_DIR)/|' --group 0 --owner 0
+	-@rm src/fonts/extrafonts.inf
+	-@echo "$(TAR_SRCF_NAME) has been created!"
+
+commit:
+	cvs commit -m "commit via nmake working on version $(TAG)"
+
+tagall:
+	cvs rtag $(TAG) $(MODULE_NAME) $(DEPENDANT_MODULES)
+

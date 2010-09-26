@@ -1,0 +1,9 @@
+export PATH=$HOME/staticlibs/bin/:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin:/opt/local/bin
+export CPPFLAGS="-I$HOME/staticlibs/include -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk"
+export LDFLAGS="-L$HOME/staticlibs/lib -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk"
+export CC=gcc-4.0
+export CXX=g++-4.0
+export MACOSX_DEPLOYMENT_TARGET=10.4
+./configure --with-qt=$HOME/staticlibs --with-extrafonts=yes --with-x=no
+
+

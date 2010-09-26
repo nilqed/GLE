@@ -1,0 +1,109 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+size 7.75 7
+
+set font rm
+
+tlin = 0.6
+
+xdel = 0.1
+ydel = 0.1
+
+pagewd = pagewidth()-2*xdel
+
+sub show_table f1$ f2$
+   top = pageheight()-tlin-ydel*2
+
+   dx=pagewd/21
+   dy=top/14
+
+   for j = 0 to 12
+      amove 0.5*dx+xdel (j+1/2)*dy+ydel
+      set just cc hei 0.25
+      write (12-j)*2
+   next j
+
+   for j = 0 to 13
+      amove 0+xdel (j+1)*dy+ydel
+      aline pagewidth()-xdel (j+1)*dy+ydel
+   next j
+
+   for i = 0 to 19
+      amove (i+1)*dx+xdel ydel
+      aline (i+1)*dx+xdel top+ydel
+      amove (i+3/2)*dx+xdel 13.5*dy+ydel
+      set just cc hei 0.25 font rm
+      write i
+   next i
+
+   idx = 0
+   for j = 0 to 12
+      for i = 0 to 19
+         amove (i+1+0.5)*dx+xdel (12-j+0.5)*dy+ydel
+         if idx <= 256 then
+            set just cc hei 0.27 font f2$
+            begin text
+                \char{\expr{idx}}
+            end text
+            idx = idx + 1
+         end if
+      next i
+   next j
+
+   set just lc hei 0.35 font rm
+   amove xdel pageheight()-tlin/2-ydel+0.1
+
+   write f1$+" ("+f2$+")"
+end sub
+
+id$ = arg$(1)
+name$ = ""
+
+fopen "fonts.csv" fi read
+until feof(fi)
+   fread fi nr mid$ nm$
+   if mid$ = id$ then
+      name$ = nm$
+   end if
+next
+fclose fi
+
+! print name$+" ("+id$+")"
+
+show_table name$ id$

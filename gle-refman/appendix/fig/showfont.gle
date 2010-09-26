@@ -1,0 +1,103 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+size 12 9  !24 18
+begin scale .5 .5
+!yanz=12 !/14
+!fnm$="plsym1" !"texcmr"
+!nam$="Ganz langer name"
+include glename.gle 
+
+xstart=3
+ystart=14
+xspace=1
+yspace=2*(12/yanz)
+
+set hei .9
+set font texcmr
+amove 1.5 17
+set just bl
+write "Font : " fnm$
+amove 22.5 17
+set hei .7
+set just br
+write nam$
+set hei 1.0
+
+set hei .5
+!set color blue
+amove xstart-xspace ystart+1.5
+rmove xspace/2 yspace/2
+rline 0 -ystart-yspace+.5
+amove xstart ystart+1.5
+set just center
+for x=1 to 20
+	write (x-1)
+	gsave
+	rmove xspace/2 yspace/2 
+	rline 0 -ystart-yspace+.5
+	grestore
+	rmove xspace 0
+next x
+amove xstart-1 ystart
+!!for y=1 to 7 !13
+for y=1 to (yanz/2)+1
+	write (y-1)*2
+	gsave
+	rmove -1*(xspace/2) yspace/2 ! .5 .5
+	rline 24-xstart 0
+	grestore
+	rmove 0 -yspace
+next y
+rmove -1*(xspace/2) (yspace/2)
+rline 24-xstart 0
+
+set color black
+set hei .8*(12/yanz)
+set font fnm$
+amove xstart ystart
+for j = 0 to (yanz/2)
+ for i = 0 to 19
+	! note: no spaces in expression below. (exept inside quotes)
+ xx$ = "\char{"+num1$(j*20+i)+"}"
+ write xx$
+ rmove xspace 0
+ next i
+amove xstart ystart-((j+1)*yspace)
+next j
+end scale

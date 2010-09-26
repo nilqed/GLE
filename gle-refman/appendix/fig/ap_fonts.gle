@@ -1,0 +1,158 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+size 18 24
+
+not_avail = 0
+
+sub fnt f$ n$
+ set font rm
+ set just right
+ write f$
+ rmove .5 0
+ if font(f$) then
+   set just left font f$
+   write n$
+ else
+   set just left font rm
+   write "Font `"+f$+"' not available"
+   not_avail = 1
+ end if
+ rmove -.5 -.6
+end sub 
+
+set hei .4
+amove 1.6 23 
+@fnt "rm" "Roman"
+@fnt "rmb" "Roman Bold"
+@fnt "rmi" "Roman Italic"
+@fnt "ss" "Sans Serif"
+@fnt "ssb" "Sans Serif Bold"
+@fnt "ssi" "Sans Serif Italic"
+@fnt "tt" "Typewriter"
+@fnt "ttb" "Typewriter Bold"
+@fnt "tti" "Typewriter Italic"
+
+amove 1.6 (23-(.6*11))
+@fnt "texcmr" "Computer Modern Roman"
+@fnt "texcmb" "Computer Modern Bold"
+@fnt "texcmti" "Computer Modern Text Italic"
+@fnt "texcmmi" "Computer Modern Maths Italic"
+
+@fnt "texcmss" "Computer Modern Sans Serif"
+@fnt "texcmssb" "Computer Modern Sans Serif Bold"
+@fnt "texcmssi" "Computer Modern Sans Serif Italic"
+
+@fnt "texcmtt" "Computer Modern Typewriter Text"
+@fnt "texcmitt" "Computer Modern Italic Typewriter"
+!@fnt "texcmex" "Computer Modern Extensible"
+!@fnt "texcmsl" "Computer Modern Slanted"
+!@fnt "texcmsy" "Computer Modern Symbol"
+
+amove 1.6 (23-(.6*22))
+!@fnt "plcc" "Complex Cartographic"
+!@fnt "plcg" "Complex Gothic"
+@fnt "plsr" "Simplex Roman"
+@fnt "pldr" "Duplex Roman"
+@fnt "pltr" "Triplex Roman"
+@fnt "plti" "Triplex Italic"
+@fnt "plcr" "Complex Roman"
+@fnt "plci" "Complex Italic"
+@fnt "plss" "Simplex Script"
+@fnt "plcs" "Complex Script"
+@fnt "plsa" "Simplex Ascii"
+@fnt "plba" "Block Ascii"
+@fnt "plge" "Gothic English"
+@fnt "plgg" "Gothic German"
+@fnt "plgi" "Gothic Italian"
+@fnt "plsg" "Simplex Greek"
+
+amove 10.75 23
+@fnt "pstr" "Times-Roman"
+@fnt "pstb" "Times-Bold"
+@fnt "psti" "Times-Italic"
+@fnt "pstbi" "Times-BoldItalic"
+
+@fnt "psc" "Courier"
+@fnt "pscb" "Courier-Bold"
+@fnt "psco" "Courier-Oblique"
+@fnt "pscbo" "Courier-BoldOblique"
+
+@fnt "psh" "Helvetica"
+@fnt "pshb" "Helvetica-Bold"
+@fnt "psho" "Helvetica-Oblique"
+@fnt "pshbo" "Helvetica-BoldOblique"
+
+@fnt "pshc" "Helvetica-Condensed"
+@fnt "pshcb" "Helvetica-Condensed-Bold"
+@fnt "pshcdo" "Helvetica-Condensed-Oblique"
+
+@fnt "pshn" "Helvetica-Narrow"
+@fnt "pshnb" "Helvetica-Narrow-Bold"
+@fnt "pshno" "Helvetica-NarrowOblique"
+@fnt "pshnbo" "Helvetica-Narrow-BoldOblique"
+
+@fnt "psagb" "AvantGarde-Book"
+@fnt "psagd" "AvantGarde-Demi"
+@fnt "psagbo" "AvantGarde-BookOblique"
+@fnt "psagdo" "AvantGarde-DemiOblique"
+
+@fnt "psbl" "Bookman-Light"
+@fnt "psbd" "Bookman-Demi"
+@fnt "psbli" "Bookman-LightItalic"
+@fnt "psbdi" "Bookman-DemiItalic"
+
+@fnt "psncsr" "NewCenturySchlbk-Roman"
+@fnt "psncsb" "NewCenturySchlbk-Bold"
+@fnt "psncsi" "NewCenturySchlbk-Italic"
+@fnt "psncsbi" "NewCenturySchlbk-BoldItalic"
+
+@fnt "pspr" "Palatino-Roman"
+@fnt "pspb" "Palatino-Bold"
+@fnt "pspi" "Palatino-Italic"
+@fnt "pspbi" "Palatino-BoldItalic"
+
+@fnt "pssym" "PostScript Symbol"
+@fnt "pszcmi" "ZapfChancery-MediumItalic"
+@fnt "pszd" "ZapfDingbats"
+
+if not_avail = 1 then
+   set just bl font rm
+   amove 0.1 0.2
+   write "Fonts marked `not available' are not in the standard GLE distribution (install the `extra-fonts' package)"
+end if

@@ -1,0 +1,78 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%\psgraphin{stack1}{15.0}{23.0}{Shadow Graph}
+\graphin{appendix/fig/stack1}{15.0cm}{23.0cm}{1}
+\addcontentsline{toc}{section}{Shadow Graph}
+\clearpage
+\begin{center}
+\begin{minipage}[t]{12.0cm}
+%%\input{stack1.gle}
+{\scriptsize %\footnotesize
+\begin{verbatim}
+size 17 23 	! This is STACK1.GLE,  a single graph, with shading background
+set hei .4
+amove .3 .3
+text stack1.gle
+
+amove 1.5 5
+box 15 16 fill grey60
+rmove -1 1
+box 15 16 fill white
+rmove 2 4
+box 11 8 fill grey5
+set font ss
+begin graph
+	fullsize
+	size 11 8
+	title "Data transfer on 9600 bit/sec line"
+	xtitle "Time (seconds)"
+	ytitle "K Bits"
+	data test.dat
+	d1 line marker wsquare mscale 2
+	xaxis min -1 max 6
+	yaxis min 0 max 11
+end graph
+
+\end{verbatim}
+}
+\hfill {\small stack1.gle}\\
+\end{minipage}
+
+\end{center}
+\vfill

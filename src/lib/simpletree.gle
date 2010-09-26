@@ -1,0 +1,185 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Subroutines for drawing trees
+
+! For an example, see e.g., 2dplots/rt-y-is-x.gle
+
+include "ellipse.gle"
+
+sizemid$ = "\footnotesize"; sizemid  = 0.25 
+sizenode$ = "\small"; sizenode = 0.3
+vlabeladd = 0.05; nodexfill = 0.05; nodeyfill = 0.05; nodedx = 0.9; nodedy = 0.5
+tree_node_min_sx = 0; tree_node_min_sx = 0
+
+sub tree_set_node_fill dx dy
+   nodexfill = dx
+   nodeyfill = dy
+end sub
+
+sub set_tree_node_min_size sx sy
+! methods should start with set_
+   tree_node_min_sx = sx
+   tree_node_min_sy = sy
+end sub
+
+sub tree_set_node_dxdy dx dy
+   nodedx = dx
+   nodedy = dy
+end sub
+
+sub tree_set_hei nodehei leafhei labelhei
+   sizemid = labelhei
+   sizenode = nodehei
+   tree_leaf_hei = leafhei
+end sub
+
+sub texortext str$ name$ delta hi texsize$
+   set hei hi
+   if name$ = "" then
+      if shape_use_tex = 0 then
+          write str$
+      else
+          tex str$
+      end if
+   else
+      if shape_use_tex = 0 then
+          begin box name name$ add delta nobox
+       write str$
+    end box
+      else
+          tex str$ name name$ add delta
+      end if
+   end if
+end sub
+
+sub drawcliparc lx1 ly1 dx lr n$ cn$
+   begin clip
+      begin path clip
+         amove lx1 ly1+0.1
+         box nodedx*dx*2+0.2 nodedy+0.2 justify tc
+         amove pointx(ch.tc) pointy(ch.tc)
+         box width(ch) height(ch) justify tc reverse
+      end path
+      amove lx1 ly1
+      aline lx1+lr*nodedx*dx ly1-nodedy
+      save n$+cn$
+   end clip
+end sub
+
+sub drawbinnode xp yp str$ l$ r$ dx n$
+   begin object lab
+      set just tl
+      texortext str$ "" 0 sizenode sizenode$
+   end object
+   local wd     = width(lab)
+   local xleft  = xp-wd/2-nodexfill
+   local xright = xp+wd/2+nodexfill
+   local ybot   = yp-height(lab)-2*nodeyfill
+   local addx   = tree_node_min_sx-(xright-xleft)
+   if addx > 0 then
+      xleft = xleft - addx/2
+      xright = xright + addx/2
+   end if
+   amove xleft ybot
+   box xright-xleft yp-ybot name n$
+   amove xp yp-nodeyfill
+   draw lab.tc
+   lx1 = pointx(n$+".bc")
+   ly1 = pointy(n$+".bc")
+   set just center
+   amove lx1-nodedx/2*dx ly1-nodedy/2-0.05
+   texortext l$ "ch" vlabeladd sizemid sizemid$
+   @drawcliparc lx1 ly1 dx -1 n$ "1"
+   amove lx1+nodedx/2*dx ly1-nodedy/2-0.05
+   texortext r$ "ch" vlabeladd sizemid sizemid$
+   @drawcliparc lx1 ly1 dx 1 n$ "2"
+end sub
+
+sub binrootnode xp yp str$ l$ r$ dx
+   @drawbinnode xp yp str$ l$ r$ dx "r"
+end sub
+
+sub binnode par$ str$ l$ r$ dx
+   @drawbinnode pointx(par$) pointy(par$) str$ l$ r$ dx par$
+end sub
+
+sub drawtrinode xp yp str$ l$ m$ r$ dx n$
+   set just tc
+   amove xp yp-nodeyfill
+   texortext str$ "lab" 0 sizenode sizenode$
+   xleft = pointx(lab.lc)-nodexfill
+   xright = pointx(lab.rc)+nodexfill
+   ybot = pointy(lab.bc)-nodeyfill
+   amove xleft ybot
+   box xright-xleft yp-ybot name n$
+   lx1 = pointx(n$+".bc")
+   ly1 = pointy(n$+".bc")
+   set just center
+   amove lx1-nodedx/2*dx ly1-nodedy/2-0.05
+   texortext l$ "ch" vlabeladd sizemid sizemid$
+   @drawcliparc lx1 ly1 dx -1 n$ "1"
+   amove lx1 ly1-nodedy/2-0.05
+   texortext m$ "ch" vlabeladd sizemid sizemid$
+   @drawcliparc lx1 ly1 dx 0 n$ "2"
+   amove lx1+nodedx/2*dx ly1-nodedy/2-0.05
+   texortext r$ "ch" vlabeladd sizemid sizemid$
+   @drawcliparc lx1 ly1 dx 1 n$ "3"
+end sub
+
+sub trinode par$ str$ l$ m$ r$ dx
+   @drawtrinode pointx(par$) pointy(par$) str$ l$ m$ r$ dx par$
+end sub
+
+sub leaf par$ str$
+   set just tc
+   amove pointx(par$) pointy(par$)-0.1
+   texortext str$ "" 0 sizenode sizenode$
+end sub
+
+sub leaf_ellipse par$ str$
+   set hei tree_leaf_hei
+   def_ellipse_text str$ "n"
+   amove pointx(par$) pointy(par$)
+   draw n.tc
+end sub
+
+sub leaf_ellipse_empty par$ wd
+   amove pointx(par$) pointy(par$)-ellipse_c*wd/2
+   ellipse wd/2 ellipse_c*wd/2
+end sub

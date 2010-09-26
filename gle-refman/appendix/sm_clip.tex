@@ -1,0 +1,92 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%\psgraphin{stack1}{15.0}{23.0}{Shadow Graph}
+\graphin{appendix/fig/clip}{14.0cm}{19.0cm}{1}
+\addcontentsline{toc}{section}{Clipping}
+\clearpage
+\begin{center}
+\begin{minipage}[t]{12.0cm}
+%%\input{clip.gle}
+{\scriptsize %\footnotesize
+\begin{verbatim}
+size 18 24	! This is CLIP.GLE, sets up an arbitrary clipping region.
+set hei .3	! NOTE: CLIPPING ONLY WORKS ON POSTSCRIPT DEVICES.
+amove 2.3 .3	! So this won't work on the pc-screen.
+text clip.gle	
+
+set hei 10
+amove 2 2 
+begin clip	! Save default clipping region
+   begin path clip	! Set up the clipping region
+      text GLE
+   end path
+   gsave
+      amove 2 2 	
+      text www	! Draw some text which will be clipped
+      for i =	1 to 90	! Draw some lines which will be clipped
+         amove 2	2 
+         rotate -1
+         rline 0 30
+      next i
+   grestore
+end clip ! restore default clipping region
+amove 0 0 
+rline 10 10 	! draw a line which won't be clipped.
+!-----------------------------------------------------------------------------
+!Here's a simple example of how to set up a clipping region which consists
+!of two squares. Try this out
+amove 1 11
+begin origin
+   begin path clip stroke
+      amove 2 2 
+      box 4 4 
+      amove 7 2 
+      box 4 4 
+   end path
+   amove 2 2 
+   set hei 4
+   text Here is clipped text
+end origin
+\end{verbatim}
+}
+\hfill {\small clip.gle}\\
+\end{minipage}
+
+\end{center}
+\vfill

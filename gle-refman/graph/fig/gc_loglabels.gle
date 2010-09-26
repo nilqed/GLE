@@ -1,0 +1,95 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          !
+!                                                                      !
+! Modified BSD License                                                 !
+!                                                                      !
+! Copyright (C) 2009 GLE.                                              !
+!                                                                      !
+! Redistribution and use in source and binary forms, with or without   !
+! modification, are permitted provided that the following conditions   !
+! are met:                                                             !
+!                                                                      !
+!    1. Redistributions of source code must retain the above copyright !
+! notice, this list of conditions and the following disclaimer.        !
+!                                                                      !
+!    2. Redistributions in binary form must reproduce the above        !
+! copyright notice, this list of conditions and the following          !
+! disclaimer in the documentation and/or other materials provided with !
+! the distribution.                                                    !
+!                                                                      !
+!    3. The name of the author may not be used to endorse or promote   !
+! products derived from this software without specific prior written   !
+! permission.                                                          !
+!                                                                      !
+! THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   !
+! IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       !
+! WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       !
+! DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   !
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    !
+! GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER !
+! IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      !
+! OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  !
+! IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+size 15.0 5
+
+gw = pagewidth()/4
+
+include "../../script/manual.gle"
+
+mh = 0.3
+
+manual_graph_mode
+
+amove 0*gw+0.2 0
+begin graph
+   size gw pageheight()
+   scale 0.7 0.8
+   title "ylabels log off"
+   xaxis min 0 max 5 dticks 1 hei mh
+   yaxis min 1e0 max 1e3 log hei mh format "sci 0 10"
+   ylabels log off
+   let d1 = 1+sqrt(x)*1e2
+   d1 line color red
+end graph
+
+amove 1*gw+0.2 0
+begin graph
+   size gw pageheight()
+   scale 0.7 0.8
+   title "ylabels log l1"
+   xaxis min 0 max 5 dticks 1 hei mh
+   yaxis min 1e0 max 1e1 log hei mh
+   ylabels log l1
+	 let d1 = 1+sqrt(x)*2.5
+   d1 line color red   
+end graph
+
+amove 2*gw+0.2 0
+begin graph
+   size gw pageheight()
+   scale 0.7 0.8
+   title "ylabels log l25"
+   xaxis min 0 max 5 dticks 1 hei mh
+   yaxis min 1e0 max 1e3 log hei mh format "sci 0 10"
+   ylabels log l25
+	 let d1 = 1+sqrt(x)*1e2
+   d1 line color red   
+end graph
+
+amove 3*gw+0.2 0
+begin graph
+   size gw pageheight()
+   scale 0.7 0.8
+   title "ylabels log l25b"
+   xaxis min 0 max 5 dticks 1 hei mh
+   yaxis min 1e0 max 1e2 log hei mh format "fix 0"
+   ylabels log l25b
+	 let d1 = 1+sqrt(x)*10
+   d1 line color red      
+end graph

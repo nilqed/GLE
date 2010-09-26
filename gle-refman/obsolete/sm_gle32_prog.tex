@@ -1,0 +1,117 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+% GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          %
+%                                                                      %
+% Modified BSD License                                                 %
+%                                                                      %
+% Copyright (C) 2009 GLE.                                              %
+%                                                                      %
+% Redistribution and use in source and binary forms, with or without   %
+% modification, are permitted provided that the following conditions   %
+% are met:                                                             %
+%                                                                      %
+%    1. Redistributions of source code must retain the above copyright %
+% notice, this list of conditions and the following disclaimer.        %
+%                                                                      %
+%    2. Redistributions in binary form must reproduce the above        %
+% copyright notice, this list of conditions and the following          %
+% disclaimer in the documentation and/or other materials provided with %
+% the distribution.                                                    %
+%                                                                      %
+%    3. The name of the author may not be used to endorse or promote   %
+% products derived from this software without specific prior written   %
+% permission.                                                          %
+%                                                                      %
+% THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   %
+% IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       %
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       %
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   %
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    %
+% GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER %
+% IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      %
+% OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  %
+% IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{GO32/GRX Screen Driver}
+\index{GLE32!GRX}
+\index{GO32}
+\index{GLE32!SVGA}
+GLE 32 is a 32-bit-Implementation of GLE for MS-DOS. 
+Axel Rohde did this port of the GLE version 3.3b 
+GLE32 was compiled with the free port 
+of the GNU C-compiler DJGPP by D.J. Delorie. The compiler itself and 
+the DJGPP-compiled executables are running with the 32-bit DOS-extender 
+GO32.\\
+%
+GLE32 was compiled using Borland-C compatible libraries for text and 
+graphics-modes and some filesystem calls. 
+There exists for the DJGPP specific graphics-library GRX from Csaba Biegl 
+a emulation-library called BCCGRX from Hartmut Schirmer 
+to replace calls of the Borland-Graphics-Interface (BGI) with GRX-calls. 
+Hartmut has implemented the mouse-functionality, too, with GRX-calls.\\
+%
+In the example on the following lines, the progams are installed in the 
+directory \verb#d:\gle32#, the fonts are in \verb#d:\gle32\fonts#. 
+GLE 32 searches for
+its vector-fonts in the directory \verb#GLE_TOP#. Don't forget the trailing slash. 
+In addition to this, \verb#GL32FONT# points to the directory where the bitmap-fonts 
+(you can see them in the status-line of the preview) can be found. \\
+%
+The directory with the DOS-Extender GO32 and, if there's no 
+numeric-prozessor installed, the co-prozessor-emulator, must be in the 
+path-environment. 
+\begin{verbatim}
+    set GLE_TOP=d:/gle32/
+    set gle32font=d:/gle32/grxfont
+    path=..your normal path..;d:\gle;
+    go32=driver d:/gle32/driver/vesa_s3.grn gw 1024 gh 768 tw 80 th 25 nc 256 
+\end{verbatim}
+
+
+The configuration of graphics-drivers is a little bit more complicated. 
+Please study the documentation of the Libraries GRX und BCCGRX and 
+the README of GO32 in their directories. 
+
+The environment GO32 sets den path-name and the mode of the driver 
+an. This example installs the driver for an S3 graphics-board with a 
+resolution of 1024 horizontal 768 vertical pixels and 256 colors. 
+
+There's a second way to install a graphics-mode. If the environment-
+variables GLE32WIDTH, GLE32HEIGHT and GLE32COLORS are set, the graphics-
+mode in the GO32 variable is overridden. You still have to specify a 
+driver in the GO32 environment.
+\begin{verbatim}   
+    set GLE32WIDTH=800
+    set GLE32HEIGHT=600
+    set GLE32COLORS=16
+\end{verbatim}
+
+There's a prepared batch-file \verb#setgle32.bat# to set all the environment-
+variables in the directory gle32.
+
+To figure out, which modes are supported, try to run the program
+modetest in the directory \verb#gle32\driver\doc#.\\
+
+\begin{center} ! WARNING !\end{center}
+
+A wrong installed graphics-mode can DESTROY your MONITOR (and/or graphics 
+board) if the refresh rate is too high!
+
+\begin{center} USE THIS ON YOUR OWN RISK ! \end{center}
+
+You should take a look into the manuals of your monitor and your 
+graphics-adapter to figure out, which horizontal frequencies are supported. 
+If the horizontal frequency of the monitor is 64 kHz or higher, 
+you MAY feel save. (MY Monitor has a horizontal frequency of 64 kHz and 
+supports a resolution of 1024x768 with a refresh rate up to 80Hz.)\\
+% 
+If you want to go save, don't set the environment go32 at all! 
+This will use the normal (flickering) VGA-mode on a VGA-compatible 
+adapter.\\
+%
+For more detailed information and instructions how to install GO32 see
+\verb#gle32.txt#!

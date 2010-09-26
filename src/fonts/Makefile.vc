@@ -1,0 +1,204 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+
+# FONT MAKEFILE
+# makes font files *.fmt from *.afm using makefmt
+# makes *.fve fron *.gle using fbuild
+# also makes font.dat
+#
+
+!include ..\..\config.vc
+
+RM = del
+
+ADOBE35 = Adobe-Core35_AFMs-314
+
+FVE = \
+	glemark.fve plba.fve plcc.fve plcg.fve plci.fve \
+	plcr.fve plcs.fve pldr.fve plge.fve \
+	plgg.fve plgi.fve plsa.fve plsg.fve \
+	plsr.fve plss.fve plsym1.fve plsym2.fve \
+	plti.fve pltr.fve texcmb.fve texcmex.fve \
+	texcmitt.fve texcmmi.fve texcmr.fve texcmss.fve \
+	texcmssb.fve texcmssi.fve texcmsy.fve texcmti.fve \
+	texcmtt.fve
+
+FMT = 	\
+	glemark.fmt \
+	texcmb.fmt texcmex.fmt texcmitt.fmt texcmmi.fmt texcmr.fmt \
+	texcmsl.fmt texcmssb.fmt texcmss.fmt texcmssi.fmt texcmsy.fmt \
+	texcmti.fmt texcmtt.fmt \
+	plba.fmt plcc.fmt plcg.fmt plci.fmt plcr.fmt plcs.fmt pldr.fmt \
+	plge.fmt plgg.fmt plgi.fmt plsa.fmt plsg.fmt plsr.fmt plss.fmt \
+	plsym1.fmt plsym2.fmt plti.fmt pltr.fmt \
+	psagb.fmt psagbo.fmt psagd.fmt psagdo.fmt psbd.fmt psbdi.fmt \
+	psbl.fmt psbli.fmt pscb.fmt pscbo.fmt psc.fmt psco.fmt pshb.fmt pshbo.fmt \
+	pshcb.fmt pshcbo.fmt pshcdo.fmt pshc.fmt psh.fmt pshnb.fmt \
+	pshnbo.fmt pshn.fmt pshno.fmt psho.fmt psncsb.fmt psncsbi.fmt \
+	psncsi.fmt psncsr.fmt pspb.fmt pspbi.fmt pspi.fmt pspr.fmt \
+	pssym.fmt pstb.fmt pstbi.fmt psti.fmt pstr.fmt pszcmi.fmt pszd.fmt
+
+all: $(FVE) $(FMT) movefonts
+
+.SUFFIXES: .fve .fmt .afm .gle
+
+psagb.fmt: $(ADOBE35)/ITCAvantGarde-Book.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psagbo.fmt: $(ADOBE35)/ITCAvantGarde-BookOblique.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psagd.fmt: $(ADOBE35)/ITCAvantGarde-Demi.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psagdo.fmt: $(ADOBE35)/ITCAvantGarde-DemiOblique.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psbd.fmt: $(ADOBE35)/ITCBookman-Demi.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psbdi.fmt: $(ADOBE35)/ITCBookman-DemiItalic.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psbli.fmt: $(ADOBE35)/ITCBookman-LightItalic.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psbl.fmt: $(ADOBE35)/ITCBookman-Light.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psc.fmt: $(ADOBE35)/Courier.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pscb.fmt: $(ADOBE35)/Courier-Bold.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pscbo.fmt: $(ADOBE35)/Courier-BoldOblique.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psco.fmt: $(ADOBE35)/Courier-Oblique.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psh.fmt: $(ADOBE35)/Helvetica.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pshb.fmt: $(ADOBE35)/Helvetica-Bold.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pshbo.fmt: $(ADOBE35)/Helvetica-BoldOblique.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pshn.fmt: $(ADOBE35)/Helvetica-Narrow.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pshnb.fmt: $(ADOBE35)/Helvetica-NarrowBold.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pshnbo.fmt: $(ADOBE35)/Helvetica-NarrowBoldOblique.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pshno.fmt: $(ADOBE35)/Helvetica-NarrowOblique.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psho.fmt: $(ADOBE35)/Helvetica-Oblique.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psncsb.fmt: $(ADOBE35)/NewCenturySchlbk-Bold.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psncsbi.fmt: $(ADOBE35)/NewCenturySchlbk-BoldItalic.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psncsi.fmt: $(ADOBE35)/NewCenturySchlbk-Italic.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psncsr.fmt: $(ADOBE35)/NewCenturySchlbk-Roman.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pspb.fmt: $(ADOBE35)/Palatino-Bold.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pspbi.fmt: $(ADOBE35)/Palatino-BoldItalic.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pspi.fmt: $(ADOBE35)/Palatino-Italic.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pspr.fmt: $(ADOBE35)/Palatino-Roman.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pstb.fmt: $(ADOBE35)/Times-Bold.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pstbi.fmt: $(ADOBE35)/Times-BoldItalic.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+psti.fmt: $(ADOBE35)/Times-Italic.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pstr.fmt: $(ADOBE35)/Times-Roman.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pszcmi.fmt: $(ADOBE35)/ITCZapfChancery-MediumItalic.afm
+	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+
+pssym.fmt: $(ADOBE35)/Symbol.afm
+	$(PROJECT_BINDIR)/bin/makefmt -o $@ $<
+
+pszd.fmt: $(ADOBE35)/ZapfDingbats.afm
+	$(PROJECT_BINDIR)/bin/makefmt -o $@ $<
+
+.afm.fmt:
+	$(PROJECT_BINDIR)\bin\makefmt $<
+
+.gle.fve:
+	$(PROJECT_BINDIR)\bin\fbuild $<
+
+clean:
+	-$(RM) *.fve *.fmt
+
+movefonts:
+	-mkdir $(PROJECT_BINDIR)\font
+	-copy *.fve $(PROJECT_BINDIR)\font
+	-copy *.fmt $(PROJECT_BINDIR)\font
+	-copy font.dat $(PROJECT_BINDIR)\font
+	-copy psfont.dat $(PROJECT_BINDIR)\font
+
+d2u:
+	d2u -u -z $(AFM)
+
+

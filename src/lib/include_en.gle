@@ -1,0 +1,121 @@
+! Subroutines and definitions to draw figures in "arbitrary" units
+! Definitions of colors distinguishable by color blinds
+! Subroutines for positioning labels left/right/centered to a given point
+
+! USAGE
+! =====
+! 1. Start the first line of your gle file with
+!    include "include_en.gle"
+! 2. Modify the value of the variable finalsize (see line 31) 
+!    according to your needs; this variable gives the size of 
+!    your figure _after_ inclusion into your text document
+! 3. Replace dimensions (and colors) in your main gle file; f.e.
+!    set hei tinyhei
+!    set lwidth lnwidth
+!    set color blue$
+!    xtitle "ABC" hei charhei
+!    xaxis hei charhei
+!    xside lwidth lnwidth
+!    xticks lwidth lnwidth length ldwidth
+!    d1 line lwidth lswidth color red$
+! 4. Enjoy ``correct'' line widths and font sizes in your figure 
+!    after inclusion into your text document
+!
+
+! Default paper format: DIN A4 landscape
+!*********************
+size 29.7 21.0
+! but final figure should have a width of <finalsize> cm
+!     ************               *****
+!    (without compensation for the default "scale 0.7 0.7")
+finalsize = 8.5   ! cm
+factor = pagewidth()/finalsize
+
+
+sub val2cm val unit$
+!*** Conversion from arbitrary units to cm
+! In:       val     Value in units
+!           unit$   unit
+! Returns:  val*factor
+   if      unit$ = "inch"   then
+      return val*2.54*factor
+   else if unit$ = "bp"     then
+      return val/72*2.54*factor
+   else if unit$ = "pt"     then
+      return val/72.27*2.54*factor
+   else if unit$ = "pica"   then
+      return val/6.0225*2.54*factor
+   else if unit$ = "didot"  then
+      return val/67.553*2.54*factor
+   else if unit$ = "cicero" then
+      return val/5.6294*2.54*factor
+   end if
+end sub
+!******
+
+! Font sizes
+!************
+! as recommended by most publishers
+! smallest font: 6 point; largest font: 12 point
+titlehei = val2cm(12,"bp")
+charhei  = val2cm(10,"bp")
+smallhei = val2cm( 8,"bp")
+foothei  = val2cm( 7,"bp")
+tinyhei  = val2cm( 6,"bp")
+set hei charhei
+
+! Thickness of lines
+!*******************
+lswidth = val2cm(1,"bp")   ! small
+lnwidth = val2cm(2,"bp")   ! normal
+ldwidth = val2cm(4,"bp")   ! double
+
+! Colors for color blinds
+!************************
+black$    = "rgb255(0,0,0)"
+orange$   = "rgb255(230,159,0)"
+skyeblue$ = "rgb255(86,180,233)"
+green$    = "rgb255(0,158,115)"     !  "bluish green"
+yellow$   = "rgb255(240,228,66)"
+blue$     = "rgb255(0,114,178)"
+red$      = "rgb255(213,94,0)"      !  vermillon
+purple$   = "rgb255(204,121,167)"   !  "reddish purple"
+
+! Font
+!******
+! PostScript AvantGarde Demi
+set font psagd
+
+sub labelC x y height var$
+! labeling centered to x,y
+   set hei height 
+   amove xg(x) yg(y)
+   rmove -.5*twidth(var$) -.5*theight(var$)
+   write var$
+end sub
+
+sub labelR x y height var$
+! labeling ends at x,y
+   set hei height 
+   amove xg(x) yg(y)
+   rmove -1.*twidth(var$) -.5*theight(var$)
+   write var$
+end sub
+
+sub labelL x y height var$
+! labeling starts at x,y
+   set hei height
+   amove xg(x) yg(y)
+   rmove 0 -.5*theight(var$)
+   write var$
+end sub
+
+! LaTeX
+!******
+begin texpreamble
+    \usepackage{mathptmx}\renewcommand{\familydefault}{phv}
+    \usepackage{amsmath}
+    \boldmath
+end texpreamble
+set texscale scale
+! set texlabels 1 ! see manual, chapter 7.2
