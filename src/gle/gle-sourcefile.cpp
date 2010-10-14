@@ -142,16 +142,18 @@ void GLESourceFile::performUpdates() {
 		GLESourceLine* line = tmp[i];
 		int nxt = getNextInsertIndex(i, ins_pos);
 		if (nxt == i) {
+			/* may insert multiple lines */
+			while (ins_pos < m_ToInsertIdx.size() && m_ToInsertIdx[ins_pos] == i) {
 			#ifdef DEBUG_UPDATE
 				cout << "Inserting line at: " << i << endl;
 				cout << "Inserting line code: '" << m_ToInsertLine[ins_pos] << "'" << endl;
 			#endif
-			/* should insert a new line? */
-			GLESourceLine* new_line = new GLESourceLine();
-			new_line->setSource(this);
-			new_line->setCode(m_ToInsertLine[ins_pos]);
-			m_Code.push_back(new_line);
-			ins_pos++;
+				GLESourceLine* new_line = new GLESourceLine();
+				new_line->setSource(this);
+				new_line->setCode(m_ToInsertLine[ins_pos]);
+				m_Code.push_back(new_line);
+				ins_pos++;
+			}
 		}
 		if (line->isDelete()) {
 			/* should delete a line? */

@@ -79,7 +79,7 @@ GLECoreFont* init_core_font(int n) {
 
 GLECoreFont* get_core_font(int n) {
 	if (n < 0 || (unsigned int)n >= fnt.size()) {
-		gprint("no font number: %n", n);
+		gprint("no font number: %d", n);
 		return fnt[1];
 	}
 	return fnt[n];
@@ -92,7 +92,7 @@ GLECoreFont* get_core_font_ensure_loaded(int font) {
 		font_load();
 	}
 	if (font < 0 || (unsigned int)font >= fnt.size()) {
-		gprint("no font number: %n", font);
+		gprint("no font number: %d", font);
 		font = 1;
 	}
 	GLECoreFont* cfont = fnt[font];
@@ -169,6 +169,7 @@ void font_load(void) throw(ParserError) {
 		if (tokens.has_more_tokens()) {
 			GLEFont* font = new GLEFont();
 			string name = tokens.next_token();
+			// font zero is a dummy; font 1 is the first valid font
 			int n = tokens.next_integer();
 			font->setIndex(n);
 			font->setName(name);
@@ -234,6 +235,7 @@ int check_has_font(const char* name) {
 		font_load();
 	}
 	int ff = 0;
+	// font zero is a dummy!
 	for (unsigned int i = 1; i < fnt.size(); i++) {
 		if (fnt[i]->name != NULL && str_i_equals(name, fnt[i]->name)) {
 			ff = i;

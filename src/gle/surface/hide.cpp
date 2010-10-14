@@ -146,10 +146,13 @@ void hide(float huge *z,int nx, int ny, float minz, float maxz, struct surface_s
 	v_gsave();
 	g_set_line_cap(1); /* round */
 	sf = *sff; /* Make a local copy of all the paramters */
+	/* unit image */
 	init_user();
+	/* the view command specifies three parameters: eye_x, eye_y, and vdist*/
 	eye_x = sf.eye_x;
 	eye_y = sf.eye_y;
 	vdist = sf.vdist;
+	/* size command specifies screenx and screeny */
 	base = sf.screenx;
 	xmargin = sf.screenx*2/10.0;
 	ymargin = sf.screeny*1.5/10.0;
@@ -158,6 +161,7 @@ void hide(float huge *z,int nx, int ny, float minz, float maxz, struct surface_s
 	if (sf.title != NULL) height = height -.7;
 	dox = sf.xlines_on;
 	doy = sf.ylines_on;
+	/* MAXH is value of harray */
 	MAXH = sf.maxh;
 
 	if (MAXH==0) MAXH = 5000;
@@ -176,6 +180,7 @@ void hide(float huge *z,int nx, int ny, float minz, float maxz, struct surface_s
 
 	/* make it a 10x10x10 cube */
 	matmove(image,0.0,0.0,-minz); /* so 0,0,minz = 0,0,0 */
+	/* cube xlen ylen zlen -> sizex, sizey, sizez */
 	if (sf.sizez==0) sf.sizez = (sf.sizex+sf.sizey)/2.0;
 	matscale(image,sf.sizex/(float) nx,sf.sizey/(float) ny,sf.sizez/(maxz-minz));
 	/* positive z comes towards the viewer */
@@ -298,6 +303,7 @@ void hide(float huge *z,int nx, int ny, float minz, float maxz, struct surface_s
 	vsign = -1;        /* reverse tests for bottom half */
 	for (i=0; i<MAXH ;i++) h2[i] = 9999.0;  /* zero horizon */
 
+	/* bot_on = underneath */
 	if (sf.bot_on && !sf.skirt_on) {
 	touser(nx,0,0,&ux,&uy);
 	touser(0,ny,0,&ux2,&uy);

@@ -3151,7 +3151,7 @@ void get_dataset_ranges() {
 	for (int bar = 1; bar <= g_nbar; bar++) {
 		for (int i = 0; i < br[bar]->ngrp; i++) {
 			int to_bar = br[bar]->to[i];
-			if (to_bar != 0 && to_bar <= ndata && dp[to_bar] != NULL) {
+			if (to_bar != 0 && to_bar <= ndata && dp[to_bar] != NULL && dp[to_bar]->np > 0) {
 				// Extend range at both sides for a bar data set
 				// So that bars are visible
 				int np = dp[to_bar]->np;

@@ -919,7 +919,8 @@ void GLEParser::get_font(GLEPcode& pcode) throw (ParserError) {
 	}
 	pcode.addInt(8);
 	int count = get_nb_fonts();
-	for (int i = 1; i <= count; i++) {
+	// font zero is a dummy!
+	for (int i = 1; i < count; i++) {
 		const char* name = get_font_name(i);
 		if (str_i_equals(name, token.c_str())) {
 			pcode.addInt(i);
@@ -929,7 +930,7 @@ void GLEParser::get_font(GLEPcode& pcode) throw (ParserError) {
 	stringstream strm;
 	strm << "invalid font name {" << token << "}, expecting one of:";
 	int idx = 0;
-	for (int i = 1; i <= count; i++) {
+	for (int i = 1; i < count; i++) {
 		if (idx % 5 == 0) {
 			strm << endl << "       ";
 		} else {
@@ -938,7 +939,7 @@ void GLEParser::get_font(GLEPcode& pcode) throw (ParserError) {
 		if (get_font_name(i) != NULL) {
 			strm << get_font_name(i);
 			bool has_more = false;
-			for (int j = i+1; j <= count; j++) {
+			for (int j = i+1; j < count; j++) {
 				if (get_font_name(j) != NULL) {
 					has_more = true;
 					break;
@@ -2215,11 +2216,11 @@ struct mark_struct stdmark_v35[] = {
 	{ "FCIRCLE",  "GLEMARK", 8,-.5,-.5,0.7,      false },   /* fcircle */
 	{ "FSQUARE",  "GLEMARK", 5,-.5,-.5,0.7,      false },   /* fsquare */
 	{ "FTRIANGLE","GLEMARK", 2,-.5,-.433,0.7,    false },   /* ftriangle */
-	{ "FDIAMOND", "GLEMARK", 11,-.5,-.7,0.7,     false },   /* fdiamond */
+	{ "FDIAMOND", "GLEMARK", 11,-.5,-.5,0.7,     false },   /* fdiamond */
 	{ "CIRCLE",   "GLEMARK", 7,-.5,-.5,0.7,      false },   /* circle */
 	{ "SQUARE",   "GLEMARK", 4,-.5,-.5,0.7,      false },   /* square */
 	{ "TRIANGLE", "GLEMARK", 1,-.5,-.433,0.7,    false },   /* triangle */
-	{ "DIAMOND",  "GLEMARK", 10,-.5,-.7,0.7,     false },   /* diamond */
+	{ "DIAMOND",  "GLEMARK", 10,-.5,-.5,0.7,     false },   /* diamond */
 	{ "PLUS",     "TEXCMR",  43,-.375,-.24,1.0,  false },   /* plus, fixed */
 	{ "CLUB",     "TEXSY",   124,-.38,-.3,1.0,   false },   /* club */
 	{ "HEART",    "TEXSY",   126,-.38,-.34,1.0,  false },   /* heart */
@@ -2240,7 +2241,7 @@ struct mark_struct stdmark_v35[] = {
 	{ "WCIRCLE",  "GLEMARK", 9,-.5,-.5,0.7,      false },   /* wcircle */
 	{ "WTRIANGLE","GLEMARK", 3,-.5,-.433,0.7,    false },   /* wtriangle */
 	{ "WSQUARE",  "GLEMARK", 6,-.5,-.5,0.7,      false },   /* wsquare */
-	{ "WDIAMOND", "GLEMARK", 12,-.5,-.7,0.7,     false },   /* wdiamond */
+	{ "WDIAMOND", "GLEMARK", 12,-.5,-.5,0.7,     false },   /* wdiamond */
 	{ "PLANE",    "PSZD",    40,0.0,0.0,1.0,     false },   /* ZapDingbats */
 	{ "HANDPEN",  "PSZD",    45,0.0,0.0,1.0,     false },   /* ZapDingbats */
 	{ "SCIRCLE",  "PSZD",    109,0.0,0.0,1.0,    false },   /* ZapDingbats */

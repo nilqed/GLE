@@ -127,6 +127,8 @@ TeXObject* TeXInterface::draw(const char* str, TeXObjectInfo& info, int nblines,
 	tryLoadHash();
 	/* Get object from hash */
 	string obj_str = str;
+	/* replace \'' by \" so that umlauts work in LaTeX expressions */
+	str_replace_all(obj_str, "\\''", "\\\"");
 	scaleObject(obj_str, 0.0);
 	TeXHashObject* hobj = getHashObject(obj_str);
 	hobj->setNbLines(nblines);
@@ -252,6 +254,8 @@ int TeXInterface::createObj(const char* str, double hei) {
 	tryLoadHash();
 	/* Create object given string */
 	string obj_str = str;
+	/* replace \'' by \" so that umlauts work in LaTeX expressions */
+	str_replace_all(obj_str, "\\''", "\\\"");
 	scaleObject(obj_str, hei);
 	int result = getHashObjectIndex(obj_str);
 	m_TeXHash[result]->setUsed(true);
