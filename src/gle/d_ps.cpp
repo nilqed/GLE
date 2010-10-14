@@ -340,7 +340,7 @@ void PSGLEDevice::set_line_style(const char *s) {
 	strcpy(ob,"[");
 	if (strlen(s) == 1) {
 		int index = s[0] - '0';
-		if (index < 0 || index > (int)sizeof(defline)/sizeof(const char*)) {
+		if (index < 0 || index > (int)(sizeof(defline)/sizeof(const char*))) {
 			ostringstream err;
 			err << "illegal line style '" << s << "'";
 			g_throw_parser_error(err.str());

@@ -81,7 +81,7 @@ public:
 	GLEArgTypeDefaults(unsigned int arity);
 	~GLEArgTypeDefaults();
 	inline unsigned int* getArgTypes() { return m_ArgTypes; }
-	inline unsigned int setArgType(unsigned int i, unsigned int type) { m_ArgTypes[i] = type; }
+	inline void setArgType(unsigned int i, unsigned int type) { m_ArgTypes[i] = type; }
 private:
 	unsigned int m_Arity;
 	unsigned int* m_ArgTypes;

@@ -442,7 +442,7 @@ static BOOL parseGlobals(FILE *fp, GlobalFontInfo *gfi)
 //  FILE *fp;
 //  register int *cwi;
 // ** GLE ** replaced above three lines by the following one
-static int initializeArray(FILE *fp, int *cwi)
+int initializeArray(FILE *fp, int *cwi)
 {
     BOOL cont = TRUE, found = FALSE;
     long opos = ftell(fp);

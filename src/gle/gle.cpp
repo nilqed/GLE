@@ -98,12 +98,10 @@ void get_out_name(const string& name, CmdLineObj& cmdline, GLEFileLocation* outn
 #include "glearray.h"
 
 void gle_cat_csv(vector<string>* files) {
-	for (int i = 0; i < files->size(); i++) {
+	for (unsigned int i = 0; i < files->size(); i++) {
 		string fname(files->at(i));
 		GLECSVData csvData;
 		csvData.read(fname);
-
-
 	}
 }
 

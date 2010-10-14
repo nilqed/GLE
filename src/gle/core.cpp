@@ -3143,6 +3143,7 @@ void GLEPoint3D::ortho3DUnit(const GLEPoint3D& p, GLEPoint3D* r) {
 
 ostream& GLEPoint3D::write(ostream& os) const {
 	os << m_C[0] << ", " << m_C[1] << ", " << m_C[2];
+	return os;
 }
 
 GLEMatrix::GLEMatrix(int rows, int cols) {
@@ -3207,6 +3208,7 @@ ostream& GLEMatrix::write(ostream& os) const {
 		}
 		os << endl;
 	}
+	return os;
 }
 
 GLEProjection::GLEProjection() {
