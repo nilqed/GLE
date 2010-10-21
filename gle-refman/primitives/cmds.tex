@@ -55,7 +55,7 @@ can be set with various GLE commands.
 \section{Graphics Primitives (a summary)}
 {\sf ! {\it comment}} \\
 {\sf @{\it xxx}} \\
-{\sf abound {\it x y}}
+{\sf abound {\it x y}} \\
 {\sf aline {\it x y} [arrow start] [arrow end] [arrow both] [curve {\it $\alpha1$} {\it $\alpha2$} {\it d1} {\it d2}]} \\
 {\sf amove {\it x y}}  \\
 {\sf arc {\it radius a1 a2 [arrow end] [arrow start] [arrow both]}} \\
@@ -128,6 +128,7 @@ can be set with various GLE commands.
 {\sf set texscale {\it scale} $|$ {\it fixed} $|$ {\it none}} \\
 {\sf set titlescale {\it s}}  \\
 {\sf set ticksscale {\it s}}  \\
+{\sf size {\it w} {\it h}}  \\
 {\sf sub {\it sub-name paramter1 paramter2 etc}}  \\
 {\sf tex {\it string} [name {\it xxx}] [add {\it val}]}  \\
 {\sf text {\it unquoted-text-string}}  \\
@@ -370,7 +371,7 @@ is drawn as it appears in the file.  Remember that GLE treats
 text in the same way that \LaTeX \ does, so multiple spaces are ignored
 and some characters have special meaning. E.g, \verb#\ ^ _ & { }#
 
-\index{greek characters}
+\index{Greek characters}
 To include Greek characters in the middle of text use a
 backslash followed by the name of the character.
 E.g., \verb+ 3.3\Omega S+ would produce ``3.3$\Omega$S''.
@@ -651,7 +652,7 @@ barstyles.gle             & Defines additional styles for bar plots.\\
 color.gle                 & Defines functions for working with colors.\\
 colors-gle-4.0.12.gle     & Redefines all colors defined in GLE 4.0.12 and before.\\
 contour.gle               & Subroutines for drawing contour plots\\
-electronics.gle           & Subroutines for drawing electronical circuits\\
+electronics.gle           & Subroutines for drawing electrical circuits\\
 ellipse.gle               & Draw text in an ellipse\\
 feyn.gle                  & Subroutines for drawing Feynmann diagrams\\
 graphutil.gle             & Subroutines for drawing graphs\\
@@ -1092,6 +1093,14 @@ The graph title font size is set to `\texttt{titlescale}' times `\texttt{hei}'.
 \index{ticksscale}
 
 The size of the graph axis ticks is set to `\texttt{ticksscale}' times `\texttt{hei}'.
+
+\item[{\sf size {\it w} {\it h}}]
+
+Sets the size of GLE's output to {\it w} centimeter wide by {\it h} centimeter tall.
+
+This command usually appears at the top of a GLE script. That is, only commands that do not generate output can precede the `size' command. For example, the `include' command, subroutine definitions, and assignments to variables can appear before the `size' command. Commands like `aline', on the other hand, should appear after the `size' command.
+
+It is possible to omit the size command. In that case, the size of the output is determined by the `pagesize' command (see Fig.~\ref{fullpage:fig}).
 
 \item[{\sf sub {\it sub-name parameter1 parameter2 etc.}}]
 \index{sub} Defines a subroutine. The end of the subroutine

@@ -496,6 +496,7 @@ void GLEDrawingArea::clearObjects()
 	}
 	objectList.clear();
 	qDebug() << "Object list cleared";
+   updateSelection();
 }
 
 // Update the resolution and notify children

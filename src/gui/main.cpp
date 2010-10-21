@@ -93,11 +93,29 @@ typedef BOOL (__stdcall *pStackWalk)(DWORD MachineType, HANDLE hProcess, HANDLE 
 
 void PrintStackTrace(CONTEXT* context, HANDLE hLogFile, char* szOutBuffer) {
 	DWORD NumBytes;
-	HMODULE dbgHelp = LoadLibraryA("dbghelp.dll");
-	if (dbgHelp == NULL) {
-		sprintf(szOutBuffer, "   Error: dbghelp.dll not found.\n");
+   char szModuleName[MAX_PATH+1];
+	DWORD dwRes = GetModuleFileNameA(NULL, szModuleName, MAX_PATH);
+	if (dwRes == 0) {
+		sprintf(szOutBuffer, "   Error: GetModuleFileName fails.\n");
 		WriteFile(hLogFile, szOutBuffer, strlen(szOutBuffer), &NumBytes, 0);
 		return;
+	}
+   char* backSlash = strrchr(szModuleName, '\\');
+   if (backSlash != 0) {
+      backSlash[1] = 0;
+   }
+   strcat(szModuleName, "dbghelp.dll");
+	HMODULE dbgHelp = LoadLibraryA(szModuleName);
+	if (dbgHelp == NULL) {
+		sprintf(szOutBuffer, "   Error: %s not found.\n", szModuleName);
+		WriteFile(hLogFile, szOutBuffer, strlen(szOutBuffer), &NumBytes, 0);
+      // try without path
+      dbgHelp = LoadLibraryA("dbghelp.dll");
+      if (dbgHelp == NULL) {
+         sprintf(szOutBuffer, "   Error: dbghelp.dll not found.\n");
+         WriteFile(hLogFile, szOutBuffer, strlen(szOutBuffer), &NumBytes, 0);
+         return;
+      }
 	}
 	pStackWalk stackWalk = (pStackWalk)GetProcAddress(dbgHelp, "StackWalk");
 	if (stackWalk == NULL) {
