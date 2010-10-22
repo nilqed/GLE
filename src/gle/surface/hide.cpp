@@ -135,6 +135,34 @@ int vsign=1;
 #define returng {v_close(); return;}
 static struct surface_struct sf;
 
+float get_h(int i) {
+	if (i < 0 || i >= MAXH) {
+		return 0.0;
+	} else {
+		return h[i];
+	}
+}
+
+void set_h(int i, float v) {
+	if (!(i < 0 || i >= MAXH)) {
+		h[i] = v;
+	}
+}
+
+float get_h2(int i) {
+	if (i < 0 || i >= MAXH) {
+		return GLE_INF;
+	} else {
+		return h2[i];
+	}
+}
+
+void set_h2(int i, float v) {
+	if (!(i < 0 || i >= MAXH)) {
+		h2[i] = v;
+	}
+}
+
 void hide(float huge *z,int nx, int ny, float minz, float maxz, struct surface_struct *sff) {
 	int i,x,y;
 	float r,angle;
@@ -165,8 +193,8 @@ void hide(float huge *z,int nx, int ny, float minz, float maxz, struct surface_s
 	MAXH = sf.maxh;
 
 	if (MAXH==0) MAXH = 5000;
-	h = (float*)malloc(MAXH*sizeof(float));
-	h2 = (float*)malloc(MAXH*sizeof(float));
+	h = (float*)malloc((MAXH+1)*sizeof(float));
+	h2 = (float*)malloc((MAXH+1)*sizeof(float));
 	if (h==NULL || h2==NULL) {
 		gprint("Was not able to allocate horizon arrays %d \n",MAXH);
 		return;
@@ -544,14 +572,14 @@ void line3d(float x, float y, float z) {
 void show_horizon() {
 	int i;
 	v_color("RED");
-	v_move(unmaph(0),h[0]);
+	v_move(unmaph(0), get_h(0));
 	for (i=0;i<900;i++) {
-		v_line(unmaph(i),h[i]);
+		v_line(unmaph(i), get_h(i));
 	}
 	v_color("BLUE");
-	v_move(unmaph(0),h2[0]);
+	v_move(unmaph(0), get_h2(0));
 	for (i=0;i<900;i++) {
-		v_line(unmaph(i),h2[i]);
+		v_line(unmaph(i), get_h2(i));
 	}
 
 }
@@ -628,11 +656,11 @@ void hclipvec(int x1, float y1, int x2, float y2, int sethi) {
 	int i,sd,sx = 0;
 	if (x1==x2) {
 		/* printf("VEC %d %g   %d %g h=%g\n",x1,y1,x2,y2,h[x1]); scr_getch();  */
-        if (y2<y1) {v = y1; y1 = y2; y2 = v;}
-		if (h[x1]<y2) {
-			if (h[x1]>y1) y1 = h[x1];
+		if (y2<y1) {v = y1; y1 = y2; y2 = v;}
+		if (get_h(x1) < y2) {
+			if (get_h(x1) > y1) y1 = get_h(x1);
 			vector_line(x1,y1,x2,y2);
-			if (sethi) h[x1] = y2;
+			if (sethi) set_h(x1, y2);
 		}
 		return;
 	}
@@ -644,15 +672,15 @@ void hclipvec(int x1, float y1, int x2, float y2, int sethi) {
 	for (i=x1, v=y1; sd*i <= sd*x2; i+=sd, v+=step) {
 		if (visible) {
 			// FIXME: add range check for h-array?
-			if (h[i]>v) {
+			if (get_h(i) > v) {
 				if (sethi) vector_line(sx,sy,i-sd,v-step);
 				else vector_line(sx,sy,i-sd,v-step);
 				visible = false;
-			} else if (sethi) h[i] = v;
+			} else if (sethi) set_h(i, v);
 		} else {
-			if (h[i]<=v+.0001) {
+			if (get_h(i) <= v+.0001) {
 				sx = i; sy = v; visible = true;
-				if (sethi) h[i] = v;
+				if (sethi) set_h(i, v);
 			}
 		}
 	}
@@ -678,7 +706,7 @@ void seth2(int rx1, int ry1, float rz1, int rx2, int ry2, float rz2) {
 
        if (x1==x2) {
 		if (y2>y1) {v = y1; y1 = y2; y2 = v;}
-		if (h2[x1]>y2) h2[x1] = y2;
+		if (get_h2(x1) > y2) set_h2(x1, y2);
 		return;
        }
        step = (y2-y1)/(x2-x1);
@@ -687,7 +715,7 @@ void seth2(int rx1, int ry1, float rz1, int rx2, int ry2, float rz2) {
        step = step*sd;
        visible = false;
        for (i=x1, v=y1; sd*i <= sd*x2; i+=sd, v+=step) {
-		if (h2[i]>v) h2[i] = v;
+		if (get_h2(i) > v) set_h2(i, v);
        }
 }
 
@@ -703,10 +731,10 @@ void hclipvec2(int x1, float y1, int x2, float y2, int sethi) {
 			y1 = y2;
 			y2 = v;
 		}
-		if (h2[x1] > y2) {
-			if (h2[x1]<y1) y1 = h2[x1];
+		if (get_h2(x1) > y2) {
+			if (get_h2(x1) < y1) y1 = get_h2(x1);
 			vector_line(x1,y1,x2,y2);
-			if (sethi) h2[x1] = y2;
+			if (sethi) set_h2(x1, y2);
 		}
 		return;
 	}
@@ -718,25 +746,25 @@ void hclipvec2(int x1, float y1, int x2, float y2, int sethi) {
 	for (int i = x1; sd*i <= sd*x2; i+=sd) {
 		double v = vec.apply(i);
 		if (visible) {
-			if (h2[i] < v) {
+			if (get_h2(i) < v) {
 				// drops below horizon -> invisible
 				visible = false;
 				// find exact point from where on invisible
-				horiz.fit(i-sd, h2[i-sd], i, h2[i]);
+				horiz.fit(i-sd, get_h2(i-sd), i, get_h2(i));
 				double xp = vec.intersect(&horiz);
 				vector_line_d(sx, vec.apply(sx), xp, vec.apply(xp));
-			} else if (sethi) h2[i] = v;
+			} else if (sethi) set_h2(i, v);
 		} else {
-			if (h2[i]>=v-.0001) {
+			if (get_h2(i) >= v-.0001) {
 				// back above horizon -> again visible
 				visible = true;
 				if (i == x1) {
 					sx = i;
 				} else {
-					horiz.fit(i-sd, h2[i-sd], i, h2[i]);
+					horiz.fit(i-sd, get_h2(i-sd), i, get_h2(i));
 					sx = vec.intersect(&horiz);
 				}
-				if (sethi) h2[i] = v;
+				if (sethi) set_h2(i, v);
 			}
 		}
 	}

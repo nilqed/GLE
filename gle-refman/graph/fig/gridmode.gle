@@ -36,9 +36,10 @@
 !                                                                      !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-size 14 3.75
+size 14 2*3.9
 
 wd = 14/3
+hi = 3.8
 offs = 0.05
 fac = 0.9
 
@@ -46,10 +47,15 @@ include "../../script/manual.gle"
 
 manual_graph_mode
 
-amove offs -0.2
+ytop = 3.9
+ybot = -0.1
+
+set dashlen 0.017
+
+amove offs ytop
 begin graph
    title "(a) No subticks"
-   size wd 4
+   size wd hi
    hscale fac
    yticks off
    ylabels off
@@ -58,14 +64,15 @@ begin graph
 end graph
 begin key
    pos cc
+   background grey5
    margins 0.15 0.15
    text "xaxis grid"
 end key
 
-amove offs+wd -0.2
+amove offs+wd ytop
 begin graph
    title "(b) Subticks grid lines"
-   size wd 4
+   size wd hi
    hscale fac
    yticks off
    ylabels off
@@ -76,15 +83,16 @@ end graph
 begin key
    pos cc
    margins 0.15 0.15
+   background grey5
    text "xaxis grid"
    text "xsubticks on"
 end key
 
 
-amove offs+2*wd -0.2
+amove offs+2*wd ytop
 begin graph
    title "(c) Normal subticks"
-   size wd 4
+   size wd hi
    hscale fac
    yticks off
    ylabels off
@@ -95,8 +103,48 @@ end graph
 begin key
    pos cc
    margins 0.15 0.15
+   background grey5
    text "xaxis grid"
    text "xsubticks on"
    text "xsubticks length 0.12"
 end key
 
+amove offs ybot
+begin graph
+   title "(d) Various settings"
+   size wd hi
+   hscale fac
+   xaxis min 0 max 5 dticks 1
+   yaxis min 0 max 5 dticks 1
+   axis grid
+   ticks color grey40
+   subticks on
+   subticks lstyle 2
+   ylabels off
+   let d1 = 1.7*sin(2*pi*x)+2.5
+   d1 line color red
+end graph
+begin key
+   pos rc
+   offset -0.3 0
+   margins 0.15 0.15
+   background grey5
+   text "axis grid"
+   text "ticks color grey40"
+   text "subticks on"
+   text "subticks lstyle 2"
+end key
+
+amove offs+2*wd ybot
+begin graph
+   title "(e) Various settings"
+   size wd hi
+   hscale fac
+   xaxis min 0 max 3 dticks 1
+   yaxis min 1 max 1000 dticks 1 log format "sci 0 10"
+   axis grid
+   ticks color grey70
+   subticks on color grey20
+   let d1 = 40*exp(x)*abs(sin(pi*x))+2
+   d1 line color red
+end graph

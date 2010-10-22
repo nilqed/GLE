@@ -36,7 +36,7 @@
 #                                                                      #
 ########################################################################
 
-m4_define([gle_cr_version], [4.2.3])
+m4_define([gle_cr_version], [4.2.3b])
 
 AC_INIT(gle-graphics, [gle_cr_version], glx-general@lists.sourceforge.net)
 AC_CONFIG_HEADER(src/config.h)
