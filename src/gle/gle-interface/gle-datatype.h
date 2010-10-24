@@ -134,6 +134,8 @@ inline void GLE_MC_COPY(GLEMemoryCell* a, GLEMemoryCell* b) {
 bool gle_memory_cell_equals(GLEMemoryCell* a, GLEMemoryCell* b);
 void gle_memory_cell_print(GLEMemoryCell* a, ostream& out);
 
+unsigned int getUTF8NumberOfChars(const char* str, unsigned int len);
+
 class DLLCLASS GLEString : public GLEDataObject {
 protected:
 	unsigned int* m_Data;

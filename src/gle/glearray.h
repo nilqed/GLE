@@ -119,21 +119,48 @@ enum GLECSVDataStatus {
 	GLECSVDataStatusEOF
 };
 
+enum GLECSVErrorCode {
+	GLECSVErrorNone,
+	GLECSVErrorFileNotFound,
+	GLECSVErrorUnterminatedString
+};
+
+class GLECSVError {
+public:
+	GLECSVError();
+	~GLECSVError();
+	GLECSVErrorCode errorCode;
+	unsigned int errorLine;
+	unsigned int errorColumn;
+	string errorString;
+};
+
 class GLECSVData {
 protected:
 	vector<GLEBYTE> m_buffer;
-	vector<int> m_index;
-	vector<int> m_rowStart;
-	vector<int> m_rowSize;
+	vector<unsigned int> m_cellPos;
+	vector<unsigned int> m_cellSize;
+	vector<unsigned int> m_firstCell;
 	GLEBYTE* m_data;
 	bool* m_delims;
 	unsigned int m_size;
 	unsigned int m_pos;
 	unsigned int m_writePos;
+	unsigned int m_lines;
+	unsigned int m_firstColumn;
+	unsigned int m_nextLine;
+	GLECSVError m_error;
+	string m_fileName;
 public:
 	GLECSVData();
 	~GLECSVData();
 	bool read(const std::string& file);
+	void print(ostream& os);
+	void setDelims(const char* delims);
+	GLECSVError* getError();
+	unsigned int getNbLines();
+	unsigned int getNbColumns(unsigned int line);
+	const char* getCell(unsigned int row, unsigned int column, unsigned int* size);
 private:
 	bool readBlock(const std::string& file);
 	void parseBlock();
@@ -154,6 +181,9 @@ private:
 	void initWritePos();
 	void writeChar(GLEBYTE ch);
 	GLECSVDataStatus skipSpacesAndFirstDelim(GLEBYTE ch);
+	void createErrorString(const string& str);
+	unsigned int getUTF8Column(unsigned int cellPos);
+	unsigned int getFirstCell(unsigned int line);
 };
 
 #endif

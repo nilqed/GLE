@@ -146,6 +146,45 @@ void GLEString::fromUTF8(const string& str) {
 	0001 0000-0010 FFFF | 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
 */
 
+unsigned int getUTF8NumberOfChars(const char* str, unsigned int len) {
+	unsigned int i = 0;
+	unsigned int dest = 0;
+	while (i < len) {
+		unsigned char ch = str[i++];
+		if ((ch & 0x80) != 0) {
+			/* highest bit is one - 3 possibilities */
+			int remain = 0;
+			if ((ch & 0xE0) == 0xC0) {
+				/* 110x -> two byte unicode */
+				remain = 1;
+			} else if ((ch & 0xF0) == 0xE0) {
+				/* 1110x -> three byte unicode */
+				remain = 2;
+			} else if ((ch & 0xF8) == 0xF0) {
+				/* 1111x -> four byte unicode */
+				remain = 3;
+			} else if ((ch & 0xFC) == 0xF8) {
+				remain = 4;
+			} else if ((ch & 0xFE) == 0xFC) {
+				remain = 5;
+			}
+			while ((remain > 0) && (i < len)) {
+				remain--;
+				ch = str[i++];
+				if ((ch & 0xC0) != 0x80) {
+					remain = 0;
+					i--;
+					/* try processing this byte separately */
+				}
+			}
+			dest++;
+		} else {
+			dest++;
+		}
+	}
+	return dest;
+}
+
 void GLEString::fromUTF8(const char* str, unsigned int len) {
 	resize(len);
 	unsigned int i = 0;

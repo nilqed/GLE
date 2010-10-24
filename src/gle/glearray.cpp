@@ -251,8 +251,20 @@ void GLEZData::read(const string& fname) throw(ParserError) {
 	}
 }
 
+GLECSVError::GLECSVError() {
+}
+
+GLECSVError::~GLECSVError() {
+}
+
 GLECSVData::GLECSVData() {
 	initDelims();
+	m_lines = 0;
+	m_nextLine = true;
+	m_firstColumn = 0;
+	m_error.errorCode = GLECSVErrorNone;
+	m_error.errorLine = 0;
+	m_error.errorColumn = 0;
 }
 
 GLECSVData::~GLECSVData() {
@@ -267,6 +279,7 @@ bool GLECSVData::read(const std::string& file) {
 }
 
 bool GLECSVData::readBlock(const std::string& fileName) {
+	m_fileName = fileName;
 	ifstream file(fileName.c_str(), ios::in | ios::binary | ios::ate);
 	if (file.is_open()) {
 		unsigned int size = file.tellg();
@@ -276,7 +289,69 @@ bool GLECSVData::readBlock(const std::string& fileName) {
 		file.close();
 		return true;
 	} else {
+		m_error.errorCode = GLECSVErrorFileNotFound;
+		ostringstream errStr;
+		errStr << "can't open: '" << fileName << "': ";
+		str_get_system_error(errStr);
+		m_error.errorString = errStr.str();
 		return false;
+	}
+}
+
+unsigned int GLECSVData::getNbLines() {
+	return m_firstCell.size();
+}
+
+unsigned int GLECSVData::getFirstCell(unsigned int line) {
+	return m_firstCell[line];
+}
+
+unsigned int GLECSVData::getNbColumns(unsigned int line) {
+	unsigned int startCell = m_firstCell[line];
+	if (line + 1 >= m_firstCell.size()) {
+		return m_cellPos.size() - startCell;
+	} else {
+		return m_firstCell[line + 1] - startCell;
+	}
+}
+
+const char* GLECSVData::getCell(unsigned int row, unsigned int column, unsigned int* size) {
+	unsigned int idx = m_firstCell[row] + column;
+	*size = m_cellSize[idx];
+	return (const char*)&m_buffer[m_cellPos[idx]];
+}
+
+void GLECSVData::print(ostream& os) {
+	vector<unsigned int> columnWidth;
+	for (unsigned int row = 0; row < getNbLines(); row++) {
+		unsigned int nbColumns = getNbColumns(row);
+		for (unsigned int col = 0; col < nbColumns; col++) {
+			unsigned int size;
+			const char* cell = getCell(row, col, &size);
+			unsigned int chars = getUTF8NumberOfChars(cell, size);
+			while (columnWidth.size() <= col) {
+				columnWidth.push_back(0);
+			}
+			columnWidth[col] = max(columnWidth[col], chars + 1);
+		}
+	}
+	for (unsigned int row = 0; row < getNbLines(); row++) {
+		unsigned int nbColumns = getNbColumns(row);
+		for (unsigned int col = 0; col < nbColumns; col++) {
+			unsigned int size;
+			const char* cell = getCell(row, col, &size);
+			unsigned int chars = getUTF8NumberOfChars(cell, size);
+			for (unsigned int idx = 0; idx < size; idx++) {
+				os << cell[idx];
+			}
+			if (col != nbColumns - 1) {
+				os << ",";
+				for (unsigned int idx = chars; idx < columnWidth[col]; idx++) {
+					os << (char)' ';
+				}
+			}
+		}
+		os << endl;
 	}
 }
 
@@ -286,22 +361,26 @@ void GLECSVData::parseBlock() {
 	m_data = &m_buffer[0];
 	GLECSVDataStatus status = readCell();
 	while (status != GLECSVDataStatusEOF) {
-
-
 		status = readCell();
+	}
+}
+
+void GLECSVData::setDelims(const char* delims) {
+	int pos = 0;
+	unsigned int size = 256;
+	for (unsigned int i = 0; i < size; i++) {
+		m_delims[i] = false;
+	}
+	while (delims[pos] != 0) {
+		m_delims[(int)delims[pos]] = true;
+		pos++;
 	}
 }
 
 void GLECSVData::initDelims() {
 	unsigned int size = 256;
 	m_delims = new bool[size];
-	for (unsigned int i = 0; i < size; i++) {
-		m_delims[i] = false;
-	}
-	m_delims[' '] = true;
-	m_delims[','] = true;
-	m_delims[';'] = true;
-	m_delims['\t'] = true;
+	setDelims(" ,;\t");
 }
 
 bool GLECSVData::isDelim(GLEBYTE ch) {
@@ -333,6 +412,20 @@ void GLECSVData::skipTillEol() {
 	}
 }
 
+void GLECSVData::createErrorString(const string& str) {
+	ostringstream err;
+	err << str;
+	err << " at " << (m_error.errorLine + 1) << ":" << (m_error.errorColumn + 1);
+	err << " while reading '" << m_fileName << "'";
+	m_error.errorString = err.str();
+}
+
+unsigned int GLECSVData::getUTF8Column(unsigned int cellPos) {
+	int size = cellPos - m_firstColumn;
+	if (size < 0) size = 0;
+	return getUTF8NumberOfChars((const char*)&m_buffer[m_firstColumn], size);
+}
+
 GLECSVDataStatus GLECSVData::readCellString(GLEBYTE quote) {
 	unsigned int cellSize = 1;
 	unsigned int cellPos = lastCharPos();
@@ -342,19 +435,24 @@ GLECSVDataStatus GLECSVData::readCellString(GLEBYTE quote) {
 		writeChar(ch);
 		cellSize++;
 		if (ch == 0) {
-			// Unterminated string constant
+			m_error.errorCode = GLECSVErrorUnterminatedString;
+			m_error.errorLine = m_lines;
+			m_error.errorColumn = getUTF8Column(cellPos);
+			createErrorString("unterminated string");
 			return GLECSVDataStatusEOF;
 		}
 		if (isEol(ch)) {
-			// Unterminated string constant
-			return GLECSVDataStatusEOL;
+			m_error.errorCode = GLECSVErrorUnterminatedString;
+			m_error.errorLine = m_lines;
+			m_error.errorColumn = getUTF8Column(cellPos);
+			createErrorString("unterminated string");
+			return removeTrailingEOLs();
 		}
 		if (ch == quote) {
 			GLEBYTE ch = readChar();
 			if (ch != quote) {
 				writeChar(ch);
 				createCell(cellSize, cellPos);
-				// Skip spaces and delims
 				return skipSpacesAndFirstDelim(ch);
 			}
 		}
@@ -394,22 +492,27 @@ GLECSVDataStatus GLECSVData::readCell() {
 }
 
 void GLECSVData::createCell(unsigned int cellSize, unsigned int cellPos) {
-	cout << "Cell: '";
-	for (unsigned int i = 0; i < cellSize; i++) {
-		cout << (char)m_data[cellPos + i];
+	if (m_nextLine) {
+		m_firstCell.push_back(m_cellPos.size());
+		m_nextLine = false;
 	}
-	cout << "'" << endl;
+	m_cellSize.push_back(cellSize);
+	m_cellPos.push_back(cellPos);
 }
 
 GLECSVDataStatus GLECSVData::removeTrailingEOLs() {
+	m_lines++;
+	m_nextLine = true;
 	GLEBYTE ch;
 	do {
 		ch = readChar();
 		if (ch == 0) {
+			m_firstColumn = m_pos;
 			return GLECSVDataStatusEOF;
 		}
 	} while (isEol(ch));
 	goBack();
+	m_firstColumn = m_pos;
 	return GLECSVDataStatusEOL;
 }
 
@@ -473,4 +576,8 @@ GLECSVDataStatus GLECSVData::skipSpacesAndFirstDelim(GLEBYTE ch) {
 		ch = readChar();
 	}
 	return GLECSVDataStatusOK;
+}
+
+GLECSVError* GLECSVData::getError() {
+	return &m_error;
 }
