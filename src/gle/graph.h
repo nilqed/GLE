@@ -275,7 +275,7 @@ GRAPHDEF bool g_auto_s_h, g_auto_s_v;
 GRAPHDEF bool g_math;
 GRAPHDEF double sizex,sizey;
 GRAPHDEF double vscale,hscale;
-
+GRAPHDEF double g_discontinuityThreshold;
 GRAPHDEF struct fill_data *fd[MAX_NB_FILL];
 GRAPHDEF int nfd;
 GRAPHDEF int gntmp;

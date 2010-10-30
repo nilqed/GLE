@@ -1504,7 +1504,7 @@ public:
 	DataFillDimension(GLEFunctionParserPcode* fct);
 	~DataFillDimension();
 	void setRange(GLERange* range, bool log);
-	bool isYValid();
+	bool isYValid();	
 	inline bool isLog() { return m_Log; }
 	inline GLERange* getRange() { return &m_Range; }
 	inline void setDoubleAt(double v, int i) { m_Values->setDoubleAt(v, i); }
@@ -1548,6 +1548,11 @@ protected:
 	bool m_FineTune;
 	bool m_CrEnable;
 	double m_PrevXValue;
+	bool m_detectDiscontinuity;
+	double m_discontinuityThreshold;
+	bool m_tuneDistance;
+	int m_tuneIterationsMin;
+	int m_tuneIterationsMax;
 	set<double> m_MissX;
 	GLEVectorAutoDelete<GLELetDataSet>* m_DataSets;
 	GLEVectorAutoDelete<DataFillDimension> m_Dim;
@@ -1570,10 +1575,13 @@ public:
 	bool selectXValue(double x, int lr);
 	void selectXValueNoIPol(double x);
 	double maxDistanceTo(double x);
+	void minMaxDistanceTo(double x, GLERange* distanceRange);
 	void tryIPol(double other, double nanval);
+	void checkDiscontinuity(double xPrev, double xNext, int lr);
 	void tryAddMissing(double x, int lr);
 	void setInfo(GLEFunctionParserPcode* expr, int varx);
 	void setYMinYMax(double ymin, double ymax);
+	void setDetectDiscontinuity(bool detect, double threshold);
 	inline int size() { return m_Size; }
 	inline double* getX() { return m_Dim[0]->getValues()->toArray(); }
 	inline double* getY() { return m_Dim[1]->getValues()->toArray(); }
@@ -1596,6 +1604,11 @@ DataFill::DataFill(bool finetune) {
 	m_CrEnable = true;
 	m_Missing = new GLEBoolArray();
 	m_Where = NULL;
+	m_detectDiscontinuity = false;
+	m_discontinuityThreshold = GLE_INF;
+	m_tuneDistance = 1e-6;
+	m_tuneIterationsMin = 50;
+	m_tuneIterationsMax = 10000;	
 }
 
 DataFill::~DataFill() {
@@ -1650,13 +1663,20 @@ bool DataFill::selectXValue(double x, int lr) {
 }
 
 double DataFill::maxDistanceTo(double x) {
+	GLERange range;
+	minMaxDistanceTo(x, &range);
+	return range.getMax();
+}
+
+void DataFill::minMaxDistanceTo(double x, GLERange* distanceRange) {
 	/* set parameter variable */
 	if (m_VarX >= 0) var_set(m_VarX, x);
 	/* set data set variables */
 	for (unsigned int i = 0; i < m_DataSets->size(); i++) {
 		(*m_DataSets)[i]->interpolateTo(x, GLE_DS_L);
 	}
-	double dist = 0.0;
+	double maxValue = 0.0;
+	double minValue = GLE_INF;
 	for (unsigned int i = 0; i < m_Dim.size(); i++) {
 		DataFillDimension* dim = m_Dim[i];
 		if (dim->isYValid()) {
@@ -1665,16 +1685,16 @@ double DataFill::maxDistanceTo(double x) {
 			if (dim->isYValid()) {
 				double v2 = dim->getValue();
 				double d = axis_range_dist_perc(v1, v2, dim->getRange(), dim->isLog());
-				dist = max(dist, d);
+				maxValue = max(maxValue, d);
+				minValue = min(minValue, d);
 			}
 		}
 	}
-	return dist;
+	distanceRange->setMinMax(minValue, maxValue);
 }
 
 void DataFill::tryIPol(double other, double nanval) {
 	int iter = 0;
-	double limit = 0.001;
 	double not_xmid = 0.0;
 	while (true) {
 		double xmid = (other + nanval)/2;
@@ -1686,7 +1706,8 @@ void DataFill::tryIPol(double other, double nanval) {
 			other = xmid;
 			not_xmid = nanval;
 		}
-		if (maxDistanceTo(not_xmid) < limit) {
+		if (iter > m_tuneIterationsMax || (iter > m_tuneIterationsMin 
+										   && maxDistanceTo(not_xmid) < m_tuneDistance)) {
 			addPointLR(xmid, GLE_DS_L);
 			return;
 		}
@@ -1763,6 +1784,49 @@ void DataFill::addMissingLR(double x, int lr) {
 	m_Size++;
 }
 
+void DataFill::checkDiscontinuity(double xPrev, double xNext, int lr) {
+	if (!m_detectDiscontinuity) {
+		return;
+	}
+	double leftX = xPrev;
+	double rightX = xNext;
+	selectXValue(leftX, lr);
+	double distance = maxDistanceTo(rightX);
+	if (distance > m_discontinuityThreshold) {
+		int iter = 0;
+		GLERange leftDistance;
+		GLERange rightDistance;
+		while (true) {
+			double xMid = (leftX + rightX) / 2;
+			selectXValue(xMid, lr);
+			minMaxDistanceTo(leftX, &leftDistance);
+			selectXValue(xMid, lr);
+			minMaxDistanceTo(rightX, &rightDistance);
+			double minDistance = leftDistance.getMin() + rightDistance.getMin();
+			if (leftDistance.getMax() > m_discontinuityThreshold) {
+				rightX = xMid;
+				distance = leftDistance.getMax();
+			} else if (rightDistance.getMax() > m_discontinuityThreshold) {
+				leftX = xMid;
+				distance = rightDistance.getMax();
+			} else {
+				return;
+			}
+			iter++;
+			if (iter > m_tuneIterationsMax || (iter > m_tuneIterationsMin && minDistance < m_tuneDistance)) {
+				if (leftX != xPrev) {
+					addPointLR(leftX, lr);
+				}
+				addMissingLR(xMid, lr);
+				if (rightX != xNext) {
+					addPointLR(rightX, lr);
+				}
+				return;
+			}
+		}
+	}
+}
+
 void DataFill::addPointFineTune(double x, int lr) {
 	if (!isYValid()) {
 		bool yNotNan = isYNotNan();
@@ -1776,6 +1840,8 @@ void DataFill::addPointFineTune(double x, int lr) {
 		if (m_PrevInvalid) {
 			tryIPol(x, m_PrevXValue);
 			m_PrevInvalid = false;
+		} else {
+			checkDiscontinuity(m_PrevXValue, x, lr);
 		}
 		addPointLR(x, lr);
 	}
@@ -1816,6 +1882,11 @@ void DataFill::addPointIPol(double x) {
 			break;
 		}
 	}
+}
+
+void DataFill::setDetectDiscontinuity(bool detect, double threshold) {
+	m_detectDiscontinuity = detect;
+	m_discontinuityThreshold = threshold;
 }
 
 class GLECheckWindow {
@@ -2259,6 +2330,9 @@ void GLELet::doLet() throw(ParserError) {
 	}
 	/* copy default dataset settings */
 	DataFill fill(m_FineTune);
+	if (g_discontinuityThreshold < 100.0) {
+		fill.setDetectDiscontinuity(true, g_discontinuityThreshold / 100.0);
+	}
 	fill.setVarX(m_VarX);
 	for (int dim = GLE_DIM_X; dim <= GLE_DIM_Y; dim++) {
 		DataFillDimension* dim_f = new DataFillDimension(m_Fcts[dim].get());
@@ -3930,7 +4004,7 @@ void GLEDataPairs::noNaN() {
 	int pos = 0;
 	int npnts = size();
 	for (int j = 0; j < npnts; j++) {
-		if (!gle_isnan(m_X[j]) && !gle_isnan(m_Y[j])) {
+		if (m_M[j] || (!gle_isnan(m_X[j]) && !gle_isnan(m_Y[j]))) {
 			m_X[pos] = m_X[j]; m_Y[pos] = m_Y[j]; m_M[pos] = m_M[j];
 			pos++;
 		}

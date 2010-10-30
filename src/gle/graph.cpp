@@ -91,6 +91,7 @@ bool do_remaining_entries(int ct);
 void graph_freebars();
 double get_next_exp(TOKENS tk,int ntk,int *curtok);
 void data_command();
+void do_discontinuity();
 
 GLEAxis xx[GLE_AXIS_MAX+1];
 
@@ -144,6 +145,7 @@ void begin_graph(int *pln , int *pcode , int *cp) throw (ParserError) {
 	KeyInfo keyinfo;
 	g_hscale = .7;
 	g_vscale = .7;
+	g_discontinuityThreshold = GLE_INF;
 	nlet = 0;
 	erflg = true;
 	if (g_get_compatibility() == GLE_COMPAT_35) {
@@ -189,6 +191,9 @@ do_next_line:
 		else kw("SCALE") goto do_scale;
 		else kw("COLORMAP") goto do_colormap;
 		else kw("TITLE") goto do_main_title;
+		else kw("DISCONTINUITY") {
+			do_discontinuity();
+		}
 		else kw("UNDER") g_funder.push_back((*pln)-1);
 		else kw("BACKGROUND")
 		{
@@ -889,6 +894,18 @@ void do_axis_part_all(int xset) throw (ParserError) {
 	if (axis == GLE_AXIS_Y) {
 		do_axis_part(GLE_AXIS_Y2, false, xset);
 		do_axis_part(GLE_AXIS_Y0, false, xset);
+	}
+}
+
+void do_discontinuity() {
+	int ct = 2;
+	while (ct <= ntk)  {
+		kw("THRESHOLD") {
+			g_discontinuityThreshold = next_exp;
+		} else {
+			g_throw_parser_error("Expecting discontinuity option, but found '", tk[ct], "'");
+		}
+		ct++;
 	}
 }
 
