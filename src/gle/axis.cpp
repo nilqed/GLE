@@ -89,7 +89,7 @@ double axis_range_dist_perc(double v1, double v2, GLERange* range, bool log) {
 }
 
 double fnloglen(double v, GLEAxis *ax) {
-	return (v - log10(ax->getMin()) / (log10(ax->getMax()) - log10(ax->getMin()))) * ax->length;
+	return (v - log10(ax->getMin())) / (log10(ax->getMax()) - log10(ax->getMin())) * ax->length;
 }
 
 double fnAxisX(double v, GLEAxis *ax) {
@@ -214,12 +214,12 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 	} else {
 		if (drawgrid) return;
 	}
-
+	
 /*----------------------------- Generate the places for labels to go */
 	gmin = ax->getMin();
 	gmax = ax->getMax();
 	int lgset = ax->lgset;
-
+	
 	vector<bool> subplaces;
 	int lgset_def = GLE_AXIS_LOG_OFF;
 	if (ax->log) {
