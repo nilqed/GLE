@@ -52,13 +52,13 @@
 #include "token.h"
 #include "graph.h"
 
-void start_subtick(double *tick1, double gmin, double dticks);
+double start_subtick(double dsubticks, double dticks, GLEAxis* ax);
 void nice_ticks(double *dticks, double *gmin,double *gmax, double *t1,double *tn,int minset, int maxset);
 void numtrim(char **d,char *s, double dticks);
 void nice_log_ticks(double *start, double *last, double gmin, double gmax) throw (ParserError);
 
-double fnloglen(double v,GLEAxis *ax);
-double fnlogx(double v,GLEAxis *ax);
+double fnloglen(double v, GLEAxis *ax);
+double fnlogx(double v, GLEAxis *ax);
 
 void draw_axis_titles(GLEAxis *ax, double h, double ox, double oy, GLEMeasureBox* measure);
 void draw_axis_titles_v35(GLEAxis *ax, double h, double ox, double oy, double dticks, double llen);
@@ -67,13 +67,6 @@ extern double graph_x1;
 extern double graph_x2;
 extern double graph_y1;
 extern double graph_y2;
-
-#define fnx(vv) m_fnx(vv)
-#define fnlx(vv) fnlogx(vv,ax)
-#define true (!false)
-#define false 0
-
-static double  gglen,ggmin,ggmax,ggnegate;
 
 void add_tex_labels(string* title)
 {
@@ -95,13 +88,31 @@ double axis_range_dist_perc(double v1, double v2, GLERange* range, bool log) {
 	return fabs(v1 - v2);
 }
 
-double m_fnx(double v);
+double fnloglen(double v, GLEAxis *ax) {
+	return (v - log10(ax->getMin()) / (log10(ax->getMax()) - log10(ax->getMin()))) * ax->length;
+}
 
-double m_fnx(double v) {
-	if (ggnegate) 	{
-		v = ggmax - (v-ggmin);
+double fnAxisX(double v, GLEAxis *ax) {
+	if (ax->negate) {
+		v = ax->getMax() - (v - ax->getMin());
 	}
-	return (((v-ggmin)/(ggmax-ggmin)) * gglen );
+	if (ax->log) {
+		return fnloglen(log10(v), ax);
+	} else {
+		return (v - ax->getMin()) / (ax->getMax() - ax->getMin()) * ax->length;
+	}
+}
+
+bool axis_value_equal(double v1, double v2, GLEAxis* ax) {
+	if (ax->log) {
+		if (v2 == 0) {
+			return fabs(v1) < 0.001;
+		} else {
+			return fabs(v1 - v2) / v2 < 0.001;
+		}
+	} else {
+		return fabs(v1 - v2) < ax->dsubticks/100.0;
+	}
 }
 
 bool axis_is_pos(double pos, int* cnt, double del, vector<double>& vec) {
@@ -142,11 +153,11 @@ void axis_draw_tick(GLEAxis *ax, double fi, int* tick1_cnt, int* tick2_cnt, doub
 	double from = has_tick2 ? -fabs(t)*inv : 0.0;
 	double to = has_tick1 ? fabs(t)*inv : 0.0;
 	if (axis_horizontal(ax->type)) {
-		g_move(ox+fnx(fi), oy+from);
-		g_line(ox+fnx(fi), oy+to);
+		g_move(ox + fnAxisX(fi, ax), oy + from);
+		g_line(ox + fnAxisX(fi, ax), oy + to);
 	} else {
-		g_move(ox+from, oy+fnx(fi));
-		g_line(ox+to, oy+fnx(fi));
+		g_move(ox + from, oy + fnAxisX(fi, ax));
+		g_line(ox + to, oy + fnAxisX(fi, ax));
 	}
 }
 
@@ -160,26 +171,37 @@ void axis_draw_tick_log(GLEAxis *ax, double fi, int* tick1_cnt, int* tick2_cnt, 
 	double from = has_tick2 ? -fabs(t)*inv : 0.0;
 	double to = has_tick1 ? fabs(t)*inv : 0.0;
 	if (axis_horizontal(ax->type)) {
-		g_move(ox+fnlx(fi), oy+from);
-		g_line(ox+fnlx(fi), oy+to);
+		g_move(ox + fnAxisX(fi, ax), oy + from);
+		g_line(ox + fnAxisX(fi, ax), oy + to);
 	} else {
-		g_move(ox+from, oy+fnlx(fi));
-		g_line(ox+to, oy+fnlx(fi));
+		g_move(ox + from, oy + fnAxisX(fi, ax));
+		g_line(ox + to, oy + fnAxisX(fi, ax));
 	}
 }
 
+bool inAxisRange(double value, GLEAxis* ax) {
+	if (value >= ax->getMin() && value <= ax->getMax()) {
+		return true;
+	}
+	if (axis_value_equal(value, ax->getMin(), ax)) {
+		return true;
+	}
+	if (axis_value_equal(value, ax->getMax(), ax)) {
+		return true;
+	}
+	return false;
+}
+
 void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
-	double fi,x,y,gmin,gmax,dticks,tick1,tickn;
-	int i,xax,n,savecap;
-	double tlen,stlen,dsubticks,tt,t;
+	double x,y,gmin,gmax,dticks,tick1,tickn;
+	int savecap;
 	double h,dist;
-	double bl,br,bu,bd;
 	double ox,oy;
 
 	// Fix for font problems by Jan Struyf
 	g_resetfont();
 
-	xax = axis_horizontal(ax->type);
+	bool xax = axis_horizontal(ax->type);
 	if (ax->off) return;
 	g_get_xy(&ox,&oy);
 
@@ -194,12 +216,8 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 	}
 
 /*----------------------------- Generate the places for labels to go */
-	ggmin = ax->getMin();
-	ggmax = ax->getMax();
-	ggnegate = ax->negate;
 	gmin = ax->getMin();
 	gmax = ax->getMax();
-	gglen = ax->length;
 	int lgset = ax->lgset;
 
 	vector<bool> subplaces;
@@ -210,7 +228,7 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 		nice_log_ticks(&tick1, &tickn, gmin, gmax);
 		/* find suitable value for dticks */
 		if (lgset == GLE_AXIS_LOG_DEFAULT || lgset == GLE_AXIS_LOG_OFF) {
-			dticks = (tickn - tick1) / gglen * 3 * h;
+			dticks = (tickn - tick1) / ax->length * 3 * h;
 			if (dticks >= 4) {
 				dticks = ((int)dticks / 5) * 5.0;
 			} else if (dticks >= 2) {
@@ -309,7 +327,7 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 			/* haven't been set, so generate positions. */
 			double prev_tick = GLE_INF;
 			double end_tick = (tickn+dticks/100.0);
-			for (fi = tick1; fi <= end_tick; fi += dticks) {
+			for (double fi = tick1; fi <= end_tick; fi += dticks) {
 				if (fi - prev_tick == 0.0) {
 					/* dticks too small for precision of double */
 					ax->subticks_off = true;
@@ -324,13 +342,12 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 /*------------------------------  Now draw the ticks	(subticks first) */
 
 	// ticks length
-	tlen = ax->base*g_get_fconst(GLEC_TICKSSCALE);
+	double tlen = ax->base*g_get_fconst(GLEC_TICKSSCALE);
 	if (ax->ticks_length!=0) tlen = ax->ticks_length;
 
 	// subticks length and distance
-	stlen = tlen/2;
+	double stlen = tlen/2;
 	if (ax->subticks_length!=0) stlen = ax->subticks_length;
-	dsubticks = 0;
 
 	// draw subticks
 	if (ax->log) {
@@ -371,19 +388,14 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 			g_grestore();
 		}
 	} else {
+		double dsubticks = 0;
 		if (ax->nsubticks != 0) dsubticks = dticks/(ax->nsubticks+1);
 		if (ax->dsubticks != 0) dsubticks = ax->dsubticks;
 		if (dsubticks == 0) dsubticks = dticks / 2.0;
 		ax->dsubticks = dsubticks;
-		double end_tick = gmax;
-		if (ax->has_ftick) {
-			tick1 += dsubticks;
-			end_tick = tickn;
-		} else {
-			start_subtick(&tick1, gmin, dsubticks);
-		}
-		t = stlen;
 		if (!ax->subticks_off && drawticks) {
+			double firstSubtick = start_subtick(dsubticks, dticks, ax);
+			double subtickLimit = ax->getMax() + dsubticks/100.0;
 			int place_cnt = 0;
 			int tick1_cnt = 0;
 			int tick2_cnt = 0;
@@ -391,9 +403,9 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 			g_set_color(ax->subticks_color);
 			g_set_line_width(ax->subticks_lwidth);
 			g_set_line_style(ax->subticks_lstyle);
-			for (fi = tick1; fi <= end_tick; fi += dsubticks) {
-				if (!ax->isPlace(fi, &place_cnt, dsubticks)) {
-					axis_draw_tick(ax, fi, &tick1_cnt, &tick2_cnt, ox, oy, t);
+			for (double fi = firstSubtick; fi <= subtickLimit; fi += dsubticks) {
+				if (inAxisRange(fi, ax) && !ax->isPlace(fi, &place_cnt, dsubticks)) {
+					axis_draw_tick(ax, fi, &tick1_cnt, &tick2_cnt, ox, oy, stlen);
 				}
 			}
 			g_grestore();
@@ -401,8 +413,7 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 	}
 
 /*------------------------------  Now the main ticks */
-	t = tlen;
-	tt = stlen;
+
 	if (!ax->ticks_off && drawticks) {
 		g_gsave();
 		g_set_color(ax->ticks_color);
@@ -412,16 +423,16 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 		int tick2_cnt = 0;
 		if (ax->log) {
 			/* Draw log ticks */
-			for (i = 0; i < ax->getNbPlaces(); i++) {
-				fi = ax->places[i];
+			for (int i = 0; i < ax->getNbPlaces(); i++) {
+				double fi = ax->places[i];
 				if (!bool_vector_is(&subplaces, i)) {
 					/* only draw major ticks */
 					axis_draw_tick_log(ax, fi, &tick1_cnt, &tick2_cnt, ox, oy, tlen);
 				}
 			}
 		} else {
-			for (i = 0; i < ax->getNbPlaces(); i++) {
-				fi = ax->places[i];
+			for (int i = 0; i < ax->getNbPlaces(); i++) {
+				double fi = ax->places[i];
 				axis_draw_tick(ax, fi, &tick1_cnt, &tick2_cnt, ox, oy, tlen);
 			}
 		}
@@ -430,6 +441,7 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 
 /*-----------------------------  Ok lets draw the side now */
 /*-----------------------------  Note: after the ticks - this gives better result if ticks are different color */
+
 	if (!ax->side_off && drawrest) {
 		// FIXME: is cap not saved by gsave??
 		g_get_line_cap(&savecap);
@@ -446,6 +458,7 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 	}
 
 /*------------------------------  Now draw the labels */
+
 	double real_llen = 0;
 	if (!ax->ticks_off) {
 		if (tlen < 0) real_llen = -tlen;
@@ -459,9 +472,9 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 		char cbuff[100];
 		GLENumberFormat* format = ax->format == "" ? NULL : new GLENumberFormat(ax->format);
 		if (ax->log) {
-			for (i = 0; i < ax->getNbPlaces(); i++) {
-				fi = ax->places[i];
-				n = (int) floor(.0001 + fi/pow(10.0,floor(log10(fi))));
+			for (int i = 0; i < ax->getNbPlaces(); i++) {
+				double fi = ax->places[i];
+				int n = (int) floor(.0001 + fi/pow(10.0,floor(log10(fi))));
 				if (!bool_vector_is(&subplaces, i)) {
 					n = (int) floor(log10(fi)+0.5);
 					if (format != NULL) {
@@ -494,8 +507,8 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 				// Get axis labels from a data set
 				ax->getLabelsFromDataSet(ax->getNamesDataSet());
 			} else {
-				for (i = 0; i < ax->getNbPlaces(); i++) {
-					fi = ax->places[i]; x = fabs(fi);
+				for (int i = 0; i < ax->getNbPlaces(); i++) {
+					double fi = ax->places[i]; x = fabs(fi);
 					if (fabs(x) < 0.00001*dticks) {
 						// otherwise place for "zero" may be -8.2556e-25 or some other small number
 						fi = 0;
@@ -527,10 +540,11 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 	GLEMeasureBox measure;
 	measure.measureStart();
 	// If there are no labels, use g_set_bounds to initialize "measure"
+	double bl,br,bu,bd;
 	init_measure_by_axis(ax, ox, oy, real_llen);
 	if (!ax->label_off && drawrest) {
 		int nb_names = ax->getNbNamedPlaces();
-		for (i = 0; i < nb_names; i++) {
+		for (int i = 0; i < nb_names; i++) {
 			string name = ax->names[i];
 			add_tex_labels(&name);
 			g_measure(name, &bl, &br, &bu, &bd);
@@ -540,13 +554,13 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 		}
 		int place_cnt = 0;
 		double angle = ax->getLabelAngle();
-		for (i = 0; i < nb_names; i++) {
-			fi = ax->places[i];
+		for (int i = 0; i < nb_names; i++) {
+			double fi = ax->places[i];
 			string name = ax->names[i];
 			add_tex_labels(&name);
 			if (!ax->isNoPlaceLogOrReg(fi, &place_cnt, dticks) && name != "") {
-				fi = fnx(fi);
-				if (ax->log) fi = fnlx(ax->places[i]);
+				fi = fnAxisX(fi, ax);
+				if (ax->log) fi = fnAxisX(ax->places[i], ax);
 				g_measure(name, &bl, &br, &bu, &bd);
 				switch (ax->type) {
 					case GLE_AXIS_X:
@@ -615,6 +629,7 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 	// g_box_stroke(measure.getX1(), measure.getY1(), measure.getX2(), measure.getY2(), false);
 
 /*---------------------------------- Now the axis title. */
+
 	if (ax->title_off || ax->title == "" || !drawrest) {
 		g_update_bounds_box(box);
 		return;
@@ -729,8 +744,8 @@ void draw_axis_titles_v35(GLEAxis *ax, double h, double ox, double oy, double dt
 			string name = ax->names[i];
 			add_tex_labels(&name);
 			if (!ax->isNoPlaceLogOrReg(fi, &place_cnt, dticks) && name != "") {
-				fi = fnx(fi);
-				if (ax->log) fi = fnlx(ax->places[i]);
+				fi = fnAxisX(fi, ax);
+				if (ax->log) fi = fnAxisX(ax->places[i], ax);
 				g_measure(name, &bl, &br, &bu, &bd);
 				switch (ax->type) {
 					case GLE_AXIS_X:
@@ -950,15 +965,22 @@ void roundrange(GLERange* range, bool extend, bool tozero, double dticks) {
 	}
 }
 
-double chop(double f) {
-	return (double) (int) f;
-}
-
-void start_subtick(double *tick1, double gmin, double dticks) {
-	if (gmin == chop(gmin/dticks) * dticks)
-		*tick1 = gmin;
-	else
-		*tick1 = chop(gmin/dticks) * dticks + dticks;
+double start_subtick(double dsubticks, double dticks, GLEAxis* ax) {
+	double firstTick;
+	if (ax->getNbPlaces() > 0) {
+		firstTick = ax->getPlace(0);
+	} else {
+		GLERange range;
+		range.copy(ax->getRange());
+		roundrange(&range, false, false, dticks);
+		firstTick = range.getMin();
+	}
+	if (firstTick <= ax->getMin()) {
+		return firstTick;
+	} else {
+		double n = ceil((firstTick - ax->getMin()) / dsubticks) + 1;
+		return firstTick - n * dsubticks;
+	}
 }
 
 void numtrime(char *o,char *s) {
@@ -997,17 +1019,6 @@ void numtrim(char **d,char *s,double dticks) {
 	}
 	*(o++) = 0;
 	if (nonzero!=NULL) *(nonzero+1) = 0;
-}
-
-double fnloglen(double v,GLEAxis *ax) {
-	return ((v-log10(ax->getMin()))/(log10(ax->getMax())-log10(ax->getMin()))) * ax->length;
-}
-
-double fnlogx(double v,GLEAxis *ax) {
-	if (ax->negate) {
-		v = ax->getMax() - (v-ax->getMin());
-	}
-	return fnloglen(log10(v),ax);
 }
 
 void print_axis(GLEAxis *ax) {
