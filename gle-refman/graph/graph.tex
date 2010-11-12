@@ -61,6 +61,7 @@ commands are not explicitly mentioned in the following descriptions.
 {\sf center} \\
 {\sf colormap {\it fct} {\it pixels-x} {\it pixels-y} [{\it color}] [{\it invert}] [{\it zmin} $z_1$]  [{\it zmax} $z_2$] [{\it palette} {\it pal}]} \\
 {\sf data {\it filename {\sf [}d1 d2 d3 ...{\sf ] [}d1=c1,c3 ...{\sf ]} } [ignore {\it n}] [comment {\it char}] } \\
+{\sf discontinuity threshold {\it t}} \\
 {\sf dn [deresolve m] [average] line} \\
 {\sf dn err {\it d5} errwidth {\it width-exp} errup {\it nn\%} errdown {\it d4}} \\
 {\sf dn herr {\it d5} herrwidth {\it width-exp} herrleft {\it nn\%} errright {\it d4}} \\
@@ -240,6 +241,18 @@ Sun, 4
 
 \noindent{}then GLE creates an x-axis with one label for each day of the week, similar to that of the graph in Fig.~\ref{fig:weekday}. See also the `{\sf xnames}' command for more details on how to add labels to an axis.
 
+\item[{\sf discontinuity threshold {\it t}}]
+\index{discontinuity}
+
+GLE can automatically detect discontinuities in graphs. To enable this feature, add ``{\sf discontinuity threshold $t$}'' to the graph block. The value of $t$ is the percentage of the axis range that the graph needs to change in one step in order to be detected as a discontinuity. Fig.~\ref{fig:discont} plots the ``floor'' function as an example.
+
+The discontinuity detection feature inserts a missing value at the position of each discontinuity. This leads to gaps in the curve (Fig.~\ref{fig:discont}, left). These can be disabled by using the ``nomiss'' keyword (Fig.~\ref{fig:discont}, middle).
+
+\begin{figure}
+\centering
+\mbox{\input{graph/fig/discontinuity.inc}}
+\caption{\label{fig:discont}An example of the auto-discontinuity detection feature.}
+\end{figure}
 
 \item[{\sf dn [deresolve m] [average] line}]
 \index{dn!deresolve}\index{deresolve}

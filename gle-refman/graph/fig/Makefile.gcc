@@ -39,7 +39,7 @@
 EPSS = gc_axes.inc gc_axisall.inc gc_bargraph1.inc gc_bargraph2.inc gc_bargraph_3d.inc \
        gc_err.inc gc_fillgraph.inc gc_let.inc gc_names.inc gc_nomiss.inc gc_fit.inc gc_fitfct.inc \
        linemode.inc gc_loglabels.inc gc_graphscale.inc gc_horizbar.inc gc_mathmode.inc gc_logsubticks.inc \
-       noisysine.inc age.inc normal.inc gridmode.inc y2axis-scale.inc
+       noisysine.inc age.inc normal.inc gridmode.inc y2axis-scale.inc discontinuity.inc
 
 ifeq ($(RUNBUILD),1)
 	GLE = ../../../build/bin/gle
