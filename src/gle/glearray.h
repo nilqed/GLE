@@ -151,6 +151,7 @@ protected:
 	unsigned int m_nextLine;
 	GLECSVError m_error;
 	string m_fileName;
+	string m_comment;
 public:
 	GLECSVData();
 	~GLECSVData();

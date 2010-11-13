@@ -846,7 +846,8 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 
 GLESub* eval_subroutine_call(int *pcode, int *cp, int* otyp) throw(ParserError) {
 	if (*(pcode+(*cp)++) != 1) {
-		gprint("PCODE, Expecting expression, v=%ld cp=%d \n",*(pcode+(--*(cp))),*cp);
+		(*cp)--;
+		gprint("PCODE, Expecting expression, v=%ld cp=%d \n", *(pcode + (*cp)), *cp);
 		return NULL;
 	}
 	int plen = pcode[(*cp)++];
@@ -918,7 +919,8 @@ void eval(int *pcode, int *cp, double *oval, const char **ostr, int *otyp) throw
 		return;
 	}
 	if (pcode[(*cp)++] != 1) {
-		gprint("PCODE, Expecting expression, v=%ld cp=%d \n",*(pcode+(--*(cp))),*cp);
+		(*cp)--;
+		gprint("PCODE, Expecting expression, v=%ld cp=%d \n", *(pcode + (*cp)), *cp);
 		return;
 	}
 	int plen = pcode[(*cp)++];

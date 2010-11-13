@@ -265,6 +265,7 @@ GLECSVData::GLECSVData() {
 	m_error.errorCode = GLECSVErrorNone;
 	m_error.errorLine = 0;
 	m_error.errorColumn = 0;
+	m_comment = "!";
 }
 
 GLECSVData::~GLECSVData() {
@@ -396,7 +397,18 @@ bool GLECSVData::isEol(GLEBYTE ch) {
 }
 
 bool GLECSVData::isComment(GLEBYTE ch) {
-	return false;
+	int currentPos = m_pos;
+	size_t commentPos = 0;
+	while (commentPos < m_comment.size() && ch == m_comment[commentPos]) {
+		ch = readChar();
+		commentPos++;
+	}
+	if (commentPos == m_comment.size()) {
+		return true;
+	} else {
+		m_pos = currentPos;
+		return false;
+	}
 }
 
 void GLECSVData::skipTillEol() {
@@ -440,15 +452,13 @@ GLECSVDataStatus GLECSVData::readCellString(GLEBYTE quote) {
 			m_error.errorColumn = getUTF8Column(cellPos);
 			createErrorString("unterminated string");
 			return GLECSVDataStatusEOF;
-		}
-		if (isEol(ch)) {
+		} else if (isEol(ch)) {
 			m_error.errorCode = GLECSVErrorUnterminatedString;
 			m_error.errorLine = m_lines;
 			m_error.errorColumn = getUTF8Column(cellPos);
 			createErrorString("unterminated string");
 			return removeTrailingEOLs();
-		}
-		if (ch == quote) {
+		} else if (ch == quote) {
 			GLEBYTE ch = readChar();
 			if (ch != quote) {
 				writeChar(ch);
@@ -465,27 +475,30 @@ GLECSVDataStatus GLECSVData::readCell() {
 	if (ch == '"' || ch == '\'') {
 		return readCellString(ch);
 	}
+	unsigned int cellCount = 0;
 	unsigned int cellSize = 0;
 	unsigned int cellPos = lastCharPos();
 	while (true) {
 		if (ch == 0) {
 			createCell(cellSize, cellPos);
 			return GLECSVDataStatusEOF;
-		}
-		if (isEol(ch)) {
+		} else if (isEol(ch)) {
 			createCell(cellSize, cellPos);
 			return removeTrailingEOLs();
-		}
-		if (isDelim(ch)) {
+		} else if (isDelim(ch)) {
 			createCell(cellSize, cellPos);
 			return GLECSVDataStatusOK;
-		}
-		if (isComment(ch)) {
-			createCell(cellSize, cellPos);
+		} else if (isComment(ch)) {
+			if (cellSize != 0) {
+				createCell(cellSize, cellPos);
+			}
 			skipTillEol();
 			return GLECSVDataStatusEOL;
 		}
-		cellSize++;
+		cellCount++;
+		if (!isSpace(ch)) {
+			cellSize = cellCount;
+		}
 		ch = readChar();
 	}
 	return GLECSVDataStatusOK;
