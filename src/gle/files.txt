@@ -129,7 +129,6 @@ bitmap$(PATH_SEP)glepng.$(OBJ_SUFF) \
 bitmap$(PATH_SEP)ascii85.$(OBJ_SUFF) \
 surface$(PATH_SEP)gsurface.$(OBJ_SUFF) \
 surface$(PATH_SEP)hide.$(OBJ_SUFF) \
-surface$(PATH_SEP)vdevice.$(OBJ_SUFF) \
 surface$(PATH_SEP)fcontour.$(OBJ_SUFF) \
 surface$(PATH_SEP)ffitcontour.$(OBJ_SUFF) \
 surface$(PATH_SEP)gcontour.$(OBJ_SUFF) \

@@ -47,7 +47,6 @@ f2c.h
 OBJECTS = \
 gsurface.$(OBJ_SUFF) \
 hide.$(OBJ_SUFF) \
-vdevice.$(OBJ_SUFF) \
 fcontour.$(OBJ_SUFF) \
 ffitcontour.$(OBJ_SUFF) \
 gcontour.$(OBJ_SUFF)

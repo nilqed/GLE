@@ -70,7 +70,7 @@ colortyp colvar;
 #define false 0
 char *eval_str();
 void var_getstr(int varnum,char *s);
-int pass_marker(char *s);
+//int pass_marker(char *s);
 int f_eof(int chn);
 void gle_as_a_calculator(vector<string>* exprs);
 void output_error_cerr(ParserError& err);

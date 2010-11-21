@@ -44,10 +44,6 @@
 #include "../gprint.h"
 #include "../core.h"
 #include "gsurface.h"
-#include "vdevice.h"
-
-#define huge
-#define TESTING true
 
 typedef int int32;
 
@@ -55,14 +51,14 @@ void initminmax(void);
 void init_user(void);
 void nice_ticks(float *dticks, float *gmin,float *gmax , float *t1,float *tn);
 void grid_back(int nx, int ny, float z1, float z2);
-void skirt(float huge *z,int ix1, int iy1, float minz);
+void skirt(float *z,int ix1, int iy1, float minz);
 void find_splits(int nx, int ny, int *splitx, int *splity);
 void fxy_polar(float dx,float dy,float *radius,float *angle);
 void fpolar_xy(float r, float angle, float *dx, float *dy);
 void draw_zaxis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz);
 void draw_axis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz);
 void draw_maintitle();
-void hide(float huge *z,int nx, int ny, float minz, float maxz, struct surface_struct *sff);
+void hide(float *z,int nx, int ny, float minz, float maxz, struct surface_struct *sff);
 void touser3(float x, float y, float z, float *uux, float *uuy, float *uuz);
 void touser(float x, float y, float z, float *uux, float *uuy);
 void matmove(float i[4][4],float x, float y, float z);
@@ -78,10 +74,10 @@ void draw_riselines(int nx, int ny,float minz, float maxz);
 void move3d(float x, float y, float z);
 void line3d(float x, float y, float z);
 void cube(float x, float y, float z1, float z2);
-void horizon(float huge *z,int ix1,int iy1,int ix2,int iy2);
-void horizon2(float huge *z,int ix1,int iy1,int ix2,int iy2);
-void horizonv(float huge *z,int ix1,int iy1,int ix2,int iy2);
-void horizonv2(float huge *z,int ix1,int iy1,int ix2,int iy2);
+void horizon(float *z,int ix1,int iy1,int ix2,int iy2);
+void horizon2(float *z,int ix1,int iy1,int ix2,int iy2);
+void horizonv(float *z,int ix1,int iy1,int ix2,int iy2);
+void horizonv2(float *z,int ix1,int iy1,int ix2,int iy2);
 void hclipvec(int x1, float y1, int x2, float y2, int sethi);
 void hclipvec2(int x1, float y1, int x2, float y2, int sethi);
 void clipline(float x1, float y1, float z1, float x2, float y2, float z2);
@@ -132,7 +128,6 @@ int doy=true;
 int dox=true;  /* false */
 int nnx;
 int vsign=1;
-#define returng {v_close(); return;}
 static struct surface_struct sf;
 
 float get_h(int i) {
@@ -163,66 +158,80 @@ void set_h2(int i, float v) {
 	}
 }
 
-void hide(float huge *z,int nx, int ny, float minz, float maxz, struct surface_struct *sff) {
+void hide(float *z ,int nx, int ny, float minz, float maxz, struct surface_struct *sff) {
 	int i,x,y;
 	float r,angle;
 	float width,height;
 	float ux,uy,uz,scalex,scaley,ux3,uy3,ux2;
 	int splitx, splity;
 	int x1,x2;
-
-	v_gsave();
+	g_gsave();
 	g_set_line_cap(1); /* round */
 	sf = *sff; /* Make a local copy of all the paramters */
-	/* unit image */
+
+/* unit image */
 	init_user();
+
 	/* the view command specifies three parameters: eye_x, eye_y, and vdist*/
 	eye_x = sf.eye_x;
 	eye_y = sf.eye_y;
 	vdist = sf.vdist;
-	/* size command specifies screenx and screeny */
+
+/* size command specifies screenx and screeny */
 	base = sf.screenx;
 	xmargin = sf.screenx*2/10.0;
 	ymargin = sf.screeny*1.5/10.0;
 	width = sf.screenx-.5;
 	height = sf.screeny-.5;
-	if (sf.title != NULL) height = height -.7;
+
+	if (sf.title != NULL)
+		height = height -.7;
+
 	dox = sf.xlines_on;
 	doy = sf.ylines_on;
-	/* MAXH is value of harray */
+
+/* MAXH is value of harray */
 	MAXH = sf.maxh;
 
-	if (MAXH==0) MAXH = 5000;
+	if (MAXH==0)
+		MAXH = 5000;
+
 	h = (float*)malloc((MAXH+1)*sizeof(float));
 	h2 = (float*)malloc((MAXH+1)*sizeof(float));
 	if (h==NULL || h2==NULL) {
 		gprint("Was not able to allocate horizon arrays %d \n",MAXH);
 		return;
 	}
+
 	min_zed  = minz;
-	v_open(sf.screenx,sf.screeny);
 	nnx = nx;        /* save dimensions for use in subroutine */
 	vsign = 1; /* doing top half */
-	for (i=0; i<MAXH ;i++) h[i] = 0.0;  /* zero horizon */
+
+	for (i=0; i<MAXH ;i++)
+		h[i] = 0.0;  /* zero horizon */
+
 	maxdepth = 0;
 
-	/* make it a 10x10x10 cube */
+/* make it a 10x10x10 cube */
 	matmove(image,0.0,0.0,-minz); /* so 0,0,minz = 0,0,0 */
-	/* cube xlen ylen zlen -> sizex, sizey, sizez */
-	if (sf.sizez==0) sf.sizez = (sf.sizex+sf.sizey)/2.0;
+
+/* cube xlen ylen zlen -> sizex, sizey, sizez */
+	if (sf.sizez==0)
+		sf.sizez = (sf.sizex+sf.sizey)/2.0;
+
 	matscale(image,sf.sizex/(float) nx,sf.sizey/(float) ny,sf.sizez/(maxz-minz));
-	/* positive z comes towards the viewer */
+/* positive z comes towards the viewer */
 
 	//matshow("Before rotate", image);
 	//cout << "sizex = " << sf.sizex << " sizey = " << sf.sizey << endl;
 	//cout << "screenx = " << sf.screenx << " screeny = " << sf.screeny << endl;
 
-	/* 60 50 20 , 80 0 0 */
+/* 60 50 20 , 80 0 0 */
 	matrx(image,deg(sf.xrotate)); /* clockwise holding right hand side */
 	matry(image,deg(sf.yrotate)); /* clockwise holding top */
 	matrz(image,deg(sf.zrotate)); /* clockwise holding front */
 
-	/* now rotate cube so line from 0,0,0 --> 0,0,1 is vertical on screen */
+/* now rotate cube so line from 0,0,0 --> 0,0,1 is vertical on screen */
 	touser(0.0,0.0,0.0,&ux,&uy);
 	touser(0.0,0.0,1.0,&ux3,&uy3);
 	fxy_polar(ux3-ux,uy3-uy,&r,&angle);
@@ -230,181 +239,259 @@ void hide(float huge *z,int nx, int ny, float minz, float maxz, struct surface_s
 
 	//matshow("After rotate", image);
 
-	/* Normalize image, shift to touch x=0, y=0, z=0 */
+/* Normalize image, shift to touch x=0, y=0, z=0 */
 	initminmax();
+
 	for (x=0; x<nx; x+=nx-1) {
-	 for (y=0; y<ny; y+=ny-1) {
-		touser3(x,y,minz,&ux,&uy,&uz);
-		setminmax(ux,uy,uz);
-		touser3(x,y,maxz,&ux,&uy,&uz);
-		setminmax(ux,uy,uz);
-	 }
+		for (y=0; y<ny; y+=ny-1) {
+			touser3(x,y,minz,&ux,&uy,&uz);
+			setminmax(ux,uy,uz);
+			touser3(x,y,maxz,&ux,&uy,&uz);
+			setminmax(ux,uy,uz);
+		}
 	}
 
 	scalex = 1;
 	scaley = 1;
-	if (smax_x>width) scalex = width/(smax_x-smin_x);
-	if (smax_y>height) scaley = height/(smax_y-smin_y);
-	if (scalex<scaley) scaley = scalex;
+
+	if (smax_x > width)
+		scalex = width/(smax_x-smin_x);
+	if (smax_y > height)
+		scaley = height/(smax_y-smin_y);
+	if (scalex < scaley)
+		scaley = scalex;
 
 	image[0][3] = image[0][3] - smin_x + xmargin/scaley;
 	image[1][3] = image[1][3] - smin_y + ymargin/scaley;
 	image[2][3] = image[2][3] - smax_z;
 
 	initminmax();
+
 	for (x=0; x<nx; x+=nx-1) {
-	 for (y=0; y<ny; y+=ny-1) {
-		touser3(x,y,minz,&ux,&uy,&uz);
-		setminmax(ux,uy,uz);
-		touser3(x,y,maxz,&ux,&uy,&uz);
-		setminmax(ux,uy,uz);
-	 }
+		for (y=0; y<ny; y+=ny-1) {
+			touser3(x,y,minz,&ux,&uy,&uz);
+			setminmax(ux,uy,uz);
+			touser3(x,y,maxz,&ux,&uy,&uz);
+			setminmax(ux,uy,uz);
+		}
 	}
 
 	scalex = 1;
 	scaley = 1;
-	if (smax_x>width) scalex = width/smax_x;
-	if (smax_y>height) scaley = height/smax_y;
-	if (scalex<scaley) scaley = scalex;
+
+	if (smax_x > width)
+		scalex = width/smax_x;
+	if (smax_y > height)
+		scaley = height/smax_y;
+	if (scalex < scaley)
+		scaley = scalex;
+
 	matscale(image,scaley,scaley,scaley);
 
 	initminmax();
+
 	for (x=0; x<nx; x+=nx-1) {
-	 for (y=0; y<ny; y+=ny-1) {
-		touser3(x,y,minz,&ux,&uy,&uz);
-		setminmax(ux,uy,uz);
-		touser3(x,y,maxz,&ux,&uy,&uz);
-		setminmax(ux,uy,uz);
-	 }
+		for (y=0; y<ny; y+=ny-1) {
+			touser3(x,y,minz,&ux,&uy,&uz);
+			setminmax(ux,uy,uz);
+			touser3(x,y,maxz,&ux,&uy,&uz);
+			setminmax(ux,uy,uz);
+		}
 	}
 
 	//matshow("After rescale", image);
 
-	/* Deepest point will be at   z==-(smax_z-smin_z) */
+/* Deepest point will be at   z==-(smax_z-smin_z) */
 	maxdepth = smin_z;
 
-	v_move(eye_x,eye_y);
-	v_set_hei(.3);
+	g_move(eye_x,eye_y);
+	g_set_hei(.3);
 
-	/* decide on mapping of ux onto h[] -------------------------- */
-#define maph(ux) (((ux)-map_sub)*map_mul)
+/* decide on mapping of ux onto h[] -------------------------- */
+#define maph(ux)   (((ux)-map_sub)*map_mul)
 #define unmaph(ux) (((ux)/map_mul)+map_sub)
 
 	x1 = 10000;
 	x2 = -10000;
 	for (x=0; x<nx; x+=nx-1) {
-	 for (y=0; y<ny; y+=ny-1) {
-		 touser(x,y,minz,&ux,&uy);
-		if (ux<x1) x1 = (int)ux;
-		if (ux>x2) x2 = (int)ux;
-		 touser(x,y,maxz,&ux,&uy);
-		if (ux<x1) x1 = (int)ux;
-		if (ux>x2) x2 = (int)ux;
-	 }
+		for (y=0; y<ny; y+=ny-1) {
+			touser(x,y,minz,&ux,&uy);
+			if (ux < x1)
+				x1 = (int)ux;
+			if (ux > x2)
+				x2 = (int)ux;
+			touser(x,y,maxz,&ux,&uy);
+			if (ux < x1)
+				x1 = (int)ux;
+			if (ux > x2)
+				x2 = (int)ux;
+		}
 	}
-	/* map x1 -- x2  onto 2 -- 998 */
+
+/* map x1 -- x2  onto 2 -- 998 */
 	x1--; x2++;
 	map_sub = x1;
 	map_mul = (MAXH-100)/((double) x2-x1);
-	/* ----------------------------------------------------  */
 
-	/* if the closest line of constant X is not one of the edges
-	   then split object at EYE(X)
-	*/
-
+/* ----------------------------------------------------  */
+/* if the closest line of constant X is not one of the edges
+   then split object at EYE(X)
+*/
 	find_splits(nx,ny,&splitx,&splity);
 
-	/* if ux of nx,0,0 is less than ux of 0,ny,0 then */
-	/* eye is closer to XAXIS then*/
-	/*   (lines of constant x will be horizontal */
-	/*   process lines of constant X in usual order, front to back*/
-	/*   After each x line, draw lines of constant y between lastx and nextx */
-	/* else, do y first and x betweens.*/
+/* if ux of nx,0,0 is less than ux of 0,ny,0 then */
+/* eye is closer to XAXIS then*/
+/*   (lines of constant x will be horizontal */
+/*   process lines of constant X in usual order, front to back*/
+/*   After each x line, draw lines of constant y between lastx and nextx */
+/* else, do y first and x betweens.*/
 
 	touser(nx,0,0,&ux,&uy);
 	touser(0,ny,0,&ux2,&uy);
 
-
-	/* Now draw bottom half */
-	v_color(sf.bot_color);
-	v_lstyle(sf.bot_lstyle);
+/* Now draw bottom half */
+	g_set_color(pass_color_var(sf.bot_color));
+	g_set_line_style(sf.bot_lstyle);
 	vsign = -1;        /* reverse tests for bottom half */
-	for (i=0; i<MAXH ;i++) h2[i] = 9999.0;  /* zero horizon */
+	for (i=0; i<MAXH ;i++)
+		h2[i] = 9999.0;  /* zero horizon */
 
-	/* bot_on = underneath */
+/* bot_on = underneath */
 	if (sf.bot_on && !sf.skirt_on) {
-	touser(nx,0,0,&ux,&uy);
-	touser(0,ny,0,&ux2,&uy);
-	if (ux < ux2) {
-	 for (x=nx-1; x>=0; x--) {
-	  if (dox) for (y=splity; y>0; y--) horizonv2(z,x,y,x,y-1); /* x */
-	  if (dox) for (y=splity+1; y<ny; y++) if (y>0) horizonv2(z,x,y-1,x,y);
-	  for (y=splity; y>=0; y--) if (x>0) if (doy) horizonv2(z,x,y,x-1,y);
-	  for (y=splity+1; y<ny; y++) if (x>0) if (doy) horizonv2(z,x,y,x-1,y);
-	 }
-	} else {
-	 for (y=0; y<ny; y++) {
-	  if (doy) for (x=splitx; x>0; x--) horizonv2(z,x,y,x-1,y); /* y */
-	  if (doy) for (x=splitx+1; x<nx; x++) if (x>0) horizonv2(z,x-1,y,x,y);
-	  for (x=splitx; x>=0; x--) if (y<ny-1) if (dox) horizonv2(z,x,y,x,y+1);
-	  for (x=splitx+1; x<nx; x++) if (y<ny-1) if (dox) horizonv2(z,x,y,x,y+1);
-	 }
-	}
+		touser(nx,0,0,&ux,&uy);
+		touser(0,ny,0,&ux2,&uy);
+		if (ux < ux2) {
+			for (x=nx-1; x>=0; x--) {
+				if (dox)
+					for (y=splity; y>0; y--)
+						horizonv2(z,x,y,x,y-1); /* x */
+				if (dox)
+					for (y=splity+1; y<ny; y++)
+						if (y>0)
+							horizonv2(z,x,y-1,x,y);
+				for (y=splity; y>=0; y--)
+					if (x>0)
+						if (doy)
+							horizonv2(z,x,y,x-1,y);
+				for (y=splity+1; y<ny; y++)
+					if (x>0)
+						if (doy)
+							horizonv2(z,x,y,x-1,y);
+			}
+		} else {
+			for (y=0; y<ny; y++) {
+				if (doy)
+					for (x=splitx; x>0; x--)
+						horizonv2(z,x,y,x-1,y); /* y */
+				if (doy)
+					for (x=splitx+1; x<nx; x++)
+						if (x>0)
+							horizonv2(z,x-1,y,x,y);
+				for (x=splitx; x>=0; x--)
+					if (y<ny-1)
+						if (dox)
+							horizonv2(z,x,y,x,y+1);
+				for (x=splitx+1; x<nx; x++)
+					if (y<ny-1)
+						if (dox)
+							horizonv2(z,x,y,x,y+1);
+			}
+		}
 	} /* if bot_on a&& !skirt_on */
 
 
 /* should clip object nicely at zmin,zmax,  do this inside vector_line */
 	vsign = 1;        /* normal tests for top half */
-	v_color(sf.top_color);
-	v_lstyle(sf.top_lstyle);
+	g_set_color(pass_color_var(sf.top_color));
+	g_set_line_style(sf.top_lstyle);
+
 	if (sf.top_on) {
-	if (ux < ux2) {
-	 /* Go from x = splitx to zero, then splitx+1 to nx-1 */
-	 for (x=nx-1; x>=0; x--) {
-	  if (dox) for (y=splity; y>0; y--) horizonv(z,x,y,x,y-1); /* X */
-	  if (dox) for (y=splity+1; y<ny; y++) if (y>0) horizonv(z,x,y-1,x,y); /* Constant X  (this does join, should be earlier )(*/
-	  for (y=splity; y>=0; y--) if (x>0) if (doy) horizonv(z,x,y,x-1,y); /* Constant Y */
-	  for (y=splity+1; y<ny; y++) if (x>0) if (doy) horizonv(z,x,y,x-1,y); /* Constant Y */
-	 }
-	} else {
-	 /* Go from y = splity to zero, then splity+1 to ny-1 */
-	 for (y=0; y<ny; y++) {
-	  if (doy) for (x=splitx; x>0; x--) horizonv(z,x,y,x-1,y); /* Constant y */
-	  if (doy) for (x=splitx+1; x<nx; x++) if (x>0) horizonv(z,x-1,y,x,y); /* Constant y  (this does join, should be first )(*/
-	  for (x=splitx; x>=0; x--) if (y<ny-1) if (dox) horizonv(z,x,y,x,y+1); /* Constant x */
-	  for (x=splitx+1; x<nx; x++) if (y<ny-1) if (dox) horizonv(z,x,y,x,y+1); /* Constant x */
-	 }
-	}
+		if (ux < ux2) {
+/* Go from x = splitx to zero, then splitx+1 to nx-1 */
+			for (x=nx-1; x>=0; x--) {
+				if (dox)
+					for (y=splity; y>0; y--)
+/* X */
+						horizonv(z,x,y,x,y-1);
+				if (dox)
+					for (y=splity+1; y<ny; y++)
+						if (y>0)
+/* Constant X  (this does join, should be earlier) */
+							horizonv(z,x,y-1,x,y);
+				for (y=splity; y>=0; y--)
+					if (x>0)
+						if (doy)
+ /* Constant Y */
+							horizonv(z,x,y,x-1,y);
+				for (y=splity+1; y<ny; y++)
+					if (x>0)
+						if (doy)
+/* Constant Y */
+							horizonv(z,x,y,x-1,y);
+			}
+		} else {
+/* Go from y = splity to zero, then splity+1 to ny-1 */
+			for (y=0; y<ny; y++) {
+				if (doy)
+					for (x=splitx; x>0; x--)
+/* Constant y */
+						horizonv(z,x,y,x-1,y);
+				if (doy)
+					for (x=splitx+1; x<nx; x++)
+						if (x>0)
+/* Constant y  (this does join, should be first) */
+							horizonv(z,x-1,y,x,y);
+				for (x=splitx; x>=0; x--)
+					if (y<ny-1)
+						if (dox)
+/* Constant x */
+							horizonv(z,x,y,x,y+1);
+				for (x=splitx+1; x<nx; x++)
+					if (y<ny-1)
+						if (dox)
+/* Constant x */
+							horizonv(z,x,y,x,y+1);
+			}
+		}
 	} /* sf.top_on */
 
+	g_set_color(pass_color_var(sf.top_color));
+	g_set_line_style(sf.top_lstyle);
 
-	v_color(sf.top_color);
-	v_lstyle(sf.top_lstyle);
 	if (sf.skirt_on) { /* set h2 to bottom of top surface */
-		for (x=nx-1; x>0; x--) seth2(x,0,z[x],x-1,0,z[x-1]);
-		for (y=0; y<ny-1; y++) seth2(nx-1,y,z[nx-1+y* (int32) nx],nx-1,y+1,z[nx-1+(y+1)* (int32) nx]);
+		for (x=nx-1; x>0; x--)
+			seth2(x,0,z[x],x-1,0,z[x-1]);
+		for (y=0; y<ny-1; y++)
+			seth2(nx-1,y,z[nx-1+y* (int32) nx],nx-1,y+1,z[nx-1+(y+1)* (int32) nx]);
 	}
-/*        show_horizon(); */
+/* show_horizon(); */
 	if (sf.skirt_on) {
-	  for (y=splity; y>=0; y--) skirt(z,nx-1,y,minz);
-	  for (y=splity+1; y<ny; y++) skirt(z,nx-1,y,minz);
-	  for (x=splitx; x>=0; x--) skirt(z,x,0,minz);
-	  for (x=splitx+1; x<nx; x++) skirt(z,x,0,minz);
+		for (y=splity; y>=0; y--)
+			skirt(z,nx-1,y,minz);
+		for (y=splity+1; y<ny; y++)
+			skirt(z,nx-1,y,minz);
+		for (x=splitx; x>=0; x--)
+			skirt(z,x,0,minz);
+		for (x=splitx+1; x<nx; x++)
+			skirt(z,x,0,minz);
 	}
+
 	if (sf.skirt_on) { /* set h2 to bottom edge of box */
 		for (x=nx-1; x>=0; x--) seth2(x,0,minz,x-1,0,minz);
 		for (y= -1; y<ny; y++) seth2(nx-1,y,minz,nx-1,y+1,minz);
 	}
-	/* now define h2[] if bot wasn't drawn */
+
+/* now define h2[] if bot wasn't drawn */
 	if (!sf.bot_on && !sf.skirt_on) {
-		for (x=nx-1; x>0; x--) seth2(x,0,z[x],x-1,0,z[x-1]);
-		for (y=0; y<ny-1; y++) seth2(nx-1,y,z[nx-1+y* (int32) nx],nx-1,y+1,z[nx-1+(y+1)* (int32) nx]);
+		for (x=nx-1; x>0; x--)
+			seth2(x,0,z[x],x-1,0,z[x-1]);
+		for (y=0; y<ny-1; y++)
+			seth2(nx-1,y,z[nx-1+y* (int32) nx],nx-1,y+1,z[nx-1+(y+1)* (int32) nx]);
 	}
+/* Set back original color */
+	g_grestore();
 
-	/* Set back original color */
-	v_grestore();
-
-	/* Draw the unit cube for reference   -------------------------- */
+/* Draw the unit cube for reference   -------------------------- */
 	if (sf.cube_on) {
 		cube(nx-1,ny-1,minz,maxz);
 	}
@@ -422,26 +509,28 @@ void hide(float huge *z,int nx, int ny, float minz, float maxz, struct surface_s
 	draw_markers(nx,ny);
 	draw_riselines(nx,ny,minz,maxz);
 
-	free(h); free(h2);
-	v_close();
+	free(h);
+	free(h2);
 }
 #define DVAL(a,b) if ((a)==0) a = (b)
 
 void draw_maintitle() {
-	v_set_just("BC");
+	g_set_just(pass_justify("BC"));
 	if (sf.title == NULL) return;
-	v_color(sf.title_color);
+	g_set_color(pass_color_var(sf.title_color));
 	DVAL(sf.title_hei,base/30.0);
-	v_set_hei(sf.title_hei);
-	v_move(sf.screenx/2.0,sf.screeny-sf.title_hei+sf.title_dist);
-	v_text((char*)sf.title);
+	g_set_hei(sf.title_hei);
+	g_move(sf.screenx/2.0,sf.screeny-sf.title_hei+sf.title_dist);
+	g_text((char*)sf.title);
 }
 
 void draw_axis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
 	float ux,uy,ux2,uy2,ux3,uy3,r,a,ta,r2,x,xx,t1,tn;
 	char buff[80];
-	if (ax->type>1) return;
-	if (!ax->on) return;
+	if (ax->type>1)
+		return;
+	if (!ax->on)
+		return;
 	if (ax->type==0) {
 		touser(0,0,minz,&ux,&uy);
 		touser(nx-1,0,minz,&ux2,&uy2);
@@ -449,20 +538,24 @@ void draw_axis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
 		touser(nx-1,0,minz,&ux,&uy);
 		touser(nx-1,ny-1,minz,&ux2,&uy2);
 	}
-	v_color(ax->color);
-	if (!sf.cube_on) {v_move(ux,uy); v_line(ux2,uy2);}
+	g_set_color(pass_color_var(ax->color));
+	if (!sf.cube_on) {
+		g_move(ux,uy);
+		g_line(ux2,uy2);
+	}
 	fxy_polar(ux2-ux,uy2-uy,&r,&a);
 	ta = a ;
 	a = a - 90;
-	if (ax->ticklen == 0) ax->ticklen = base*.001;
+	if (ax->ticklen == 0)
+		ax->ticklen = base*.001;
 	r = ax->ticklen;
 	r2 = ax->ticklen+base*.02+ax->dist;
 	fpolar_xy(r,a,&ux2,&uy2);
 	fpolar_xy(r2,a,&ux3,&uy3);
 
 	DVAL(ax->hei,base/60.0);
-	v_set_hei(ax->hei);
-	v_set_just("TC");
+	g_set_hei(ax->hei);
+	g_set_just(pass_justify("TC"));
 
 	nice_ticks(&ax->step, &ax->min, &ax->max, &t1, &tn);
 
@@ -474,24 +567,26 @@ void draw_axis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
 			xx =  (ny-1)*(x-ax->min)/(ax->max - ax->min);
 			touser(nx-1,xx,minz,&ux,&uy);
 		}
-		v_move(ux,uy);
-		v_line(ux+ux2,uy+uy2);
-		v_move(ux+ux3,uy+uy3);
-		if (fabs(x)<(.0001*ax->step)) x = 0;
+		g_move(ux,uy);
+		g_line(ux+ux2,uy+uy2);
+		g_move(ux+ux3,uy+uy3);
+		if (fabs(x)<(.0001*ax->step))
+			x = 0;
 		sprintf(buff,"%g",x);
 		g_gsave();
 		g_rotate(ta);
-		if (ax->nolast && x> (ax->max - .5*(ax->step))) /*  */ ;
+		if (ax->nolast && x> (ax->max - .5*(ax->step))) /* do nothing */ ;
 		else if (ax->nofirst && x==t1) /* do nothing */;
-		else v_text(buff);
+		else g_text(buff);
 		g_grestore();
 	}
-	v_set_just("TC");
+	g_set_just(pass_justify("TC"));
 	/* Now draw the title for this axis */
-	if (ax->title == NULL) return;
-	v_color(ax->title_color);
+	if (ax->title == NULL)
+		return;
+	g_set_color(pass_color_var(ax->title_color));
 	DVAL(ax->title_hei,base/40.0);
-	v_set_hei(ax->title_hei);
+	g_set_hei(ax->title_hei);
 	if (ax->type==0) {
 		touser((nx-1)/2.0,0,minz,&ux,&uy);
 	} else {
@@ -501,9 +596,9 @@ void draw_axis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
 	r = ax->title_dist;
 	fpolar_xy(r,a,&ux2,&uy2);
 	g_gsave();
-	v_move(ux+ux2,uy+uy2);
+	g_move(ux+ux2,uy+uy2);
 	g_rotate(ta);
-	v_text((char*)ax->title);
+	g_text((char*)ax->title);
 	g_grestore();
 }
 
@@ -511,53 +606,60 @@ void draw_zaxis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
 	float ux,uy,ux2,uy2,ux3,uy3,r,a,ta,r2,x,t1,tn;
 	char buff[80];
 
-	if (!ax->on) return;
+	if (!ax->on)
+		return;
 	touser(0,0,minz,&ux,&uy);
 	touser(0,0,maxz,&ux2,&uy2);
-	v_color(ax->color);
-	if (!sf.cube_on) {v_move(ux,uy); v_line(ux2,uy2);}
+	g_set_color(pass_color_var(ax->color));
+	if (!sf.cube_on) {
+		g_move(ux,uy);
+		g_line(ux2,uy2);
+	}
 	fxy_polar(ux2-ux,uy2-uy,&r,&a);
 	ta = a ;
 	a = a + 90;
-	if (ax->ticklen == 0) ax->ticklen = base*.001;
+	if (ax->ticklen == 0)
+		ax->ticklen = base*.001;
 	r = ax->ticklen;
 	r2 = ax->ticklen+base*.02+ax->dist;
 	fpolar_xy(r,a,&ux2,&uy2);
 	fpolar_xy(r2,a,&ux3,&uy3);
 	DVAL(ax->hei,base/60.0);
-	v_set_hei(ax->hei);
-	v_set_just("RC");
+	g_set_hei(ax->hei);
+	g_set_just(pass_justify("RC"));
 	nice_ticks(&ax->step, &ax->min, &ax->max, &t1, &tn);
 	for (x=t1; x<=.0001+ax->max; x+=ax->step) {
 		touser(0,0,x,&ux,&uy);
-		v_move(ux,uy);
-		v_line(ux+ux2,uy+uy2);
-		v_move(ux+ux3,uy+uy3);
-		if (fabs(x)<(.0001*ax->step)) x = 0;
+		g_move(ux,uy);
+		g_line(ux+ux2,uy+uy2);
+		g_move(ux+ux3,uy+uy3);
+		if (fabs(x)<(.0001*ax->step))
+			x = 0;
 		sprintf(buff,"%g",x);
-		v_text(buff);
+		g_text(buff);
 	}
-	v_set_just("BC");
-	/* Now draw the title for this axis */
-	if (ax->title == NULL) return;
-	v_color(ax->title_color);
+	g_set_just(pass_justify("BC"));
+/* Now draw the title for this axis */
+	if (ax->title == NULL)
+		return;
+	g_set_color(pass_color_var(ax->title_color));
 	DVAL(ax->title_hei,base/40.0);
-	v_set_hei(ax->title_hei);
+	g_set_hei(ax->title_hei);
 	touser(0,0,(maxz-minz)/2.0+minz,&ux,&uy);
 	DVAL(ax->title_dist,base/17.0);
 	r = ax->title_dist;
 	fpolar_xy(r,a,&ux2,&uy2);
 	g_gsave();
-	v_move(ux+ux2,uy+uy2);
+	g_move(ux+ux2,uy+uy2);
 	g_rotate(a-90);
-	v_text((char*)ax->title);
+	g_text((char*)ax->title);
 	g_grestore();
 }
 
 void move3d(float x, float y, float z) {
 	float ux,uy;
 	touser(x,y,z,&ux,&uy);
-	v_move(ux,uy);
+	g_move(ux,uy);
        #if (defined DJ || defined EMXOS2)   /* a.r. for surface markers */
 	d_move_really(ux,uy);
        #endif
@@ -566,25 +668,24 @@ void move3d(float x, float y, float z) {
 void line3d(float x, float y, float z) {
 	float ux,uy;
 	touser(x,y,z,&ux,&uy);
-	v_line(ux,uy);
+	g_line(ux,uy);
 }
 
 void show_horizon() {
 	int i;
-	v_color("RED");
-	v_move(unmaph(0), get_h(0));
+	g_set_color(pass_color_var("RED"));
+	g_move(unmaph(0), get_h(0));
 	for (i=0;i<900;i++) {
-		v_line(unmaph(i), get_h(i));
+		g_line(unmaph(i), get_h(i));
 	}
-	v_color("BLUE");
-	v_move(unmaph(0), get_h2(0));
+	g_set_color(pass_color_var("BLUE"));
+	g_move(unmaph(0), get_h2(0));
 	for (i=0;i<900;i++) {
-		v_line(unmaph(i), get_h2(i));
+		g_line(unmaph(i), get_h2(i));
 	}
-
 }
 
-void skirt(float huge *z,int ix1, int iy1, float minz) {
+void skirt(float *z,int ix1, int iy1, float minz) {
 	/*
 	touser(ix1,iy1,z[ix1+iy1* (int32) nnx],&ux,&y1);
 	x1 = maph(ux);
@@ -596,7 +697,7 @@ void skirt(float huge *z,int ix1, int iy1, float minz) {
 	clipline(ix1,iy1,z[ix1+iy1* (int32) nnx],ix1,iy1,minz);
 }
 
-void horizonv(float huge *z,int ix1,int iy1,int ix2,int iy2) {
+void horizonv(float *z,int ix1,int iy1,int ix2,int iy2) {
 	float ux;
 	int x1,x2,putback=false;
 	float y1,y2;
@@ -605,9 +706,8 @@ void horizonv(float huge *z,int ix1,int iy1,int ix2,int iy2) {
 	if (z[ix1+iy1* (int32) nnx] <= min_zed  ||
 	 z[ix2+iy2* (int32) nnx] <= min_zed) {
 		putback = true;
-		v_color(sf.zcolour);
+		g_set_color(pass_color_var(sf.zcolour));
 	}}
-
 
 	touser(ix1,iy1,z[ix1+iy1* (int32) nnx],&ux,&y1);
 	x1 = (int)maph(ux);
@@ -617,7 +717,7 @@ void horizonv(float huge *z,int ix1,int iy1,int ix2,int iy2) {
 
 	if (putback) {
 		putback = true;
-		v_color(sf.bot_color);
+		g_set_color(pass_color_var(sf.bot_color));
 	}
 
 }
@@ -630,7 +730,7 @@ void clipline(float x1, float y1, float z1, float x2, float y2, float z2) {
 
 	touser(x1,y1,z1,&ux,&uy);
 	touser(x2,y2,z2,&ux2,&uy2);
-	if (!doclipping) { v_move(ux,uy); v_line(ux2,uy2); return;}
+	if (!doclipping) { g_move(ux,uy); g_line(ux2,uy2); return;}
 	ix1 = (int)maph(ux); ix2 = (int)maph(ux2);
 
 /*        printf("hclipvec %d %g  %d %g \n",ix1,uy,ix2,uy2); scr_getch(); */
@@ -639,7 +739,7 @@ void clipline(float x1, float y1, float z1, float x2, float y2, float z2) {
 	hclipvec2(ix1,uy,ix2,uy2,false);
 }
 
-void horizonv2(float huge *z,int ix1,int iy1,int ix2,int iy2) {
+void horizonv2(float *z,int ix1,int iy1,int ix2,int iy2) {
 	float ux;
 	int x1,x2;
 	float y1,y2;
@@ -720,8 +820,8 @@ void seth2(int rx1, int ry1, float rz1, int rx2, int ry2, float rz2) {
 }
 
 void vector_line_d(double x1, double y1, double x2, double y2) {
-	v_move(unmaph(x1),y1);
-	v_line(unmaph(x2),y2);
+	g_move(unmaph(x1),y1);
+	g_line(unmaph(x2),y2);
 }
 
 void hclipvec2(int x1, float y1, int x2, float y2, int sethi) {
@@ -776,8 +876,8 @@ void vector_line(int x1, float y1, int x2, float y2) {
 	if (x2<0 || x1<0) {
 		gprint("Less than zero \n");
 	}
-	v_move(unmaph(x1),y1);
-	v_line(unmaph(x2),y2);
+	g_move(unmaph(x1),y1);
+	g_line(unmaph(x2),y2);
 }
 
 void touser(float x, float y, float z, float *uux, float *uuy) {
@@ -896,8 +996,8 @@ void matrx(float i[4][4], float angle) {
 
 void grid_back(int nx, int ny, float z1, float z2) {
 	float x,y,z;
-	v_color(sf.back_color);
-	v_lstyle(sf.back_lstyle);
+	g_set_color(pass_color_var(sf.back_color));
+	g_set_line_style(sf.back_lstyle);
 	doclipping = sf.back_hidden;
 	if (sf.back_ystep>0) for (y=sf.yaxis.min; y<=sf.yaxis.max+.00001; y+=sf.back_ystep) {
 		clipline(0,SY(y),z1,0,SY(y),z2);
@@ -906,8 +1006,8 @@ void grid_back(int nx, int ny, float z1, float z2) {
 		clipline(0,0,z,0,ny-1,z);
 	}
 
-	v_color(sf.right_color);
-	v_lstyle(sf.right_lstyle);
+	g_set_color(pass_color_var(sf.right_color));
+	g_set_line_style(sf.right_lstyle);
 	doclipping = sf.right_hidden;
 	if (sf.right_xstep>0) for (x=sf.xaxis.min; x<=sf.xaxis.max+.00001; x+=sf.right_xstep) {
 		clipline(SX(x),ny-1,z1,SX(x),ny-1,z2);
@@ -917,8 +1017,8 @@ void grid_back(int nx, int ny, float z1, float z2) {
 	}
 
 
-	v_color(sf.base_color);
-	v_lstyle(sf.base_lstyle);
+	g_set_color(pass_color_var(sf.base_color));
+	g_set_line_style(sf.base_lstyle);
 	doclipping = sf.base_hidden;
 	if (sf.base_xstep>0) for (x=sf.xaxis.min; x<=sf.xaxis.max+.00001; x+=sf.base_xstep) {
 		clipline(SX(x),0,z1,SX(x),ny-1,z1);
@@ -933,12 +1033,12 @@ void draw_markers(int nx, int ny) {
 	int i;
 	pnt = sf.pntxyz;
 	if (*sf.marker == 0) return;
-	v_color(sf.marker_color);
+	g_set_color(pass_color_var(sf.marker_color));
 	DVAL(sf.marker_hei,base/60.0);
-	v_set_hei(sf.marker_hei);
+	g_set_hei(sf.marker_hei);
 	for (i=0; i<sf.npnts; i+=3) {
 		move3d(SX(pnt[i]),SY(pnt[i+1]),pnt[i+2]);
-		v_marker(sf.marker);
+		g_marker(pass_marker(sf.marker), sf.marker_hei);
 	}
 }
 
@@ -947,8 +1047,8 @@ void draw_riselines(int nx, int ny,float minz, float maxz) {
 	int i;
 
 	if (sf.riselines!=0) {
-	 v_color(sf.riselines_color);
-	 v_lstyle(sf.riselines_lstyle);
+	 g_set_color(pass_color_var(sf.riselines_color));
+	 g_set_line_style(sf.riselines_lstyle);
 	 for (i=0; i<sf.npnts; i+=3) {
 		move3d(SX(pnt[i]),SY(pnt[i+1]),pnt[i+2]);
 		line3d(SX(pnt[i]),SY(pnt[i+1]),maxz);
@@ -956,8 +1056,8 @@ void draw_riselines(int nx, int ny,float minz, float maxz) {
 	}
 
 	if (sf.droplines==0) return;
-	v_color(sf.droplines_color);
-	v_lstyle(sf.droplines_lstyle);
+	g_set_color(pass_color_var(sf.droplines_color));
+	g_set_line_style(sf.droplines_lstyle);
 	for (i=0; i<sf.npnts; i+=3) {
 		move3d(SX(pnt[i]),SY(pnt[i+1]),pnt[i+2]);
 		line3d(SX(pnt[i]),SY(pnt[i+1]),minz);
@@ -967,8 +1067,8 @@ void draw_riselines(int nx, int ny,float minz, float maxz) {
 void cube(float x, float y, float z1, float z2) {
 	if (sf.cube_hidden_on) doclipping = true;
 	else doclipping = false;
-	v_color(sf.cube_color);
-	v_lstyle(sf.cube_lstyle);
+	g_set_color(pass_color_var(sf.cube_color));
+	g_set_line_style(sf.cube_lstyle);
 
 	/* draw axis behind peaks: don't overwrite peaks with round or square cap! */
 	g_set_line_cap(0);
@@ -996,8 +1096,8 @@ void cube(float x, float y, float z1, float z2) {
 /*
 
 	move3d(0,0,z1);
-	v_color(sf.cube_color);
-	v_lstyle(sf.cube_lstyle);
+	g_set_color(pass_color_var(sf.cube_color));
+	g_set_line_style(sf.cube_lstyle);
 	line3d(x,0,z1);
 	line3d(x,y,z1);
 	line3d(0,y,z1);

@@ -72,6 +72,8 @@ int mem_worst(void);
 int pass_color(const char *s) throw(ParserError);
 int pass_color_var(const char *s) throw(ParserError);
 int pass_font(const char *s);
+int pass_justify(const char *s);
+int pass_marker(char *s) throw(ParserError);
 int testfree(int i);
 int text_printf(int *in,int ilen);
 int w_message(char *s);
