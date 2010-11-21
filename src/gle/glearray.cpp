@@ -279,6 +279,14 @@ bool GLECSVData::read(const std::string& file) {
 	return true;
 }
 
+void GLECSVData::readBuffer(const char* buffer) {
+	unsigned int size = strlen(buffer);
+	m_buffer.resize(size + 1);
+	memcpy(&m_buffer[0], buffer, size);
+	m_buffer[size] = 0;
+	parseBlock();
+}
+
 bool GLECSVData::readBlock(const std::string& fileName) {
 	m_fileName = fileName;
 	ifstream file(fileName.c_str(), ios::in | ios::binary | ios::ate);
@@ -376,6 +384,10 @@ void GLECSVData::setDelims(const char* delims) {
 		m_delims[(int)delims[pos]] = true;
 		pos++;
 	}
+}
+
+void GLECSVData::setCommentIndicator(const char* comment) {
+	m_comment = comment;
 }
 
 void GLECSVData::initDelims() {

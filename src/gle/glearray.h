@@ -156,8 +156,10 @@ public:
 	GLECSVData();
 	~GLECSVData();
 	bool read(const std::string& file);
+	void readBuffer(const char* buffer);
 	void print(ostream& os);
 	void setDelims(const char* delims);
+	void setCommentIndicator(const char* comment);
 	GLECSVError* getError();
 	unsigned int getNbLines();
 	unsigned int getNbColumns(unsigned int line);

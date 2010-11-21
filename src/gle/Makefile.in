@@ -157,6 +157,10 @@ $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.a: $(GLEOBJS) $(OBJECTS) $(L
 	ar rvu $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.a $(OBJECTS) $(LINKOBJS)
 	ranlib $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.a
 
+$(PROJECT_BINDIR)/bin/gle-unit-test: unit-tests/part1.cpp $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.a
+	$(CXX) $(GLEOPT) $(LIBGLE_LDFLAGS) -o $(PROJECT_BINDIR)/bin/gle-unit-test unit-tests/part1.cpp $(PROJECT_BINDIR)/lib/libgle-graphics-@GLE_VERSION@.a $(LIBS) $(LIBGLE_ELIBS)
+	$(PROJECT_BINDIR)/bin/gle-unit-test
+
 $(PROJECT_BINDIR)/bin/gle: $(GLEIN)
 	$(CXX) $(GLEOPT) $(SIMPLE_LDFLAGS) -o $(PROJECT_BINDIR)/bin/gle $(GLEOBJ) $(GLE_ELIBS) $(SIMPLE_LIBS)
 

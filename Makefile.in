@@ -530,3 +530,6 @@ snapshot:
 
 nosnapshot:
 	perl platform/script/makesnapshot.pl 0
+
+unit-test:
+	make -C src/gle $(PROJECT_BINDIR)/bin/gle-unit-test
