@@ -54,3 +54,5 @@
 #define FN_PATH     95
 #define FN_FONT     96
 #define FN_GETENV   97
+#define FN_XG3D     98
+#define FN_YG3D     99

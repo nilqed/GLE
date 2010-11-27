@@ -671,6 +671,18 @@ void line3d(float x, float y, float z) {
 	g_line(ux,uy);
 }
 
+double xg3d(double x, double y, double z) {
+	float ux, uy;
+	touser((float)x, (float)y, (float)z, &ux, &uy);
+	return ux;
+}
+
+double yg3d(double x, double y, double z) {
+	float ux, uy;
+	touser((float)x, (float)y, (float)z, &ux, &uy);
+	return uy;
+}
+
 void show_horizon() {
 	int i;
 	g_set_color(pass_color_var("RED"));

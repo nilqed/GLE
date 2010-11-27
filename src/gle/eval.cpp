@@ -74,6 +74,8 @@ void var_getstr(int varnum,char *s);
 int f_eof(int chn);
 void gle_as_a_calculator(vector<string>* exprs);
 void output_error_cerr(ParserError& err);
+double xg3d(double x, double y, double z);
+double yg3d(double x, double y, double z);
 
 /*---------------------------------------------------------------------------*/
 /* bin = 10..29, binstr = 30..49, fn= 60...139, userfn=LOCAL_START_INDEX..nnn */
@@ -827,6 +829,14 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 					throw g_format_parser_error("index out of range: %d (1 ... %d)", j, dp[i]->np);
 				else
 					stk[nstk] = dp[i]->yv[j-1];
+			break;
+		case 60+FN_XG3D:
+			stk[nstk - 2] = xg3d(stk[nstk - 2], stk[nstk - 1], stk[nstk]);
+            nstk -= 2;
+			break;
+		case 60+FN_YG3D:
+			stk[nstk - 2] = yg3d(stk[nstk - 2], stk[nstk - 1], stk[nstk]);
+            nstk -= 2;
 			break;
 		default:  /* User function, LOCAL_START_INDEX..nnn , or error */
 			/* Is it a user defined function */
