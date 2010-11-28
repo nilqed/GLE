@@ -122,7 +122,8 @@ enum GLECSVDataStatus {
 enum GLECSVErrorCode {
 	GLECSVErrorNone,
 	GLECSVErrorFileNotFound,
-	GLECSVErrorUnterminatedString
+	GLECSVErrorUnterminatedString,
+	GLECSVErrorInconsistentNrColumns
 };
 
 class GLECSVError {
@@ -149,6 +150,7 @@ protected:
 	unsigned int m_lines;
 	unsigned int m_firstColumn;
 	unsigned int m_nextLine;
+	unsigned int m_ignoreHeader;
 	GLECSVError m_error;
 	string m_fileName;
 	string m_comment;
@@ -160,10 +162,14 @@ public:
 	void print(ostream& os);
 	void setDelims(const char* delims);
 	void setCommentIndicator(const char* comment);
+	void setIgnoreHeader(unsigned int ignore);
 	GLECSVError* getError();
 	unsigned int getNbLines();
 	unsigned int getNbColumns(unsigned int line);
 	const char* getCell(unsigned int row, unsigned int column, unsigned int* size);
+	string getCellString(unsigned int row, unsigned int column);
+	void setCellTrim(unsigned int row, unsigned int column, const char* data);
+	unsigned int validateIdenticalNumberOfColumns();
 private:
 	bool readBlock(const std::string& file);
 	void parseBlock();
@@ -173,6 +179,7 @@ private:
 	bool isEol(GLEBYTE ch);
 	bool isComment(GLEBYTE ch);
 	void skipTillEol();
+	void ignoreHeader();
 	GLECSVDataStatus readCellString(GLEBYTE quote);
 	GLECSVDataStatus readCell();
 	void createCell(unsigned int cellSize, unsigned int cellPos);

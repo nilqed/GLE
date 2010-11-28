@@ -54,6 +54,7 @@
 #include "gprint.h"
 #include "key.h"
 #include "justify.h"
+#include "file_io.h"
 
 #define GLEG_CMD_AXIS     1
 #define GLEG_CMD_LABELS   2
@@ -1482,7 +1483,8 @@ private:
 public:
 	string fileName;
 	string comment;
-	int ignore;
+	string delimiters;
+	unsigned int ignore;
 	bool nox;
 };
 
@@ -1493,9 +1495,12 @@ GLEDataSetDescription::GLEDataSetDescription() {
 	cy = -1;
 }
 
-GLEDataDescription::GLEDataDescription() {
-	ignore = -1;
-	nox = false;
+GLEDataDescription::GLEDataDescription() :
+    comment("!"),
+    delimiters(" ,;\t"),
+	ignore(0),
+	nox(false)
+{
 }
 
 /* data a.dat												  */
@@ -1547,8 +1552,8 @@ void read_data_description(GLEDataDescription* description) {
 	}
 }
 
-double get_data_value(const vector<string>& temp, int dn, int point, const char* xy, int offs, bool* missing) {
-	const string& value(temp[offs]);
+double get_data_value(GLECSVData* data, int dn, int point, const char* xy, int row, int col, bool* missing) {
+	const string& value(data->getCellString(row, col));
 	if (value == "*") {
 		*missing = true;
 		return 0.0;
@@ -1578,65 +1583,32 @@ void data_command() {
 	GLEDataDescription description;
 	read_data_description(&description);
 	// Open file
-	ifstream fptr;
-	validate_open_input_stream(fptr, description.fileName);
-	// File data
-	int fileLine = 0;
-	int dataLine = 0;
-	int dataColumns = -1;
-	vector<string> temp;
-	// Tokenizer
-	TokenizerLanguage tok_lang;
-	StringTokenizer str_tok(&tok_lang);
-	tok_lang.setSpaceTokens(" ,;\t");
-	tok_lang.setLineCommentTokens("!");
-	tok_lang.setDecimalDot('.');
-	tok_lang.setParseStrings(true);
-	str_tok.set_fname(description.fileName.c_str());
-	// Read file line by line
-	while (fptr.good()) {
-		string line;
-		getline(fptr, line);
-		str_trim_right(line);
-		if (fileLine >= description.ignore) {
-			str_tok.set_string(line);
-			str_tok.inc_line();
-			int lineColumns = 0;
-			while (true) {
-				string& token = str_tok.try_next_token();
-				// must compare first porton of next token
-				const string& comment = description.comment;
-				if (token == "" || (comment.length() > 0 &&  token.find(comment) == 0 ) ) {
-					break;
-				}
-				if (token == "*" || token == "?" || token == "-" || token == ".") {
-					token = "*";
-				}
-				lineColumns++;
-				temp.push_back(token);
-			}
-			if (lineColumns > 0) {
-				dataLine++;
-				if (dataColumns == -1) {
-					dataColumns = lineColumns;
-				} else {
-					if (lineColumns != dataColumns) {
-						ostringstream err;
-						err << "inconsistent number of columns " << lineColumns << " <> " << dataColumns;
-						err << " at line " << (fileLine + 1);
-						err	<< " in '" << description.fileName << "'";
-						g_throw_parser_error(err.str());
-					}
-				}
+	string expandedName(GLEExpandEnvironmentVariables(description.fileName));
+	validate_file_name(expandedName, true);
+	GLECSVData csvData;
+	csvData.setDelims(description.delimiters.c_str());
+	csvData.setCommentIndicator(description.comment.c_str());
+	csvData.setIgnoreHeader(description.ignore);
+	csvData.read(expandedName);
+	unsigned int dataColumns = csvData.validateIdenticalNumberOfColumns();
+	GLECSVError* error = csvData.getError();
+	if (error->errorCode != GLECSVErrorNone) {
+		g_throw_parser_error(error->errorString);
+	}
+	// Replace supported missing value indicators by "*"
+	for (unsigned int row = 0; row < csvData.getNbLines(); ++row) {
+		for (unsigned int col = 0; col < dataColumns; ++col) {
+			unsigned int cellSize;
+			const char* cell = csvData.getCell(row, col, &cellSize);
+			if (cellSize == 1 && (cell[0] == '*' || cell[0] == '?' || cell[0] == '-' || cell[0] == '.')) {
+				csvData.setCellTrim(row, col, "*");
 			}
 		}
-		fileLine++;
 	}
-	fptr.close();
 	// Handle special types of data sets
 	bool all_str_col = true;
-	for (int row = 0; row < dataLine; row++) {
-		if (is_float_miss(temp[row * dataColumns])) {
+	for (unsigned int row = 0; row < csvData.getNbLines(); row++) {
+		if (is_float_miss(csvData.getCellString(row, 0))) {
 			all_str_col = false;
 			break;
 		}
@@ -1676,12 +1648,12 @@ void data_command() {
 	// Validate column indices
 	for (int i = 0; i < description.getNbDataSets(); i++) {
 		GLEDataSetDescription* dataset = description.getDataSet(i);
-		if (dataset->cx < 0 || dataset->cx > dataColumns) {
+		if (dataset->cx < 0 || dataset->cx > (int)dataColumns) {
 			ostringstream err;
 			err << "x-value column index out of range for d" << dataset->ds << ": " << dataset->cx << " not in [0,...," << dataColumns << "]";
 			g_throw_parser_error(err.str());
 		}
-		if (dataset->cy < 0 || dataset->cy > dataColumns) {
+		if (dataset->cy < 0 || dataset->cy > (int)dataColumns) {
 			ostringstream err;
 			err << "y-value column index out of range for d" << dataset->ds << ": " << dataset->cy << " not in [0,...," << dataColumns << "]";
 			g_throw_parser_error(err.str());
@@ -1689,8 +1661,8 @@ void data_command() {
 	}
 	// Auto-detect header
 	bool has_header = true;
-	for (int col = 0; col < dataColumns; col++) {
-		if (is_float_miss(temp[col])) {
+	for (unsigned int col = 0; col < dataColumns; col++) {
+		if (is_float_miss(csvData.getCellString(0, col))) {
 			has_header = false;
 			break;
 		}
@@ -1704,8 +1676,9 @@ void data_command() {
 			int dn = dataset->ds;
 			int cy = dataset->cy;
 			createDataSet(dn);
-			str_remove_quote(temp[cy - 1]);
-			dp[dn]->key_name = sdup(temp[cy - 1].c_str());
+			string tmp(csvData.getCellString(0, cy - 1));
+			str_remove_quote(tmp);
+			dp[dn]->key_name = sdup(tmp.c_str());
 		}
 	}
 	// Copy all data to the data sets
@@ -1713,7 +1686,7 @@ void data_command() {
 		GLEDataSetDescription* dataset = description.getDataSet(i);
 		int dn = dataset->ds;
 		createDataSet(dn);
-		int np = dataLine - first_row;
+		int np = csvData.getNbLines() - first_row;
 		dp[dn]->clearAll();
 		dp[dn]->xv = (double*) myallocz(sizeof(double) * (np + 1));
 		dp[dn]->yv = (double*) myallocz(sizeof(double) * (np + 1));
@@ -1722,18 +1695,18 @@ void data_command() {
 		dp[dn]->np = np;
 		for (int j = 0; j < np ; j++) {
 			bool missing = false;
+			unsigned int row = first_row + j;
 			if (dataset->cx == 0) {
 				dp[dn]->xv[j] = j + 1;
 			} else {
-				int x_offs = (j + first_row) * dataColumns + dataset->cx - 1;
-				dp[dn]->xv[j] = get_data_value(temp, dn, j, "x", x_offs, &missing);
+				dp[dn]->xv[j] = get_data_value(&csvData, dn, j, "x", row, dataset->cx - 1, &missing);
 			}
-			int y_offs = (j + first_row) * dataColumns + dataset->cy - 1;
-			dp[dn]->yv[j] = get_data_value(temp, dn, j, "y", y_offs, &missing);
+			dp[dn]->yv[j] = get_data_value(&csvData, dn, j, "y", row, dataset->cy - 1, &missing);
 			dp[dn]->miss[j] = missing;
 			// yv_str is used to use this data set as labels
-			str_remove_quote(temp[y_offs]);
-			dp[dn]->yv_str->push_back(temp[y_offs]);
+			string tmp(csvData.getCellString(row, dataset->cy - 1));
+			str_remove_quote(tmp);
+			dp[dn]->yv_str->push_back(tmp);
 		}
 	}
 }

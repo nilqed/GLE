@@ -60,24 +60,46 @@ void unit_test_impl(bool expr, const char* exprStr, const char* file, int line) 
 }
 
 void test_csv_reader1() {
-	const char* input1 = "REM Line with comments"
-	                     " REM Line with comments"
-	                     "\"0.123\",5.5    ,23"
-	                     "België,25          REM Hello"
-	                     "\"Tussen \"\"dubbele quotes\"\"\",36,40"
-	                     "Tussen 'enkele quotes',20,10"
-	                     "\\textbf{hello},1,23.5"
-	                     "\"Comma: ,\",你好, 10"
-	                     "\"Drie dubbele quotes \"\"\"\"\"\"\",1,23"
-	                     "\"\"\"\",,32"
+	const unsigned int columns[] = { 3, 2, 3, 3, 3, 3, 3, 3, 3 };
+	const char* tokens[] = {
+			"\"0.123\"", "5.5", "23",
+            "België", "25",
+            "\"Tussen \"dubbele quotes\"\"", "36", "40",
+            "Tussen 'enkele quotes'", "20", "10",
+            "\\textbf{hello}", "1", "23.5",
+            "\"Comma: ,\"", "你好", "10",
+            "\"Drie dubbele quotes \"\"\"\"", "1", "23",
+            "\"\"\"", "", "32",
+            "A", "B", ""
+	};
+	const char* input1 = "REM Line with comments\n"
+	                     " REM Line with comments\n"
+	                     "\"0.123\",5.5    ,23\n"
+	                     "België,25          REM Hello\n"
+	                     "\"Tussen \"\"dubbele quotes\"\"\",36,40\r\n"
+	                     "Tussen 'enkele quotes',20,10\n"
+	                     "\\textbf{hello},1,23.5\n"
+	                     "\"Comma: ,\",你好, 10\n\r"
+	                     "\"Drie dubbele quotes \"\"\"\"\"\"\",1,23\n"
+	                     "\"\"\"\",,32\n"
 	                     "A,B,";
 	GLECSVData reader;
-	reader.setDelims(" ,;\t");
+	reader.setDelims(",;\t");
 	reader.setCommentIndicator("REM");
 	reader.readBuffer(input1);
 	GLECSVError* error = reader.getError();
 	unit_test(error->errorCode == GLECSVErrorNone);
-
+	unit_test(reader.getNbLines() == 9);
+	for (unsigned int i = 0; i < reader.getNbLines(); i++) {
+		unit_test(reader.getNbColumns(i) == columns[i]);
+	}
+	unsigned int pos = 0;
+	for (unsigned int i = 0; i < reader.getNbLines(); i++) {
+		for (unsigned int j = 0; j < reader.getNbColumns(i); j++) {
+			string cellValue = reader.getCellString(i, j);
+			unit_test(cellValue == tokens[pos++]);
+		}
+	}
 }
 
 int main(void) {

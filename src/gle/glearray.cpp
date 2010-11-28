@@ -260,6 +260,7 @@ GLECSVError::~GLECSVError() {
 GLECSVData::GLECSVData() {
 	initDelims();
 	m_lines = 0;
+	m_ignoreHeader = 0;
 	m_nextLine = true;
 	m_firstColumn = 0;
 	m_error.errorCode = GLECSVErrorNone;
@@ -330,6 +331,43 @@ const char* GLECSVData::getCell(unsigned int row, unsigned int column, unsigned 
 	return (const char*)&m_buffer[m_cellPos[idx]];
 }
 
+string GLECSVData::getCellString(unsigned int row, unsigned int column) {
+	unsigned int size;
+	const char* buffer = getCell(row, column, &size);
+	return string(buffer, size);
+}
+
+void GLECSVData::setCellTrim(unsigned int row, unsigned int column, const char* data) {
+	unsigned int idx = m_firstCell[row] + column;
+	unsigned int size = min(m_cellSize[idx], strlen(data));
+	for (unsigned int i = 0; i < size; i++) {
+		m_buffer[m_cellPos[idx] + i] = data[i];
+	}
+	m_cellSize[idx] = size;
+}
+
+unsigned int GLECSVData::validateIdenticalNumberOfColumns() {
+	bool found = false;
+	unsigned int dataColumns = 0;
+	for (unsigned int row = 0; row < getNbLines(); ++row) {
+		if (!found) {
+			found = true;
+			dataColumns = getNbColumns(row);
+		} else {
+			if (m_error.errorCode == GLECSVErrorNone && getNbColumns(row) != dataColumns) {
+				m_error.errorCode = GLECSVErrorInconsistentNrColumns;
+				m_error.errorLine = row;
+				m_error.errorColumn = 0;
+				ostringstream err;
+				err << "inconsistent number of columns " << getNbColumns(row) << " <> " << dataColumns;
+				createErrorString(err.str());
+				return dataColumns;
+			}
+		}
+	}
+	return dataColumns;
+}
+
 void GLECSVData::print(ostream& os) {
 	vector<unsigned int> columnWidth;
 	for (unsigned int row = 0; row < getNbLines(); row++) {
@@ -368,6 +406,7 @@ void GLECSVData::parseBlock() {
 	m_pos = 0;
 	m_size = m_buffer.size();
 	m_data = &m_buffer[0];
+	ignoreHeader();
 	GLECSVDataStatus status = readCell();
 	while (status != GLECSVDataStatusEOF) {
 		status = readCell();
@@ -388,6 +427,10 @@ void GLECSVData::setDelims(const char* delims) {
 
 void GLECSVData::setCommentIndicator(const char* comment) {
 	m_comment = comment;
+}
+
+void GLECSVData::setIgnoreHeader(unsigned int ignore) {
+	m_ignoreHeader = ignore;
 }
 
 void GLECSVData::initDelims() {
@@ -433,6 +476,12 @@ void GLECSVData::skipTillEol() {
 			removeTrailingEOLs();
 			return;
 		}
+	}
+}
+
+void GLECSVData::ignoreHeader() {
+	for (unsigned int i = 0; i < m_ignoreHeader; i++) {
+		skipTillEol();
 	}
 }
 
