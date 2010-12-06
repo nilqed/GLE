@@ -1370,6 +1370,7 @@ void copy_default(int dn) {
 bool is_float_miss(const string& str) {
 	if (is_float(str)) return true;
 	if (str == "*") return true;
+	if (str == "") return true;
 	return false;
 }
 
@@ -1535,6 +1536,8 @@ void read_data_description(GLEDataDescription* description) {
 			description->ignore = tokens->next_integer();
 		} else if (str_i_equals(token, "COMMENT")) {
 			parser->evalTokenToFileName(&description->comment);
+		} else if (str_i_equals(token, "DELIMITERS")) {
+			parser->evalTokenToString(&description->delimiters);
 		} else if(str_i_equals(token,"NOX")) {
 			description->nox = true;
 		} else {
@@ -1605,14 +1608,28 @@ void data_command() {
 			}
 		}
 	}
-	// Handle special types of data sets
-	bool all_str_col = true;
-	for (unsigned int row = 0; row < csvData.getNbLines(); row++) {
-		if (is_float_miss(csvData.getCellString(row, 0))) {
-			all_str_col = false;
+	// Auto-detect header
+	bool has_header = true;
+	for (unsigned int col = 0; col < dataColumns; col++) {
+		if (is_float_miss(csvData.getCellString(0, col))) {
+			has_header = false;
 			break;
 		}
 	}
+	unsigned int first_row = has_header ? 1 : 0;
+	// Handle special types of data sets
+	bool all_str_col = true;
+	if (first_row >= csvData.getNbLines()) {
+		all_str_col = false;
+	} else {
+		for (unsigned int row = first_row; row < csvData.getNbLines(); row++) {
+			if (is_float_miss(csvData.getCellString(row, 0))) {
+				all_str_col = false;
+				break;
+			}
+		}
+	}
+	// Set nox
 	bool nox = description.nox || dataColumns == 1 || all_str_col;
 	// Auto-assign columns
 	int cx = nox ? 0 : 1;
@@ -1659,18 +1676,8 @@ void data_command() {
 			g_throw_parser_error(err.str());
 		}
 	}
-	// Auto-detect header
-	bool has_header = true;
-	for (unsigned int col = 0; col < dataColumns; col++) {
-		if (is_float_miss(csvData.getCellString(0, col))) {
-			has_header = false;
-			break;
-		}
-	}
 	// Read header and copy to key
-	int first_row = 0;
 	if (has_header) {
-		first_row = 1;
 		for (int i = 0; i < description.getNbDataSets(); i++) {
 			GLEDataSetDescription* dataset = description.getDataSet(i);
 			int dn = dataset->ds;

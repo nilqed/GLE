@@ -548,7 +548,11 @@ GLECSVDataStatus GLECSVData::readCell() {
 			return removeTrailingEOLs();
 		} else if (isDelim(ch)) {
 			createCell(cellSize, cellPos);
-			return GLECSVDataStatusOK;
+			if (isSpace(ch)) {
+				return removeTrailingSpace();
+			} else {
+				return GLECSVDataStatusOK;
+			}
 		} else if (isComment(ch)) {
 			if (cellSize != 0) {
 				createCell(cellSize, cellPos);
@@ -572,6 +576,22 @@ void GLECSVData::createCell(unsigned int cellSize, unsigned int cellPos) {
 	}
 	m_cellSize.push_back(cellSize);
 	m_cellPos.push_back(cellPos);
+}
+
+GLECSVDataStatus GLECSVData::removeTrailingSpace() {
+	GLEBYTE ch;
+	do {
+		ch = readChar();
+		if (ch == 0) {
+			return GLECSVDataStatusEOF;
+		}
+	} while (isSpace(ch));
+	if (isEol(ch)) {
+		return removeTrailingEOLs();
+	} else {
+		goBack();
+		return GLECSVDataStatusOK;
+	}
 }
 
 GLECSVDataStatus GLECSVData::removeTrailingEOLs() {

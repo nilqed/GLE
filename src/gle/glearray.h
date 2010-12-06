@@ -183,6 +183,7 @@ private:
 	GLECSVDataStatus readCellString(GLEBYTE quote);
 	GLECSVDataStatus readCell();
 	void createCell(unsigned int cellSize, unsigned int cellPos);
+	GLECSVDataStatus removeTrailingSpace();
 	GLECSVDataStatus removeTrailingEOLs();
 	void goBack();
 	unsigned int lastCharPos();
