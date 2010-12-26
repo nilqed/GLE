@@ -129,6 +129,7 @@ public:
 	void setString(int var, GLEString* s);
 	GLEDataObject* getObject(int var);
 	void setObject(int var, GLEDataObject* obj);
+	void set(int var, GLEMemoryCell* value);
 	void init(int var, int type);
 	void find(const char *name, int *idx, int *type);
 	void findAdd(const char *name, int *idx, int *type);
@@ -182,6 +183,7 @@ void var_getstr(int v, char *s);
 void var_getstr(int jj, string& s);
 void var_nlocal(int *l);
 void var_set(int jj, double v);
+void var_set(int jj, GLEMemoryCell* value);
 GLEVarMap* var_swap_local_map(GLEVarMap* map);
 void var_set_local_map(GLEVarMap* map);
 void var_setstr(int jj, char *s);

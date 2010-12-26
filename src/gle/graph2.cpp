@@ -90,6 +90,24 @@ void do_draw_hist(double* xt, double* yt, int* m, int npts, GLEDataSet* ds);
 void do_draw_bar(double* xt, double* yt, int* m, int npts, GLEDataSet* ds);
 void do_draw_impulses(double* xt, double* yt, int* m, int npts, GLEDataSet* ds);
 
+bool hasDataset(int di) {
+	return di > 0 && di <= ndata && dp[di] != NULL && !dp[di]->undefined();
+}
+
+GLEDataSet* getDataset(int di, const char* descr = 0) {
+	if (hasDataset(di)) {
+		return dp[di];
+	} else {
+		ostringstream err;
+		if (descr != 0) {
+			err << descr << " ";
+		}
+		err << "dataset d" << di << " not defined";
+		g_throw_parser_error(err.str());
+		return 0;
+	}
+}
+
 double fnx(double value, GLEDataSet* dataSet) {
 	GLEAxis* axis = dataSet->getAxis(GLE_DIM_X);
 	GLERange* range = dataSet->getDim(GLE_DIM_X)->getRange();
@@ -150,31 +168,14 @@ double graph_ygraph(double v) {
 	}
 }
 
-double bar_get_min_interval(int bar, int idx) {
-	double min = GLE_INF;
-	if (idx < 0 || idx > br[bar]->ngrp) {
-		return min;
-	}
-	int d = br[bar]->to[idx];
-	if (d == 0 || dp[d] == 0) {
-		return min;
-	}
-	double* px = dp[d]->xv;
-	if (px == 0) {
-		return min;
-	}
-	for (int i = 1; i < dp[d]->np; i++) {
-		double w = px[i] - px[i-1];
-		if (w > 0 && w < min) min = w;
-	}
-	return min;
-}
-
 double bar_get_min_interval_bars(int bar) {
 	double min = GLE_INF;
 	for (int idx = 0; idx < br[bar]->ngrp; idx++) {
-		double dataSetMin = bar_get_min_interval(bar, idx);
-		min = std::min(min, dataSetMin);
+		int di = br[bar]->to[idx];
+		if (hasDataset(di)) {
+			GLEDataPairs data(dp[di]);
+			min = std::min(min, data.getMinXInterval());
+		}
 	}
 	return min;
 }
@@ -223,10 +224,10 @@ void draw_bars() {
 		for (int bi = 0; bi < nbars; bi++) {
 			int df = br[b]->from[bi];
 			int dt = br[b]->to[bi];
-			// validate "to" data set
-			if (dt == 0 || dp[dt] == 0 || dp[dt]->xv == 0 || dp[dt]->yv == 0) {
+			// validate "to" dataset
+			if (!hasDataset(dt)) {
 				ostringstream err;
-				err << "bar data set d" << dt << " not defined";
+				err << "bar dataset d" << dt << " not defined";
 				g_throw_parser_error(err.str());
 			}
 			// set bar style
@@ -247,44 +248,41 @@ void draw_bars() {
 			double bdis = br[b]->dist;
 			double whole_wid = (nbars-1) * bdis + bwid;
 			// get data
-			double *xt = dp[dt]->xv;
-			double* yt = dp[dt]->yv;
-			int* mt = dp[dt]->miss;
 			GLEDataSet* toDataSet = dp[dt];
 			toDataSet->checkRanges();
-			// check if has "from" data set
-			bool hasfrom = df != 0 && dp[df] != 0 && dp[df]->xv != 0 && dp[df]->yv != 0;
+			GLEDataPairs toData(toDataSet);
+			// check if has "from" dataset
+			bool hasfrom = hasDataset(df);
 			if (hasfrom) {
 				if (dp[df]->np != dp[dt]->np) {
 					ostringstream err;
-					err << "bar 'from' data set d" << df << " and 'to' data set d" << dt << " ";
+					err << "bar 'from' dataset d" << df << " and 'to' dataset d" << dt << " ";
 					err << "have a different number of points (" << dp[df]->np << " <> " << dp[dt]->np << ")";
 					g_throw_parser_error(err.str());
 				}
-				double* xf = dp[df]->xv;
-				double* yf = dp[df]->yv;
-				int* mf = dp[df]->miss;
-				for (int i = 0; i < dp[dt]->np; i++) {
-					if (mf[i] != mt[i]) {
+				GLEDataPairs fromData(dp[df]);
+				for (unsigned int i = 0; i < dp[dt]->np; i++) {
+					if (fromData.getM(i) != toData.getM(i)) {
 						ostringstream err;
-						err << "bar 'from' data set d" << df << " and 'to' data set d" << dt << " ";
+						err << "bar 'from' dataset d" << df << " and 'to' dataset d" << dt << " ";
 						err << "have inconsistent missing values at point " << (i + 1);
 						g_throw_parser_error(err.str());
 					}
-					if (!equals_rel(xf[i], xt[i])) {
+					if (!equals_rel(fromData.getX(i), toData.getX(i))) {
 						ostringstream err;
-						err << "bar 'from' data set d" << df << " and 'to' data set d" << dt << " ";
-						err << "have different x-values at point " << (i + 1) << " (" << xf[i] << " <> " << xt[i] << ")";
+						err << "bar 'from' dataset d" << df << " and 'to' dataset d" << dt << " ";
+						err << "have different x-values at point " << (i + 1) << " (";
+						err << fromData.getX(i) << " <> " << toData.getX(i) << ")";
 						g_throw_parser_error(err.str());
 					}
-					if (!mt[i]) {
-						draw_bar(xt[i] - whole_wid/2 + bi*bdis, yf[i], yt[i], bwid, br[b], bi, toDataSet);
+					if (!toData.getM(i)) {
+						draw_bar(toData.getX(i) - whole_wid/2 + bi*bdis, fromData.getY(i), toData.getY(i), bwid, br[b], bi, toDataSet);
 					}
 				}
 			} else {
-				for (int i = 0; i < dp[dt]->np; i++) {
-					if (!mt[i]) {
-						draw_bar(xt[i] - whole_wid/2 + bi*bdis, 0.0, yt[i], bwid, br[b], bi, toDataSet);
+				for (unsigned int i = 0; i < dp[dt]->np; i++) {
+					if (!toData.getM(i)) {
+						draw_bar(toData.getX(i) - whole_wid/2 + bi*bdis, 0.0, toData.getY(i), bwid, br[b], bi, toDataSet);
 					}
 				}
 
@@ -450,29 +448,29 @@ void gr_thrownomiss(void) {
 }
 
 void gr_nomiss(int i) {
-	double *nx,*ny,*xt,*yt;
-	int *m,*nm;
-	int k,npnts;
-	if (dp[i] == NULL) return;
-	if ( dp[i]->xv!=NULL && dp[i]->yv!=NULL ) {
-		k = 0;
-		yt = dp[i]->yv;
-		xt = dp[i]->xv;
-		m =  dp[i]->miss;
-		nx = xt;
-		ny = yt;
-		nm = m;
-		npnts = dp[i]->np;
-		for (int j=0 ; j<npnts ; j++,m++,xt++,yt++) {
-			if (!*m) {
-				*nx++ = *xt;
-				*ny++ = *yt;
-				*nm++ = *m;
-				k++;
-			}
-		}
-		dp[i]->np = k;
+	if (!hasDataset(i)) {
+		return;
 	}
+	unsigned int nbPoints = 0;
+	GLEDataSet* dataSet = dp[i];
+	dataSet->validateDimensions();
+	GLEArrayImpl* dimensions = dataSet->getData();
+	vector<int> miss(dataSet->getMissingValues());
+	for (unsigned int dim = 0; dim < dimensions->size(); dim++) {
+		GLEDataObject* data = dimensions->getObject(dim);
+		if (data != 0 && data->getType() == GLEObjectTypeArray) {
+			GLEArrayImpl* array = static_cast<GLEArrayImpl*>(data);
+			unsigned int target = 0;
+			for (unsigned int j = 0; j < array->size(); j++) {
+				if (!miss[j]) {
+					array->set(target++, array->get(j));
+				}
+			}
+			array->resize(target);
+			nbPoints = max(nbPoints, target);
+		}
+	}
+	dataSet->np = nbPoints;
 }
 
 void reset_axis_ranges() {
@@ -537,7 +535,8 @@ void fitbez(GLEDataPairs* data, bool multi);
 
 GLERC<GLEDataPairs> transform_data(GLEDataSet* ds, bool isline = true) {
 	/* isline = false for marker plots */
-	GLERC<GLEDataPairs> data = new GLEDataPairs(ds->xv, ds->yv, ds->miss, ds->np);
+	GLERC<GLEDataPairs> data = new GLEDataPairs();
+	data->copy(ds);
 	data->noNaN();
 	bool xlog = xx[ds->getDim(GLE_DIM_X)->getAxis()].log;
 	bool ylog = xx[ds->getDim(GLE_DIM_Y)->getAxis()].log;
@@ -548,7 +547,7 @@ GLERC<GLEDataPairs> transform_data(GLEDataSet* ds, bool isline = true) {
 			int pos = 0;
 			if (!ds->deresolve_avg) {
 				/* deresolve by just skipping some of the original points */
-				for (int j = 0; j < data->size(); j += ds->deresolve) {
+				for (unsigned int j = 0; j < data->size(); j += ds->deresolve) {
 					data->set(pos++, data->getX(j), data->getY(j), 0);
 				}
 				data->set(pos++, data->getX(data->size()-1), data->getY(data->size()-1), 0);
@@ -557,7 +556,7 @@ GLERC<GLEDataPairs> transform_data(GLEDataSet* ds, bool isline = true) {
 				/* d1 deresolve 5 average plots points something like */
 				/* X = (X[5]+X[0])/2, Y = mean(Y[0]...Y[5]), etc. */
 				if (isline) data->set(pos++, data->getX(0), data->getY(0), 0);
-				for (int i = 0; (i+1)*ds->deresolve-1 < data->size(); i++) {
+				for (unsigned int i = 0; (i+1)*ds->deresolve-1 < data->size(); i++) {
 					double yavg = 0.0;
 					for (int j = 0; j < ds->deresolve; j++) {
 						yavg += data->getY(i*ds->deresolve + j);
@@ -597,7 +596,7 @@ void draw_fills() {
 		if (fd[n]->type == 0) return;
 		struct fill_data *ff = fd[n];
 		int dn = ff->da;
-		if (dp[dn] == NULL || dp[dn]->xv == NULL) {
+		if (!hasDataset(dn)) {
 			gprint("no data in fill dataset");
 			return;
 		}
@@ -633,14 +632,14 @@ void draw_fills() {
 				ymx = ff->ymin;
 			case 2: /* d1,x2 */
 				fill_vec(*xt, ymx, *xt, *yt, &fvec);
-				for (int i = 0; i < data1->size()-1; i++, xt++, yt++) {
+				for (unsigned int i = 0; i < data1->size()-1; i++, xt++, yt++) {
 					fill_vec(*xt, *yt, *(xt+1), *(yt+1), &fvec);
 				}
 				fill_vec(*xt, *yt, *xt, ymx, &fvec);
 				fill_vec(*xt, ymx, data1->getX(0), ymx, &fvec);
 				break;
 			case 3: /* d1,d2 */
-				for (int i = 0; i < data1->size()-1; i++, xt++, yt++) {
+				for (unsigned int i = 0; i < data1->size()-1; i++, xt++, yt++) {
 					fill_vec(*xt, *yt, *(xt+1), *(yt+1), &fvec);
 					x2 = *(xt+1); y2 = *(yt+1);
 				}
@@ -652,13 +651,13 @@ void draw_fills() {
 				xt = data2->getX() + data2->size() - 1;
 				yt = data2->getY() + data2->size() - 1;
 				fill_vec(x2, y2, *xt, *yt, &fvec);
-				for (int i = 0; i < data2->size()-1; i++, xt--, yt--) {
+				for (unsigned int i = 0; i < data2->size()-1; i++, xt--, yt--) {
 					fill_vec(*xt, *yt, *(xt-1), *(yt-1), &fvec);
 				}
 				fill_vec(*xt, *yt, data1->getX(0), data1->getY(0), &fvec);
 				break;
 			case 4: /* d1 */
-				for (int i = 0; i < data1->size()-1; i++, xt++, yt++) {
+				for (unsigned int i = 0; i < data1->size()-1; i++, xt++, yt++) {
 					fill_vec(*xt, *yt, *(xt+1), *(yt+1), &fvec);
 				}
 				fill_vec(*xt, *yt, data1->getX(0), data1->getY(0), &fvec);
@@ -720,17 +719,6 @@ void setupdown(const string& s, bool *enable, int *dataset, bool *percentage, do
 /* 	d3 err 10%			*/
 /* 	d3 errup 10% errdown d2		*/
 /* 	d3 err d1 errwidth .2		*/
-bool dataset_null(int i) {
-	if (dp[i]==NULL) {
-		gprint("Dataset %d doesn't exist at all\n",i);
-		return true;
-	}
-	if (dp[i]->yv == NULL) {
-		gprint("Dataset %d doesn't exist\n",i);
-		return true;
-	}
-	return false;
-}
 
 void draw_errbar(double x, double y, double eup, double ewid, GLEDataSet* ds) {
 	if (ds->contains(x, y)) {
@@ -750,105 +738,68 @@ void draw_herrbar(double x, double y, double eup, double ewid, GLEDataSet* ds) {
 	}
 }
 
-void draw_herr();
-
-void draw_err() {
-	int upd, downd;
-	bool doup, upp;
-	bool dodown, downp;
-	double upval,eup,edown,ewid;
-	double downval;
-	double *xt,*yt,x;
-	int *m,mup,mdown;
-	int dn,i = 0;
-	g_gsave();
-	for (dn=1;dn<=ndata;dn++) {
-	  GLEDataSet* dataSet = dp[dn];
-	  if (dataSet!=NULL && (dataSet->errup.size() != 0 || dataSet->errdown.size() != 0)) {
-		dataSet->checkRanges();
-		g_get_hei(&x);
-		if (dataSet->errwidth==0) dataSet->errwidth = x/3;
-		ewid = dataSet->errwidth;
-		setupdown(dataSet->errup,&doup,&upd,&upp,&upval);
-		setupdown(dataSet->errdown,&dodown,&downd,&downp,&downval);
-		g_set_color(dataSet->color);
-		g_set_line_width(dataSet->lwidth);
-		yt = dataSet->yv;
-		xt = dataSet->xv;
-		m = dataSet->miss;
-		if (upd) if (dataset_null(upd)) return;
-		if (downd) if (dataset_null(downd)) return;
-		for (i=0;i<dataSet->np;i++,m++,xt++,yt++) {
-			mup = false; mdown = false;
-			if (upd) {
-				eup = *(dp[upd]->yv+i);
-				mup = *(dp[upd]->miss+i);
-			} else {
-				eup = upval;
-				if (upp) eup = (eup * *yt)/100;
-			}
-			if (downd) {
-				edown = *(dp[downd]->yv+i);
-				mdown = *(dp[downd]->miss+i);
-			} else {
-				edown = downval;
-				if (downp) edown = (edown * *yt)/100;
-			}
-			if (doup && !*m && !mup) draw_errbar(*xt, *yt, eup, ewid, dataSet);
-			if (dodown && !*m && !mdown) draw_errbar(*xt, *yt, -edown, ewid, dataSet);
-		}
-	  }
+void draw_err(GLEDataSet* dataSet, const string& errdescr, bool isUp, bool isHoriz, double errwd, const char* descr) {
+	dataSet->checkRanges();
+	if (errwd == 0) {
+		double hei;
+		g_get_hei(&hei);
+		errwd = hei/3;
 	}
-	g_grestore();
-	draw_herr();
+	int errID;
+	double value;
+	bool enable, percentage;
+	setupdown(errdescr, &enable, &errID, &percentage, &value);
+	g_set_color(dataSet->color);
+	g_set_line_width(dataSet->lwidth);
+	GLEDataPairs pairs(dataSet);
+	GLEDataPairs errPairs;
+	if (errID != 0) {
+		GLEDataSet* errDataset = getDataset(errID, descr);
+		errPairs.copyDimension(errDataset, 1);
+		errDataset->validateNbPoints(dataSet->np, descr);
+	}
+	vector<double>* errDimension = pairs.getDimension(isHoriz ? 0 : 1);
+	for (unsigned int i = 0; i < dataSet->np; i++) {
+		int miss = false;
+		double error = 0.0;
+		if (errID != 0) {
+			miss = errPairs.getM(i);
+			error = errPairs.getY(i);
+		} else {
+			error = value;
+			if (percentage) error *= fabs(errDimension->at(i)) / 100.0;
+		}
+		if (enable && !pairs.getM(i) && !miss) {
+			if (!isUp) {
+				error = error * -1;
+			}
+			if (isHoriz) {
+				draw_herrbar(pairs.getX(i), pairs.getY(i), error, errwd, dataSet);
+			} else {
+				draw_errbar(pairs.getX(i), pairs.getY(i), error, errwd, dataSet);
+			}
+		}
+	}
 }
 
-void draw_herr() {
-	double upval,eup,edown,ewid;
-	bool dodown, downp;
-	bool doup, upp;
-	int downd, upd;
-	double downval;
-	double *xt,*yt,x;
-	int *m,mup,mdown;
-	int dn,i;
+void draw_err() {
 	g_gsave();
-	for (dn=1;dn<=ndata;dn++) {
-	  GLEDataSet* dataSet = dp[dn];
-	  if (dataSet!=NULL) if (dataSet->herrup.size() != 0 || dataSet->herrdown.size() != 0) {
-		dataSet->checkRanges();
-		g_get_hei(&x);
-		if (dataSet->herrwidth==0) dataSet->herrwidth = x/3;
-		ewid = dataSet->herrwidth;
-		setupdown(dataSet->herrup,&doup,&upd,&upp,&upval);
-		setupdown(dataSet->herrdown,&dodown,&downd,&downp,&downval);
-		g_set_color(dataSet->color);
-		g_set_line_width(dataSet->lwidth);
-		yt = dataSet->yv;
-		xt = dataSet->xv;
-		m = dataSet->miss;
-		if (upd) if (dataset_null(upd)) return ;
-		if (downd) if (dataset_null(downd)) return ;
-		for (i=0;i<dataSet->np;i++,m++,xt++,yt++) {
-			mup = false; mdown = false;
-			if (upd) {
-				eup = *(dp[upd]->yv+i);
-				mup = *(dp[upd]->miss+i);
-			} else {
-				eup = upval;
-				if (upp) eup = (eup * *xt)/100;
+	for (int dn = 1; dn <= ndata; dn++) {
+		if (hasDataset(dn)) {
+			GLEDataSet* dataSet = dp[dn];
+			if (dataSet->errup.size() != 0) {
+				draw_err(dataSet, dataSet->errup, true, false, dataSet->errwidth, "error up");
 			}
-			if (downd) {
-				edown = *(dp[downd]->yv+i);
-				mdown = *(dp[downd]->miss+i);
-			} else {
-				edown = downval;
-				if (downp) edown = (edown * *xt)/100;
+			if (dataSet->errdown.size() != 0) {
+				draw_err(dataSet, dataSet->errdown, false, false, dataSet->errwidth, "error down");
 			}
-			if (doup && !*m && !mup) draw_herrbar(*xt, *yt, eup, ewid, dataSet);
-			if (dodown && !*m  && !mdown) draw_herrbar(*xt, *yt, -edown, ewid, dataSet);
+			if (dataSet->herrup.size() != 0) {
+				draw_err(dataSet, dataSet->herrup, true, true, dataSet->herrwidth, "error right");
+			}
+			if (dataSet->herrdown.size() != 0) {
+				draw_err(dataSet, dataSet->herrdown, false, true, dataSet->herrwidth, "error left");
+			}
 		}
-	  }
 	}
 	g_grestore();
 }
@@ -862,7 +813,7 @@ void draw_lines() {
 	for (int dn = 1; dn <= ndata; dn++) {
 		last_vecx = GLE_INF;
 		last_vecy = GLE_INF;
-		if (dp[dn] != NULL && dp[dn]->xv != NULL && (dp[dn]->line || dp[dn]->lstyle[0] != 0)) {
+		if (hasDataset(dn) && (dp[dn]->line || dp[dn]->lstyle[0] != 0)) {
 			GLEDataSet* dataSet = dp[dn];
 			dataSet->checkRanges();
 			GLERC<GLEDataPairs> data = transform_data(dataSet);
@@ -1098,13 +1049,17 @@ void draw_markers() throw (ParserError) {
 			if (dataSet->mscale != 0) msize = msize * dataSet->mscale;
 			double mdist = dataSet->mdist;
 			if (mdist == 0) {
-				GLEDataSet* mdata = NULL;
-				if (dataSet->mdata != 0) mdata = dp[dataSet->mdata];
-				for (int i = 0; i < data->size(); i++) {
+				GLEDataPairs mdataPairs;
+				if (dataSet->mdata != 0) {
+					GLEDataSet* mdataSet = getDataset(dataSet->mdata, "marker mdata");
+					mdataPairs.copyDimension(mdataSet, 1);
+					mdataSet->validateNbPoints(data->size(), "marker mdata");
+				}
+				for (unsigned int i = 0; i < data->size(); i++) {
 					if (!data->getM(i)) {
 						double dval = 1.0;
-						if (mdata != NULL && mdata->yv != NULL && i < mdata->np) {
-							dval = mdata->yv[i];
+						if (dataSet->mdata != 0) {
+							dval = mdataPairs.getY(i);
 						}
 						draw_mark(data->getX(i), data->getY(i), dataSet->marker, msize, dval, dataSet);
 					}
@@ -1117,7 +1072,7 @@ void draw_markers() throw (ParserError) {
 					double len = 0.0;
 					double x0 = fnx(xt[0], dataSet);
 					double y0 = fny(yt[0], dataSet);
-					for (int i = 1; i < data->size(); i++) {
+					for (unsigned int i = 1; i < data->size(); i++) {
 						double x = fnx(xt[i], dataSet);
 						double y = fny(yt[i], dataSet);
 						len += sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
@@ -1126,7 +1081,7 @@ void draw_markers() throw (ParserError) {
 					x0 = fnx(xt[0], dataSet);
 					y0 = fny(yt[0], dataSet);
 					double prev_dist = mdist - fmod(len, mdist)/2.0;
-					for (int i = 1; i < data->size(); i++) {
+					for (unsigned int i = 1; i < data->size(); i++) {
 						double x = fnx(xt[i], dataSet);
 						double y = fny(yt[i], dataSet);
 						double dist = sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
@@ -1376,18 +1331,20 @@ void GLELetDataSet::initializeFrom(int dn, int var) {
 	m_DN = dn;
 	m_Var = var;
 	/* points */
-	double* xv = dp[dn]->xv;
-	double* yv = dp[dn]->yv;
-	int* mm = dp[dn]->miss;
-	/* get data from data sets */
+	GLEDataSet* dataSet = dp[dn];
+	GLEDataPairs pairs(dataSet);
+	double* xv = pairs.getX();
+	double* yv = pairs.getY();
+	int* mm = pairs.getM();
+	/* get data from datasets */
 	/* record x-values for which y-value is missing separately */
 	int nbvals = 0;
 	double xprev = GLE_INF;
-	for (int i = 0; i < dp[dn]->np; i++) {
+	for (unsigned int i = 0; i < dataSet->np; i++) {
 		if (!mm[i]) {
 			if (xv[i] == xprev && nbvals > 0) {
 				/* same x-value, but different y-value */
-				/* support for data sets with discontinuities */
+				/* support for datasets with discontinuities */
 				m_Vals[nbvals-1].y[GLE_DS_R] = yv[i];
 			} else {
 				DataSetVal val;
@@ -1410,11 +1367,11 @@ void GLELetDataSet::initializeFrom(int dn, int var) {
 	if (!sorted) {
 		std::sort(m_Vals.begin(), m_Vals.end(), DataSetValCMP);
 	}
-	// Check if data set represents a function
+	// Check if dataset represents a function
 	m_IsFunction = true;
 	for (unsigned int i = 1; i < m_Vals.size(); i++) {
 		if (m_Vals[i].x == m_Vals[i-1].x) {
-			// Note: GLE can't combine different data sets if they don't represent functions in one let command
+			// Note: GLE can't combine different datasets if they don't represent functions in one let command
 			m_IsFunction = false;
 		}
 	}
@@ -1582,6 +1539,7 @@ public:
 	void setInfo(GLEFunctionParserPcode* expr, int varx);
 	void setYMinYMax(double ymin, double ymax);
 	void setDetectDiscontinuity(bool detect, double threshold);
+	void toDataset(GLEDataSet* dataset);
 	inline int size() { return m_Size; }
 	inline double* getX() { return m_Dim[0]->getValues()->toArray(); }
 	inline double* getY() { return m_Dim[1]->getValues()->toArray(); }
@@ -1650,7 +1608,7 @@ void DataFill::selectXValueNoIPol(double x) {
 bool DataFill::selectXValue(double x, int lr) {
 	/* set parameter variable */
 	if (m_VarX >= 0) var_set(m_VarX, x);
-	/* set data set variables */
+	/* set dataset variables */
 	bool onceMore = false;
 	for (unsigned int i = 0; i < m_DataSets->size(); i++) {
 		onceMore |= (*m_DataSets)[i]->interpolateTo(x, lr);
@@ -1671,7 +1629,7 @@ double DataFill::maxDistanceTo(double x) {
 void DataFill::minMaxDistanceTo(double x, GLERange* distanceRange) {
 	/* set parameter variable */
 	if (m_VarX >= 0) var_set(m_VarX, x);
-	/* set data set variables */
+	/* set dataset variables */
 	for (unsigned int i = 0; i < m_DataSets->size(); i++) {
 		(*m_DataSets)[i]->interpolateTo(x, GLE_DS_L);
 	}
@@ -1887,6 +1845,25 @@ void DataFill::addPointIPol(double x) {
 void DataFill::setDetectDiscontinuity(bool detect, double threshold) {
 	m_detectDiscontinuity = detect;
 	m_discontinuityThreshold = threshold;
+}
+
+void DataFill::toDataset(GLEDataSet* dataset) {
+	dataset->np = size();
+	GLEArrayImpl* dimensions = dataset->getData();
+	dimensions->ensure(m_Dim.size());
+	for (unsigned int dim = 0; dim < m_Dim.size(); dim++) {
+		GLEArrayImpl* newArray = new GLEArrayImpl();
+		newArray->ensure(dataset->np);
+		dimensions->setObject(dim, newArray);
+		GLEDoubleArray* values = m_Dim[dim]->getValues();
+		for (unsigned int i = 0; i < dataset->np; i++) {
+			if (m_Missing->getBoolAt(i)) {
+				newArray->setUnknown(i);
+			} else {
+				newArray->setDouble(i, values->getDoubleAt(i));
+			}
+		}
+	}
 }
 
 class GLECheckWindow {
@@ -2194,15 +2171,23 @@ bool GLELet::checkIdenticalRanges(GLEVectorAutoDelete<GLELetDataSet>& datasets) 
 	if (datasets.size() == 0) return false;
 	if (datasets.size() == 1) return true;
 	GLELetDataSet* ds0 = datasets[0];
-	int nbX = dp[ds0->getDatasetID()]->np;
+	unsigned int nbX = dp[ds0->getDatasetID()]->np;
 	for (unsigned int i = 1; i < datasets.size(); i++) {
 		if (dp[datasets[i]->getDatasetID()]->np != nbX) return false;
 	}
-	double* rangeX0 = dp[ds0->getDatasetID()]->xv;
+	GLEArrayImpl* rangeX0 = dp[ds0->getDatasetID()]->getDimData(0);
+	if (rangeX0 == 0) {
+		return false;
+	}
 	for (unsigned int i = 1; i < datasets.size(); i++) {
-		double* rangeXi = dp[datasets[i]->getDatasetID()]->xv;
-		for (int j = 0; j < nbX; j++) {
-			if (rangeX0[j] != rangeXi[j]) return false;
+		GLEArrayImpl* rangeXi = dp[datasets[i]->getDatasetID()]->getDimData(0);
+		if (rangeXi == 0 || rangeX0->size() != rangeXi->size()) {
+			return false;
+		}
+		for (unsigned int j = 0; j < rangeX0->size(); j++) {
+			if (!gle_memory_cell_equals(rangeX0->get(j), rangeXi->get(j))) {
+				return false;
+			}
 		}
 	}
 	return true;
@@ -2211,28 +2196,37 @@ bool GLELet::checkIdenticalRanges(GLEVectorAutoDelete<GLELetDataSet>& datasets) 
 void GLELet::transformIdenticalRangeDatasets(GLEVectorAutoDelete<GLELetDataSet>& datasets, DataFill* fill) {
 	// transform single dataset - advantage: dataset does not need to represent a function and is not sorted
 	GLELetDataSet* ds0 = datasets[0];
-	int nbX = dp[ds0->getDatasetID()]->np;
-	double* rangeX0 = dp[ds0->getDatasetID()]->xv;
-	for (int j = 0; j < nbX; j++) {
-		if (m_HasFrom && rangeX0[j] < m_LetFrom) {
+	GLEDataSet* ds0Data = dp[ds0->getDatasetID()];
+	unsigned int nbX = ds0Data->np;
+	GLEDataPairs ds0Pairs;
+	ds0Pairs.copyDimension(ds0Data, 0);
+	for (unsigned int j = 0; j < nbX; j++) {
+		if (m_HasFrom && ds0Pairs.getX(j) < m_LetFrom) {
 			continue;
 		}
-		if (m_HasTo && rangeX0[j] > m_LetTo) {
+		if (m_HasTo && ds0Pairs.getX(j) > m_LetTo) {
 			continue;
 		}
 		bool miss = false;
-		for (unsigned int i = 0; i < datasets.size(); i++) {
-			GLELetDataSet* dsi = datasets[i];
-			if (dp[dsi->getDatasetID()]->miss[j]) {
-				miss = true;
-			} else if (dsi->getVar() != -1) {
-				/* dsi->getVar() can be -1 if dataset is only used in "range" expression */
-				var_set(dsi->getVar(), dp[dsi->getDatasetID()]->yv[j]);
+		if (ds0Pairs.getM(j)) {
+			miss = true;
+		} else {
+			for (unsigned int i = 0; i < datasets.size(); i++) {
+				GLELetDataSet* dsi = datasets[i];
+				GLEArrayImpl* dsiArray = dp[dsi->getDatasetID()]->getDimData(1);
+				if (dsiArray != 0 && dsiArray->size() == nbX) {
+					if (dsiArray->isUnknown(j)) {
+						miss = true;
+					} else if (dsi->getVar() != -1) {
+						/* dsi->getVar() can be -1 if dataset is only used in "range" expression */
+						var_set(dsi->getVar(), dsiArray->get(j));
+					}
+				}
 			}
 		}
 		if (!miss) {
 			// this method sets the x value and computes the values for all dimensions
-			fill->selectXValueNoIPol(rangeX0[j]);
+			fill->selectXValueNoIPol(ds0Pairs.getX(j));
 			if (!m_Where.isNull()) {
 				if (m_Where->evalDouble() != 0.0) {
 					fill->addPoint();
@@ -2325,7 +2319,7 @@ void GLELet::doLet() throw(ParserError) {
 	int dset_id = getDataSet();
 	if (ndata < dset_id) ndata = dset_id;
 	if (dp[dset_id] == NULL) {
-		dp[dset_id] = new GLEDataSet();
+		dp[dset_id] = new GLEDataSet(dset_id);
 		copy_default(dset_id);
 	}
 	/* copy default dataset settings */
@@ -2343,7 +2337,7 @@ void GLELet::doLet() throw(ParserError) {
 	/* was "range" option given? */
 	set<int>& rangeDS = getXRangeDS();
 	bool allRangeDS = rangeDS.empty();
-	/* initialize input data sets */
+	/* initialize input datasets */
 	bool allFunctions = true;
 	GLEVectorAutoDelete<GLELetDataSet> datasets;
 	for (int i = 0; i < ndn; i++) {
@@ -2397,17 +2391,8 @@ void GLELet::doLet() throw(ParserError) {
 	} else {
 		dp[dset_id]->clearAll();
 	}
-	/* done, transfer to target data set */
-	dp[dset_id]->np = fill.size();
-	if (dp[dset_id]->np == 0) {
-		g_throw_parser_error("no data points in data set d", dset_id);
-	}
-	dp[dset_id]->miss = fill.getM();
-	dp[dset_id]->xv = fill.getX();
-	dp[dset_id]->yv = fill.getY();
-	//for (int i = 0; i < dp[dset_id]->np; i++) {
-	//	cerr << "m: " << dp[dset_id]->miss[i] << " " << dp[dset_id]->xv[i] << " " << dp[dset_id]->yv[i] << endl;
-	//}
+	/* done, transfer to target dataset */
+	fill.toDataset(dp[dset_id]);
 }
 
 void GLELet::doFitFunction(const string& fct, GLEParser* parser, bool finetune) throw(ParserError) {
@@ -2486,15 +2471,16 @@ void GLELet::doFitFunction(const string& fct, GLEParser* parser, bool finetune) 
 	double ymax = -GLE_INF;
 	double xmin = +GLE_INF;
 	double ymin = +GLE_INF;
-	for (int i = 0; i < dp[ddlinfit]->np; i++) {
-		if (!dp[ddlinfit]->miss[i]) {
-			if (window.valid(dp[ddlinfit]->xv[i], dp[ddlinfit]->yv[i])) {
-				xmax = max(xmax, dp[ddlinfit]->xv[i]);
-				xmin = min(xmin, dp[ddlinfit]->xv[i]);
-				ymax = max(ymax, dp[ddlinfit]->yv[i]);
-				ymin = min(ymin, dp[ddlinfit]->yv[i]);
-				x.push_back(dp[ddlinfit]->xv[i]);
-				y.push_back(dp[ddlinfit]->yv[i]);
+	GLEDataPairs fitPairs(getDataset(ddlinfit));
+	for (unsigned int i = 0; i < fitPairs.size(); i++) {
+		if (!fitPairs.getM(i)) {
+			if (window.valid(fitPairs.getX(i), fitPairs.getY(i))) {
+				xmax = max(xmax, fitPairs.getX(i));
+				xmin = min(xmin, fitPairs.getX(i));
+				ymax = max(ymax, fitPairs.getY(i));
+				ymin = min(ymin, fitPairs.getY(i));
+				x.push_back(fitPairs.getX(i));
+				y.push_back(fitPairs.getY(i));
 			}
 		}
 	}
@@ -2669,7 +2655,7 @@ void GLELet::doHistogram(GLEParser* parser) throw(ParserError) {
 	// get the data series to compute histogram of
 	string& token = tokens->next_token();
 	if (token.length() <= 1 || toupper(token[0]) != 'D') {
-		throw tokens->error("data set identifier expected after histogram command");
+		throw tokens->error("dataset identifier expected after histogram command");
 	}
 	int bins = -1;
 	int histds = get_dataset_identifier(token.c_str(), true);
@@ -2701,13 +2687,11 @@ void GLELet::doHistogram(GLEParser* parser) throw(ParserError) {
 		setHasTo(true);
 		setTo(ax->getMax());
 	}
+	GLEDataPairs histData(getDataset(histds));
 	if (!hasFrom() || !hasTo()) {
 		GLERange range;
-		int np = dp[histds]->np;
-		double* yv = dp[histds]->yv;
-		int* m = dp[histds]->miss;
-		for (int i = 0; i < np; i++) {
-			range.updateRange(yv[i], m[i]);
+		for (unsigned int i = 0; i < histData.size(); i++) {
+			range.updateRange(histData.getY(i), histData.getM(i));
 		}
 		roundrange(&range, false, false, 0.0);
 		if (range.validNotEmpty()) {
@@ -2738,10 +2722,10 @@ void GLELet::doHistogram(GLEParser* parser) throw(ParserError) {
 		}
 		from.push_back(value);
 	}
-	for (int i=0; i < dp[histds]->np; i++) {
-		if (!dp[histds]->miss[i]) {
+	for (unsigned int i = 0; i < dp[histds]->np; i++) {
+		if (!histData.getM(i)) {
 			int found = -1;
-			double yv = dp[histds]->yv[i];
+			double yv = histData.getY(i);
 			for (vector<double>::size_type j = 0; j < counts.size(); j++) {
 				if (yv >= from[j] && yv < from[j+1]) {
 					found = j;
@@ -2762,10 +2746,7 @@ void GLELet::doHistogram(GLEParser* parser) throw(ParserError) {
 	}
 	int resds = getDataSet();
 	dp[resds]->clearAll();
-	dp[resds]->np = fill.size();
-	dp[resds]->miss = fill.getM();
-	dp[resds]->xv = fill.getX();
-	dp[resds]->yv = fill.getY();
+	fill.toDataset(dp[resds]);
 }
 
 /*  LET d2 = exp(x) [ FROM exp TO exp [ STEP exp ] ]	*/
@@ -2798,11 +2779,11 @@ void do_let(const string& letcmd, bool nofirst) throw(ParserError) {
 	let.setNoFirst(nofirst);
 	let.setFineTune(nofirst);
 
-	// dd is the data set to assigned the let to
+	// dd is the dataset to assigned the let to
 	// atoi the +1 strips the d
 	string& token = tokens->next_token();
 	if (token.length() <= 1 || toupper(token[0]) != 'D') {
-		throw tokens->error("data set identifier expected after let command");
+		throw tokens->error("dataset identifier expected after let command");
 	}
 	let.setDataSet(get_dataset_identifier(token.c_str()));
 
@@ -3068,7 +3049,7 @@ void do_dataset(int d) throw(ParserError) {
 }
 
 void do_each_dataset_settings() {
-	// Set data sets in to/from of bar commands as used
+	// Set datasets in to/from of bar commands as used
 	for (int bar = 1; bar <= g_nbar; bar++) {
 		for (int i = 0; i < br[bar]->ngrp; i++) {
 			int to_bar = br[bar]->to[i];
@@ -3083,18 +3064,18 @@ void do_each_dataset_settings() {
 			}
 		}
 	}
-	/* Add data set to key */
+	/* Add dataset to key */
 	for (int dn = 1; dn <= ndata; dn++) {
 		if (dp[dn] != NULL && dp[dn]->axisscale) {
 			do_dataset_key(dn);
-			/* automatically turn on labels on axis for this data set */
+			/* automatically turn on labels on axis for this dataset */
 			for (int dim = GLE_DIM_X; dim <= GLE_DIM_Y; dim++) {
 				GLEAxis* ax = &xx[dp[dn]->getDim(dim)->getAxis()];
 				if (!ax->has_label_onoff) ax->label_off = false;
 			}
 		}
 	}
-	// If no data set is used, then scale based on all data sets
+	// If no dataset is used, then scale based on all datasets
 	bool has = false;
 	for (int dn = 1; dn <= ndata; dn++) {
 		if (dp[dn] != NULL && dp[dn]->axisscale) has = true;
@@ -3104,11 +3085,11 @@ void do_each_dataset_settings() {
 			if (dp[dn] != NULL) dp[dn]->axisscale = true;
 		}
 	}
-	// Make sure no axis has data sets associated to it
+	// Make sure no axis has datasets associated to it
 	for (int axis = GLE_AXIS_X; axis <= GLE_AXIS_Y0; axis++) {
 		xx[axis].removeAllDimensions();
 	}
-	// Add data sets to axis
+	// Add datasets to axis
 	for (int dn = 1; dn <= ndata; dn++) {
 		if (dp[dn] != NULL && dp[dn]->axisscale) {
 			for (int dim = 0; dim < 2; dim++) {
@@ -3150,10 +3131,11 @@ void set_bar_axis_places() {
 				GLEAxis* axis = br[bar]->horiz ? &xx[2] : &xx[1];
 				if (axis->hasNames() && !axis->hasPlaces()) {
 					int np = dp[to_bar]->np;
-					double* xt = dp[to_bar]->xv;
 					if (np == axis->getNbNames()) {
-						for (int i = 0; i < np; i++) {
-							axis->addPlace(xt[i]);
+						GLEDataPairs barData;
+						barData.copyDimension(getDataset(to_bar), 0);
+						for (unsigned int i = 0; i < barData.size(); i++) {
+							axis->addPlace(barData.getX(i));
 						}
 					}
 				}
@@ -3165,10 +3147,13 @@ void set_bar_axis_places() {
 void min_max_scale(GLEAxis* ax) {
 	GLERange* range = ax->getDataRange();
 	for (int dim = 0; dim < ax->getNbDimensions(); dim++) {
-		GLEDataSet* data = ax->getDim(dim)->getDataSet();
-		double* values = ax->getDim(dim)->getDataValues();
-		for (int i = 0; i < data->np; i++) {
-			range->updateRange(values[i], data->miss[i]);
+		GLEDataSet* dataset = ax->getDim(dim)->getDataSet();
+		if (dataset->np > 0) {
+			GLEDataPairs pairs(dataset);
+			vector<double>* values = pairs.getDimension(ax->getDim(dim)->getDataDimensionIndex());
+			for (unsigned int i = 0; i < pairs.size(); i++) {
+				range->updateRange(values->at(i), pairs.getM(i));
+			}
 		}
 	}
 }
@@ -3177,10 +3162,15 @@ void quantile_scale(GLEAxis* ax) {
 	/* building list for quantile calculation */
 	vector<double> q_list;
 	for (int dim = 0; dim < ax->getNbDimensions(); dim++) {
-		GLEDataSet* data = ax->getDim(dim)->getDataSet();
-		double* values = ax->getDim(dim)->getDataValues();
-		for (int i = 0; i < data->np; i++) {
-			if (!data->miss[i]) q_list.push_back(values[i]);
+		GLEDataSet* dataset = ax->getDim(dim)->getDataSet();
+		if (dataset->np > 0) {
+			GLEDataPairs pairs(dataset);
+			vector<double>* values = pairs.getDimension(ax->getDim(dim)->getDataDimensionIndex());
+			for (unsigned int i = 0; i < pairs.size(); i++) {
+				if (!pairs.getM(i)) {
+					q_list.push_back(values->at(i));
+				}
+			}
 		}
 	}
 	std::sort(q_list.begin(), q_list.end());
@@ -3221,22 +3211,21 @@ void get_dataset_ranges() {
 		bounds->addToRangeX(xx[GLE_AXIS_X].getDataRange());
 		bounds->addToRangeY(xx[GLE_AXIS_Y].getDataRange());
 	}
-	// Set data sets in to/from of bar commands as used
+	// Set datasets in to/from of bar commands as used
 	for (int bar = 1; bar <= g_nbar; bar++) {
 		for (int i = 0; i < br[bar]->ngrp; i++) {
 			int to_bar = br[bar]->to[i];
 			if (to_bar != 0 && to_bar <= ndata && dp[to_bar] != NULL && dp[to_bar]->np > 0) {
-				// Extend range at both sides for a bar data set
+				// Extend range at both sides for a bar dataset
 				// So that bars are visible
 				int np = dp[to_bar]->np;
 				if (np > 0) {
-					double* xt = dp[to_bar]->xv;
-					int* m = dp[to_bar]->miss;
 					GLEDataSetDimension* xdim = dp[to_bar]->getDimXInv();
 					GLERange* xrange = xx[xdim->getAxis()].getDataRange();
-					double delta = bar_get_min_interval(bar, i);
-					xrange->updateRange(xt[0]-delta/2, m[0]);
-					xrange->updateRange(xt[np-1]+delta/2, m[np-1]);
+					GLEDataPairs barData(dp[to_bar]);
+					double delta = barData.getMinXInterval();
+					xrange->updateRange(barData.getX(0) - delta/2, barData.getM(0));
+					xrange->updateRange(barData.getX(np - 1) + delta/2, barData.getM(np-1));
 				}
 			}
 		}
@@ -3299,7 +3288,7 @@ void do_bigfile_compatibility_dn(int dn) throw(ParserError) {
 	validate_open_input_stream(file, fname);
 	vector<double> xp;
 	vector<double> yp;
-	vector<bool> miss;
+	vector<int> miss;
 	vector<double> columns;
 	vector<bool> columns_miss;
 	char_separator sep2(" ,;\t\n", "!");
@@ -3362,20 +3351,8 @@ void do_bigfile_compatibility_dn(int dn) throw(ParserError) {
 		}
 	}
 	file.close();
-	// (xp.size()+1) avoids "error allocating zero memory"
-	double* xv_dp = (double*) myallocz(sizeof(double)*(xp.size()+1));
-	double* yv_dp = (double*) myallocz(sizeof(double)*(xp.size()+1));
-	int* miss_dp = (int*) myallocz(sizeof(int)*(xp.size()+1));
-	for (unsigned int i = 0; i < xp.size(); i++) {
-		xv_dp[i] = xp[i];
-		yv_dp[i] = yp[i];
-		miss_dp[i] = (int)miss[i];
-	}
 	dp[dn]->clearAll();
-	dp[dn]->np = xp.size();
-	dp[dn]->xv = xv_dp;
-	dp[dn]->yv = yv_dp;
-	dp[dn]->miss = miss_dp;
+	dp[dn]->fromData(xp, yp, miss);
 }
 
 void do_bigfile_compatibility() throw(ParserError) {
@@ -3756,10 +3733,8 @@ void GLEColorMap::draw(double x0, double y0, double wd, double hi) {
 	}
 }
 
-GLEDataSet::GLEDataSet() {
-	xv = NULL;   /* x data values */
-	yv = NULL;   /* y data values */
-	miss = NULL; /* if true miss this point */
+GLEDataSet::GLEDataSet(int identifier) {
+	id = identifier;
 	nomiss = 0;
 	np = 0;      /* NUMBER OF POINTS */
 	autoscale = 0;
@@ -3810,23 +3785,17 @@ GLEDataSet::~GLEDataSet() {
 }
 
 void GLEDataSet::initBackup() {
-	backup_xv = backup_yv = NULL;
-	backup_miss = NULL; backup_np = 0;
+	m_dataBackup.clear();
 }
 
 void GLEDataSet::clearAll() {
 	np = 0;
-	if (yv_str != NULL) delete yv_str;
-	if (backup_xv != NULL && backup_xv != xv) free(backup_xv);
-	if (backup_yv != NULL && backup_yv != yv) free(backup_yv);
-	if (backup_miss != NULL && backup_miss != miss) free(backup_miss);
-	if (xv != NULL) free(xv);
-	if (yv != NULL) free(yv);
-	if (miss != NULL) free(miss);
-	yv_str = NULL;
-	xv = yv = NULL;
-	miss = NULL;
-	initBackup();
+	m_dataBackup.clear();
+	m_data.clear();
+}
+
+bool GLEDataSet::undefined() {
+	return m_data.size() == 0;
 }
 
 void GLEDataSet::copy(GLEDataSet* other) {
@@ -3872,21 +3841,21 @@ void GLEDataSet::copy(GLEDataSet* other) {
 }
 
 void GLEDataSet::backup() {
-	backup_np = np;
-	backup_xv = xv;
-	backup_yv = yv;
-	backup_miss = miss;
+	m_dataBackup.ensure(m_data.size());
+	for (unsigned int i = 0; i < m_data.size(); i++) {
+		m_dataBackup.set(i, m_data.get(i));
+	}
 }
 
 void GLEDataSet::restore() {
-	if (backup_xv != NULL) {
-		if (xv != NULL && xv != backup_xv) free(xv);
-		if (yv != NULL && yv != backup_yv) free(yv);
-		if (miss != NULL && miss != backup_miss) free(miss);
-		np = backup_np;
-		xv = backup_xv;
-		yv = backup_yv;
-		miss = backup_miss;
+	if (m_dataBackup.size() != 0) {
+		for (unsigned int i = 0; i < m_dataBackup.size(); i++) {
+			m_data.set(i, m_dataBackup.get(i));
+			GLEDataObject* dimI = m_dataBackup.getObject(i);
+			if (dimI != 0 && dimI->getType() == GLEObjectTypeArray) {
+				np = static_cast<GLEArrayImpl*>(dimI)->size();
+			}
+		}
 	}
 	initBackup();
 }
@@ -3920,6 +3889,88 @@ void GLEDataSet::copyRangeIfRequired(int dimension) {
 	}
 }
 
+void GLEDataSet::validateDimensions() {
+	GLEArrayImpl* data = getData();
+	for (unsigned int i = 0; i < data->size(); i++) {
+		GLEDataObject* dim = data->getObject(i);
+		if (dim == 0 || dim->getType() != GLEObjectTypeArray) {
+			ostringstream err;
+			err << "dataset d" << id << " dimension " << dimension2String(i) << " not a double array";
+			g_throw_parser_error(err.str());
+		}
+		GLEArrayImpl* array = static_cast<GLEArrayImpl*>(dim);
+		if (array->size() != np) {
+			ostringstream err;
+			err << "dataset d" << id << " dimension " << dimension2String(i)
+				<< " has an incorrect number of data points (" << array->size() << " <> " << np << ")";
+			g_throw_parser_error(err.str());
+		}
+	}
+}
+
+void GLEDataSet::validateNbPoints(unsigned int expectedNb, const char* descr) {
+	if (np != expectedNb) {
+		ostringstream err;
+		if (descr != 0) {
+			err << descr << " ";
+		}
+		err << "dataset d" << id << " contains " << np;
+		err << " data points, but " << expectedNb << " are required";
+		g_throw_parser_error(err.str());
+	}
+}
+
+GLEArrayImpl* GLEDataSet::getDimData(unsigned int dim) {
+	if (dim >= getData()->size()) {
+		return 0;
+	}
+	GLEDataObject* data = getData()->getObject(dim);
+	if (data != 0 && data->getType() == GLEObjectTypeArray) {
+		return static_cast<GLEArrayImpl*>(data);
+	} else {
+		return 0;
+	}
+}
+
+void GLEDataSet::fromData(const vector<double>& xp, const vector<double>& yp, const vector<int>& miss) {
+	np = xp.size();
+	GLEArrayImpl* dimensions = getData();
+	unsigned int dims = 2;
+	dimensions->ensure(dims);
+	for (unsigned int dim = 0; dim < dims; dim++) {
+		GLEArrayImpl* newArray = new GLEArrayImpl();
+		newArray->ensure(np);
+		dimensions->setObject(dim, newArray);
+		for (unsigned int i = 0; i < np; i++) {
+			if (miss[i]) {
+				newArray->setUnknown(i);
+			} else {
+				newArray->setDouble(i, dim == 0 ? xp[i] : yp[i]);
+			}
+		}
+	}
+
+}
+
+vector<int> GLEDataSet::getMissingValues() {
+	vector<int> result;
+	result.assign(np, false);
+	GLEArrayImpl* dimensions = getData();
+	for (unsigned int dim = 0; dim < dimensions->size(); dim++) {
+		GLEDataObject* data = dimensions->getObject(dim);
+		if (data != 0 && data->getType() == GLEObjectTypeArray) {
+			GLEArrayImpl* array = static_cast<GLEArrayImpl*>(data);
+			unsigned int count = min(np, array->size());
+			for (unsigned int i = 0; i < count; i++) {
+				if (array->isUnknown(i)) {
+					result[i] = true;
+				}
+			}
+		}
+	}
+	return result;
+}
+
 void GLEDataSet::checkRanges() throw(ParserError) {
 	// when parsing "let" -> already create dataset with ensureCreate...
 	// so that dn command applies to it
@@ -3945,11 +3996,11 @@ void GLEDataSetDimension::copy(GLEDataSetDimension* other) {
 	getRange()->copySet(other->getRange());
 }
 
-double* GLEDataSetDimension::getDataValues() {
+int GLEDataSetDimension::getDataDimensionIndex() {
 	if (getDataSet()->inverted) {
-		return getIndex() == 0 ? getDataSet()->yv : getDataSet()->xv;
+		return getIndex() == 0 ? 1 : 0;
 	} else {
-		return getIndex() == 0 ? getDataSet()->xv : getDataSet()->yv;
+		return getIndex();
 	}
 }
 
@@ -3960,7 +4011,63 @@ GLEDataPairs::GLEDataPairs(double* x, double* y, int* m, int np) {
 	set(x, y, m, np);
 }
 
+GLEDataPairs::GLEDataPairs(GLEDataSet* dataSet) {
+	copy(dataSet);
+}
+
 GLEDataPairs::~GLEDataPairs() {
+}
+
+void GLEDataPairs::validate(GLEDataSet* data, unsigned int minDim) {
+	if (data->getData()->size() < minDim) {
+		ostringstream err;
+		err << "dataset d" << data->id << " has " << data->getData()->size() << " dimensions, but " << minDim << " dimensions are required";
+		g_throw_parser_error(err.str());
+	}
+	data->validateDimensions();
+}
+
+double GLEDataPairs::getDataPoint(GLEMemoryCell* element, int datasetID, unsigned int dimension, unsigned int arrayIdx) {
+	double result = 0.0;
+	if (!gle_memory_cell_to_double(element, &result)) {
+		ostringstream err;
+		err << "dataset d" << datasetID << " dimension " << dimension2String(dimension)
+			<< " point " << (arrayIdx + 1) << ": expected double but found '";
+		gle_memory_cell_print(element, err);
+		err << "'";
+		g_throw_parser_error(err.str());
+	}
+	return result;
+}
+
+void GLEDataPairs::copyDimensionImpl(GLEArrayImpl* data, unsigned int np, int datasetID, unsigned int dim) {
+	GLEArrayImpl* array = static_cast<GLEArrayImpl*>(data->getObject(dim));
+	vector<double>* dimDataPoints = getDimension(dim);
+	dimDataPoints->resize(np);
+	for (unsigned int i = 0; i < np; i++) {
+		GLEMemoryCell* element = array->get(i);
+		if (element->Type == GLE_MC_UNKNOWN) {
+			m_M[i] = true;
+			dimDataPoints->at(i) = 0.0;
+		} else {
+			dimDataPoints->at(i) = getDataPoint(element, datasetID, dim, i);
+		}
+	}
+}
+
+void GLEDataPairs::copyDimension(GLEDataSet* dataSet, unsigned int dim) {
+	validate(dataSet, dim + 1);
+	m_M.assign(dataSet->np, false);
+	copyDimensionImpl(dataSet->getData(), dataSet->np, dataSet->id, dim);
+}
+
+void GLEDataPairs::copy(GLEDataSet* dataSet) {
+	validate(dataSet, 2);
+	m_M.assign(dataSet->np, false);
+	GLEArrayImpl* data = dataSet->getData();
+	for (unsigned int dim = 0; dim < data->size(); dim++) {
+		copyDimensionImpl(data, dataSet->np, dataSet->id, dim);
+	}
 }
 
 void GLEDataPairs::resize(int np) {
@@ -3976,7 +4083,7 @@ void GLEDataPairs::set(double* x, double* y, int* m, int np) {
 	}
 }
 
-void GLEDataPairs::set(int i, double x, double y, int m) {
+void GLEDataPairs::set(unsigned int i, double x, double y, int m) {
 	if (i < size()) {
 		m_X[i] = x; m_Y[i] = y; m_M[i] = m;
 	}
@@ -4026,12 +4133,12 @@ void GLEDataPairs::noLogZero(bool xlog, bool ylog) {
 
 void GLEDataPairs::transformLog(bool xlog, bool ylog) {
 	if (xlog) {
-		for (int i = 0; i < size(); i++) {
+		for (unsigned int i = 0; i < size(); i++) {
 			m_X[i] = log10(m_X[i]);
 		}
 	}
 	if (ylog) {
-		for (int i = 0; i < size(); i++) {
+		for (unsigned int i = 0; i < size(); i++) {
 			m_Y[i] = log10(m_Y[i]);
 		}
 	}
@@ -4039,13 +4146,35 @@ void GLEDataPairs::transformLog(bool xlog, bool ylog) {
 
 void GLEDataPairs::untransformLog(bool xlog, bool ylog) {
 	if (xlog) {
-		for (int i = 0; i < size(); i++) {
+		for (unsigned int i = 0; i < size(); i++) {
 			m_X[i] = pow(10.0, m_X[i]);
 		}
 	}
 	if (ylog) {
-		for (int i = 0; i < size(); i++) {
+		for (unsigned int i = 0; i < size(); i++) {
 			m_Y[i] = pow(10.0, m_Y[i]);
 		}
 	}
+}
+
+vector<double>* GLEDataPairs::getDimension(unsigned int i) {
+	switch (i) {
+	case 0:
+		return &m_X;
+	case 1:
+		return &m_Y;
+	default:
+		return NULL;
+	}
+}
+
+double GLEDataPairs::getMinXInterval() {
+	double min = GLE_INF;
+	for (unsigned int i = 1; i < m_X.size(); i++) {
+		double w = m_X[i] - m_X[i-1];
+		if (w > 0.0 && w < min) {
+			min = w;
+		}
+	}
+	return min;
 }

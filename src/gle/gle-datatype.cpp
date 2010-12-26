@@ -78,6 +78,23 @@ void gle_memory_cell_print(GLEMemoryCell* a, ostream& out) {
 	}
 }
 
+bool gle_memory_cell_to_double(GLEMemoryCell* a, double* result) {
+	switch (a->Type) {
+		case GLE_MC_BOOL:
+			*result = a->Entry.BoolVal ? 1.0 : 0.0;
+			return true;
+		case GLE_MC_INT:
+			*result = a->Entry.IntVal;
+			return true;
+		case GLE_MC_DOUBLE:
+			*result = a->Entry.DoubleVal;
+			return true;
+		default:
+			*result = 0.0;
+			return false;
+	}
+}
+
 GLEDataObject::GLEDataObject() {
 }
 
@@ -508,12 +525,19 @@ GLEArrayImpl::GLEArrayImpl() {
 }
 
 GLEArrayImpl::~GLEArrayImpl() {
+	clear();
+}
+
+void GLEArrayImpl::clear() {
 	if (m_Data != NULL) {
 		for (unsigned int i = 0; i < m_Length; i++) {
 			GLE_MC_DEL_INTERN(&m_Data[i]);
 		}
 		free(m_Data);
 	}
+	m_Data = NULL;
+	m_Length = 0;
+	m_Alloc = 0;
 }
 
 int GLEArrayImpl::getType(unsigned int i) {
@@ -579,9 +603,30 @@ void GLEArrayImpl::setBool(unsigned int i, bool v) {
 	GLE_MC_SET_BOOL(&m_Data[i], v);
 }
 
+void GLEArrayImpl::setUnknown(unsigned int i) {
+	GLE_MC_SET_UNKNOWN(&m_Data[i]);
+}
+
+bool GLEArrayImpl::isUnknown(unsigned int i) {
+	return m_Data[i].Type == GLE_MC_UNKNOWN;
+}
+
 GLEDataObject* GLEArrayImpl::getObject(unsigned int i) {
 	if (m_Data[i].Type == GLE_MC_OBJECT) return m_Data[i].Entry.ObjectVal;
 	else return NULL;
+}
+
+GLERC<GLEString> GLEArrayImpl::getString(unsigned int i) {
+	GLERC<GLEString> result;
+	GLEMemoryCell* cell = &m_Data[i];
+	if (cell->Type == GLE_MC_OBJECT && cell->Entry.ObjectVal->getType() == GLEObjectTypeString) {
+		result = static_cast<GLEString*>(cell->Entry.ObjectVal);
+	} else {
+		ostringstream out;
+		gle_memory_cell_print(cell, out);
+		result = new GLEString(out.str());
+	}
+	return result;
 }
 
 void GLEArrayImpl::ensure(unsigned int size) {
@@ -593,6 +638,16 @@ void GLEArrayImpl::ensure(unsigned int size) {
 }
 
 void GLEArrayImpl::resize(unsigned int size) {
+	ensure(size);
+	if (size < m_Length) {
+		for (unsigned int i = size; i < m_Length; i++) {
+			init(i);
+		}
+		m_Length = size;
+	}
+}
+
+void GLEArrayImpl::resizeMemory(unsigned int size) {
 	if (m_Alloc < size) {
 		m_Data = (GLEMemoryCell*)realloc(m_Data, size*sizeof(GLEMemoryCell));
 		m_Alloc = size;
@@ -604,7 +659,7 @@ void GLEArrayImpl::extend(unsigned int size) {
 	while (newSize < size) {
 		newSize = 2*newSize + 5;
 	}
-	resize(newSize);
+	resizeMemory(newSize);
 }
 
 void GLEArrayImpl::enumStrings(ostream& out) {

@@ -112,6 +112,11 @@ inline void GLE_MC_SET_BOOL(GLEMemoryCell* a, bool v) {
 	a->Type = GLE_MC_BOOL;
 }
 
+inline void GLE_MC_SET_UNKNOWN(GLEMemoryCell* a) {
+	GLE_MC_DEL_INTERN(a);
+	a->Type = GLE_MC_UNKNOWN;
+}
+
 inline void GLE_MC_SET_OBJECT(GLEMemoryCell* a, GLEDataObject* v) {
 	if (a->Type == GLE_MC_OBJECT) {
 		a->Entry.ObjectVal = (GLEDataObject*)GLE_SET_RC(a->Entry.ObjectVal, v);
@@ -133,6 +138,7 @@ inline void GLE_MC_COPY(GLEMemoryCell* a, GLEMemoryCell* b) {
 
 bool gle_memory_cell_equals(GLEMemoryCell* a, GLEMemoryCell* b);
 void gle_memory_cell_print(GLEMemoryCell* a, ostream& out);
+bool gle_memory_cell_to_double(GLEMemoryCell* a, double* result);
 
 unsigned int getUTF8NumberOfChars(const char* str, unsigned int len);
 
@@ -198,6 +204,7 @@ protected:
 public:
 	GLEArrayImpl();
 	virtual ~GLEArrayImpl();
+	void clear();
 	void set(unsigned int i, const GLEMemoryCell* cell);
 	inline GLEMemoryCell* get(unsigned int i) { return &m_Data[i]; }
 	inline GLEDataObject* getObjectUnsafe(unsigned int i) { return m_Data[i].Entry.ObjectVal; }
@@ -210,14 +217,19 @@ public:
 	void DLLFCT setInt(unsigned int i, int v);
 	bool DLLFCT getBool(unsigned int i);
 	void DLLFCT setBool(unsigned int i, bool v);
+	void DLLFCT setUnknown(unsigned int i);
+	bool DLLFCT isUnknown(unsigned int i);
 	void DLLFCT setObject(unsigned int i, GLEDataObject* v);
 	DLLFCT GLEDataObject* getObject(unsigned int i);
+	DLLFCT GLERC<GLEString> getString(unsigned int i);
 	void addObject(GLEDataObject* v);
 	void ensure(unsigned int size);
 	void resize(unsigned int size);
 	void extend(unsigned int size);
 	void enumStrings(ostream& out);
 	virtual int getType();
+private:
+	void resizeMemory(unsigned int size);
 };
 
 class DLLCLASS GLEArrayWithFreeList : public GLEArrayImpl {

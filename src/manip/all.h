@@ -134,6 +134,8 @@ using namespace std;
 #define gprint printf
 #define myfree free
 
+struct GLEMemoryCell;
+
 char *range_int(char *s, int *v);
 void find_mkey(char *cp, int *idx);
 extern int gle_debug;
@@ -186,6 +188,7 @@ void var_findadd(const char *name, int *idx, int *type);    /* Add a variable to
 void var_get(int jj, double *v);
 void var_nlocal(int *l);
 void var_set(int jj, double v);
+void var_set(int jj, GLEMemoryCell* value);
 void var_setstr(int jj, char *s);
 void xy_polar(double dx,double dy,double *radius,double *angle);
 

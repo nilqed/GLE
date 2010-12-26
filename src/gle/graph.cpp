@@ -116,7 +116,7 @@ bool check_axis_command_name(const char* name, const char* cmp) {
 
 void ensureDataSetCreated(int d) {
 	if (dp[d] == NULL) {
-		dp[d] = new GLEDataSet();
+		dp[d] = new GLEDataSet(d);
 		copy_default(d);
 		if (ndata < d) ndata = d;
 	}
@@ -166,7 +166,7 @@ void begin_graph(int *pln , int *pcode , int *cp) throw (ParserError) {
 	g_get_usersize(&g_xsize,&g_ysize);
 	g_get_hei(&g_fontsz);
 	set_sizelength();
-	dp[0] = new GLEDataSet();  /* dataset for default settings */
+	dp[0] = new GLEDataSet(0);  /* dataset for default settings */
 	(*pln)++;
 	begin_init();
 	for (;;) {
@@ -1355,7 +1355,7 @@ int freedataset(int d) {
 	for (i=1;i<=ndata;i++)
 	{
 		if (dp[i] == NULL) c++;
-		else if (dp[i]->xv == NULL) c++;
+		else if (dp[i]->undefined()) c++;
 		if (c==d) return i;
 	}
 	return ndata + d - c;
@@ -1365,13 +1365,6 @@ void copy_default(int dn) {
 	dp[dn]->copy(dp[0]);
 	dp[dn]->key_name = NULL;
 	dp[dn]->axisscale = false;
-}
-
-bool is_float_miss(const string& str) {
-	if (is_float(str)) return true;
-	if (str == "*") return true;
-	if (str == "") return true;
-	return false;
 }
 
 int get_dataset_identifier(const char* ds, bool def) throw(ParserError) {
@@ -1466,10 +1459,14 @@ int get_column_number(GLEParser* parser) throw(ParserError) {
 class GLEDataSetDescription {
 public:
 	GLEDataSetDescription();
+	void setColumnIdx(unsigned int dimension, int column);
+	int getColumnIdx(unsigned int dimension) const;
+	unsigned int getNrDimensions() const;
+
 	int ds;
 	bool xygiven;
-	int cx;
-	int cy;
+private:
+	vector<int> m_columnIdx;
 };
 
 class GLEDataDescription {
@@ -1480,7 +1477,8 @@ public:
 	inline void addDataSet(const GLEDataSetDescription& description) { m_description.push_back(description); }
 
 private:
-		vector<GLEDataSetDescription> m_description;
+	vector<GLEDataSetDescription> m_description;
+
 public:
 	string fileName;
 	string comment;
@@ -1492,8 +1490,19 @@ public:
 GLEDataSetDescription::GLEDataSetDescription() {
 	ds = 0;
 	xygiven = false;
-	cx = -1;
-	cy = -1;
+}
+
+void GLEDataSetDescription::setColumnIdx(unsigned int dimension, int column) {
+	m_columnIdx.resize(std::max(m_columnIdx.size(), dimension + 1), -1);
+	m_columnIdx[dimension] = column;
+}
+
+int GLEDataSetDescription::getColumnIdx(unsigned int dimension) const {
+	return m_columnIdx[dimension];
+}
+
+unsigned int GLEDataSetDescription::getNrDimensions() const {
+	return m_columnIdx.size();
 }
 
 GLEDataDescription::GLEDataDescription() :
@@ -1546,38 +1555,101 @@ void read_data_description(GLEDataDescription* description) {
 			datasetDescription.ds = get_dataset_identifier(token, parser, false);
 			if (tokens->is_next_token("=")) {
 				datasetDescription.xygiven = true;
-				datasetDescription.cx = get_column_number(parser);
+				datasetDescription.setColumnIdx(0, get_column_number(parser));
 				tokens->ensure_next_token(",");
-				datasetDescription.cy = get_column_number(parser);
+				datasetDescription.setColumnIdx(1, get_column_number(parser));
 			}
 			description->addDataSet(datasetDescription);
 		}
 	}
 }
 
-double get_data_value(GLECSVData* data, int dn, int point, const char* xy, int row, int col, bool* missing) {
-	const string& value(data->getCellString(row, col));
-	if (value == "*") {
-		*missing = true;
-		return 0.0;
+bool isMissingValue(const char* content, unsigned int size) {
+	if (size == 0) {
+		return true;
+	} else if (size == 1) {
+		char ch = content[0];
+		return ch == '*' || ch == '?' || ch == '-' || ch == '.';
 	} else {
-		char *ptr;
-		double result = strtod(value.c_str(), &ptr);
-		if (*ptr != 0) {
-/*			ostringstream err;
-			err << "expected floating point number, not '" << value << "'";
-			err << ", while reading the " << xy << "-value of point " << (point + 1) << " of d" << dn;
-			g_throw_parser_error(err.str());  */
+		return false;
+	}
+}
+
+void get_data_value(GLECSVData* csvData, int dn, GLEArrayImpl* array, int arrayIdx, int row, int col, unsigned int dimension) {
+	unsigned int size;
+	const char* buffer = csvData->getCell(row, col, &size);
+	if (isMissingValue(buffer, size)) {
+		array->setUnknown(arrayIdx);
+	} else {
+		char *ptr = NULL;
+		string strValue(buffer, size);
+		double doubleValue = strtod(strValue.c_str(), &ptr);
+		if (ptr == NULL || *ptr != 0) {
+			str_remove_quote(strValue);
+			array->setObject(arrayIdx, new GLEString(strValue));
+		} else {
+			array->setDouble(arrayIdx, doubleValue);
 		}
-		return result;
 	}
 }
 
 void createDataSet(int dn) {
 	if (dn > ndata) ndata = dn;
 	if (dp[dn] == NULL) {
-		dp[dn] = new GLEDataSet();
+		dp[dn] = new GLEDataSet(dn);
 		copy_default(dn);
+	}
+}
+
+string dimension2String(unsigned int dimension) {
+	if (dimension == 0) {
+		return "x";
+	} else if (dimension == 1) {
+		return "y";
+	} else if (dimension == 2) {
+		return "z";
+	} else {
+		ostringstream dim;
+		dim << (dimension + 1);
+		return dim.str();
+	}
+}
+
+bool isFloatMiss(GLECSVData* csvData, unsigned int row, unsigned int col) {
+	unsigned int size;
+	const char* buffer = csvData->getCell(row, col, &size);
+	if (isMissingValue(buffer, size)) {
+		return true;
+	} else if (is_float(string(buffer, size))) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool auto_has_header(GLECSVData* csvData, unsigned int dataColumns) {
+	if (csvData->getNbLines() == 0) {
+		return false;
+	} else {
+		for (unsigned int col = 0; col < dataColumns; col++) {
+			if (isFloatMiss(csvData, 0, col)) {
+				return false;
+			}
+		}
+		return true;
+	}
+}
+
+bool auto_all_labels_column(GLECSVData* csvData, unsigned int first_row) {
+	if (first_row >= csvData->getNbLines()) {
+		return false;
+	} else {
+		for (unsigned int row = first_row; row < csvData->getNbLines(); row++) {
+			if (isFloatMiss(csvData, row, 0)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
 
@@ -1598,38 +1670,10 @@ void data_command() {
 	if (error->errorCode != GLECSVErrorNone) {
 		g_throw_parser_error(error->errorString);
 	}
-	// Replace supported missing value indicators by "*"
-	for (unsigned int row = 0; row < csvData.getNbLines(); ++row) {
-		for (unsigned int col = 0; col < dataColumns; ++col) {
-			unsigned int cellSize;
-			const char* cell = csvData.getCell(row, col, &cellSize);
-			if (cellSize == 1 && (cell[0] == '*' || cell[0] == '?' || cell[0] == '-' || cell[0] == '.')) {
-				csvData.setCellTrim(row, col, "*");
-			}
-		}
-	}
 	// Auto-detect header
-	bool has_header = true;
-	for (unsigned int col = 0; col < dataColumns; col++) {
-		if (is_float_miss(csvData.getCellString(0, col))) {
-			has_header = false;
-			break;
-		}
-	}
+	bool has_header = auto_has_header(&csvData, dataColumns);
 	unsigned int first_row = has_header ? 1 : 0;
-	// Handle special types of data sets
-	bool all_str_col = true;
-	if (first_row >= csvData.getNbLines()) {
-		all_str_col = false;
-	} else {
-		for (unsigned int row = first_row; row < csvData.getNbLines(); row++) {
-			if (is_float_miss(csvData.getCellString(row, 0))) {
-				all_str_col = false;
-				break;
-			}
-		}
-	}
-	// Set nox
+	bool all_str_col = auto_all_labels_column(&csvData, first_row);
 	bool nox = description.nox || dataColumns == 1 || all_str_col;
 	// Auto-assign columns
 	int cx = nox ? 0 : 1;
@@ -1638,8 +1682,8 @@ void data_command() {
 	for (int i = 0; i < nbDataSetsGiven; ++i) {
 		GLEDataSetDescription* dataset = description.getDataSet(i);
 		if (!dataset->xygiven) {
-			dataset->cx = cx;
-			dataset->cy = i + cyOffs + 1;
+			dataset->setColumnIdx(0, cx);
+			dataset->setColumnIdx(1, i + cyOffs + 1);
 		}
 	}
 	if (nbDataSetsGiven == 0) {
@@ -1647,8 +1691,8 @@ void data_command() {
 		for (int i = 0; i < nbDataSetsMax; ++i) {
 			GLEDataSetDescription dataset;
 			dataset.ds = freedataset(i + 1);
-			dataset.cx = cx;
-			dataset.cy = i + cyOffs + 1;
+			dataset.setColumnIdx(0, cx);
+			dataset.setColumnIdx(1, i + cyOffs + 1);
 			description.addDataSet(dataset);
 		}
 	}
@@ -1657,63 +1701,67 @@ void data_command() {
 		int ds = 0;
 		GLEDataSetDescription dataset;
 		dataset.ds = ds;
-		dataset.cx = 0;
-		dataset.cy = 1;
+		dataset.setColumnIdx(0, 0);
+		dataset.setColumnIdx(1, 1);
 		description.addDataSet(dataset);
 		xx[GLE_AXIS_X].setNamesDataSet(ds);
 	}
 	// Validate column indices
 	for (int i = 0; i < description.getNbDataSets(); i++) {
 		GLEDataSetDescription* dataset = description.getDataSet(i);
-		if (dataset->cx < 0 || dataset->cx > (int)dataColumns) {
+		if (dataset->getNrDimensions() <= 0) {
 			ostringstream err;
-			err << "x-value column index out of range for d" << dataset->ds << ": " << dataset->cx << " not in [0,...," << dataColumns << "]";
+			err << "no columns defined for d" << dataset->ds;
 			g_throw_parser_error(err.str());
 		}
-		if (dataset->cy < 0 || dataset->cy > (int)dataColumns) {
-			ostringstream err;
-			err << "y-value column index out of range for d" << dataset->ds << ": " << dataset->cy << " not in [0,...," << dataColumns << "]";
-			g_throw_parser_error(err.str());
+		for (unsigned int dimension = 0; dimension < dataset->getNrDimensions(); dimension++) {
+			int column = dataset->getColumnIdx(dimension);
+			if (column < 0 || column > (int)dataColumns) {
+				ostringstream err;
+				err << "dimension " << dimension2String(dimension) <<  " column index out of range for d"
+					<< dataset->ds << ": " << column << " not in [0,...," << dataColumns << "]";
+				g_throw_parser_error(err.str());
+			}
 		}
 	}
 	// Read header and copy to key
-	if (has_header) {
+	if (has_header && csvData.getNbLines() > 0) {
 		for (int i = 0; i < description.getNbDataSets(); i++) {
 			GLEDataSetDescription* dataset = description.getDataSet(i);
 			int dn = dataset->ds;
-			int cy = dataset->cy;
-			createDataSet(dn);
-			string tmp(csvData.getCellString(0, cy - 1));
-			str_remove_quote(tmp);
-			dp[dn]->key_name = sdup(tmp.c_str());
+			int targetColumn = dataset->getColumnIdx(dataset->getNrDimensions() - 1);
+			if (targetColumn > 0) {
+				createDataSet(dn);
+				string tmp(csvData.getCellString(0, targetColumn - 1));
+				str_remove_quote(tmp);
+				dp[dn]->key_name = sdup(tmp.c_str());
+			}
 		}
 	}
 	// Copy all data to the data sets
 	for (int i = 0; i < description.getNbDataSets(); i++) {
-		GLEDataSetDescription* dataset = description.getDataSet(i);
-		int dn = dataset->ds;
+		GLEDataSetDescription* datasetDescr = description.getDataSet(i);
+		int dn = datasetDescr->ds;
 		createDataSet(dn);
-		int np = csvData.getNbLines() - first_row;
-		dp[dn]->clearAll();
-		dp[dn]->xv = (double*) myallocz(sizeof(double) * (np + 1));
-		dp[dn]->yv = (double*) myallocz(sizeof(double) * (np + 1));
-		dp[dn]->miss = (int*) myallocz(sizeof(int) * (np + 1));
-		dp[dn]->yv_str = new vector<string>();
-		dp[dn]->np = np;
-		for (int j = 0; j < np ; j++) {
-			bool missing = false;
-			unsigned int row = first_row + j;
-			if (dataset->cx == 0) {
-				dp[dn]->xv[j] = j + 1;
-			} else {
-				dp[dn]->xv[j] = get_data_value(&csvData, dn, j, "x", row, dataset->cx - 1, &missing);
+		GLEDataSet* dataset = dp[dn];
+		unsigned int np = csvData.getNbLines() - first_row;
+		dataset->clearAll();
+		dataset->np = np;
+		GLEArrayImpl* dataDimensions = dataset->getData();
+		dataDimensions->ensure(datasetDescr->getNrDimensions());
+		for (unsigned int dimension = 0; dimension < datasetDescr->getNrDimensions(); dimension++) {
+			int column = datasetDescr->getColumnIdx(dimension);
+			GLEArrayImpl* dataColumn = new GLEArrayImpl();
+			dataDimensions->setObject(dimension, dataColumn);
+			dataColumn->ensure(np);
+			for (unsigned int j = 0; j < np ; j++) {
+				if (column == 0) {
+					dataColumn->setDouble(j, j + 1);
+				} else {
+					unsigned int row = first_row + j;
+					get_data_value(&csvData, dn, dataColumn, j, row, column - 1, dimension);
+				}
 			}
-			dp[dn]->yv[j] = get_data_value(&csvData, dn, j, "y", row, dataset->cy - 1, &missing);
-			dp[dn]->miss[j] = missing;
-			// yv_str is used to use this data set as labels
-			string tmp(csvData.getCellString(row, dataset->cy - 1));
-			str_remove_quote(tmp);
-			dp[dn]->yv_str->push_back(tmp);
 		}
 	}
 }

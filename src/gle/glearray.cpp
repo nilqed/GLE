@@ -444,7 +444,7 @@ bool GLECSVData::isDelim(GLEBYTE ch) {
 }
 
 bool GLECSVData::isSpace(GLEBYTE ch) {
-	return ch == ' ';
+	return ch == ' ' || ch == '\t';
 }
 
 bool GLECSVData::isEol(GLEBYTE ch) {

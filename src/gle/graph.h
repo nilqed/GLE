@@ -126,7 +126,7 @@ public:
 	GLEDataSetDimension();
 	~GLEDataSetDimension();
 	void copy(GLEDataSetDimension* other);
-	double* getDataValues();
+	int getDataDimensionIndex();
 	inline GLERangeSet* getRange() { return &m_Range; }
 	inline int getAxis() { return m_Axis; }
 	inline void setAxis(int axis) { m_Axis = axis; }
@@ -144,34 +144,44 @@ protected:
 public:
 	GLEDataPairs();
 	GLEDataPairs(double* x, double* y, int* m, int np);
+	GLEDataPairs(GLEDataSet* dataSet);
 	virtual ~GLEDataPairs();
+	void copy(GLEDataSet* dataSet);
+	void copyDimension(GLEDataSet* dataSet, unsigned int dim);
 	void resize(int np);
 	void set(double* x, double* y, int* m, int np);
-	void set(int i, double x, double y, int m);
+	void set(unsigned int i, double x, double y, int m);
 	void add(double x, double y, int m);
 	void noMissing();
 	void noNaN();
 	void transformLog(bool xlog, bool ylog);
 	void untransformLog(bool xlog, bool ylog);
 	void noLogZero(bool xlog, bool ylog);
-	inline int size() { return m_X.size(); }
+	vector<double>* getDimension(unsigned int i);
+	double getMinXInterval();
+	inline unsigned int size() { return m_X.size(); }
 	inline double getX(int i) { return m_X[i]; }
 	inline double getY(int i) { return m_Y[i]; }
 	inline int getM(int i) { return m_M[i]; }
 	inline double* getX() { return &m_X[0]; }
 	inline double* getY() { return &m_Y[0]; }
 	inline int* getM() { return &m_M[0]; }
+
+public:
+	static void validate(GLEDataSet* data, unsigned int minDim);
+	static double getDataPoint(GLEMemoryCell* element, int datasetID, unsigned int dimension, unsigned int arrayIdx);
+
+private:
+	void copyDimensionImpl(GLEArrayImpl* data, unsigned int np, int datasetID, unsigned int dim);
 };
 
 class GLEAxis;
 
 class GLEDataSet {
 public:
-	double *xv;	/* x data values */
-	double *yv; /* y data values */
-	int *miss; /* if true miss this point */
+	int id;
 	int nomiss;
-	int np; /* NUMBER OF POINTS */
+	unsigned int np; /* NUMBER OF POINTS */
 	int autoscale;
 	bool axisscale;
 	bool inverted;
@@ -205,16 +215,17 @@ public:
 	bool line;
 	double rx1,ry1,rx2,ry2;
 	GLEDataSetDimension dims[2];
-	double *backup_xv, *backup_yv;
-	int *backup_miss, backup_np;
+	GLEArrayImpl m_data;
+	GLEArrayImpl m_dataBackup;
 public:
-	GLEDataSet();
+	GLEDataSet(int identifier);
 	~GLEDataSet();
 	void copy(GLEDataSet* other);
 	void backup();
 	void restore();
 	void initBackup();
 	void clearAll();
+	bool undefined();
 	GLEDataSetDimension* getDimXInv();
 	GLEDataSetDimension* getDimYInv();
 	GLEAxis* getAxis(int i);
@@ -222,7 +233,14 @@ public:
 	bool contains(double x, double y);
 	void checkRanges() throw(ParserError);
 	void copyRangeIfRequired(int dimension);
+	vector<int> getMissingValues();
+	void validateDimensions();
+	void validateNbPoints(unsigned int expectedNb, const char* descr = NULL);
+	GLEArrayImpl* getDimData(unsigned int dim);
+	void fromData(const vector<double>& xp, const vector<double>& yp, const vector<int>& miss);
 	inline GLEDataSetDimension* getDim(int i) { return &dims[i]; }
+	inline GLEArrayImpl* getData() { return &m_data; }
+	inline GLEArrayImpl* getDataBackup() { return &m_dataBackup; }
 };
 
 #define GLE_DIM_X 0
@@ -289,7 +307,6 @@ void draw_bar(double x, double yf, double yt, double wd, bar_struct* barset, int
 void draw_user_function_calls(bool underneath) throw(ParserError);
 void get_dataset_ranges();
 void set_bar_axis_places();
-bool is_float_miss(const string& str);
 int get_dataset_identifier(const char* ds, bool def = false) throw(ParserError);
 
 double graph_bar_pos(double xpos, int bar, int set) throw(ParserError);
@@ -298,6 +315,7 @@ void begin_key(int *pln, int *pcode, int *cp) throw (ParserError);
 void begin_tab(int *pln, int *pcode, int *cp);
 void begin_text(int *pln, int *pcode, int *cp, double w, int just);
 void draw_key(int nkd, struct offset_struct* koffset, char *kpos,double khei, int knobox);
+string dimension2String(unsigned int dimension);
 
 #define DP_CAST (struct data_struct*)
 #define BR_CAST (struct bar_struct*)

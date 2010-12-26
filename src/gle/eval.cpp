@@ -813,10 +813,14 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 			if (i <= 0 || i >= MAX_NB_DATA || dp[i] == NULL)
 				throw g_format_parser_error("dataset d%d not defined", i);
 			else
-				if (j <= 0 || j > dp[i]->np)
+				if (j <= 0 || j > (int)dp[i]->np) {
 					throw g_format_parser_error("index out of range: %d (1 ... %d)", j, dp[i]->np);
-				else
-					stk[nstk] = dp[i]->xv[j-1];
+				} else {
+					GLEArrayImpl* array = dp[i]->getDimData(0);
+					if (array != 0) {
+						stk[nstk] = array->getDouble(j-1);
+					}
+				}
 			break;
 		case 60+FN_DATAYVALUE: /* Y value in a dateset */
 			*otyp = 1; nstk -= 1;
@@ -825,10 +829,14 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 			if (i <= 0 || i >= MAX_NB_DATA || dp[i] == NULL)
 				throw g_format_parser_error("dataset d%d not defined", i);
 			else
-				if (j <= 0 || j > dp[i]->np)
+				if (j <= 0 || j > (int)dp[i]->np) {
 					throw g_format_parser_error("index out of range: %d (1 ... %d)", j, dp[i]->np);
-				else
-					stk[nstk] = dp[i]->yv[j-1];
+				} else {
+					GLEArrayImpl* array = dp[i]->getDimData(1);
+					if (array != 0) {
+						stk[nstk] = array->getDouble(j-1);
+					}
+				}
 			break;
 		case 60+FN_XG3D:
 			stk[nstk - 2] = xg3d(stk[nstk - 2], stk[nstk - 1], stk[nstk]);

@@ -282,6 +282,16 @@ void GLEVars::setDouble(int var, double v) {
 	}
 }
 
+void GLEVars::set(int var, GLEMemoryCell* value) {
+	if (check(&var)) {
+		double v;
+		gle_memory_cell_to_double(value, &v);
+		local_var->var_val[var] = v;
+	} else {
+		m_Global.set(var, value);
+	}
+}
+
 GLEString* GLEVars::getString(int var) {
 	if (check(&var)) {
 		const char* str = local_var->var_str[var].c_str();
@@ -566,6 +576,10 @@ void var_alloc_local(GLEVarMap* map) {
 
 void var_free_local() {
 	getVarsInstance()->freeLocal();
+}
+
+void var_set(int var, GLEMemoryCell* value) {
+	getVarsInstance()->set(var, value);
 }
 
 void var_set(int var, double v) {

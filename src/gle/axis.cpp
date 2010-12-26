@@ -1237,34 +1237,42 @@ int GLEAxis::getNbNamedPlaces() {
 }
 
 void GLEAxis::getLabelsFromDataSet(int ds) {
-	int crpos = 0;
-	if (dp[ds] == NULL) return;
-	int npnts = dp[ds]->np;
-	double* xt = dp[ds]->xv;
-	if (npnts <= 0 || xt == NULL) return;
+	GLEDataSet* dataSet = dp[ds];
+	if (dataSet == NULL || dataSet->np == 0) {
+		return;
+	}
+	GLEDataPairs data;
+	GLEDataPairs::validate(dataSet, 2);
+	data.copyDimension(dataSet, 0);
+	GLEArrayImpl* yv = static_cast<GLEArrayImpl*>(dataSet->getData()->getObject(1));
+	double* xt = data.getX();
 	double min_val = xt[0];
-	double max_val = xt[npnts-1];
-	double half_spc = (max_val - min_val)/npnts/2.0;
+	double max_val = xt[dataSet->np - 1];
+	double half_spc = (max_val - min_val) / dataSet->np / 2.0;
 	min_val -= half_spc;
 	max_val += half_spc;
-	vector<string>* yv_str = dp[ds]->yv_str;
-	if (yv_str == NULL) return;
+	unsigned int crpos = 0;
 	for (int i = 0; i < getNbPlaces(); i++) {
 		double fi = places[i];
 		if (fi >= min_val && fi <= max_val) {
 			// find last position with x-value smaller than fi
-			while (crpos < npnts && xt[crpos] < fi) crpos++;
-				if (crpos < npnts && crpos >= 0) {
+			while (crpos < dataSet->np && xt[crpos] < fi) {
+				crpos++;
+			}
+			if (crpos < dataSet->np && crpos >= 0) {
 				if (crpos > 0) crpos--;
-				int sel = crpos;
+				unsigned int sel = crpos;
 				double dist = fabs(xt[crpos] - fi);
-				if (crpos+1 < npnts) {
+				if (crpos+1 < dataSet->np) {
 					if (fabs(xt[crpos+1] - fi) < dist) sel = crpos+1;
 				}
-				if (crpos-1 >= 0) {
+				if (crpos >= 1) {
 					if (fabs(xt[crpos-1] - fi) < dist) sel = crpos-1;
 				}
-				if (sel >= 0 && sel < (int)yv_str->size()) *getNamePtr(i) = (*yv_str)[sel];
+				if (sel >= 0 && sel < dataSet->np && !data.getM(sel)) {
+					GLERC<GLEString> str(yv->getString(sel));
+					*getNamePtr(i) = str->toUTF8();
+				}
 			}
 		}
 	}
