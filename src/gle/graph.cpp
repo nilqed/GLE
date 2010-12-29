@@ -74,10 +74,12 @@ static int xxgrid[GLE_AXIS_MAX+1];
 
 extern int g_nkd, g_keycol;
 extern key_struct *kd[100];
+KeyInfo* g_keyInfo = 0;
 
 int letline[MAX_NUMBER_OF_LET_COMMANDS];
 int nlet;
 
+bool g_inGraph = false;
 int g_nbar = 0;
 int g_graph_background = GLE_FILL_CLEAR;
 
@@ -91,8 +93,23 @@ void do_axis_part_all(int xset) throw (ParserError);
 bool do_remaining_entries(int ct);
 void graph_freebars();
 double get_next_exp(TOKENS tk,int ntk,int *curtok);
-void data_command();
+void data_command(GLESourceLine& sline);
 void do_discontinuity();
+void do_bar(int& ct);
+void do_fill(int& ct);
+void do_hscale(int& ct);
+void do_letsave(int& ct);
+void do_size(int& ct);
+void do_key(int& ct);
+void do_vscale(int& ct);
+void do_scale(int& ct);
+void do_colormap(int& ct);
+void do_main_title(int& ct);
+void do_noticks(int& ct);
+void do_names(int& ct);
+void do_places(int& ct);
+void do_title(int& ct);
+void do_datasets(int& ct);
 
 GLEAxis xx[GLE_AXIS_MAX+1];
 
@@ -133,22 +150,20 @@ void ensureDataSetCreatedAndSetUsed(int d) {
 // A useful value for base is 0.25
 
 void begin_graph(int *pln , int *pcode , int *cp) throw (ParserError) {
-	int ct,i,t,d;
-	int st;
-	int erflg;
-	stringstream err;
-
+	if (g_inGraph) {
+		g_throw_parser_error("graph block can't be nested");
+	}
+	g_inGraph = true;
 	g_colormap = NULL;
 	nlet = 0;
 	g_nkd = 0;
 	g_keycol = 0;
-
-	KeyInfo keyinfo;
+	delete g_keyInfo;
+	g_keyInfo = new KeyInfo();
 	g_hscale = .7;
 	g_vscale = .7;
 	g_discontinuityThreshold = GLE_INF;
 	nlet = 0;
-	erflg = true;
 	if (g_get_compatibility() == GLE_COMPAT_35) {
 		g_nobox = false;
 	} else {
@@ -158,7 +173,7 @@ void begin_graph(int *pln , int *pcode , int *cp) throw (ParserError) {
 	g_auto_s_h = false;
 	g_auto_s_v = false;
 	g_math = false;
-	for (i = 1; i <= GLE_AXIS_MAX; i++) {
+	for (int i = 1; i <= GLE_AXIS_MAX; i++) {
 		xxgrid[i] = 0;
 		vinit_axis(i);
 	}
@@ -167,63 +182,102 @@ void begin_graph(int *pln , int *pcode , int *cp) throw (ParserError) {
 	g_get_hei(&g_fontsz);
 	set_sizelength();
 	dp[0] = new GLEDataSet(0);  /* dataset for default settings */
-	(*pln)++;
-	begin_init();
-	for (;;) {
-		/* process next line */
-do_next_line:
-		srclin[0] = 0;
-		st = begin_token(&pcode,cp,pln,srclin,tk,&ntk,outbuff);
-		if (!st) {
-			draw_graph(&keyinfo);
-			return;
-		}
-		ct = 1;
-		if (str_i_equals(tk[ct],"BAR")) goto do_bar;
-		else if (str_i_equals(tk[ct],"DATA")) goto do_data;
-		else kw("DATA") goto do_data;
-		else kw("EXTRACT") goto do_extract;
-		else kw("FILL") goto do_fill;
-		else kw("HSCALE") goto do_hscale;
-		else kw("LET") 	goto do_letsave;
-		else kw("SIZE") goto do_size;
-		else kw("KEY") goto do_key;
-		else kw("VSCALE") goto do_vscale;
-		else kw("SCALE") goto do_scale;
-		else kw("COLORMAP") goto do_colormap;
-		else kw("TITLE") goto do_main_title;
-		else kw("DISCONTINUITY") {
-			do_discontinuity();
-		}
-		else kw("UNDER") g_funder.push_back((*pln)-1);
-		else kw("BACKGROUND")
-		{
-			g_graph_background = next_color;
-		}
-		else kw("!") goto do_next_line;
-		else kw(" ") goto do_next_line;
-		else if (check_axis_command_name(tk[ct],"NOTICKS")) goto do_noticks;
-		else if (str_i_str(tk[ct],"AXIS") != NULL) do_axis_part_all(GLEG_CMD_AXIS);
-		else if (str_i_str(tk[ct],"LABELS") != NULL) do_axis_part_all(GLEG_CMD_LABELS);
-		else if (str_i_str(tk[ct],"SIDE") != NULL) do_axis_part_all(GLEG_CMD_SIDE);
-		else if (str_i_str(tk[ct],"SUBTICKS") != NULL) do_axis_part_all(GLEG_CMD_SUBTICKS);
-		else if (str_i_str(tk[ct],"TICKS") != NULL) do_axis_part_all(GLEG_CMD_TICKS);
-		else if (check_axis_command_name(tk[ct],"NAMES")) goto do_names;
-		else if (check_axis_command_name(tk[ct],"PLACES")) goto do_places;
-		else if (check_axis_command_name(tk[ct],"TITLE")) goto do_title;
-		else if (toupper(*tk[ct])=='D') goto do_datasets;
-		else if (!do_remaining_entries(ct)) {
-			/* This might be a function call, find out later */
-			g_fcalls.push_back((*pln)-1);
-		}
-	}
+}
 
-/* ----------------------------------------------------------------*/
-do_bar:
+void end_graph() {
+	draw_graph(g_keyInfo);
+	g_inGraph = false;
+}
+
+bool execute_graph(GLESourceLine& sline, bool isCommandCheck) {
+	begin_init();
+	int st = begin_token(sline, srclin, tk, &ntk, outbuff);
+	if (!st) {
+		return false;
+	}
+	int ct = 1;
+	if (str_i_equals(tk[ct],"BAR")) {
+		if (isCommandCheck) return true;
+		do_bar(ct);
+	} else if (str_i_equals(tk[ct],"DATA")) {
+		if (isCommandCheck) return true;
+		data_command(sline);
+	} else kw("FILL") {
+		if (isCommandCheck) return true;
+		do_fill(ct);
+	} else kw("HSCALE") {
+		if (isCommandCheck) return true;
+		do_hscale(ct);
+	} else kw("LET") {
+		if (isCommandCheck) return true;
+		do_letsave(ct);
+	} else kw("SIZE") {
+		if (isCommandCheck) return true;
+		do_size(ct);
+	} else kw("KEY") {
+		if (isCommandCheck) return true;
+		do_key(ct);
+	} else kw("VSCALE") {
+		if (isCommandCheck) return true;
+		do_vscale(ct);
+	} else kw("SCALE") {
+		if (isCommandCheck) return true;
+		do_scale(ct);
+	} else kw("COLORMAP") {
+		if (isCommandCheck) return true;
+		do_colormap(ct);
+	} else kw("TITLE") {
+		if (isCommandCheck) return true;
+		do_main_title(ct);
+	} else kw("DISCONTINUITY") {
+		if (isCommandCheck) return true;
+		do_discontinuity();
+	} else kw("UNDER") {
+		if (isCommandCheck) return true;
+		g_funder.push_back(sline.getGlobalLineNo());
+	} else kw("BACKGROUND") {
+		if (isCommandCheck) return true;
+		g_graph_background = next_color;
+	} else if (check_axis_command_name(tk[ct],"NOTICKS")) {
+		if (isCommandCheck) return true;
+		do_noticks(ct);
+	} else if (str_i_str(tk[ct],"AXIS") != NULL) {
+		if (isCommandCheck) return true;
+		do_axis_part_all(GLEG_CMD_AXIS);
+	} else if (str_i_str(tk[ct],"LABELS") != NULL) {
+		if (isCommandCheck) return true;
+		do_axis_part_all(GLEG_CMD_LABELS);
+	} else if (str_i_str(tk[ct],"SIDE") != NULL) {
+		if (isCommandCheck) return true;
+		do_axis_part_all(GLEG_CMD_SIDE);
+	} else if (str_i_str(tk[ct],"SUBTICKS") != NULL) {
+		if (isCommandCheck) return true;
+		do_axis_part_all(GLEG_CMD_SUBTICKS);
+	} else if (str_i_str(tk[ct],"TICKS") != NULL) {
+		if (isCommandCheck) return true;
+		do_axis_part_all(GLEG_CMD_TICKS);
+	} else if (check_axis_command_name(tk[ct],"NAMES")) {
+		if (isCommandCheck) return true;
+		do_names(ct);
+	} else if (check_axis_command_name(tk[ct],"PLACES")) {
+		if (isCommandCheck) return true;
+		do_places(ct);
+	} else if (check_axis_command_name(tk[ct],"TITLE")) {
+		if (isCommandCheck) return true;
+		do_title(ct);
+	} else if (toupper(*tk[ct])=='D') {
+		if (isCommandCheck) return true;
+		do_datasets(ct);
+	} else if (do_remaining_entries(ct)) {
+		if (isCommandCheck) return true;
+	}
+	return false;
+}
+
+void do_bar(int& ct) {
 	/* bar d1,d2,d3 from d4,d5,d6 color red,green,blue fill grey,blue,green
 		dist exp, width exp, LSTYLE 3,445,1
 		3dbar .5 .5 top black,black,black side red,green,blue  notop */
-{
 	int ng = 0,fi;
 	char *ss;
 	g_nbar++;
@@ -234,7 +288,7 @@ do_bar:
 	while (ss!=NULL) {
 	  if (toupper(*ss)=='D') {
 		ng = (br[g_nbar]->ngrp)++;
-		d = get_dataset_identifier(ss);
+		int d = get_dataset_identifier(ss);
 		ensureDataSetCreatedAndSetUsed(d);
 		br[g_nbar]->to[ng] = d;
  	  }
@@ -242,7 +296,7 @@ do_bar:
 	}
 
 	br[g_nbar]->horiz = false;
-	for (i = 0; i <= ng; i++) {
+	for (int i = 0; i <= ng; i++) {
 		br[g_nbar]->color[i] = g_get_grey(0.0);
 		br[g_nbar]->fill[i] = g_get_grey(i == 0 ? 0.0 : 1.0-ng/i);
 		br[g_nbar]->from[i] = 0;
@@ -310,14 +364,12 @@ do_bar:
 	  ct++;
 	}
 }
-goto do_next_line;
-/*----------------------------------------------------------------*/
+
 /* fill x1,d2 color green xmin 1 xmax 2 ymin 1 ymax 2   */
 /* fill d1,x2 color green xmin 1 xmax 2 ymin 1 ymax 2   */
 /* fill d1,d2 color green xmin 1 xmax 2 ymin 1 ymax 2   */
 /* fill d1 color green xmin 1 xmax 2 ymin 1 ymax 2      */
-do_fill:
-{
+void do_fill(int& ct) {
 	char *ss,s1[40],s2[40];
 	fd[++nfd] = FD_CAST myallocz(sizeof(*fd[1]));
 	ct = 2;
@@ -329,21 +381,21 @@ do_fill:
 	}
 	if (str_i_equals(s1,"X1")) {
 		fd[nfd]->type = 1;
-		d = get_dataset_identifier(s2);
+		int d = get_dataset_identifier(s2);
 		fd[nfd]->da = d;
 	} else if (str_i_equals(s2,"X2")) {
 		fd[nfd]->type = 2;
-		d = get_dataset_identifier(s1);
+		int d = get_dataset_identifier(s1);
 		fd[nfd]->da = d;
 	} else if (!str_i_equals(s2,"")) {
 		fd[nfd]->type = 3;
-		d = get_dataset_identifier(s1);
+		int d = get_dataset_identifier(s1);
 		int d2 = get_dataset_identifier(s2);
 		fd[nfd]->da = d;
 		fd[nfd]->db = d2;
 	} else if (toupper(*s1)=='D') {
 		fd[nfd]->type = 4;
-		d = get_dataset_identifier(s1);
+		int d = get_dataset_identifier(s1);
 		fd[nfd]->da = d;
 	} else {
 		g_throw_parser_error("invalid fill option, wanted d1,d2 or x1,d1 or d1,x2 or d1");
@@ -368,19 +420,18 @@ do_fill:
 	   ct++;
 	}
 }
-goto do_next_line;
-/*----------------------------------------------------------------*/
-do_key:
+
+void do_key(int& ct) {
 	ct = 2;
 	while (ct<=ntk)  {
 		kw("OFFSET") {
-			keyinfo.setOffsetX(next_exp);
-			keyinfo.setOffsetY(next_exp);
+			g_keyInfo->setOffsetX(next_exp);
+			g_keyInfo->setOffsetY(next_exp);
 		}
 		else kw("MARGINS") {
 			double mx = next_exp;
 			double my = next_exp;
-			keyinfo.setMarginXY(mx, my);
+			g_keyInfo->setMarginXY(mx, my);
 		}
 		else kw("ABSOLUTE") {
 			if (g_xsize*g_ysize==0) {
@@ -391,32 +442,32 @@ do_key:
 			store_window_bounds_to_vars();
 			set_sizelength();
 
-			keyinfo.setOffsetX(next_exp);
-			keyinfo.setOffsetY(next_exp);
-			keyinfo.setAbsolute(true);
+			g_keyInfo->setOffsetX(next_exp);
+			g_keyInfo->setOffsetY(next_exp);
+			g_keyInfo->setAbsolute(true);
 		}
-		else kw("BACKGROUND") keyinfo.setBackgroundColor(next_color);
-		else kw("BOXCOLOR") keyinfo.setBoxColor(next_color);
-		else kw("ROW") keyinfo.setBase(next_exp);
-		else kw("LPOS") keyinfo.setLinePos(next_exp);
-		else kw("LLEN") keyinfo.setLineLen(next_exp);
-		else kw("NOBOX") keyinfo.setNoBox(true);
-		else kw("NOLINE") keyinfo.setNoLines(true);
-		else kw("COMPACT") keyinfo.setCompact(true);
-		else kw("HEI") keyinfo.setHei(next_exp);
-		else kw("POSITION") next_str(keyinfo.getJustify());
-		else kw("POS") next_str(keyinfo.getJustify());
+		else kw("BACKGROUND") g_keyInfo->setBackgroundColor(next_color);
+		else kw("BOXCOLOR") g_keyInfo->setBoxColor(next_color);
+		else kw("ROW") g_keyInfo->setBase(next_exp);
+		else kw("LPOS") g_keyInfo->setLinePos(next_exp);
+		else kw("LLEN") g_keyInfo->setLineLen(next_exp);
+		else kw("NOBOX") g_keyInfo->setNoBox(true);
+		else kw("NOLINE") g_keyInfo->setNoLines(true);
+		else kw("COMPACT") g_keyInfo->setCompact(true);
+		else kw("HEI") g_keyInfo->setHei(next_exp);
+		else kw("POSITION") next_str(g_keyInfo->getJustify());
+		else kw("POS") next_str(g_keyInfo->getJustify());
 		else kw("JUSTIFY") {
-			next_str(keyinfo.getJustify());
-			keyinfo.setPosOrJust(false);
+			next_str(g_keyInfo->getJustify());
+			g_keyInfo->setPosOrJust(false);
 		}
 		else kw("JUST") {
-			next_str(keyinfo.getJustify());
-			keyinfo.setPosOrJust(false);
+			next_str(g_keyInfo->getJustify());
+			g_keyInfo->setPosOrJust(false);
 		}
-		else kw("DIST") keyinfo.setDist(next_exp);
-		else kw("COLDIST") keyinfo.setColDist(next_exp);
-		else kw("OFF") keyinfo.setDisabled(true);
+		else kw("DIST") g_keyInfo->setDist(next_exp);
+		else kw("COLDIST") g_keyInfo->setColDist(next_exp);
+		else kw("OFF") g_keyInfo->setDisabled(true);
 		else kw("SEPARATOR") {
 			if (g_nkd == 0) {
 				g_throw_parser_error("key: 'separator' should come after a valid key entry");
@@ -433,38 +484,28 @@ do_key:
 		else g_throw_parser_error("unrecognised KEY sub command: '",tk[ct],"'");
 		ct++;
 	}
-goto do_next_line;
-/*----------------------------------------------------------------*/
-do_data:
-{
-   data_command();
-   goto do_next_line;
 }
-goto do_next_line;
-/*----------------------------------------------------------------*/
-do_extract:
-	goto do_next_line;
-/*----------------------------------------------------------------*/
-do_hscale:
+
+void do_hscale(int& ct) {
 	if (str_i_equals(tk[ct+1], "AUTO")) g_auto_s_h = true;
 	else g_hscale = next_exp;
-	goto do_next_line;
-/*----------------------------------------------------------------*/
-do_letsave:
+}
+
+void do_letsave(int& ct) {
 	nlet++;
 	letline[nlet] = g_get_error_line();
 	if (nlet >= MAX_NUMBER_OF_LET_COMMANDS) gprint("TOO MANY LET Commands in graph! the maximum let commands allowed is %d\n",MAX_NUMBER_OF_LET_COMMANDS);
-	goto do_next_line;
-/*----------------------------------------------------------------*/
-do_size:
+}
+
+void do_size(int& ct) {
 	g_xsize = next_exp;
 	g_ysize = next_exp;
 	/* ! set up some more constants */
 	set_sizelength();
 	do_remaining_entries(ct+1);
-	goto do_next_line;
-/*----------------------------------------------------------------*/
-do_scale:
+}
+
+void do_scale(int& ct) {
 	if (str_i_equals(tk[ct+1], "AUTO")) {
 		g_auto_s_v = true;
 		g_auto_s_h = true;
@@ -474,13 +515,14 @@ do_scale:
 		g_vscale = next_exp;
 	}
 	do_remaining_entries(ct+1);
-	goto do_next_line;
-do_vscale:
+}
+
+void do_vscale(int& ct) {
 	if (str_i_equals(tk[ct+1], "AUTO")) g_auto_s_v = true;
 	else g_vscale = next_exp;
-	goto do_next_line;
-/*----------------------------------------------------------------*/
-do_colormap:
+}
+
+void do_colormap(int& ct) {
 	g_colormap = new GLEColorMap();
 	g_colormap->setFunction(tk[++ct]);
 	g_colormap->setWidth((int)floor(next_exp+0.5));
@@ -500,10 +542,10 @@ do_colormap:
 		ct++;
 	}
 	g_colormap->readData();
-	goto do_next_line;
-/*----------------------------------------------------------------*/
-do_names:
-	t = axis_type_check(tk[1]);
+}
+
+void do_names(int& ct) {
+	int t = axis_type_check(tk[1]);
 	xx[t].label_off = false;
 	if (ntk >= 3 && str_i_equals(tk[2], "FROM") && toupper(tk[3][0]) == 'D') {
 		// Support syntax "xnames from d1" to retrieve names from the data set
@@ -515,19 +557,19 @@ do_names:
 			xx[t].addName(strbuf);
 		}
 	}
-	goto do_next_line;
-/*----------------------------------------------------------------*/
-do_places:	/* x2places, or xplaces, or yplaces or y2places */
-	t = axis_type_check(tk[1]);
+}
+
+void do_places(int& ct) {
+	int t = axis_type_check(tk[1]);
 	xx[t].label_off = false;
 	ct = 1;
 	while (ct<ntk)  {
 		xx[t].addPlace(next_exp);
 	}
-	goto do_next_line;
-/*----------------------------------------------------------------*/
-do_noticks:
-	t = axis_type_check(tk[1]);
+}
+
+void do_noticks(int& ct) {
+	int t = axis_type_check(tk[1]);
 	ct = 1;
 	xx[t].clearNoTicks();
 	if (t <= 2) xx[t+2].clearNoTicks();
@@ -536,11 +578,11 @@ do_noticks:
 		xx[t].addNoTick(pos);
 		if (t <= 2) xx[t+2].addNoTick(pos);
 	}
-	goto do_next_line;
-/*----------------------------------------------------------------*/
-do_main_title:
+}
+
+void do_main_title(int& ct) {
 	/* should change position and size of main title */
-	t = GLE_AXIS_T;
+	int t = GLE_AXIS_T;
 	xx[GLE_AXIS_T].off = 0;
 	ct = 1;
 	next_vquote_cpp(xx[t].title);
@@ -556,10 +598,10 @@ do_main_title:
 	    else g_throw_parser_error("expecting title sub command, not '", tk[ct], "'");
 	    ct++;
 	}
-	goto do_next_line;
-/*----------------------------------------------------------------*/
-do_title:
-	t = axis_type_check(tk[1]);
+}
+
+void do_title(int& ct) {
+	int t = axis_type_check(tk[1]);
 	ct = 1;
 	next_vquote_cpp(xx[t].title);
 	ct = 3;
@@ -581,10 +623,10 @@ do_title:
 	    }
 	    ct++;
 	}
-	goto do_next_line;
-/*----------------------------------------------------------------*/
-do_datasets:
-	d = get_dataset_identifier(tk[1]); /* dataset number (right$(k$,2))  (0=dn) */
+}
+
+void do_datasets(int& ct) {
+	int d = get_dataset_identifier(tk[1]); /* dataset number (right$(k$,2))  (0=dn) */
 	if (d != 0) {
 		ensureDataSetCreatedAndSetUsed(d);
 		do_dataset(d);
@@ -595,7 +637,6 @@ do_datasets:
 			}
 		}
 	}
-	goto do_next_line;
 }
 
 bool do_remaining_entries(int ct) {
@@ -1521,10 +1562,9 @@ GLEDataDescription::GLEDataDescription() :
 /* data a.dat COMMENT # d1=c1,c3 d2=c5,c1				*/
 /* data a.dat COMMENT # IGNORE n d1=c1,c3 d2=c5,c1	*/
 
-void read_data_description(GLEDataDescription* description) {
+void read_data_description(GLEDataDescription* description, GLESourceLine& sline) {
 	// Get data command
-	string datacmd;
-	get_block_line(g_get_error_line(), datacmd);
+	string datacmd(sline.getCode());
 	// Initialize parser for this line
 	GLEParser* parser = get_global_parser();
 	parser->setString(datacmd.c_str());
@@ -1653,10 +1693,10 @@ bool auto_all_labels_column(GLECSVData* csvData, unsigned int first_row) {
 	}
 }
 
-void data_command() {
+void data_command(GLESourceLine& sline) {
 	// Read data set description
 	GLEDataDescription description;
-	read_data_description(&description);
+	read_data_description(&description, sline);
 	// Open file
 	string expandedName(GLEExpandEnvironmentVariables(description.fileName));
 	validate_file_name(expandedName, true);

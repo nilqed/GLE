@@ -1037,6 +1037,9 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				cp++;
 				end_object();
 				break;
+			  case GLE_OPBEGIN_GRAPH:
+				end_graph();
+				break;
 			  default :
 				get_global_parser()->get_block_type(jj, temp_str);
 				g_throw_parser_error("invalid end of block type '", temp_str.c_str(), "'");
@@ -1655,6 +1658,11 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  case GLE_KW_SLEEP:
 			readval(x);
 			GLESleep((int)floor(x*1000+0.5));
+			break;
+		  case GLE_KW_BLOCK_COMMAND:
+			readlong(jj); /* block type */
+			/* only graph block supported for now */
+			execute_graph(sline, false);
 			break;
 		  default :
 		  	byte_code_error(PCODE_UNKNOWN_COMMAND);

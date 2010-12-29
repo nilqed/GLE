@@ -48,7 +48,7 @@
 /* and give it the next unused index number                         */
 /*            *** 50 is RESERVED for assignment ***                 */
 /* when adding you need to edit pass.cpp and run.cpp                */
-/* CURRENT MAX IS 88 next command number is 89                      */
+/* CURRENT MAX IS 89 next command number is 90                      */
 /*------------------------------------------------------------------*/
 
 #define NKEYS (sizeof mkeywfn / sizeof(struct mkeyw))

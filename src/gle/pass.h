@@ -53,9 +53,10 @@ typedef struct op_key OPKEY[];
 #define GLE_SRCBLK_RETURN 5
 #define GLE_SRCBLK_MAGIC  100
 
-#define GLE_OPBEGIN_IF   6
-#define GLE_OPBEGIN_SUB  7
-#define GLE_OPBEGIN_BOX  2
+#define GLE_OPBEGIN_IF    6
+#define GLE_OPBEGIN_SUB   7
+#define GLE_OPBEGIN_BOX   2
+#define GLE_OPBEGIN_GRAPH 10
 
 class GLESubMap;
 
@@ -143,8 +144,9 @@ public:
 	~GLEParser();
 	void initTokenizer();
 	double evalTokenToDouble() throw(ParserError);
-   void evalTokenToString(string* str) throw(ParserError);
-   void evalTokenToFileName(string* str) throw(ParserError);
+	void evalTokenToString(string* str) throw(ParserError);
+	void evalTokenToFileName(string* str) throw(ParserError);
+	bool pass_block_specific(GLESourceLine& sourceLine, GLEPcode& pcode);
 	void passt(GLESourceLine &SLine, GLEPcode& pcode) throw(ParserError);
 	void polish_eol(GLEPcode& pcode, int *rtype) throw(ParserError);
 	void polish(GLEPcode& pcode, int *rtype) throw(ParserError);

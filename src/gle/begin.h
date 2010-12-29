@@ -59,6 +59,9 @@ BEGINDEF char tkbuff[TKBUFF_LENGTH];
 BEGINDEF char space_str[3];
 BEGINDEF int ntk;
 
+class GLESourceLine;
+
+int begin_token(GLESourceLine& sline, char *srclin, TOKENS tk, int *ntk, char *outbuff);
 int begin_token(int **pcode,int *cp,int *pln,char *srclin,TOKENS tk,int *ntk,char *outbuff);
 void begin_init(void);
 int begin_next_line(int *pcode, int *cp);

@@ -36,7 +36,7 @@
  *                                                                      *
  ************************************************************************/
 
-#define GLE_KW_NB                             89
+#define GLE_KW_NB                             90
 
 #define GLE_KW_BLANK                          0
 #define GLE_KW_ABOUND                         87
@@ -131,3 +131,4 @@
 #define GLE_KW_UNTIL                          47
 #define GLE_KW_WHILE                          48
 #define GLE_KW_WRITE                          49
+#define GLE_KW_BLOCK_COMMAND                  89

@@ -77,6 +77,7 @@ extern vector<int> g_funder;
 extern GLEColorMap* g_colormap;
 
 extern int g_nkd, g_keycol;
+extern GLEGlobalSource* g_Source;
 
 void box3d(double x1, double y1, double x2, double y2,double x3d,double y3d,int sidecolor, int topcolor, int notop);
 void var_clear_local(void);
@@ -2758,9 +2759,8 @@ void GLELet::doHistogram(GLEParser* parser) throw(ParserError) {
 // DATA results in the line being drawn from the minimum to the maximum of the data series
 //
 void do_let(int line, bool nofirst) throw(ParserError) {
-	string letcmd;
 	g_set_error_line(line);
-	get_block_line(line, letcmd);
+	string letcmd(g_Source->getLineCode(line - 1));
 	do_let(letcmd, nofirst);
 }
 

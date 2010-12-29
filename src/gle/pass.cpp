@@ -59,6 +59,7 @@ void get_cap(TOKENS tk,int *ntok,int *curtok,int *pcode,int *plen);
 void get_join(TOKENS tk,int *ntok,int *curtok,int *pcode,int *plen);
 void g_marker_def(char *s1, char *s2);
 void font_load(void) throw(ParserError);
+bool execute_graph(GLESourceLine& sline, bool isCommandCheck);
 
 extern int this_line;
 extern int gle_debug;
@@ -1022,6 +1023,23 @@ GLESub* GLEParser::is_draw_sub(const string& str) {
 	return sub_find((char*)subname.c_str());
 }
 
+bool GLEParser::pass_block_specific(GLESourceLine& sourceLine, GLEPcode& pcode) {
+	for (int i = m_blocks.size() - 1; i >= 0; i--) {
+		GLESourceBlock* block = &m_blocks[i];
+		if (block->getType() == GLE_SRCBLK_MAGIC + GLE_OPBEGIN_GRAPH) {
+			if (execute_graph(sourceLine, true)) {
+				int pos_start = pcode.size();
+				pcode.addInt(0);
+				pcode.addInt(GLE_KW_BLOCK_COMMAND);
+				pcode.addInt(GLE_OPBEGIN_GRAPH);
+				pcode.setInt(pos_start, pcode.size()-pos_start);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void GLEParser::passt(GLESourceLine &SLine, GLEPcode& pcode) throw(ParserError) {
 	resetSpecial();
 	static int i,f,vtyp,v,vidx;
@@ -1030,7 +1048,7 @@ void GLEParser::passt(GLESourceLine &SLine, GLEPcode& pcode) throw(ParserError) 
 	int fctkey;
 	int nbcmd = 0;
 	int position;
-	GLESourceBlock* block;
+	GLESourceBlock* block = last_block();
 	string first, temp_str;
 	if (cur_mode != 0) {
 		do_text_mode(SLine, getTokens(), pcode);
@@ -1039,19 +1057,23 @@ void GLEParser::passt(GLESourceLine &SLine, GLEPcode& pcode) throw(ParserError) 
 	setAllowSpace(false);
 	bool single_cmd = false;
 	Tokenizer* tokens = getTokens();
-	if (m_auto_endif) {
-		// Allow for "IF test THEN code" blocks	without "END IF"
-		block = last_block();
-		if (block->getType() == GLE_SRCBLK_MAGIC+GLE_OPBEGIN_IF) {
-			string& token = tokens->try_next_token();
-			if (str_i_equals(token, "ELSE")) m_auto_endif = false;
-			if (token != "") tokens->pushback_token();
-		} else if (block->getType() != GLE_SRCBLK_ELSE) {
-			m_auto_endif = false;
-		}
+	if (block != 0) {
 		if (m_auto_endif) {
-			m_auto_endif = false;
-			do_endif(srclin, pcode);
+			// Allow for "IF test THEN code" blocks	without "END IF"
+			if (block->getType() == GLE_SRCBLK_MAGIC+GLE_OPBEGIN_IF) {
+				string& token = tokens->try_next_token();
+				if (str_i_equals(token, "ELSE")) m_auto_endif = false;
+				if (token != "") tokens->pushback_token();
+			} else if (block->getType() != GLE_SRCBLK_ELSE) {
+				m_auto_endif = false;
+			}
+			if (m_auto_endif) {
+				m_auto_endif = false;
+				do_endif(srclin, pcode);
+			}
+		}
+		if (pass_block_specific(SLine, pcode)) {
+			return;
 		}
 	}
 	int pos_start = pcode.size();
@@ -1190,7 +1212,6 @@ void GLEParser::passt(GLESourceLine &SLine, GLEPcode& pcode) throw(ParserError) 
 					get_optional(op_begin_text, pcode);
 					break;
 				  case 10: /* graph */
-					cur_mode = 10;
 					break;
 				  case 11: /* xaxis */
 					cur_mode = 11;

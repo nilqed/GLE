@@ -77,6 +77,17 @@ int begin_token(int **pcode,int *cp,int *pln,char *srclin,TOKENS tk,int *ntk,cha
 	return true;
 }
 
+int begin_token(GLESourceLine& sline, char *srclin, TOKENS tk, int *ntk, char *outbuff) {
+	g_set_error_line(sline.getGlobalLineNo());
+	strcpy(srclin, sline.getCodeCStr());
+	replace_exp(srclin);
+	for (int i = 0; i < TOKEN_LENGTH; i++) {
+		strcpy(tk[i], " ");
+	}
+	token(srclin,tk,ntk,outbuff);
+	return true;
+}
+
 bool begin_line(int *pln, string& srclin) {
 	g_set_error_line(*pln);
 	int *pcode = gpcode[(*pln)++];
