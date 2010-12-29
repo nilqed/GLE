@@ -90,7 +90,7 @@ void draw_graph(KeyInfo* keyinfo) throw (ParserError);
 void do_set_bar_color(const char* tk, bar_struct* bar, int type);
 void do_set_bar_style(const char* tk, bar_struct* bar);
 void do_axis_part_all(int xset) throw (ParserError);
-bool do_remaining_entries(int ct);
+bool do_remaining_entries(int ct, bool isCommandCheck);
 void graph_freebars();
 double get_next_exp(TOKENS tk,int ntk,int *curtok);
 void data_command(GLESourceLine& sline);
@@ -110,6 +110,8 @@ void do_names(int& ct);
 void do_places(int& ct);
 void do_title(int& ct);
 void do_datasets(int& ct);
+bool is_dataset_identifier(const char* ds);
+GLESub* sub_find(const string& s);
 
 GLEAxis xx[GLE_AXIS_MAX+1];
 
@@ -149,7 +151,7 @@ void ensureDataSetCreatedAndSetUsed(int d) {
 // axis is defined in terms of its base size, which is equal to g_fontsz.
 // A useful value for base is 0.25
 
-void begin_graph(int *pln , int *pcode , int *cp) throw (ParserError) {
+void begin_graph(int *pcode, int *cp) throw (ParserError) {
 	if (g_inGraph) {
 		g_throw_parser_error("graph block can't be nested");
 	}
@@ -191,7 +193,7 @@ void end_graph() {
 
 bool execute_graph(GLESourceLine& sline, bool isCommandCheck) {
 	begin_init();
-	int st = begin_token(sline, srclin, tk, &ntk, outbuff);
+	int st = begin_token(sline, srclin, tk, &ntk, outbuff, !isCommandCheck);
 	if (!st) {
 		return false;
 	}
@@ -234,7 +236,7 @@ bool execute_graph(GLESourceLine& sline, bool isCommandCheck) {
 		do_discontinuity();
 	} else kw("UNDER") {
 		if (isCommandCheck) return true;
-		g_funder.push_back(sline.getGlobalLineNo());
+		g_funder.push_back(sline.getGlobalLineNo() - 1);
 	} else kw("BACKGROUND") {
 		if (isCommandCheck) return true;
 		g_graph_background = next_color;
@@ -265,11 +267,19 @@ bool execute_graph(GLESourceLine& sline, bool isCommandCheck) {
 	} else if (check_axis_command_name(tk[ct],"TITLE")) {
 		if (isCommandCheck) return true;
 		do_title(ct);
-	} else if (toupper(*tk[ct])=='D') {
+	} else if (is_dataset_identifier(tk[ct])) {
 		if (isCommandCheck) return true;
 		do_datasets(ct);
-	} else if (do_remaining_entries(ct)) {
+	} else if (do_remaining_entries(ct, isCommandCheck)) {
 		if (isCommandCheck) return true;
+	} else {
+		string fct_name(tk[ct]);
+		str_to_uppercase(fct_name);
+		GLESub* sub = sub_find((char*)fct_name.c_str());
+		if (sub != NULL) {
+			if (isCommandCheck) return true;
+			g_fcalls.push_back(sline.getGlobalLineNo() - 1);
+		}
 	}
 	return false;
 }
@@ -502,7 +512,7 @@ void do_size(int& ct) {
 	g_ysize = next_exp;
 	/* ! set up some more constants */
 	set_sizelength();
-	do_remaining_entries(ct+1);
+	do_remaining_entries(ct+1, false);
 }
 
 void do_scale(int& ct) {
@@ -514,7 +524,7 @@ void do_scale(int& ct) {
 		g_hscale = next_exp;
 		g_vscale = next_exp;
 	}
-	do_remaining_entries(ct+1);
+	do_remaining_entries(ct+1, false);
 }
 
 void do_vscale(int& ct) {
@@ -639,21 +649,32 @@ void do_datasets(int& ct) {
 	}
 }
 
-bool do_remaining_entries(int ct) {
+bool do_remaining_entries(int ct, bool isCommandCheck) {
 	int nb_found = 0;
 	bool found = true;
 	while (found && ct <= ntk) {
-		kw("NOBOX") g_nobox = true;
-		else kw("BOX") g_nobox = false;
-		else kw("NOBORDER") g_nobox = true; // for compatibility with v3.5
-		else kw("BORDER") g_nobox = false;
-		else kw("CENTER") g_center = true;
-		else kw("FULLSIZE") {
+		kw("NOBOX") {
+			if (isCommandCheck) return true;
+			g_nobox = true;
+		} else kw("BOX") {
+			if (isCommandCheck) return true;
+			g_nobox = false;
+		} else kw("NOBORDER") {
+			if (isCommandCheck) return true;
+			g_nobox = true; // for compatibility with v3.5
+		} else kw("BORDER") {
+			if (isCommandCheck) return true;
+			g_nobox = false;
+		} else kw("CENTER") {
+			if (isCommandCheck) return true;
+			g_center = true;
+		} else kw("FULLSIZE") {
+			if (isCommandCheck) return true;
 			g_vscale = 1;
 			g_hscale = 1;
 			g_nobox = true;
-		}
-		else kw("MATH") {
+		} else kw("MATH") {
+			if (isCommandCheck) return true;
 			g_math = true;
 			xx[GLE_AXIS_Y].offset = 0.0;
 			xx[GLE_AXIS_Y].has_offset = true;
@@ -663,8 +684,9 @@ bool do_remaining_entries(int ct) {
 			xx[GLE_AXIS_X].ticks_both = true;
 			xx[GLE_AXIS_X2].off = true;
 			xx[GLE_AXIS_Y2].off = true;
+		} else {
+			found = false;
 		}
-		else found = false;
 		if (found) {
 			ct++;
 			nb_found++;
@@ -1408,6 +1430,22 @@ void copy_default(int dn) {
 	dp[dn]->axisscale = false;
 }
 
+bool is_dataset_identifier(const char* ds) {
+	int len = strlen(ds);
+	if (len <= 1 || toupper(ds[0]) != 'D') {
+		return false;
+	}
+	if (str_i_equals(ds, "dn")) {
+		return true;
+	}
+	if (len > 3 && ds[1] == '[' && ds[len - 1] == ']') {
+		return true;
+	}
+	char* ptr = NULL;
+	strtol(ds+1, &ptr, 10);
+	return ptr != NULL && *ptr == 0;
+}
+
 int get_dataset_identifier(const char* ds, bool def) throw(ParserError) {
 	int len = strlen(ds);
 	if (len <= 1 || toupper(ds[0]) != 'D') {
@@ -1416,18 +1454,31 @@ int get_dataset_identifier(const char* ds, bool def) throw(ParserError) {
 	if (str_i_equals(ds, "dn")) {
 		return 0;
 	}
-	char* ptr = NULL;
-	int result = strtol(ds+1, &ptr, 10);
-	if (*ptr != 0) {
-		g_throw_parser_error("data set identifier should be integer, not '", ds, "'");
+	if (len > 3 && ds[1] == '[' && ds[len - 1] == ']') {
+		double id;
+		string str(ds + 2, len - 3);
+		polish_eval((char*)str.c_str(), &id);
+		int result = (int)floor(id + 0.5);
+		if (result < 0 || result >= MAX_NB_DATA) {
+			ostringstream err;
+			err << "data set identifier out of range: '" << result << "'";
+			g_throw_parser_error(err.str());
+		}
+		return result;
+	} else {
+		char* ptr = NULL;
+		int result = strtol(ds+1, &ptr, 10);
+		if (*ptr != 0) {
+			g_throw_parser_error("illegal data set identifier '", ds, "'");
+		}
+		if (result < 0 || result >= MAX_NB_DATA) {
+			g_throw_parser_error("data set identifier out of range '", ds, "'");
+		}
+		if (def && dp[result] == NULL) {
+			g_throw_parser_error("data set '", ds, "' not defined");
+		}
+		return result;
 	}
-	if (result < 0 || result >= MAX_NB_DATA) {
-		g_throw_parser_error("data set identifier out of range '", ds, "'");
-	}
-	if (def && dp[result] == NULL) {
-		g_throw_parser_error("data set '", ds, "' not defined");
-	}
-	return result;
 }
 
 int get_dataset_identifier(const string& ds, GLEParser* parser, bool def) throw(ParserError) {

@@ -77,10 +77,12 @@ int begin_token(int **pcode,int *cp,int *pln,char *srclin,TOKENS tk,int *ntk,cha
 	return true;
 }
 
-int begin_token(GLESourceLine& sline, char *srclin, TOKENS tk, int *ntk, char *outbuff) {
+int begin_token(GLESourceLine& sline, char *srclin, TOKENS tk, int *ntk, char *outbuff, bool replaceExpr) {
 	g_set_error_line(sline.getGlobalLineNo());
 	strcpy(srclin, sline.getCodeCStr());
-	replace_exp(srclin);
+	if (replaceExpr) {
+		replace_exp(srclin);
+	}
 	for (int i = 0; i < TOKEN_LENGTH; i++) {
 		strcpy(tk[i], " ");
 	}

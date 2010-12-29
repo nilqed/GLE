@@ -61,7 +61,7 @@ BEGINDEF int ntk;
 
 class GLESourceLine;
 
-int begin_token(GLESourceLine& sline, char *srclin, TOKENS tk, int *ntk, char *outbuff);
+int begin_token(GLESourceLine& sline, char *srclin, TOKENS tk, int *ntk, char *outbuff, bool replaceExpr);
 int begin_token(int **pcode,int *cp,int *pln,char *srclin,TOKENS tk,int *ntk,char *outbuff);
 void begin_init(void);
 int begin_next_line(int *pcode, int *cp);

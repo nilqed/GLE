@@ -753,7 +753,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					begin_tab(srclin,pcode,&cp);
 					break;
 				case 10: /* graph */
-					begin_graph(srclin,pcode,&cp);
+					begin_graph(pcode,&cp);
 					break;
 				case 11: /* xaxis */
 				case 12: /* yaxis */

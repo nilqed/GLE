@@ -348,7 +348,7 @@ void GLERun::sub_call(int idx, double *pval, char **pstr, int *npm, int *otyp) t
 	// cout << "calling routine: " << sub->getName() << endl;
 	for (int i = s_start + 1; i < s_end; i++) {
 		// cout << "executing line " << i << " of " << getSource()->getNbLines() << endl;
-		GLESourceLine* line = getSource()->getLine(i);
+		GLESourceLine* line = getSource()->getLine(i - 1);
 		do_pcode(*line,&i,gpcode[i],gplen[i],&endp,mkdrobjs);
 		dbg gprint("AFTER DO_PCODE I = %d \n",i);
 	}
@@ -399,7 +399,7 @@ void GLERun::sub_call(GLESub* sub) throw(ParserError) {
 	int oldline = this_line;
 	for (int i = s_start + 1; i < s_end; i++) {
 		dbg gprint("=Call do pcode, line %d ",i);
-		GLESourceLine* line = getSource()->getLine(i);
+		GLESourceLine* line = getSource()->getLine(i - 1);
 		do_pcode(*line, &i, gpcode[i], gplen[i], &endp, mkdrobjs);
 		dbg gprint("AFTER DO_PCODE I = %d \n",i);
 	}

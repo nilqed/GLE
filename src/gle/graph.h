@@ -310,7 +310,7 @@ void set_bar_axis_places();
 int get_dataset_identifier(const char* ds, bool def = false) throw(ParserError);
 
 double graph_bar_pos(double xpos, int bar, int set) throw(ParserError);
-void begin_graph(int *pln, int *pcode, int *cp) throw (ParserError);
+void begin_graph(int *pcode, int *cp) throw (ParserError);
 void end_graph();
 bool execute_graph(GLESourceLine& sline, bool isCommandCheck);
 void begin_key(int *pln, int *pcode, int *cp) throw (ParserError);

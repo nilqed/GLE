@@ -44,7 +44,7 @@ manual_graph_mode
 set alabelscale 0.6
 
 wd = 14/3
-dy = -0.2
+dy = -0.1
 
 xmin = -4
 xmax = 4

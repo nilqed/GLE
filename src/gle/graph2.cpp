@@ -410,7 +410,6 @@ void box3d(double x1, double y1, double x2, double y2,double x3d,double y3d,int 
 void draw_user_function_calls(bool underneath) throw(ParserError) {
 	vector<int>& calls = underneath ? g_funder : g_fcalls;
 	if (calls.size() != 0) {
-		string str;
 		GLEParser* parser = get_global_parser();
 		g_gsave();
 		g_beginclip();
@@ -422,18 +421,14 @@ void draw_user_function_calls(bool underneath) throw(ParserError) {
 		g_set_hei(g_fontsz);
 		for (vector<int>::size_type i = 0; i < calls.size(); i++) {
 			double res;
-			int pln = calls[i];
-			if (begin_line(&pln, str)) {
-				parser->setString(str.c_str());
-				Tokenizer* tokens = parser->getTokens();
-				tokens->is_next_token_i("UNDER");
-				GLEPcodeList pc_list;
-				GLEPcode pcode(&pc_list);
-				parser->get_subroutine_call(pcode);
-				eval_pcode(pcode, &res);
-			} else {
-				g_throw_parser_error("unexpected empty line in graph block");
-			}
+			string str(g_Source->getLineCode(calls[i]));
+			parser->setString(str.c_str());
+			Tokenizer* tokens = parser->getTokens();
+			tokens->is_next_token_i("UNDER");
+			GLEPcodeList pc_list;
+			GLEPcode pcode(&pc_list);
+			parser->get_subroutine_call(pcode);
+			eval_pcode(pcode, &res);
 		}
 		g_endclip();
 		g_grestore();
