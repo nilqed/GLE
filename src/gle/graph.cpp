@@ -1585,7 +1585,7 @@ GLEDataSetDescription::GLEDataSetDescription() {
 }
 
 void GLEDataSetDescription::setColumnIdx(unsigned int dimension, int column) {
-	m_columnIdx.resize(std::max(m_columnIdx.size(), dimension + 1), -1);
+	m_columnIdx.resize(std::max<unsigned int>(m_columnIdx.size(), dimension + 1), -1);
 	m_columnIdx[dimension] = column;
 }
 
