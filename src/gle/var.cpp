@@ -48,6 +48,8 @@
 #include "gprint.h"
 #include "cutils.h"
 
+#include <set>
+
 #define true (!false)
 #define false 0
 
@@ -58,24 +60,21 @@ GLEVars* getVarsInstance() {
 	return g_VarsInstance;
 }
 
-GLELocalVars::GLELocalVars(int num) : var_val(num, 0.0), var_str(num, "") {
+GLELocalVars::GLELocalVars(int num) {
+	values.resize(num);
 }
 
 GLELocalVars::~GLELocalVars() {
 }
 
 void GLELocalVars::expand(int num) {
-	if ((int)var_val.size() <= num) {
-		var_val.resize(num+1, 0.0);
-		var_str.resize(num+1, "");
-	}
+	values.ensure(num + 1);
 }
 
 void GLELocalVars::copyFrom(GLELocalVars* other, int nb) {
 	expand(nb);
 	for (int i = 0; i < nb; i++) {
-		var_val[i] = other->var_val[i];
-		var_str[i] = other->var_str[i];
+		values.set(i, other->values.get(i));
 	}
 }
 
@@ -113,6 +112,31 @@ void GLEVarSubMap::removeFromParent() {
 	}
 }
 
+void GLEVarSubMap::addToParent(GLEVarMap* parent) {
+	m_Parent = parent;
+	m_Parent->addVars(m_Map);
+}
+
+GLEVarBackup::GLEVarBackup() {
+}
+
+void GLEVarBackup::backup(GLEVars* vars, const vector<int>& ids) {
+	GLEMemoryCell data;
+	GLE_MC_INIT(data);
+	m_ids.assign(ids.begin(), ids.end());
+	m_values.resize(ids.size());
+	for (size_t i = 0; i < ids.size(); ++i) {
+		vars->get(ids[i], &data);
+		m_values.set(i, &data);
+	}
+}
+
+void GLEVarBackup::restore(GLEVars* vars) {
+	for (size_t i = 0; i < m_ids.size(); ++i) {
+		vars->set(m_ids[i], m_values.get(i));
+	}
+}
+
 GLEVarMap::GLEVarMap() {
 	m_IsTemp = false;
 }
@@ -143,6 +167,40 @@ int GLEVarMap::addVarIdx(const string& name) {
 		m_Types.push_back(type);
 	}
 	return idx;
+}
+
+void GLEVarMap::addVars(const StringIntHash& submap) {
+	set<int> free(m_Free.begin(), m_Free.end());
+	for (StringIntHash::const_iterator i(submap.begin()); i != submap.end(); ++i) {
+		int idx = i->second;
+		set<int>::const_iterator found(free.find(idx));
+		if (found == free.end()) {
+			unsigned int origSize = m_Names.size();
+			if (idx >= (int)origSize) {
+				unsigned int newSize = idx + 1;
+				m_Names.resize(newSize, "?");
+				m_Types.resize(newSize, 0);
+				for (unsigned int j = origSize; j < newSize - 1; j++) {
+					free.insert(j);
+				}
+				string name(i->first);
+				int type = str_var(name) ? 2 : 1;
+				m_Names[idx] = name;
+				m_Types[idx] = type;
+			} else {
+				ostringstream err;
+				err << "GLE internal error: variable not free when adding submap (name = " << i->first << ", id = " << idx << ")";
+				g_throw_parser_error(err.str());
+			}
+		} else {
+			free.erase(found);
+			string name(i->first);
+			int type = str_var(name) ? 2 : 1;
+			m_Names[idx] = name;
+			m_Types[idx] = type;
+		}
+	}
+	m_Free.assign(free.begin(), free.end());
 }
 
 int GLEVarMap::var_find_add(const string& name, bool* isnew) {
@@ -202,18 +260,18 @@ GLEVarSubMap* GLEVarMap::pushSubMap() {
 	return sub;
 }
 
+void GLEVarMap::pushSubMap(GLEVarSubMap* submap) {
+	submap->addToParent(this);
+	m_SubMap.push_back(submap);
+}
+
 void GLEVarMap::popSubMap() {
 	GLEVarSubMap* sub = m_SubMap.back();
 	sub->removeFromParent();
-	delete sub;
 	m_SubMap.pop_back();
 }
 
 void GLEVarMap::clearSubMaps() {
-	for (vector<GLESub*>::size_type i = 0; i < m_SubMap.size(); i++) {
-		delete m_SubMap[i];
-		m_SubMap[i] = NULL;
-	}
 	m_SubMap.clear();
 }
 
@@ -268,7 +326,7 @@ char* GLEVars::getName(int var) {
 
 double GLEVars::getDouble(int var) {
 	if (check(&var)) {
-		return local_var->var_val[var];
+		return local_var->values.getDouble(var);
 	} else {
 		return m_Global.getDouble(var);
 	}
@@ -276,7 +334,7 @@ double GLEVars::getDouble(int var) {
 
 void GLEVars::setDouble(int var, double v) {
 	if (check(&var)) {
-		local_var->var_val[var] = v;
+		local_var->values.setDouble(var, v);
 	} else {
 		m_Global.setDouble(var, v);
 	}
@@ -284,20 +342,31 @@ void GLEVars::setDouble(int var, double v) {
 
 void GLEVars::set(int var, GLEMemoryCell* value) {
 	if (check(&var)) {
-		double v;
-		gle_memory_cell_to_double(value, &v);
-		local_var->var_val[var] = v;
+		local_var->values.set(var, value);
 	} else {
 		m_Global.set(var, value);
 	}
 }
 
-GLEString* GLEVars::getString(int var) {
+void GLEVars::get(int var, GLEMemoryCell* value) {
 	if (check(&var)) {
-		const char* str = local_var->var_str[var].c_str();
-		return new GLEString(str);
+		GLE_MC_COPY(value, local_var->values.get(var));
 	} else {
-		return (GLEString*)m_Global.getObject(var);
+		GLE_MC_COPY(value, m_Global.get(var));
+	}
+}
+
+GLEString* GLEVars::getString(int var) {
+	GLEDataObject* object = 0;
+	if (check(&var)) {
+		object = local_var->values.getObject(var);
+	} else {
+		object = m_Global.getObject(var);
+	}
+	if (object != 0 && object->getType() == GLEObjectTypeString) {
+		return (GLEString*)object;
+	} else {
+		return new GLEString();
 	}
 }
 
@@ -311,7 +380,7 @@ GLEDataObject* GLEVars::getObject(int var) {
 
 void GLEVars::setString(int var, GLEString* s) {
 	if (check(&var)) {
-		s->toUTF8(local_var->var_str[var]);
+		local_var->values.setObject(var, s);
 	} else {
 		m_Global.setObject(var, s);
 	}
@@ -327,10 +396,9 @@ void GLEVars::setObject(int var, GLEDataObject* obj) {
 
 void GLEVars::init(int var, int type) {
 	if (check(&var)) {
-		local_var->var_str[var] = "";
-		local_var->var_val[var] = 0.0;
+		if (type == 2) local_var->values.setObject(var, new GLEString());
+		else local_var->values.setDouble(var, 0.0);
 	} else {
-		m_Global.init(var);
 		if (type == 2) m_Global.setObject(var, new GLEString());
 		else m_Global.setDouble(var, 0.0);
 	}
@@ -445,6 +513,15 @@ GLEVarSubMap* GLEVars::addLocalSubMap() {
 		var_alloc_local(0);
 	}
 	return m_LocalMap->pushSubMap();
+}
+
+void GLEVars::addLocalSubMap(GLEVarSubMap* submap) {
+	if (m_LocalMap == NULL) {
+		m_LocalMap = new GLEVarMap();
+		m_LocalMap->setTemp(true);
+		var_alloc_local(0);
+	}
+	m_LocalMap->pushSubMap(submap);
 }
 
 void GLEVars::removeLocalSubMap() {
@@ -670,14 +747,6 @@ void var_findadd(const char *name, int *idx, int *type) {
 // First search in local vars, then in global vars
 void var_find(const char *name, int *idx, int *type) {
 	getVarsInstance()->find(name, idx, type);
-}
-
-GLEVarSubMap* var_add_local_submap() {
-	return getVarsInstance()->addLocalSubMap();
-}
-
-void var_remove_local_submap() {
-	getVarsInstance()->removeLocalSubMap();
 }
 
 void var_find_dn(GLEVarSubMap* map, int *idx, int *var, int *nd) {

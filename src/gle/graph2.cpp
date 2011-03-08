@@ -2059,30 +2059,57 @@ void GLEFitLS::toFunctionStr(const string& format, string* str) throw(ParserErro
 
 class GLELet {
 protected:
-	GLEVarSubMap* m_SubMap;
+	GLERC<GLEVarSubMap> m_SubMap;
 	GLERCVector<GLEFunctionParserPcode> m_Fcts;
 	GLERC<GLEFunctionParserPcode> m_Where;
+	GLEVarBackup m_varBackup;
 	set<int> m_XRangeDS;
 	double m_LetFrom, m_LetTo, m_LetStep, m_LogStep;
 	bool m_FineTune, m_NoFirst, m_HasSteps, m_HasStepOption, m_HasFrom, m_HasTo;
 	int m_VarX, m_Ds, m_LetNSteps;
+	int m_codeLine;
+
+	// For histogram routine
+	int m_nrBins;
+	int m_HistDS;
+
+	// For fitting routines
+	int m_FitDS;
+	bool m_limitDataX;
+	bool m_limitDataY;
+	bool m_limitData;
+	string m_fitType;
+	string m_fitFct;
+	string m_eqStr;
+	string m_format;
+	string m_rsq;
+	string m_varSlope;
+	string m_varIntercept;
+	string m_varR;
+	GLECheckWindow m_window;
+
 public:
 	GLELet();
 	~GLELet();
 	void initVars();
 	void initStep();
 	void doLet() throw(ParserError);
-	void doFitFunction(const string& fct, GLEParser* parser, bool finetune) throw(ParserError);
-	void doHistogram(GLEParser* parser) throw(ParserError);
+	void parseFitFunction(const string& fct, GLEParser* parser) throw(ParserError);
+	void parseHistogram(GLEParser* parser) throw(ParserError);
+	void doFitFunction() throw(ParserError);
+	void doHistogram() throw(ParserError);
 	void complainAboutNoFunctions(GLEVectorAutoDelete<GLELetDataSet>& datasets) throw(ParserError);
 	bool checkIdenticalRanges(GLEVectorAutoDelete<GLELetDataSet>& datasets);
 	void transformIdenticalRangeDatasets(GLEVectorAutoDelete<GLELetDataSet>& datasets, DataFill* fill);
 	void combineFunctions(GLEVectorAutoDelete<GLELetDataSet>& datasets, DataFill* fill, double logstep);
 	void setStep(double value);
+	void createVarBackup(GLEVars* vars, StringIntHash* varHash);
+	void restoreVarBackup(GLEVars* vars);
 	GLEFunctionParserPcode* insertFunction();
 	GLEFunctionParserPcode* addFunction();
 	GLEFunctionParserPcode* addWhere();
 	inline void setVarSubMap(GLEVarSubMap* map) { m_SubMap = map; }
+	inline GLEVarSubMap* getVarSubMap() { return m_SubMap.get(); }
 	inline void setFrom(double value) { m_LetFrom = value; }
 	inline void setTo(double value) { m_LetTo = value; }
 	inline void setNSteps(int value) { m_LetNSteps = value; }
@@ -2104,6 +2131,10 @@ public:
 	inline void addFunction(GLEFunctionParserPcode* fct) { m_Fcts.add(fct); }
 	inline void addXRangeDS(int ds) { m_XRangeDS.insert(ds); }
 	inline set<int>& getXRangeDS() { return m_XRangeDS; }
+	inline bool isHistogram() const  { return m_HistDS != -1; }
+	inline bool isFit() const  { return m_FitDS != -1; }
+	inline void setCodeLine(int line) { m_codeLine = line; }
+	inline int getCodeLine() const { return m_codeLine; }
 };
 
 GLELet::GLELet() {
@@ -2120,9 +2151,29 @@ GLELet::GLELet() {
 	m_HasFrom = false;
 	m_HasTo = false;
 	m_Ds = -1;
+	m_codeLine = -1;
+	m_fitType = "none";
+	m_HistDS = -1;
+	m_nrBins = -1;
+	m_FitDS = -1;
+	m_limitDataX = false;
+	m_limitDataY = false;
+	m_limitData = false;
 }
 
 GLELet::~GLELet() {
+}
+
+void GLELet::createVarBackup(GLEVars* vars, StringIntHash* varHash) {
+	vector<int> ids;
+	for (StringIntHash::iterator i(varHash->begin()); i != varHash->end(); ++i) {
+		ids.push_back(i->second);
+	}
+	m_varBackup.backup(vars, ids);
+}
+
+void GLELet::restoreVarBackup(GLEVars* vars) {
+	m_varBackup.restore(vars);
 }
 
 void GLELet::setStep(double value) {
@@ -2292,8 +2343,8 @@ void GLELet::doLet() throw(ParserError) {
 	double logstep = 1.0;
 	int ndn = 0;
 	int dn_idx[11], dn_var[11];
-	if (m_SubMap != NULL) {
-		var_find_dn(m_SubMap, dn_idx, dn_var, &ndn);
+	if (!m_SubMap.isNull()) {
+		var_find_dn(m_SubMap.get(), dn_idx, dn_var, &ndn);
 	}
 	if (m_LetTo <= m_LetFrom) {
 		stringstream ss;
@@ -2391,42 +2442,24 @@ void GLELet::doLet() throw(ParserError) {
 	fill.toDataset(dp[dset_id]);
 }
 
-void GLELet::doFitFunction(const string& fct, GLEParser* parser, bool finetune) throw(ParserError) {
-	string SlopeVar, OffsetVar;
-	bool linfit = false, logefit = false, log10fit = false, powxfit = false, genfit = false;
+void GLELet::parseFitFunction(const string& fct, GLEParser* parser) throw(ParserError) {
 	Tokenizer* tokens = parser->getTokens();
-
-	// doing fitting routines
-	if (str_i_equals(fct,"LINFIT"))   linfit = true;
-	if (str_i_equals(fct,"LOGEFIT"))  logefit = true;
-	if (str_i_equals(fct,"LOG10FIT")) log10fit = true;
-	if (str_i_equals(fct,"POWXFIT"))  powxfit = true;
-	if (str_i_equals(fct,"FIT"))      genfit = true;
-
-	// compose a new let string and recurse to this function
-	// get the data series to linear fit to
 	string& token = tokens->next_token();
-	int ddlinfit = get_dataset_identifier(token.c_str(), true);
-
-	// do the fit check the next tokens
-	vector<double> x, y;
-	bool limit_data_y = false;  // plot as far as y data
-	bool limit_data_x = false;  // plot as far as x data
-	bool limit_data = false; // plot which ever is maximum x or y
-	string fitfct, eqstr, format, rsq;
-
-	GLECheckWindow window;
+	m_FitDS = get_dataset_identifier(token, parser, true);
+	m_fitType = fct;
+	m_limitDataX = false;
+	m_limitDataY = false;
+	m_limitData = false;
 	while (true) {
 		string& token = tokens->try_next_token();
 		if (str_i_equals(token, "WITH")) {
-			fitfct = tokens->next_multilevel_token();
+			m_fitFct = tokens->next_multilevel_token();
 		} else if (str_i_equals(token, "EQSTR")) {
-			eqstr = tokens->next_token();
+			parser->evalTokenToString(&m_eqStr);
 		} else if (str_i_equals(token, "FORMAT")) {
-			format = tokens->next_token();
-			str_remove_quote(format);
+			parser->evalTokenToString(&m_format);
 		} else if (str_i_equals(token, "RSQ")) {
-			rsq = tokens->next_token();
+			parser->evalTokenToString(&m_rsq);
 		} else if (str_i_equals(token, "FROM")) {
 			setHasFrom(true);
 			setFrom(parser->evalTokenToDouble());
@@ -2438,39 +2471,65 @@ void GLELet::doFitFunction(const string& fct, GLEParser* parser, bool finetune) 
 			setStep(parser->evalTokenToDouble());
 		} else if (str_i_equals(token, "LIMIT_DATA_X")) {
 			// user wants the data ploted from dd xmax to dd xmin
-			limit_data_x = true;
+			m_limitDataX = true;
 		} else if (str_i_equals(token, "LIMIT_DATA_Y")) {
 			// get x values from evaluation of slope
-			limit_data_y = true;
+			m_limitDataY = true;
 		} else if (str_i_equals(token, "LIMIT_DATA")) {
-			limit_data = true;
+			m_limitData = true;
 		} else if (str_i_equals(token, "XMIN")) {
 			double xm = parser->evalTokenToDouble();
-			window.setXMin(xm);
+			m_window.setXMin(xm);
 			setFrom(xm);
 		} else if (str_i_equals(token, "XMAX")) {
 			double xm = parser->evalTokenToDouble();
-			window.setXMax(xm);
+			m_window.setXMax(xm);
 			setTo(xm);
 		} else if (str_i_equals(token, "YMIN")) {
-			window.setYMin(parser->evalTokenToDouble());
+			m_window.setYMin(parser->evalTokenToDouble());
 		} else if (str_i_equals(token, "YMAX")) {
-			window.setYMax(parser->evalTokenToDouble());
+			m_window.setYMax(parser->evalTokenToDouble());
 		} else {
 			if (token != "") tokens->pushback_token();
 			break;
 		}
 	}
+	// user can supply three variables to get the fit: SLOPE OFFSET R_SQUARED
+	if (tokens->has_more_tokens()) {
+		m_varSlope = tokens->next_token();
+		ensure_valid_var_name(tokens, m_varSlope);
+	}
+	if (tokens->has_more_tokens()) {
+		m_varIntercept = tokens->next_token();
+		ensure_valid_var_name(tokens, m_varIntercept);
+	}
+	if (tokens->has_more_tokens()) {
+		m_varR = tokens->next_token();
+		ensure_valid_var_name(tokens, m_varR);
+	}
+	if (tokens->has_more_tokens()) {
+		throw tokens->error("extra tokens at end of let command");
+	}
+}
 
+void GLELet::doFitFunction() throw(ParserError) {
+	bool linfit = false, logefit = false, log10fit = false, powxfit = false, genfit = false;
+	// doing fitting routines
+	if (str_i_equals(m_fitType, "LINFIT"))   linfit = true;
+	if (str_i_equals(m_fitType, "LOGEFIT"))  logefit = true;
+	if (str_i_equals(m_fitType, "LOG10FIT")) log10fit = true;
+	if (str_i_equals(m_fitType, "POWXFIT"))  powxfit = true;
+	if (str_i_equals(m_fitType, "FIT"))      genfit = true;
 	// copy to vectors but ignore miss
+	vector<double> x, y;
 	double xmax = -GLE_INF;
 	double ymax = -GLE_INF;
 	double xmin = +GLE_INF;
 	double ymin = +GLE_INF;
-	GLEDataPairs fitPairs(getDataset(ddlinfit));
+	GLEDataPairs fitPairs(getDataset(m_FitDS));
 	for (unsigned int i = 0; i < fitPairs.size(); i++) {
 		if (!fitPairs.getM(i)) {
-			if (window.valid(fitPairs.getX(i), fitPairs.getY(i))) {
+			if (m_window.valid(fitPairs.getX(i), fitPairs.getY(i))) {
 				xmax = max(xmax, fitPairs.getX(i));
 				xmin = min(xmin, fitPairs.getX(i));
 				ymax = max(ymax, fitPairs.getY(i));
@@ -2480,132 +2539,102 @@ void GLELet::doFitFunction(const string& fct, GLEParser* parser, bool finetune) 
 			}
 		}
 	}
-
-	if (limit_data_x){
+	if (m_limitDataX) {
 		setFrom(xmin);
 		setTo(xmax);
 	}
-
-	// user can supply three variables to get the fit: SLOPE OFFSET R_SQUARED
-	if (tokens->has_more_tokens()) {
-		SlopeVar = tokens->next_token();
-		ensure_valid_var_name(tokens, SlopeVar);
-	}
-	if (tokens->has_more_tokens()) {
-		OffsetVar = tokens->next_token();
-		ensure_valid_var_name(tokens, OffsetVar);
-	}
-	if (tokens->has_more_tokens()) {
-		rsq = tokens->next_token();
-		ensure_valid_var_name(tokens, rsq);
-	}
-
-	if (tokens->has_more_tokens()) {
-		throw tokens->error("extra tokens at end of let command");
-	}
-
 	int fitds = getDataSet();
-	double slope=0,offset=0,rsquared=0,temp_xmax=0,temp_xmin=0;
+	double slope = 0, offset = 0, rsquared = 0;
 	char* new_let = new char[1000];
 	if (linfit) {
-		least_square(&x,&y,&slope,&offset,&rsquared);
-		if (limit_data_y || limit_data) {
+		least_square(&x, &y, &slope, &offset, &rsquared);
+		if (m_limitDataY || m_limitData) {
 			// find x values from ymax and min
 			// y=slope*x+offset
 			// x=(y-offset)/slope
-			temp_xmax = max( (ymax-offset)/slope , (ymin-offset)/slope);
-			temp_xmin = min( (ymax-offset)/slope , (ymin-offset)/slope);
-			if (limit_data_y) {
+			double temp_xmax = max((ymax-offset)/slope, (ymin-offset)/slope);
+			double temp_xmin = min((ymax-offset)/slope, (ymin-offset)/slope);
+			if (m_limitDataY) {
 				setTo(temp_xmax);
 				setFrom(temp_xmin);
-			} else if (limit_data) {
-				setTo(max(temp_xmax,xmax));
-				setFrom(min(temp_xmin,xmin));
+			} else if (m_limitData) {
+				setTo(max(temp_xmax, xmax));
+				setFrom(min(temp_xmin, xmin));
 			}
 		}
-		sprintf(new_let,"let d%d = %0.10e*x+%0.10e FROM %0.10e TO %0.10e",fitds,slope,offset,getFrom(),getTo());
+		sprintf(new_let, "let d%d = %0.10e*x+%0.10e FROM %0.10e TO %0.10e", fitds, slope, offset, getFrom(), getTo());
 	} else if (logefit) {
 		//take loge of y values
-		vector<double>::iterator vdi=y.begin();
-		while (vdi != y.end()) {
+		for (vector<double>::iterator vdi = y.begin(); vdi != y.end(); ++vdi) {
 			(*vdi) = log(*vdi);
-			vdi++;
 		}
-		least_square(&x,&y,&slope,&offset,&rsquared);
-		if (limit_data_y || limit_data) {
+		least_square(&x, &y, &slope, &offset, &rsquared);
+		if (m_limitDataY || m_limitData) {
 			// find x values from ymax and min
 			// y=exp(offset)*exp(slope*x)
 			// x=(log(y)-offset)/slope
-			//
-			temp_xmax = max( (log(ymax)-offset)/slope , (log(ymin)-offset)/slope);
-			temp_xmin = min( (log(ymax)-offset)/slope , (log(ymin)-offset)/slope);
-			if (limit_data_y) {
+			double temp_xmax = max((log(ymax)-offset)/slope, (log(ymin)-offset)/slope);
+			double temp_xmin = min((log(ymax)-offset)/slope, (log(ymin)-offset)/slope);
+			if (m_limitDataY) {
 				setTo(temp_xmax);
 				setFrom(temp_xmin);
-			} else if (limit_data) {
-				setTo(max(temp_xmax,xmax));
-				setFrom(min(temp_xmin,xmin));
+			} else if (m_limitData) {
+				setTo(max(temp_xmax, xmax));
+				setFrom(min(temp_xmin, xmin));
 			}
 		}
 		offset = exp(offset);
-		sprintf(new_let,"let d%d = %0.10e*exp(%0.10e*x) FROM %0.10e TO %0.10e",fitds,offset,slope,getFrom(),getTo());
+		sprintf(new_let, "let d%d = %0.10e*exp(%0.10e*x) FROM %0.10e TO %0.10e", fitds, offset, slope, getFrom(), getTo());
 	} else if (log10fit) {
 		//take log10 of y values
-		vector<double>::iterator vdi=y.begin();
-		while (vdi != y.end()) {
+		for (vector<double>::iterator vdi = y.begin(); vdi != y.end(); ++vdi) {
 			(*vdi) = log10(*vdi);
-			vdi++;
 		}
 		least_square(&x,&y,&slope,&offset,&rsquared);
-		if (limit_data_y || limit_data) {
+		if (m_limitDataY || m_limitData) {
 			// find x values from ymax and min
 			// y=exp(offset)*exp(slope*x)
 			// x=(log10(y)-offset)/slope
-			//
-			temp_xmax = max( (log10(ymax)-offset)/slope , (log10(ymin)-offset)/slope);
-			temp_xmin = min( (log10(ymax)-offset)/slope , (log10(ymin)-offset)/slope);
-			if (limit_data_y) {
+			double temp_xmax = max((log10(ymax)-offset)/slope, (log10(ymin)-offset)/slope);
+			double temp_xmin = min((log10(ymax)-offset)/slope, (log10(ymin)-offset)/slope);
+			if (m_limitDataY) {
 				setTo(temp_xmax);
 				setFrom(temp_xmin);
-			} else if (limit_data) {
-				setTo(max(temp_xmax,xmax));
-				setFrom(min(temp_xmin,xmin));
+			} else if (m_limitData) {
+				setTo(max(temp_xmax, xmax));
+				setFrom(min(temp_xmin, xmin));
 			}
 		}
 		offset = pow(10.0,offset);
-		sprintf(new_let,"let d%d = %0.10e*10^(%0.10e*x) FROM %0.10e TO %0.10e",fitds,offset,slope,getFrom(),getTo());
+		sprintf(new_let, "let d%d = %0.10e*10^(%0.10e*x) FROM %0.10e TO %0.10e", fitds, offset, slope, getFrom(), getTo());
 	} else if (powxfit) {
 		//take loge of both axis
-		vector<double>::iterator vdi=y.begin();
-		while (vdi != y.end()) {
+		for (vector<double>::iterator vdi = y.begin(); vdi != y.end(); ++vdi) {
 			(*vdi) = log(*vdi);
-			vdi++;
 		}
-		vdi=x.begin();
-		while (vdi != x.end()) {
+		for (vector<double>::iterator vdi = x.begin(); vdi != x.end(); ++vdi) {
 			(*vdi) = log(*vdi);
-			vdi++;
 		}
-		least_square(&x,&y,&slope,&offset,&rsquared);
-		if (limit_data_y || limit_data) {
+		least_square(&x, &y, &slope, &offset, &rsquared);
+		if (m_limitDataY || m_limitData) {
 			// find x values from ymax and min
 			// y=exp(offset)*x^(slope)
 			// x = ( y / exp(offset) ) ^ (1/slope)
-			temp_xmax = max( pow(ymax/exp(offset),1.0/slope) ,pow(ymin/exp(offset),1.0/slope) );
-			temp_xmin = min( pow(ymax/exp(offset),1.0/slope) ,pow(ymin/exp(offset),1.0/slope) );
-			if (limit_data_y) {
+			double temp_xmax = max(pow(ymax/exp(offset),1.0/slope), pow(ymin/exp(offset),1.0/slope) );
+			double temp_xmin = min(pow(ymax/exp(offset),1.0/slope), pow(ymin/exp(offset),1.0/slope) );
+			if (m_limitDataY) {
 				setTo(temp_xmax);
 				setFrom(temp_xmin);
-			} else if (limit_data) {
-				setTo(max(temp_xmax,xmax));
-				setFrom(min(temp_xmin,xmin));
+			} else if (m_limitData) {
+				setTo(max(temp_xmax, xmax));
+				setFrom(min(temp_xmin, xmin));
 			}
 		}
 		offset = exp(offset);
-		sprintf(new_let,"let d%d = %0.10e*x^(%0.10e) FROM %0.10e TO %0.10e",fitds,offset,slope,getFrom(),getTo());
+		sprintf(new_let, "let d%d = %0.10e*x^(%0.10e) FROM %0.10e TO %0.10e", fitds, offset, slope, getFrom(), getTo());
 	} else if (genfit) {
 		GLEFitLS fitls;
-		fitls.polish(fitfct);
+		fitls.polish(m_fitFct);
 		fitls.setXY(&x,&y);
 		fitls.fit();
 		fitls.testFit();
@@ -2614,47 +2643,44 @@ void GLELet::doFitFunction(const string& fct, GLEParser* parser, bool finetune) 
 		addFunction()->polishX();
 		addFunction(fitls.getFunction());
 		doLet();
-		if (eqstr != "") {
+		if (m_eqStr != "") {
 			string eqstr_v;
-			str_to_uppercase(eqstr);
-			fitls.toFunctionStr(format, &eqstr_v);
-			var_findadd_set(eqstr.c_str(), eqstr_v);
+			str_to_uppercase(m_eqStr);
+			fitls.toFunctionStr(m_format, &eqstr_v);
+			var_findadd_set(m_eqStr.c_str(), eqstr_v);
 		}
-		if (rsq != "") {
-			str_to_uppercase(rsq);
-			var_findadd_set((char*)rsq.c_str(), fitls.getRSquare());
+		if (m_rsq != "") {
+			str_to_uppercase(m_rsq);
+			var_findadd_set((char*)m_rsq.c_str(), fitls.getRSquare());
 		}
 		delete []new_let;
 		return;
 	}
 	// add the variables -- they will be globals?
-	if (SlopeVar != "") {
-		str_to_uppercase(SlopeVar);
-		var_findadd_set((char*)SlopeVar.c_str(), slope);
+	if (m_varSlope != "") {
+		str_to_uppercase(m_varSlope);
+		var_findadd_set((char*)m_varSlope.c_str(), slope);
 	}
-	if (OffsetVar != "") {
-		str_to_uppercase(OffsetVar);
-		var_findadd_set((char*)OffsetVar.c_str(), offset);
+	if (m_varIntercept != "") {
+		str_to_uppercase(m_varIntercept);
+		var_findadd_set((char*)m_varIntercept.c_str(), offset);
 	}
-	if (rsq != "") {
-		str_to_uppercase(rsq);
-		var_findadd_set((char*)rsq.c_str(), rsquared);
+	if (m_varR != "") {
+		str_to_uppercase(m_varR);
+		var_findadd_set((char*)m_varR.c_str(), rsquared);
 	}
-	// cout << "new let: " << new_let << endl;
-	do_let(new_let, finetune);
+	string letFct(new_let);
 	delete []new_let;
-	return;
+	GLELet* let = parseLet(letFct, getCodeLine());
+	::doLet(let, m_FineTune);
+	delete let;
 }
 
-void GLELet::doHistogram(GLEParser* parser) throw(ParserError) {
+void GLELet::parseHistogram(GLEParser* parser) throw(ParserError) {
 	Tokenizer* tokens = parser->getTokens();
-	// get the data series to compute histogram of
 	string& token = tokens->next_token();
-	if (token.length() <= 1 || toupper(token[0]) != 'D') {
-		throw tokens->error("dataset identifier expected after histogram command");
-	}
-	int bins = -1;
-	int histds = get_dataset_identifier(token.c_str(), true);
+	m_nrBins = -1;
+	m_HistDS = get_dataset_identifier(token, parser, true);
 	while (tokens->has_more_tokens()) {
 		string& token = tokens->next_token();
 		if (str_i_equals(token, "FROM")) {
@@ -2667,23 +2693,18 @@ void GLELet::doHistogram(GLEParser* parser) throw(ParserError) {
 			setHasStepOption(true);
 			setStep(parser->evalTokenToDouble());
 		} else if (str_i_equals(token, "BINS")) {
-			bins = (int)floor(parser->evalTokenToDouble()+0.5);
+			m_nrBins = (int)floor(parser->evalTokenToDouble()+0.5);
 		} else {
 			stringstream errstr;
 			errstr << "unknown token in 'let' expression: '" << token << "'";
 			throw tokens->error(errstr.str());
 		}
 	}
-	GLEAxis* ax = &xx[GLE_AXIS_X];
-	if (!hasFrom() && ax->getRange()->hasMin()) {
-		setHasFrom(true);
-		setFrom(ax->getMin());
-	}
-	if (!hasTo() && ax->getRange()->hasMax()) {
-		setHasTo(true);
-		setTo(ax->getMax());
-	}
-	GLEDataPairs histData(getDataset(histds));
+}
+
+void GLELet::doHistogram() throw(ParserError) {
+	int bins = m_nrBins;
+	GLEDataPairs histData(getDataset(m_HistDS));
 	if (!hasFrom() || !hasTo()) {
 		GLERange range;
 		for (unsigned int i = 0; i < histData.size(); i++) {
@@ -2718,7 +2739,7 @@ void GLELet::doHistogram(GLEParser* parser) throw(ParserError) {
 		}
 		from.push_back(value);
 	}
-	for (unsigned int i = 0; i < dp[histds]->np; i++) {
+	for (unsigned int i = 0; i < dp[m_HistDS]->np; i++) {
 		if (!histData.getM(i)) {
 			int found = -1;
 			double yv = histData.getY(i);
@@ -2745,6 +2766,10 @@ void GLELet::doHistogram(GLEParser* parser) throw(ParserError) {
 	fill.toDataset(dp[resds]);
 }
 
+void deleteLet(GLELet* let) {
+	delete let;
+}
+
 /*  LET d2 = exp(x) [ FROM exp TO exp [ STEP exp ] ]	*/
 /*  LET d3 = exp(dn,d...)				*/
 // added by V.L.
@@ -2752,42 +2777,20 @@ void GLELet::doHistogram(GLEParser* parser) throw(ParserError) {
 // [SLOPE] [OFFSET] [R_SQUARED] are user defined variables
 //  no option after linfit results in line being drawn over the whole graph
 // DATA results in the line being drawn from the minimum to the maximum of the data series
-//
-void do_let(int line, bool nofirst) throw(ParserError) {
-	g_set_error_line(line);
-	string letcmd(g_Source->getLineCode(line - 1));
-	do_let(letcmd, nofirst);
-}
 
-void do_let(const string& letcmd, bool nofirst) throw(ParserError) {
-    // FIXME:
-	// when parsing "let" -> already create dataset with ensureCreate...
-	// so that dn command applies to it
-
-	GLELet let;
-
-	GLEParser* parser = get_global_parser();
-	parser->setString(letcmd.c_str());
+GLELet* parseLet(GLEParser* parser, int codeLine) throw(ParserError) {
+	GLELet* let = new GLELet();
+	let->setCodeLine(codeLine);
 	Tokenizer* tokens = parser->getTokens();
 	tokens->ensure_next_token_i("LET");
 
-	let.setNoFirst(nofirst);
-	let.setFineTune(nofirst);
-
-	// dd is the dataset to assigned the let to
-	// atoi the +1 strips the d
+	// read the target data set identifier
 	string& token = tokens->next_token();
-	if (token.length() <= 1 || toupper(token[0]) != 'D') {
-		throw tokens->error("dataset identifier expected after let command");
-	}
-	let.setDataSet(get_dataset_identifier(token.c_str()));
+	let->setDataSet(get_dataset_identifier(token, parser, false));
+	ensureDataSetCreated(let->getDataSet());
 
 	// next token should be an equal sign
 	tokens->ensure_next_token("=");
-
-	// default is to plot over the entire data range
-	let.setFrom(xx[GLE_AXIS_X].getMin());
-	let.setTo(xx[GLE_AXIS_X].getMax());
 
 	string let_fct = tokens->next_multilevel_token();
 	if (str_i_equals(let_fct,"LINFIT")   ||
@@ -2795,64 +2798,67 @@ void do_let(const string& letcmd, bool nofirst) throw(ParserError) {
 	    str_i_equals(let_fct,"LOG10FIT") ||
 	    str_i_equals(let_fct,"POWXFIT")  ||
 	    str_i_equals(let_fct,"FIT")) {
-		let.doFitFunction(let_fct, parser, nofirst);
-		return;
+		let->parseFitFunction(let_fct, parser);
+		return let;
 	}
 
 	if (str_i_equals(let_fct,"HIST")) {
-		let.doHistogram(parser);
-		return;
+		let->parseHistogram(parser);
+		return let;
 	}
 
-	GLEVarSubMap* submap = var_add_local_submap();
-	let.initVars();
+	GLEVars* vars = getVarsInstance();
+	let->setVarSubMap(vars->addLocalSubMap());
+	let->initVars();
 
 	// read in multi-dimensional let
-	GLEFunctionParserPcode* dim_1 = let.addFunction();
-	dim_1->polishPos(let_fct.c_str(), tokens->token_pos_col());
+	StringIntHash varHash;
+	GLEFunctionParserPcode* dim_1 = let->addFunction();
+	dim_1->polishPos(let_fct.c_str(), tokens->token_pos_col(), &varHash);
 	while (tokens->is_next_token(",")) {
 		const string& let_fct_n = tokens->next_multilevel_token();
-		GLEFunctionParserPcode* dim_n = let.addFunction();
-		dim_n->polishPos(let_fct_n.c_str(), tokens->token_pos_col());
+		GLEFunctionParserPcode* dim_n = let->addFunction();
+		dim_n->polishPos(let_fct_n.c_str(), tokens->token_pos_col(), &varHash);
 	}
 	// if one dimensional, then first dimension is just "x"
-	if (let.getDimension() == 1) {
-		GLEFunctionParserPcode* dim_0 = let.insertFunction();
+	if (let->getDimension() == 1) {
+		GLEFunctionParserPcode* dim_0 = let->insertFunction();
 		dim_0->polishX();
 	}
 	// check for too high dimension
-	if (let.getDimension() > 2) {
+	if (let->getDimension() > 2) {
 		ostringstream errstr;
-		errstr << "let dimension > 2 not supported (found dimension " << let.getDimension() << ")";
+		errstr << "let dimension > 2 not supported (found dimension " << let->getDimension() << ")";
 		throw tokens->error(errstr.str());
 	}
+	let->createVarBackup(vars, &varHash);
 
 	// iterate over all tokens
 	while (tokens->has_more_tokens()) {
 		token = tokens->next_token();
 		if (str_i_equals(token,"FROM")) {
-			let.setHasFrom(true);
-			let.setFrom(parser->evalTokenToDouble());
+			let->setHasFrom(true);
+			let->setFrom(parser->evalTokenToDouble());
 		} else if (str_i_equals(token,"TO")) {
-			let.setHasTo(true);
-			let.setTo(parser->evalTokenToDouble());
+			let->setHasTo(true);
+			let->setTo(parser->evalTokenToDouble());
 		} else if (str_i_equals(token,"STEP")) {
-			let.setHasStepOption(true);
-			let.setStep(parser->evalTokenToDouble());
+			let->setHasStepOption(true);
+			let->setStep(parser->evalTokenToDouble());
 		} else if (str_i_equals(token,"NSTEPS")) {
-			let.setNSteps((int)floor(parser->evalTokenToDouble()+0.5));
+			let->setNSteps((int)floor(parser->evalTokenToDouble()+0.5));
 		} else if (str_i_equals(token,"NOTUNE")) {
-			let.setFineTune(false);
+			let->setFineTune(false);
 		} else if (str_i_equals(token,"WHERE")) {
 			const string& where_s = tokens->next_multilevel_token();
-			GLEFunctionParserPcode* where = let.addWhere();
+			GLEFunctionParserPcode* where = let->addWhere();
 			where->polishPos(where_s.c_str(), tokens->token_pos_col());
 		} else if (str_i_equals(token,"RANGE")) {
 			token = tokens->next_token();
-			let.addXRangeDS(get_dataset_identifier(token.c_str()));
+			let->addXRangeDS(get_dataset_identifier(token.c_str()));
 			while (tokens->is_next_token(",")) {
 				token = tokens->next_token();
-				let.addXRangeDS(get_dataset_identifier(token.c_str()));
+				let->addXRangeDS(get_dataset_identifier(token.c_str()));
 			}
 		} else {
 			ostringstream errstr;
@@ -2861,10 +2867,47 @@ void do_let(const string& letcmd, bool nofirst) throw(ParserError) {
 		}
 	}
 
-	let.initStep();
-	let.setVarSubMap(submap);
-	let.doLet();
-	var_remove_local_submap();
+	vars->removeLocalSubMap();
+	return let;
+}
+
+GLELet* parseLet(GLESourceLine& sline) throw(ParserError) {
+	GLEParser* parser = get_global_parser();
+	parser->setString(sline.getCodeCStr());
+	return parseLet(parser, sline.getGlobalLineNo());
+}
+
+GLELet* parseLet(const string& letFct, int codeLine) throw(ParserError) {
+	GLEParser* parser = get_global_parser();
+	parser->setString(letFct.c_str());
+	return parseLet(parser, codeLine);
+}
+
+void doLet(GLELet* let, bool nofirst) throw(ParserError) {
+	g_set_error_line(let->getCodeLine());
+	let->setNoFirst(nofirst);
+	let->setFineTune(nofirst);
+	GLEAxis* ax = &xx[GLE_AXIS_X];
+	if (!let->hasFrom()) {
+		let->setHasFrom(true);
+		let->setFrom(ax->getMin());
+	}
+	if (!let->hasTo()) {
+		let->setHasTo(true);
+		let->setTo(ax->getMax());
+	}
+	if (let->isHistogram()) {
+		let->doHistogram();
+	} else if (let->isFit()) {
+		let->doFitFunction();
+	} else {
+		GLEVars* vars = getVarsInstance();
+		vars->addLocalSubMap(let->getVarSubMap());
+		let->restoreVarBackup(vars);
+		let->initStep();
+		let->doLet();
+		vars->removeLocalSubMap();
+	}
 }
 
 extern key_struct *kd[100];
@@ -3633,14 +3676,15 @@ int GLEColorMapBitmap::decode(GLEByteStream* output) {
 	if (isFunction()) {
 		int varx, vary;
 		int vartype = 1;
-		var_add_local_submap();
+		GLEVars* vars = getVarsInstance();
+		GLERC<GLEVarSubMap> submap(vars->addLocalSubMap());
 		var_findadd("X", &varx, &vartype);
 		var_findadd("Y", &vary, &vartype);
 		GLEPcodeList pc_list;
 		GLEPcode my_pcode(&pc_list);
 		polish((char*)m_map->getFunction().c_str(), my_pcode, &etype);
 		plotFunction(my_pcode, varx, vary, output);
-		var_remove_local_submap();
+		vars->removeLocalSubMap();
 	} else {
 		plotData(getData(), output);
 	}

@@ -76,9 +76,7 @@ extern int g_nkd, g_keycol;
 extern key_struct *kd[100];
 KeyInfo* g_keyInfo = 0;
 
-int letline[MAX_NUMBER_OF_LET_COMMANDS];
-int nlet;
-
+vector<GLELet*> g_letCmds;
 bool g_inGraph = false;
 int g_nbar = 0;
 int g_graph_background = GLE_FILL_CLEAR;
@@ -98,7 +96,7 @@ void do_discontinuity();
 void do_bar(int& ct);
 void do_fill(int& ct);
 void do_hscale(int& ct);
-void do_letsave(int& ct);
+void do_letsave(GLESourceLine& sline);
 void do_size(int& ct);
 void do_key(int& ct);
 void do_vscale(int& ct);
@@ -157,7 +155,10 @@ void begin_graph(int *pcode, int *cp) throw (ParserError) {
 	}
 	g_inGraph = true;
 	g_colormap = NULL;
-	nlet = 0;
+	for (unsigned int i = 0; i < g_letCmds.size(); i++) {
+		deleteLet(g_letCmds[i]);
+	}
+	g_letCmds.clear();
 	g_nkd = 0;
 	g_keycol = 0;
 	delete g_keyInfo;
@@ -165,7 +166,6 @@ void begin_graph(int *pcode, int *cp) throw (ParserError) {
 	g_hscale = .7;
 	g_vscale = .7;
 	g_discontinuityThreshold = GLE_INF;
-	nlet = 0;
 	if (g_get_compatibility() == GLE_COMPAT_35) {
 		g_nobox = false;
 	} else {
@@ -212,7 +212,7 @@ bool execute_graph(GLESourceLine& sline, bool isCommandCheck) {
 		do_hscale(ct);
 	} else kw("LET") {
 		if (isCommandCheck) return true;
-		do_letsave(ct);
+		do_letsave(sline);
 	} else kw("SIZE") {
 		if (isCommandCheck) return true;
 		do_size(ct);
@@ -501,10 +501,9 @@ void do_hscale(int& ct) {
 	else g_hscale = next_exp;
 }
 
-void do_letsave(int& ct) {
-	nlet++;
-	letline[nlet] = g_get_error_line();
-	if (nlet >= MAX_NUMBER_OF_LET_COMMANDS) gprint("TOO MANY LET Commands in graph! the maximum let commands allowed is %d\n",MAX_NUMBER_OF_LET_COMMANDS);
+void do_letsave(GLESourceLine& sline) {
+	GLELet* let = parseLet(sline);
+	g_letCmds.push_back(let);
 }
 
 void do_size(int& ct) {
@@ -1194,7 +1193,6 @@ void prepare_graph_key_and_clip(double ox, double oy, KeyInfo* keyinfo) {
 
 void draw_graph(KeyInfo* keyinfo) throw (ParserError) {
 	GLERectangle box;
-	int i;
 	double ox,oy;
 
 	do_bigfile_compatibility();
@@ -1218,8 +1216,8 @@ void draw_graph(KeyInfo* keyinfo) throw (ParserError) {
 	/* update scale based on let commands if not explicit scale given */
 	if (should_autorange_based_on_lets()) {
 		/* if min max not set, do_let in approximate way first */
-		for (i = 1; i <= nlet; i++) {
-			do_let(letline[i], false);
+		for (unsigned int i = 0; i < g_letCmds.size(); i++) {
+			doLet(g_letCmds[i], false);
 		}
 		get_dataset_ranges();
 		for (int i = 1; i <= ndata; i++) {
@@ -1294,8 +1292,8 @@ void draw_graph(KeyInfo* keyinfo) throw (ParserError) {
 	axis_add_grid();
 
 	/* do LETS now */
-	for (i = 1; i <= nlet; i++) {
-		do_let(letline[i], true);
+	for (unsigned int i = 0; i < g_letCmds.size(); i++) {
+		doLet(g_letCmds[i], true);
 	}
 
 	/* Throw away missing values if NOMISS on datasets */

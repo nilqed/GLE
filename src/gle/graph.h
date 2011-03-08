@@ -51,6 +51,7 @@
 extern int gle_debug;
 
 class KeyInfo;
+class GLELet;
 
 void graph_init(void);
 void graph_free(void);
@@ -69,8 +70,10 @@ void draw_bars(void);
 void draw_lines(void);
 void draw_fills(void);
 void draw_err(void);
-void do_let(const string& letcmd, bool nofirst) throw(ParserError);
-void do_let(int line, bool nofirst) throw(ParserError);
+void deleteLet(GLELet* let);
+GLELet* parseLet(GLESourceLine& sline) throw(ParserError);
+GLELet* parseLet(const string& letFct, int codeLine) throw(ParserError);
+void doLet(GLELet* let, bool nofirst) throw(ParserError);
 void request(void);
 /*int draw_axis(void *axis);*/
 void bar_reset();
@@ -79,6 +82,7 @@ void store_window_bounds_to_vars();
 void draw_markers(void) throw (ParserError);
 void do_dataset_key(int d);
 void do_bigfile_compatibility() throw(ParserError);
+void ensureDataSetCreated(int d);
 
 #define kw(ss) if (str_i_equals(tk[ct],ss))
 #define true (!false)
@@ -308,6 +312,7 @@ void draw_user_function_calls(bool underneath) throw(ParserError);
 void get_dataset_ranges();
 void set_bar_axis_places();
 int get_dataset_identifier(const char* ds, bool def = false) throw(ParserError);
+int get_dataset_identifier(const string& ds, GLEParser* parser, bool def) throw(ParserError);
 
 double graph_bar_pos(double xpos, int bar, int set) throw(ParserError);
 void begin_graph(int *pcode, int *cp) throw (ParserError);

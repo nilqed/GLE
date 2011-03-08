@@ -230,7 +230,7 @@ void GLEPolish::polish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 				if (ret == 2) pcode.addStrVar(v);
 				else pcode.addVar(v);
 				unary = 2;
-				if (m_vars != NULL) {
+				if (m_vars != NULL && m_vars->try_get(uc_token) == -1) {
 					/* Add it to list of vars */
 					m_vars->add_item(uc_token, v);
 				}
@@ -270,7 +270,7 @@ void GLEPolish::polish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 				else pcode.addVar(v);
 				not_string = true;
 				unary = 2;
-				if (m_vars != NULL) {
+				if (m_vars != NULL && m_vars->try_get(uc_token) == -1) {
 					/* Add it to list of vars */
 					m_vars->add_item(uc_token, v);
 				}

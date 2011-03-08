@@ -81,8 +81,6 @@ else the variable is a global variable
 //
 // maximum number of items in each line of the data file
 #define MAX_NUMBER_OF_ITEMS 1000
-// the maximum number of let commands in graph
-#define MAX_NUMBER_OF_LET_COMMANDS 1024
 
 //
 // maximum element in the postscript line.  This affects speed of

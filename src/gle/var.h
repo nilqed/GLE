@@ -45,9 +45,10 @@
 
 #define GLE_VAR_IS_LOCAL(a) (a & GLE_VAR_LOCAL_BIT) != 0
 
+class GLEVars;
 class GLEVarMap;
 
-class GLEVarSubMap {
+class GLEVarSubMap : public GLERefCountObject {
 protected:
 	StringIntHash m_Map;
 	vector<int> m_Idxs;
@@ -57,10 +58,21 @@ public:
 	~GLEVarSubMap();
 	void clear();
 	void removeFromParent();
+	void addToParent(GLEVarMap* parent);
 	void var_add(const string& name, int idx);
 	inline int var_get(const string& name) { return m_Map.try_get(name); }
 	inline int size() { return m_Idxs.size(); }
 	inline int get(int i) { return m_Idxs[i]; }
+};
+
+class GLEVarBackup : public GLERefCountObject {
+public:
+	GLEVarBackup();
+	void backup(GLEVars* vars, const vector<int>& ids);
+	void restore(GLEVars* vars);
+private:
+	vector<int> m_ids;
+	GLEArrayImpl m_values;
 };
 
 class GLEVarMap {
@@ -83,9 +95,12 @@ public:
 	void list();
 	int getFreeID();
 	int addVarIdx(const string& name);
+	void addVars(const StringIntHash& submap);
+	void addVar(int idx, const string& name);
 	void removeVar(int idx);
 	void clearSubMaps();
 	GLEVarSubMap* pushSubMap();
+	void pushSubMap(GLEVarSubMap* submap);
 	void popSubMap();
 	inline int size() { return m_Names.size(); }
 	inline int getType(int idx) { return m_Types[idx]; }
@@ -97,8 +112,7 @@ public:
 
 class GLELocalVars {
 public:
-	vector<double> var_val;
-	vector<string> var_str;
+	GLEArrayImpl values;
 public:
 	GLELocalVars(int num);
 	~GLELocalVars();
@@ -106,7 +120,7 @@ public:
 	void copyFrom(GLELocalVars* other);
 	void copyFrom(GLELocalVars* other, int nb);
 	GLELocalVars* clone(int nb);
-	inline int size() { return var_val.size(); }
+	inline int size() { return values.size(); }
 };
 
 class GLEVars {
@@ -130,6 +144,7 @@ public:
 	GLEDataObject* getObject(int var);
 	void setObject(int var, GLEDataObject* obj);
 	void set(int var, GLEMemoryCell* value);
+	void get(int var, GLEMemoryCell* value);
 	void init(int var, int type);
 	void find(const char *name, int *idx, int *type);
 	void findAdd(const char *name, int *idx, int *type);
@@ -142,6 +157,7 @@ public:
 	void addLocal(const string& name, int *idx, int *type);
 	GLEVarMap* swapLocalMap(GLEVarMap* map);
 	GLEVarSubMap* addLocalSubMap();
+	void addLocalSubMap(GLEVarSubMap* submap);
 	void removeLocalSubMap();
 	void findDN(GLEVarSubMap* map, int *idx, int *var, int *nd);
 	int getGlobalType(int var);
@@ -191,8 +207,6 @@ char* var_get_name(int jj);
 bool var_valid_name(const string& name);
 void var_findadd_set(const char* name, double value);
 void var_findadd_set(const char* name, const string& value);
-GLEVarSubMap* var_add_local_submap();
-void var_remove_local_submap();
 
 void ensure_valid_var_name(const string& name) throw(ParserError);
 void ensure_valid_var_name(Tokenizer* tokens, const string& name) throw(ParserError);
