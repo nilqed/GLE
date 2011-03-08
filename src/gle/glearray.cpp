@@ -339,7 +339,7 @@ string GLECSVData::getCellString(unsigned int row, unsigned int column) {
 
 void GLECSVData::setCellTrim(unsigned int row, unsigned int column, const char* data) {
 	unsigned int idx = m_firstCell[row] + column;
-	unsigned int size = min(m_cellSize[idx], strlen(data));
+	unsigned int size = std::min<unsigned int>(m_cellSize[idx], strlen(data));
 	for (unsigned int i = 0; i < size; i++) {
 		m_buffer[m_cellPos[idx] + i] = data[i];
 	}
@@ -379,7 +379,7 @@ void GLECSVData::print(ostream& os) {
 			while (columnWidth.size() <= col) {
 				columnWidth.push_back(0);
 			}
-			columnWidth[col] = max(columnWidth[col], chars + 1);
+			columnWidth[col] = std::max<unsigned int>(columnWidth[col], chars + 1);
 		}
 	}
 	for (unsigned int row = 0; row < getNbLines(); row++) {

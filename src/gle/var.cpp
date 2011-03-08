@@ -606,17 +606,25 @@ int valid_var(const char* s) {
 	return true;
 }
 
+bool str_var_valid_name(const string& name) {
+   return str_var(name) && var_valid_name(name);
+}
+
 bool var_valid_name(const string& name) {
-	if (name.length() == 0) {
+	if (name.length() <= 0) {
 		return false;
-	} else {
-		int ch = name[0];
-		if (!((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))) {
+	}
+	if (name[0] >= '0' && name[0] <= '9') {
+		return false;
+	}
+	for (string::size_type i = 0; i < name.length(); i++) {
+		char ch = name[i];
+		if (!((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
+		      (ch >= '0' && ch <= '9') || (ch == '$') || (ch == '_'))) {
 			return false;
-		} else {
-			return true;
 		}
 	}
+   return true;
 }
 
 void ensure_valid_var_name(const string& name) throw(ParserError) {

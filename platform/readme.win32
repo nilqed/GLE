@@ -1,0 +1,109 @@
+GLE Readme
+==========
+
+This document contains instructions on how to run GLE4.
+
+Supported platforms: Windows, Linux, Mac OS/X, Unix, OS/2.
+
+This readme file concerns the Windows version of GLE.
+
+What is GLE?
+------------
+
+GLE is a graphics language that produces postscript, EPS, PDF, PNG, or JPG output from a simple script file. The GLE scripting language is full featured with variables, subroutines, logic control, looping, and graphing tools. It is great for plotting and charting data.
+
+GLE can create very complex output with text and graphics (including graphs and charts) from a simple plain text file.
+
+GLE is open source so you can modify it to meet your needs.
+
+GLE is a full featured programing language that includes variables, subroutines, logic control, looping, a graphing tool, and more to produce high quality postscript output. It has a full range of facilities for producing publication-quality graphs, diagrams, posters and slides. GLE provides LaTeX quality fonts together with a flexible graphics module which allows the user to specify any feature of a graph (down to the line width of the sub ticks, for example). Complex pictures can be drawn with user-defined subroutines and simple looping structures. Essentially, GLE is a programming language and if you are used to writing software, using LaTeX, or any other non-WYSIWYG tools, then you will enjoy using GLE. 
+
+More information is available at <http://www.gle-graphics.org/>.
+
+Running GLE
+-----------
+
+Note that GLE is a command line application. It takes as input a GLE script file and outputs a eps, ps, pdf, jpg, or png file. GLE can not be run from inside Windows Explorer. Instead it should be started from the Windows Command Prompt.
+
+To start GLE, open a Command Prompt(*) and issue the command:
+
+gle /d outputtype yourfile.gle
+
+where outputtype is one of: eps, ps, pdf, jpg, png
+
+and yourfile.gle is the file containing the your GLE script.
+
+E.g.:
+
+---------------------------------------------------------
+
+C:\>cd "C:\Program Files\Gle4\samples"
+
+C:\Program Files\Gle4\samples>gle /d eps sample.gle
+GLE 4.0.9c [sample.gle]-C-R-[sample.eps]
+
+---------------------------------------------------------
+
+Preview the output file sample.eps with GhostView (e.g., by browsing with Explorer to C:\Program Files\Gle4\samples and double-clicking sample.eps).
+
+See the GLE manual for more information.
+<http://www.gle-graphics.org/>
+
+Contact the GLE mailing list (glx-general) if you have any questions.
+<https://lists.sourceforge.net/lists/listinfo/glx-general>
+
+(*) The command prompt is usually available in the start menu under "All Programs" in the "Accessories" folder. The icon for the command prompt is usually "C:\". Alternatively, the command prompt can be started by choosing "Run" in the start menu and by typing "cmd" in the "Open:" field.
+
+What If GLE Does Not Run?
+-------------------------
+
+Check if your path includes the installation folder of GLE.
+
+Open the "Control Panel" from the start menu, select "System". Navigate to the "Advanced" tab and click the "Environment Variables" button.
+
+Click the variable "PATH" and click the "Edit" button. Make sure that its "Value" contains the location of gle.exe, i.e., C:\Program Files\Gle4\bin. Note that different folders are separated with ";".
+
+Please contact the mailing list if you have any further questions.
+<https://lists.sourceforge.net/lists/listinfo/glx-general>
+
+Making GLE Use Other Tools
+--------------------------
+
+To create pdf, jpg, or png files with GLE, GLE has to know the installation folder of GhostView. To include LaTeX expressions in GLE scripts, GLE has to know the installation folder of LaTeX. Both can be detected automatically with GLE as follows (this should be done only once, after the installation).
+
+This is accomplished by running "gle -finddeps [path]" in a command prompt, where path is the place to search ("C:\Program Files" is the default).
+
+C:>gle -finddeps
+Finding dependencies in: C:\Program Files: ........................
+Found: gle.exe in 'C:\Program Files\gle4\bin'
+Found: gswin32c.exe in 'C:\Program Files\Tools\gs\gs\gs8.00\bin'
+Found: latex.exe in '?'
+Found: dvips.exe in '?'
+
+In the example above, GLE has found out that it is installed in "C:\Program Files\gle4" and that GhostScript (http://www.cs.wisc.edu/~ghost/doc/AFPL/index.htm) is in "C:\Program Files\Tools\gs\gs\gs8.00\bin". Once the installation directory has been found, it is stored in the registry for further use.
+
+4.) LaTeX is usually not installed in "C:\Program Files", so a second -finddeps is required to locate it. The following example assumes the MiKTeX distribution is installed.
+
+C:>gle -finddeps "C:\MiKTeX"
+Finding dependencies in: C:\MiKTeX: ...........................
+Found: gle.exe in 'C:\Program Files\gle4\bin'
+Found: gswin32c.exe in 'C:\Program Files\Tools\gs\gs\gs8.00\bin'
+Found: latex.exe in 'C:\MiKTeX\Main\miktex\bin'
+Found: dvips.exe in 'C:\MiKTeX\Main\miktex\bin'
+
+Note that both GhostView and LaTeX are optional. For creating simple .eps graphs, they are not required, i.e., GLE will still work if you see question marks for gswin32c.exe, latex.exe and dvips.exe.
+
+License (BSD)
+-------------
+
+Copyright (c).
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+    * Neither the name of GLE nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+

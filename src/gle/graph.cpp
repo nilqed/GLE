@@ -419,7 +419,7 @@ void do_fill(int& ct) {
 	fd[nfd]->ymin = -GLE_INF;
 	fd[nfd]->ymax = GLE_INF;
 	while (ct<=ntk)  {
-		kw("COLOR") 	{ct++; fd[nfd]->color = pass_color(tk[ct]);}
+		kw("COLOR") 	{ct++; fd[nfd]->color = pass_color_var(tk[ct]);}
 	   else kw("XMIN") 	fd[nfd]->xmin = next_exp;
 	   else kw("XMAX") 	fd[nfd]->xmax = next_exp;
 	   else kw("YMIN") 	fd[nfd]->ymin = next_exp;
@@ -1583,7 +1583,7 @@ GLEDataSetDescription::GLEDataSetDescription() {
 }
 
 void GLEDataSetDescription::setColumnIdx(unsigned int dimension, int column) {
-	m_columnIdx.resize(std::max(m_columnIdx.size(), dimension + 1), -1);
+	m_columnIdx.resize(std::max<unsigned int>(m_columnIdx.size(), dimension + 1), -1);
 	m_columnIdx[dimension] = column;
 }
 

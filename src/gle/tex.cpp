@@ -1461,42 +1461,6 @@ void font_get_parskip(double *ls,double *gap) {
 	*gap = *ls * .1;
 }
 
-int pass_font(const char *p) {
-	int j;
-	char u[90];
-	char vv[80],*s;
-	double xx;
-	s = &u[0];
-	strncpy(u,p,90);
-	if ( (*s=='"')  || (strchr(s,'$') != NULL)) {
-		strcpy(vv,"cvtfont(");
-		strcat(vv,s); strcat(vv,")");
-		polish_eval(vv,&xx);
-		memcpy(&j,&xx,sizeof(int));
-		return j;  /* actually is an int */
-	} else {
-		if (fnt.size() == 0) font_load();
-		for (unsigned int i = 1; i < fnt.size(); i++) {
-			if (fnt[i]->name != NULL && str_i_equals(fnt[i]->name, u)) {
-				return i;
-			}
-		}
-		ostringstream err;
-		err << "invalid font name: '" << u << "', expecting one of:";
-		for (unsigned int i = 1; i < fnt.size(); i++) {
-			if ((i-1) % 5 == 0) {
-				err << endl << "       ";
-			} else {
-				err << " ";
-			}
-			err << fnt[i]->name;
-		}
-		gprint(err.str().c_str());
-		/* default font number */
-		return 1;
-	}
-}
-
 #define get_exps(ss) polish(ss,(char *) pcode,plen,&etype)
 #define tok(n)  tk[n]
 
