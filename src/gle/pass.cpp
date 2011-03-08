@@ -682,7 +682,7 @@ int GLEParser::get_optional(OPKEY lkey, GLEPcode& pcode) throw(ParserError) {
 	return ret;
 }
 
-ParserError GLEParser::create_option_error(OPKEY lkey, int count, string& token) {
+ParserError GLEParser::create_option_error(OPKEY lkey, int count, const string& token) {
 	stringstream strm;
 	if (count == 1) {
 		strm << "found '" << token << "', but expecting '" << lkey[0].name << "'";
@@ -770,9 +770,12 @@ int GLEParser::get_one_option(op_key* lkey, GLEPcode& pcode, int plen) throw(Par
 }
 
 int GLEParser::get_first(OPKEY lkey) throw(ParserError) {
+	return get_first(m_tokens.next_token(), lkey);
+}
+
+int GLEParser::get_first(const string& token, OPKEY lkey) throw(ParserError) {
 	int count, width;
 	get_key_info(lkey, &count, &width);
-	string& token = m_tokens.next_token();
 	for (int i = 0; i < count; i++) {
 		if (str_i_equals(token.c_str(), lkey[i].name)) {
 			return lkey[i].idx;
@@ -802,69 +805,114 @@ void GLEParser::get_fill(GLEPcode& pcode) throw (ParserError) {
 	get_color(pcode);
 }
 
-void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
-	int vtype = 1;
-	string& token = m_tokens.next_token();
-	if (token.length() > 1 && token[0] == '#') {
-		if (token.length() != 7) {
-			throw error(string("illegal color specification '")+token+"'");
+bool pass_color_hash_value(const string& color, int* result, IThrowsError* error) {
+	if (color.length() > 1 && color[0] == '#') {
+		if (color.length() != 7) {
+			throw error->throwError("illegal color specification '", color.c_str(), "'");
 		}
 		colortyp c;
-		int err = g_hash_string_to_color(token, &c);
+		int err = g_hash_string_to_color(color, &c);
 		if (err != 0) {
-			int pos = m_tokens.token_pos_col() + err;
-			throw error(pos, string("illegal color specification '")+token+"'");
+			int pos = error->getErrorPosition() + err;
+			throw error->throwError(pos, string("illegal color specification '") + color + "'");
 		}
+		*result = c.l;
+      return true;
+   } else {
+      return false;
+   }
+}
+
+int pass_color_list_or_fill(const string& color, IThrowsError* error) {
+	string uc_color;
+	str_to_uppercase(color, uc_color);
+	GLEColor* gleColor = GLEGetColorList()->get(uc_color);
+	if (gleColor != NULL) {
+		return (int)gleColor->getHexValueGLE();
+	} else {
+		int result = 0;
+		if (gt_firstval_err(op_fill_typ, uc_color.c_str(), &result)) {
+			return result;
+		} else {
+         throw error->throwError("found '", color.c_str(), "', but expecting color or fill specification");
+		}
+	}
+}
+
+void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
+	int vtype = 1;
+   int result = 0;
+	string& token = m_tokens.next_token();
+	if (pass_color_hash_value(token, &result, &m_tokens)) {
 		pcode.addInt(8);
-		pcode.addInt(c.l);
+		pcode.addInt(result);
+   } else if (is_float(token)) {
+      string expr(string("CVTGRAY(") + token + ")");
+		polish(expr.c_str(), pcode, &vtype);
 	} else if (str_i_str(token.c_str(), "RGB") != NULL) {
 		m_tokens.pushback_token();
 		get_exp(pcode);
 	} else if (token == "(") {
-		string expr = string("CVTGRAY(")+m_tokens.next_token()+")";
+		string expr(string("CVTGRAY(") + m_tokens.next_token() + ")");
 		polish(expr.c_str(), pcode, &vtype);
 		m_tokens.ensure_next_token(")");
-	} else if (is_float(token)) {
-		string expr = string("CVTGRAY(")+token+")";
-		polish(expr.c_str(), pcode, &vtype);
-	} else	if (strchr(token.c_str(),'$') != NULL) {
-		string expr = string("CVTCOLOR(")+token+")";
-		polish(expr.c_str(), pcode, &vtype);
-	} else {
-		string uc_token;
-		str_to_uppercase(token, uc_token);
-		GLEColor* color = GLEGetColorList()->get(uc_token);
-		if (color != NULL) {
-			pcode.addInt(8);
-			pcode.addInt((int)color->getHexValueGLE());
-		} else {
-			int result = 0;
-			if (gt_firstval_err(op_fill_typ, uc_token.c_str(), &result)) {
-				pcode.addInt(8);
-				pcode.addInt(result);
-			} else {
-				throw error(string("found '")+token+"', but expecting color or fill specification");
-			}
-		}
-	}
-}
-
-void GLEParser::get_marker(GLEPcode& pcode) throw (ParserError) {
-	int vtype = 1;
-	string& token = m_tokens.next_token();
-	if (token == "(" || is_float(token)) {
-		string expr = string("CVTINT(")+token+")";
-		polish(expr.c_str(), pcode, &vtype);
-	} else	if (strchr(token.c_str(),'$') != NULL) {
-		string expr = string("CVTMARKER(")+token+")";
+	} else if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
+		string expr(string("CVTCOLOR(") + token + ")");
 		polish(expr.c_str(), pcode, &vtype);
 	} else {
 		pcode.addInt(8);
-		pcode.addInt(pass_marker(token));
+		pcode.addInt(pass_color_list_or_fill(token, &m_tokens));
 	}
 }
 
-int GLEParser::pass_marker(const string& marker) throw (ParserError) {
+int pass_color_var(const char *s) throw(ParserError) {
+	int result = 0;
+   double xx = 0.0;
+   string token(s);
+   if (token.empty()) {
+      g_throw_parser_error("expecting color name, but found empty string");
+   } else if (pass_color_hash_value(token, &result, g_get_throws_error())) {
+      return result;
+	} else if (is_float(token)) {
+      string expr(string("CVTGRAY(") + token + ")");
+		polish_eval((char*)expr.c_str(), &xx);
+   } else if (str_i_str(s, "RGB") != NULL) {
+		polish_eval((char*)s, &xx);
+	} else if (token.length() > 2 && token[0] == '(' && token[token.length() - 1] == ')') { 
+      string expr(string("CVTGRAY") + token);
+		polish_eval((char*)expr.c_str(), &xx);  
+   } else if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
+      string expr(string("CVTCOLOR(") + token + ")");
+		polish_eval((char*)expr.c_str(), &xx);
+	} else {
+      return pass_color_list_or_fill(token, g_get_throws_error());
+	}
+	memcpy(&result, &xx, sizeof(int));
+	return result;
+}
+
+/*
+int pass_color_var(const char *s) throw(ParserError) {
+	if (strchr(s,'$') != NULL) {
+		int idx, typ;
+		char tmpcol[100];
+		string var_str = s;
+		str_to_uppercase(var_str);
+		var_find((char*)var_str.c_str(), &idx, &typ);
+		if (idx >= 0) {
+			var_getstr(idx, tmpcol);
+			return pass_color(tmpcol);
+		} else {
+			g_throw_parser_error("color '", s, "' not defined");
+			return 0;
+		}
+	} else {
+		return pass_color(s);
+	}
+}
+*/
+
+int get_marker_string(const string& marker, IThrowsError* error) {
 	/* if 0, maybe its a user defined marker, ie a subroutine */
 	/* Use -ve to signify subroutine instead of normal marker */
 	int mark_idx = 0;
@@ -882,8 +930,31 @@ int GLEParser::pass_marker(const string& marker) throw (ParserError) {
 			}
 		}
 	}
-	if (mark_idx == 0) throw error("invalid marker name");
-	return mark_idx;
+	if (mark_idx == 0) {
+      throw error->throwError("invalid marker name '", marker.c_str(), "'");
+   }
+   return mark_idx;
+}
+
+void GLEParser::get_marker(GLEPcode& pcode) throw (ParserError) {
+	int vtype = 1;
+	string& token = m_tokens.next_token();
+	if (token == "(" || is_float(token)) {
+		string expr = string("CVTINT(")+token+")";
+		polish(expr.c_str(), pcode, &vtype);
+	} else if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
+		string expr = string("CVTMARKER(")+token+")";
+		polish(expr.c_str(), pcode, &vtype);
+	} else {
+		pcode.addInt(8);
+		pcode.addInt(get_marker_string(token, &m_tokens));
+	}
+}
+
+int pass_marker(char *name) throw(ParserError) {
+	string marker;
+	polish_eval_string(name, &marker);
+   return get_marker_string(marker, g_get_throws_error());   
 }
 
 void GLEParser::define_marker_1(GLEPcode& pcode) throw (ParserError) {
@@ -907,25 +978,29 @@ void GLEParser::define_marker_2(GLEPcode& pcode) throw (ParserError) {
 	g_marker_def((char*)name.c_str(), (char*)sub.c_str());
 }
 
-void GLEParser::get_font(GLEPcode& pcode) throw (ParserError) {
-	int etype = 1;
+
+/*
+
+    Data types:
+    
+    - fill
+    - color
+    - marker
+    - font
+    - justify
+    - join
+    - cap
+
+*/
+
+int get_font_index(const string& token, IThrowsError* error) {
 	if (get_nb_fonts() == 0) font_load();
-	string& token = m_tokens.next_token();
-	int token_len = token.length();
-	char first_char = token_len > 0 ? token[0] : ' ';
-	if (first_char == '"' || token.find("$") != string::npos) {
-		string parse = "CVTFONT("+token+")";
-		polish(parse.c_str(), pcode, &etype);
-		return;
-	}
-	pcode.addInt(8);
 	int count = get_nb_fonts();
 	// font zero is a dummy!
 	for (int i = 1; i < count; i++) {
 		const char* name = get_font_name(i);
 		if (str_i_equals(name, token.c_str())) {
-			pcode.addInt(i);
-			return;
+			return i;
 		}
 	}
 	stringstream strm;
@@ -950,7 +1025,33 @@ void GLEParser::get_font(GLEPcode& pcode) throw (ParserError) {
 			idx++;
 		}
 	}
-	throw m_tokens.error(strm.str());
+	throw error->throwError(strm.str());
+}
+
+void GLEParser::get_font(GLEPcode& pcode) throw (ParserError) {
+	string& token = m_tokens.next_token();
+	if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
+   	int etype = 1;
+		string parse("CVTFONT(" + token + ")");
+		polish(parse.c_str(), pcode, &etype);
+		return;
+	}
+	pcode.addInt(8);
+   pcode.addInt(get_font_index(token, &m_tokens));
+}
+
+int pass_font(const char *p) {
+   string token(p);
+	if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
+      int result = 0;
+      double xx = 0.0;
+		string parse("CVTFONT(" + token + ")");
+		polish_eval((char*)parse.c_str(), &xx);
+		memcpy(&result, &xx, sizeof(int));
+		return result;
+	} else {
+      return get_font_index(token, g_get_throws_error());
+	}
 }
 
 void GLEParser::get_papersize(GLEPcode& pcode) throw (ParserError) {
@@ -967,7 +1068,28 @@ void GLEParser::get_papersize(GLEPcode& pcode) throw (ParserError) {
 }
 
 void GLEParser::get_justify(GLEPcode& pcode) throw (ParserError) {
-	pcode.addInt(get_first(op_justify));
+	const string& token = m_tokens.next_token();
+	if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
+   	int etype = 1;
+		string parse("JUSTIFY(" + token + ")");
+		polish(parse.c_str(), pcode, &etype);
+		return;
+	}
+   pcode.addInt(8);
+	pcode.addInt(get_first(token, op_justify));
+}
+
+int pass_justify(const char *s) {
+   string token(s);
+	if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
+      int result = 0;
+      double xx = 0.0;
+		string parse("JUSTIFY(" + token + ")");
+		polish_eval((char*)parse.c_str(), &xx);
+		memcpy(&result, &xx, sizeof(int));
+		return result;
+	}
+	return gt_firstval(op_justify, s);
 }
 
 void GLEParser::get_join(GLEPcode& pcode) throw (ParserError) {
@@ -1326,7 +1448,7 @@ void GLEParser::passt(GLESourceLine &SLine, GLEPcode& pcode) throw(ParserError) 
 				pcode.setLast(GLE_KW_COMMENT);
 				temp_str =  m_tokens.next_token();
 				str_remove_quote(temp_str);
-				GLEGetColorList()->defineColor(temp_str, pass_color(m_tokens.next_token().c_str()));
+				GLEGetColorList()->defineColor(temp_str, pass_color_var(m_tokens.next_token().c_str()));
 				break;
 			  case GLE_KW_COMPATIBILITY:
 				pcode.setLast(GLE_KW_COMMENT);
@@ -2116,22 +2238,6 @@ int gt_firstval(OPKEY lkey, const char *s) {
 	return 0;
 }
 
-/*
-int gt_firstval(OPKEY lkey, const char *s) {
-	int nk,i,width=0,p;
-	for (i=0; lkey[i].typ!=typ_end; i++) {
-	}
-	nk = i;
-	for (i=0; i<nk; i++) {
-		if (str_i_equals(lkey[i].name,s)) {
-			dbg gprint("Got match {%s} \n",s);
-			return lkey[i].idx;
-		}
-	}
-	gt_find_error(s, lkey, nk);
-	return 0;
-}*/
-
 int gt_index(OPKEY lkey,char *s) {
 	for (int i = 0; lkey[i].typ!=typ_end; i++) {
 		if (str_i_equals(lkey[i].name,s)) {
@@ -2156,78 +2262,6 @@ void mystrcpy(char **d, const char *s) {
 
 /* pos=   Offset to find the data			*/
 /* idx=   For switches, which can only have one value. 	*/
-
-int pass_justify(const char *s) {
-	return gt_firstval(op_justify,s);
-}
-
-int pass_color(const char *s) throw(ParserError) {
-	double xx = 0.0;
-	char vv[80];
-	if (s[0] == '#') {
-		int len = strlen(s);
-		if (len != 7) {
-			g_throw_parser_error("illegal color specification '", s, "'");
-		}
-		colortyp c;
-		int err = g_hash_string_to_color(string(s), &c);
-		if (err != 0) {
-			g_throw_parser_error("illegal color specification '", s, "'");
-		}
-		return c.l;
-	} else if (str_i_str(s,"RGB")!=NULL) {
-		polish_eval((char*)s,&xx);
-	} else if (*s=='.' || *s=='(' || isdigit(*s)) {
-		strcpy(vv,"cvtgray(");
-		strcat(vv,s); strcat(vv,")");
-		polish_eval(vv,&xx);
-	} else if (strchr(s,'$') != NULL) {
-		strcpy(vv,"cvtcolor(");
-		strcat(vv,s); strcat(vv,")");
-		polish_eval(vv,&xx);
-	} else {
-		if (s[0] == 0) {
-			g_throw_parser_error("expecting color name, but found empty string");
-		} else {
-			string uc_token = s;
-			str_to_uppercase(uc_token);
-			str_remove_quote(uc_token);
-			GLEColor* color = GLEGetColorList()->get(uc_token);
-			if (color != NULL) {
-				return (int)color->getHexValueGLE();
-			} else {
-				int result = 0;
-				if (gt_firstval_err(op_fill_typ, s, &result)) {
-					return result;
-				} else {
-					g_throw_parser_error("found '", uc_token.c_str(), "', but expecting color or fill specification");
-				}
-			}
-		}
-	}
-	int j;
-	memcpy(&j,&xx,sizeof(int));
-	return j;
-}
-
-int pass_color_var(const char *s) throw(ParserError) {
-	if (strchr(s,'$') != NULL) {
-		int idx, typ;
-		char tmpcol[100];
-		string var_str = s;
-		str_to_uppercase(var_str);
-		var_find((char*)var_str.c_str(), &idx, &typ);
-		if (idx >= 0) {
-			var_getstr(idx, tmpcol);
-			return pass_color(tmpcol);
-		} else {
-			g_throw_parser_error("color '", s, "' not defined");
-			return 0;
-		}
-	} else {
-		return pass_color(s);
-	}
-}
 
 struct mark_struct { const char *name; const char *font; int cc; double rx; double ry; double scl; bool center;};
 
@@ -2364,32 +2398,6 @@ void mark_clear(void) {
 			g_defmarker(p->name,p->font,p->cc,p->rx,p->ry,p->scl,stdmark[i].center);
 		}
 	}
-}
-
-int pass_marker(char *name) throw(ParserError) {
-	int f = 0;
-	string marker;
-	polish_eval_string(name, &marker);
-	/* if 0, maybe its a user defined marker, ie a subroutine */
-	/* Use -ve to signify subroutine instead of normal marker */
-	for (int i = 0; i < nmark; i++) {
-		if (str_i_equals(mark_name[i], marker.c_str())) {
-			f = -(++i);
-			break;
-		}
-	}
-	if (f == 0)  {
-		for (int i = nmrk-1; i >= 0; i--) {
-			if (str_i_equals(mrk_name[i], marker.c_str())) {
-				f = ++i;
-				break;
-			}
-		}
-	}
-	if (f == 0) {
-		g_throw_parser_error("invalid marker name '", marker.c_str(), "'");
-	}
-	return f;
 }
 
 void pass_file_name(const char* name, string& file) {

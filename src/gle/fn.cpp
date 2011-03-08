@@ -104,6 +104,7 @@ struct keyw { const char *word; int index; int ret,np,p[5]; } keywfn[] = {
 	{ "HEIGHT",      9,             1,1, { 0,0,0,0,0 } },
 	{ "INT",         10,            1,1, { 1,0,0,0,0 } },
 	{ "ISNAME",      FN_ISNAME,     1,1, { 2,0,0,0,0 } },
+   { "JUSTIFY",     FN_JUSTIFY,    1,1, { 2,0,0,0,0 } },
 	{ "LEFT$",       11,            2,2, { 2,1,0,0,0 } },
 	{ "LEN",         12,            1,1, { 2,0,0,0,0 } },
 	{ "LOG",         13,            1,1, { 1,0,0,0,0 } },

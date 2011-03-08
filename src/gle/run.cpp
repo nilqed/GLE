@@ -1434,8 +1434,9 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					g_set_font(both.l);
 					break;
 				  case 3: /* justify */
-					readlong(jj);
-					g_set_just(jj);
+					readval(x);
+					memcpy(&both.l,&x,4);
+					g_set_just(both.l);
 					break;
 				  case 4: /* color */
 					readval(x);

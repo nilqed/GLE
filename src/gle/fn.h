@@ -56,3 +56,4 @@
 #define FN_GETENV   97
 #define FN_XG3D     98
 #define FN_YG3D     99
+#define FN_JUSTIFY  100

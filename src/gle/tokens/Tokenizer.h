@@ -122,6 +122,19 @@ inline ostream& operator<<(ostream& os,const ParserError& err) {
 	return err.write(os);
 }
 
+class IThrowsError {
+public:
+   IThrowsError();
+   virtual ~IThrowsError();
+   
+   virtual ParserError throwError(int pos, const string& error);
+   virtual ParserError throwError(const char* s1, const char* s2, const char* s3);
+   virtual ParserError throwError(const string& error);
+   virtual int getErrorPosition() const;
+};
+
+IThrowsError* g_get_throws_error();
+
 double tokenizer_string_to_double(const char* value) throw(ParserError);
 
 #if defined(__UNIX__)
@@ -267,7 +280,7 @@ public:
 	inline void setPos(const TokenizerPos& pos) { m_pos = pos; };
 };
 
-class Tokenizer {
+class Tokenizer : public IThrowsError {
 protected:
 	const char* m_fname;
 	string m_token;
@@ -414,6 +427,14 @@ public:
 	inline void token_pushback_ch(char ch) {
 		m_token_pushback_ch[m_token_has_pushback_ch++] = ch;
 	}
+   
+   virtual ParserError throwError(const char* s1, const char* s2, const char* s3);
+   
+   virtual ParserError throwError(int pos, const string& error);
+   
+   virtual ParserError throwError(const string& error);
+   
+   virtual int getErrorPosition() const;
 
 	ParserError error(const string& src) const;
 

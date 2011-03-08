@@ -313,6 +313,40 @@ void g_throw_parser_error(const char* err, int idx) throw(ParserError) {
 	throw err_exp;
 }
 
+IThrowsError::IThrowsError() {
+}
+
+IThrowsError::~IThrowsError() {
+}
+ 
+ParserError IThrowsError::throwError(const char* s1, const char* s2, const char* s3) {
+	TokenizerPos pos;
+	pos.setColumn(-1);
+	string err(s1);
+	if (s2 != NULL) err += s2;
+	if (s3 != NULL) err += s3;
+	return ParserError(err, pos, NULL);
+}
+ 
+ParserError IThrowsError::throwError(int /* pos */, const string& error) {
+   return throwError(error);
+}
+
+ParserError IThrowsError::throwError(const string& error) {
+   TokenizerPos pos;
+	pos.setColumn(-1);
+	return ParserError(error, pos, NULL);
+}
+
+int IThrowsError::getErrorPosition() const {
+   return 0;
+}
+
+IThrowsError* g_get_throws_error() {
+   static IThrowsError instance;
+   return &instance;
+}
+
 ParserError::ParserError(const string& txt, const TokenizerPos& pos, const char* fname) {
 	m_txt = txt;
 	str_replace_all(m_txt, "\n", "\n>> ");
@@ -1253,6 +1287,22 @@ void Tokenizer::read_till_close_comment() throw(ParserError) {
 		}
 		prev_ch = token_ch;
 	}
+}
+
+ParserError Tokenizer::throwError(const char* s1, const char* s2, const char* s3) {
+   return error(s1, s2, s3);
+}
+
+ParserError Tokenizer::throwError(int pos, const string& msg) {
+   return error(pos, msg);
+}
+   
+ParserError Tokenizer::throwError(const string& msg) {
+   return error(msg);
+}
+   
+int Tokenizer::getErrorPosition() const {
+   return token_pos_col();
 }
 
 ParserError Tokenizer::error(const char* s1, const char* s2, const char* s3) const {

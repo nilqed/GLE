@@ -770,9 +770,15 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 			both.l[1] = 0;
 			memcpy(&stk[nstk],&both.d,sizeof(double));
 			break;
+		case 60+FN_JUSTIFY: /* JUSTIFY(m$) */
+			*otyp = 1;
+			both.l[0] = pass_justify(stk_str[nstk]);
+			both.l[1] = 0;
+			memcpy(&stk[nstk], &both.d, sizeof(double));
+			break;         
 		case 109: /* CVTCOLOR(c$) */
 			*otyp = 1;
-			both.l[0] = pass_color(stk_str[nstk]);
+			both.l[0] = pass_color_var(stk_str[nstk]);
 			both.l[1] = 0;
 			memcpy(&stk[nstk],&both.d,sizeof(double));
 			break;

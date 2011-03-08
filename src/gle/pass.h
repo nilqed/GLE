@@ -171,6 +171,7 @@ public:
 	void do_endsub(int srclin, GLEPcode& pcode);
 	int get_optional(OPKEY lkey, GLEPcode& pcode) throw(ParserError);
 	int get_first(OPKEY lkey) throw(ParserError);
+   int get_first(const string& token, OPKEY lkey) throw(ParserError);
 	void get_token(const char* token) throw(ParserError);
 	bool try_get_token(const char* token) throw(ParserError);
 	void get_fill(GLEPcode& pcode) throw (ParserError);
@@ -188,7 +189,7 @@ public:
 	void do_text_mode(GLESourceLine &SLine, Tokenizer* tokens, GLEPcode& pcode) throw (ParserError);
 	void checkmode() throw(ParserError);
 	void get_block_type(int type, string& result);
-	ParserError create_option_error(OPKEY lkey, int count, string& token);
+	ParserError create_option_error(OPKEY lkey, int count, const string& token);
 	int get_one_option(op_key* lkey, GLEPcode& pcode, int plen) throw(ParserError);
 	void duplicate_error(GLEPcode& pcode, int pos) throw(ParserError);
 	void checkValidName(const string& name, const char* type, int pos) throw(ParserError);
