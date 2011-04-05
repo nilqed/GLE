@@ -374,7 +374,7 @@ void GLENumberFormatterSci::formatExpPart(int exp, string* output) {
 				if (output->length() != 0) toAdd << "\\cdot ";
 				toAdd << "10^{" << exp_str << "}";
 				if (g_get_tex_labels()) toAdd << "$";
-				*output = toAdd.str();
+				*output += toAdd.str();
 			}
 			break;
 	}
