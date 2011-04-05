@@ -984,15 +984,18 @@ double start_subtick(double dsubticks, double dticks, GLEAxis* ax) {
 }
 
 void numtrime(char *o,char *s) {
-	char *e,*f;
-	strcpy(o,s);
-	e = strchr(s,'e');
-	if (e==NULL) return;
+	char *e, *f;
+	strcpy(o, s);
+	e = strchr(s, 'e');
+	if (e == NULL) return;
 	e--;
-	for (; *e=='0'; e--) ;
-	f = strchr(s,'e');
-	strcpy(e+1,f);
-	strcpy(o,s);
+	for (; *e=='0'; e--);
+	if (*e == '.') {
+		e--;
+	}
+	f = strchr(s, 'e');
+	strcpy(e + 1, f);
+	strcpy(o, s);
 }
 
 void numtrim(char **d,char *s,double dticks) {
