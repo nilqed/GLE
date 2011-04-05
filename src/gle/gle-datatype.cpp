@@ -112,6 +112,28 @@ bool GLEDataObject::equals(GLEDataObject* obj) {
 void GLEDataObject::print(ostream& out) const {
 }
 
+GLEPointDataObject::GLEPointDataObject(double x, double y) : m_point(x, y) {
+}
+
+GLEPointDataObject::~GLEPointDataObject() {
+}
+
+int GLEPointDataObject::getType() {
+	return GLEObjectTypePoint;
+}
+
+bool GLEPointDataObject::equals(GLEDataObject* obj) {
+	if (obj->getType() != GLEObjectTypePoint) return false;
+	GLEPointDataObject* other = (GLEPointDataObject*)obj;
+	return m_point.getX() == other->m_point.getX()
+		   && m_point.getY() == other->m_point.getY();
+}
+
+void GLEPointDataObject::print(ostream& out) const {
+	m_point.write(out);
+}
+
+
 GLEString::GLEString() {
 	m_Data = NULL;
 	m_Length = 0;

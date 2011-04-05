@@ -45,8 +45,11 @@ class GLESubArgNames : public GLERefCountObject {
 public:
 	GLESubArgNames();
 	void addArgName(const char* argName);
+	void addArgName(unsigned int argIndex, const char* argName);
+	void addArgNameAlias(unsigned int argIndex, const char* argName);
 private:
-	GLERC<GLEStringHash> m_ArgNames;
+	GLEArrayImpl m_ArgNames;
+	GLEStringHashData m_ArgNameHash;
 };
 
 class GLESubRoot : public GLEDataObject {
@@ -58,6 +61,23 @@ private:
 	GLERC<GLESubArgNames> m_ArgNames;
 	GLERC<GLEStringHash> m_IgnoredArgNames;
 	GLERC<GLEArrayImpl> m_Signatures;
+};
+
+class GLESubDefinitionHelper : public GLERefCountObject {
+public:
+	GLESubDefinitionHelper(const std::string& name);
+	void addArgumentAlias(unsigned int argIndex, const std::string& name);
+	unsigned int addArgument(const std::string& name, unsigned int type, bool mandatory);
+	unsigned int addDoubleArgument(const std::string& name, double defaultValue, bool mandatory);
+	unsigned int addDoubleArgumentNoDefault(const std::string& name, bool mandatory);
+	unsigned int addPointArgument(const std::string& name, GLEPointDataObject* defaultValue, bool mandatory);
+
+public:
+	std::vector<bool> m_isMandatory;
+	std::vector<unsigned int> m_ArgTypes;
+	GLERC<GLEArrayImpl> m_Defaults;
+	GLERC<GLESubArgNames> m_ArgNames;
+	GLERC<GLEString> m_Name;
 };
 
 class GLESubSignature : public GLEDataObject {

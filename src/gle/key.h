@@ -39,7 +39,7 @@
 #ifndef INC_KEY_H
 #define INC_KEY_H
 
-class key_struct {
+class KeyEntry {
 public:
 	char lstyle[9];
 	int color, fill;
@@ -51,8 +51,8 @@ public:
 	int sepstyle;
 	double sepdist;
 public:
-	key_struct(int col);
-	~key_struct();
+	KeyEntry(int col);
+	~KeyEntry();
 };
 
 class KeyRCInfo {

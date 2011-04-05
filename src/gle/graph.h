@@ -190,7 +190,7 @@ public:
 	bool axisscale;
 	bool inverted;
 	char lstyle[9];
-	char *key_name;
+	string key_name;
 	char *bigfile;
 	int key_fill;
 	int key_pattern;

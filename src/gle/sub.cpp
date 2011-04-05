@@ -59,14 +59,29 @@ double return_value = 0.0;
 string return_value_str;
 vector<string> return_str_stack;
 
-GLESubArgNames::GLESubArgNames() :
-	m_ArgNames(new GLEStringHash())
-{
+GLESubArgNames::GLESubArgNames() {
 }
 
 void GLESubArgNames::addArgName(const char* argName) {
-	GLERC<GLEString> strArgName(new GLEString(argName));
-	m_ArgNames->setObjectByKey(strArgName, strArgName.get());
+	addArgName(m_ArgNames.size(), argName);
+}
+
+void GLESubArgNames::addArgName(unsigned int argIndex, const char* argName) {
+	GLERC<GLEString> argNameStr(new GLEString(argName));
+	GLEStringHashData::iterator found(m_ArgNameHash.find(argNameStr));
+	if (found == m_ArgNameHash.end()) {
+		m_ArgNameHash.insert(make_pair(argNameStr, argIndex));
+	}
+	m_ArgNames.resize(argIndex + 1);
+	m_ArgNames.setObject(argIndex, argNameStr.get());
+}
+
+void GLESubArgNames::addArgNameAlias(unsigned int argIndex, const char* argName) {
+	GLERC<GLEString> argNameStr(new GLEString(argName));
+	GLEStringHashData::iterator found(m_ArgNameHash.find(argNameStr));
+	if (found == m_ArgNameHash.end()) {
+		m_ArgNameHash.insert(make_pair(argNameStr, argIndex));
+	}
 }
 
 GLESubRoot::GLESubRoot(GLEString* name, GLESubArgNames* argNames) :
@@ -78,6 +93,43 @@ GLESubRoot::GLESubRoot(GLEString* name, GLESubArgNames* argNames) :
 }
 
 void GLESubRoot::updateArgNames(GLESubArgNames* argNames) {
+}
+
+GLESubDefinitionHelper::GLESubDefinitionHelper(const std::string& name) {
+	m_Defaults = new GLEArrayImpl();
+	m_ArgNames = new GLESubArgNames();
+	m_Name = new GLEString(name);
+}
+
+void GLESubDefinitionHelper::addArgumentAlias(unsigned int argIndex, const std::string& name) {
+	m_ArgNames->addArgNameAlias(argIndex, name.c_str());
+}
+
+unsigned int GLESubDefinitionHelper::addArgument(const std::string& name, unsigned int type, bool mandatory) {
+	unsigned int nbArguments = m_ArgTypes.size();
+	m_ArgTypes.push_back(type);
+	m_isMandatory.push_back(mandatory);
+	m_Defaults->resize(nbArguments + 1);
+	m_ArgNames->addArgName(nbArguments, name.c_str());
+	return nbArguments;
+}
+
+unsigned int GLESubDefinitionHelper::addDoubleArgument(const std::string& name, double defaultValue, bool mandatory) {
+	unsigned int result = addArgument(name, GLEObjectTypeDouble, mandatory);
+	m_Defaults->setDouble(result, defaultValue);
+	return result;
+}
+
+unsigned int GLESubDefinitionHelper::addDoubleArgumentNoDefault(const std::string& name, bool mandatory) {
+	return addArgument(name, GLEObjectTypeDouble, mandatory);
+}
+
+unsigned int GLESubDefinitionHelper::addPointArgument(const std::string& name, GLEPointDataObject* defaultValue, bool mandatory) {
+	unsigned int result = addArgument(name, GLEObjectTypePoint, mandatory);
+	if (defaultValue != 0) {
+		m_Defaults->setObject(result, defaultValue);
+	}
+	return result;
 }
 
 GLESubSignature::GLESubSignature(GLESubRoot* root) :

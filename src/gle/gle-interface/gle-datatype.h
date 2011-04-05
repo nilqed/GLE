@@ -53,7 +53,8 @@ typedef enum {
 	GLEObjectTypeArray,
 	GLEObjectTypeColor,
 	GLEObjectTypeDynamicSub,
-	GLEObjectTypeObjectRep
+	GLEObjectTypeObjectRep,
+	GLEObjectTypePoint
 } GLEObjectType;
 
 class GLEDataObject : public GLERefCountObject {
@@ -141,6 +142,17 @@ void gle_memory_cell_print(GLEMemoryCell* a, ostream& out);
 bool gle_memory_cell_to_double(GLEMemoryCell* a, double* result);
 
 unsigned int getUTF8NumberOfChars(const char* str, unsigned int len);
+
+class DLLCLASS GLEPointDataObject : public GLEDataObject {
+protected:
+	GLEPoint m_point;
+public:
+	GLEPointDataObject(double x, double y);
+	virtual ~GLEPointDataObject();
+	virtual int getType();
+	virtual bool equals(GLEDataObject* obj);
+	virtual void print(ostream& out) const;
+};
 
 class DLLCLASS GLEString : public GLEDataObject {
 protected:

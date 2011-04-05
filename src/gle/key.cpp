@@ -49,6 +49,8 @@
 #include "gprint.h"
 #include "cutils.h"
 #include "op_def.h"
+#include "var.h"
+#include "sub.h"
 
 /* for key command and gx(), gy() */
 extern double graph_x1,graph_y1,graph_x2,graph_y2;  /* in cm */
@@ -77,15 +79,49 @@ double get_next_exp(TOKENS tk,int ntk,int *curtok);
 #define next_fill ((ct+=1),pass_color_var(tk[ct]))
 #define next_str(s)  (ct+=1,strcpy(s,tk[ct]))
 #define next_vstr(s)  (ct+=1,mystrcpy(&s,tk[ct]))
-#define next_vquote(s) (ct+=1,mystrcpy(&s,un_quote(tk[ct])))
 #define next_quote(s) (ct+=1,strcpy(&s,un_quote(tk[ct])))
 #define next_vquote_cpp(s) (ct+=1,skipspace,pass_file_name(tk[ct],s))
 
 #define KEY_FILL_HEI_FY 0.66
 #define KEY_FILL_HEI_FX 0.7
 
-key_struct *kd[100];
+KeyEntry *kd[100];
 int g_nkd, g_keycol;
+
+class ParseGeneralKeyInfo {
+public:
+	ParseGeneralKeyInfo() {
+		GLESubDefinitionHelper passKeyInfo("key");
+		offset = passKeyInfo.addPointArgument("offset", new GLEPointDataObject(0.0, 0.0), false);
+		margins = passKeyInfo.addPointArgument("margins", new GLEPointDataObject(0.0, 0.0), false);
+		absolute = passKeyInfo.addPointArgument("absolute", 0, false);
+		// background = passKeyInfo.addPointArgument("background", GLE_FILL_CLEAR, false);
+		base = passKeyInfo.addDoubleArgumentNoDefault("base", false);
+		passKeyInfo.addArgumentAlias(base, "row");
+		linepos = passKeyInfo.addDoubleArgumentNoDefault("lpos", false);
+		linelen = passKeyInfo.addDoubleArgumentNoDefault("llen", false);
+/*
+		else kw("NOBOX") info.setNoBox(true);
+		else kw("NOLINE") info.setNoLines(true);
+		else kw("COMPACT") info.setCompact(true);
+		else kw("OFF") info.setDisabled(true);
+		else kw("HEI") khei = next_exp;
+		else kw("POSITION") next_str(info.getJustify());
+		else kw("POS") next_str(info.getJustify());
+		else kw("BOXCOLOR") info.setBoxColor(next_color);
+		else kw("SEPARATOR") {
+*/
+	}
+
+public:
+	unsigned int offset;
+	unsigned int margins;
+	unsigned int absolute;
+	unsigned int background;
+	unsigned int base;
+	unsigned int linepos;
+	unsigned int linelen;
+};
 
 void begin_key(int *pln, int *pcode, int *cp) throw(ParserError) {
     int nkd=0;
@@ -163,7 +199,7 @@ void begin_key(int *pln, int *pcode, int *cp) throw(ParserError) {
 			else {
 				if (ct==1) {
 					nkd++;
-					kd[nkd] = new key_struct(col);
+					kd[nkd] = new KeyEntry(col);
 				}
 				if (nkd==0) return;
 				kw("TEXT") {
@@ -734,7 +770,7 @@ void do_draw_key(double ox, double oy, bool notxt, KeyInfo* info) {
 	}
 }
 
-key_struct::key_struct(int col) {
+KeyEntry::KeyEntry(int col) {
 	column = col;
 	sepstyle = -1;
 	sepdist = 0.0;
@@ -746,5 +782,5 @@ key_struct::key_struct(int col) {
 	background = GLE_FILL_CLEAR;
 }
 
-key_struct::~key_struct() {
+KeyEntry::~KeyEntry() {
 }

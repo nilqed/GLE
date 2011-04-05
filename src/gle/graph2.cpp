@@ -2910,7 +2910,7 @@ void doLet(GLELet* let, bool nofirst) throw(ParserError) {
 	}
 }
 
-extern key_struct *kd[100];
+extern KeyEntry *kd[100];
 
 void next_lstyle(char* s,int* ct) {
 	char next[200];
@@ -3003,7 +3003,7 @@ void do_dataset(int d) throw(ParserError) {
 	else kw("MSIZE") 	dp[d]->msize = next_exp;
 	else kw("MDIST") 	dp[d]->mdist = next_exp;
 	else kw("MSCALE") 	dp[d]->mscale = next_exp;
-	else kw("KEY") 		next_vquote(dp[d]->key_name);
+	else kw("KEY") 		next_vquote_cpp(dp[d]->key_name);
 	else kw("AUTOSCALE") 	dp[d]->autoscale = true;
 	else kw("AUTO") 	dp[d]->autoscale = true;
 	else kw("NOMISS") 	dp[d]->nomiss = true;
@@ -3139,8 +3139,8 @@ void do_each_dataset_settings() {
 }
 
 void do_dataset_key(int d) {
-	if (dp[d] != NULL && dp[d]->key_name != NULL) {
-		kd[++g_nkd] = new key_struct(g_keycol);
+	if (dp[d] != NULL && dp[d]->key_name != "") {
+		kd[++g_nkd] = new KeyEntry(g_keycol);
 		kd[g_nkd]->fill = dp[d]->key_fill;
 		kd[g_nkd]->pattern = dp[d]->key_pattern;
 		kd[g_nkd]->background = dp[d]->key_background;
@@ -3780,7 +3780,7 @@ GLEDataSet::GLEDataSet(int identifier) {
 	axisscale = false;
 	inverted = false;
 	lstyle[0] = 0;
-	key_name = NULL;
+	key_name = "";
 	bigfile = NULL;
 	key_fill = 0;
 	key_pattern = -1;

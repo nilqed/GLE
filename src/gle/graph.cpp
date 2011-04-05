@@ -73,7 +73,7 @@ extern int trace_on;
 static int xxgrid[GLE_AXIS_MAX+1];
 
 extern int g_nkd, g_keycol;
-extern key_struct *kd[100];
+extern KeyEntry *kd[100];
 KeyInfo* g_keyInfo = 0;
 
 vector<GLELet*> g_letCmds;
@@ -1380,7 +1380,6 @@ void graph_free() {
 	}
 	for (int i = 0; i < MAX_NB_DATA; i++) {
 		if (dp[i] != NULL) {
-			iffree(dp[i]->key_name,"a");
 			delete dp[i];
 		}
 		dp[i] = NULL;
@@ -1424,7 +1423,7 @@ int freedataset(int d) {
 
 void copy_default(int dn) {
 	dp[dn]->copy(dp[0]);
-	dp[dn]->key_name = NULL;
+	dp[dn]->key_name = "";
 	dp[dn]->axisscale = false;
 }
 
