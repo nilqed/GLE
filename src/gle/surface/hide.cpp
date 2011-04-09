@@ -97,6 +97,13 @@ void init_user() {
 
 float smin_x,smax_x,smin_y,smax_y,smin_z,smax_z;
 
+void g_set_color_if_defined(const char* s) {
+	if (s != NULL && s[0] != 0) {
+		int color = pass_color_var(s);
+		g_set_color(color);
+	}
+}
+
 void initminmax() {
 	smin_x = 10e10; smax_x = -10e10;
 	smin_y = 10e10; smax_y = -10e10;
@@ -350,7 +357,7 @@ void hide(float *z ,int nx, int ny, float minz, float maxz, struct surface_struc
 	touser(0,ny,0,&ux2,&uy);
 
 /* Now draw bottom half */
-	g_set_color(pass_color_var(sf.bot_color));
+	g_set_color_if_defined(sf.bot_color);
 	g_set_line_style(sf.bot_lstyle);
 	vsign = -1;        /* reverse tests for bottom half */
 	for (i=0; i<MAXH ;i++)
@@ -402,7 +409,7 @@ void hide(float *z ,int nx, int ny, float minz, float maxz, struct surface_struc
 
 /* should clip object nicely at zmin,zmax,  do this inside vector_line */
 	vsign = 1;        /* normal tests for top half */
-	g_set_color(pass_color_var(sf.top_color));
+	g_set_color_if_defined(sf.top_color);
 	g_set_line_style(sf.top_lstyle);
 
 	if (sf.top_on) {
@@ -455,7 +462,7 @@ void hide(float *z ,int nx, int ny, float minz, float maxz, struct surface_struc
 		}
 	} /* sf.top_on */
 
-	g_set_color(pass_color_var(sf.top_color));
+	g_set_color_if_defined(sf.top_color);
 	g_set_line_style(sf.top_lstyle);
 
 	if (sf.skirt_on) { /* set h2 to bottom of top surface */
@@ -714,22 +721,21 @@ void horizonv(float *z,int ix1,int iy1,int ix2,int iy2) {
 	int x1,x2,putback=false;
 	float y1,y2;
 
-	if (sf.zcolour[0]!=0) {
-	if (z[ix1+iy1* (int32) nnx] <= min_zed  ||
-	 z[ix2+iy2* (int32) nnx] <= min_zed) {
+	if (sf.zcolour[0]!=0 &&
+	    (z[ix1 + iy1 * (int32)nnx] <= min_zed || z[ix2 + iy2 * (int32)nnx] <= min_zed)) {
 		putback = true;
-		g_set_color(pass_color_var(sf.zcolour));
-	}}
+		g_set_color_if_defined(sf.zcolour);
+	}
 
-	touser(ix1,iy1,z[ix1+iy1* (int32) nnx],&ux,&y1);
+	touser(ix1,iy1,z[ix1 + iy1 * (int32)nnx],&ux,&y1);
 	x1 = (int)maph(ux);
-	touser(ix2,iy2,z[ix2+iy2* (int32) nnx],&ux,&y2);
+	touser(ix2,iy2,z[ix2 + iy2 * (int32)nnx],&ux,&y2);
 	x2 = (int)maph(ux);
 	hclipvec(x1,y1,x2,y2,true);
 
 	if (putback) {
 		putback = true;
-		g_set_color(pass_color_var(sf.bot_color));
+		g_set_color_if_defined(sf.top_color);
 	}
 
 }
@@ -1008,7 +1014,7 @@ void matrx(float i[4][4], float angle) {
 
 void grid_back(int nx, int ny, float z1, float z2) {
 	float x,y,z;
-	g_set_color(pass_color_var(sf.back_color));
+	g_set_color_if_defined(sf.back_color);
 	g_set_line_style(sf.back_lstyle);
 	doclipping = sf.back_hidden;
 	if (sf.back_ystep>0) for (y=sf.yaxis.min; y<=sf.yaxis.max+.00001; y+=sf.back_ystep) {
@@ -1018,7 +1024,7 @@ void grid_back(int nx, int ny, float z1, float z2) {
 		clipline(0,0,z,0,ny-1,z);
 	}
 
-	g_set_color(pass_color_var(sf.right_color));
+	g_set_color_if_defined(sf.right_color);
 	g_set_line_style(sf.right_lstyle);
 	doclipping = sf.right_hidden;
 	if (sf.right_xstep>0) for (x=sf.xaxis.min; x<=sf.xaxis.max+.00001; x+=sf.right_xstep) {
@@ -1029,7 +1035,7 @@ void grid_back(int nx, int ny, float z1, float z2) {
 	}
 
 
-	g_set_color(pass_color_var(sf.base_color));
+	g_set_color_if_defined(sf.base_color);
 	g_set_line_style(sf.base_lstyle);
 	doclipping = sf.base_hidden;
 	if (sf.base_xstep>0) for (x=sf.xaxis.min; x<=sf.xaxis.max+.00001; x+=sf.base_xstep) {

@@ -628,17 +628,8 @@ void hide_defaults() {
         sf.top_on = true;
         sf.bot_on = false;
         sf.base_hidden = sf.right_hidden = sf.back_hidden = true;
-	strcpy(sf.zcolour, "BLACK");
 	strcpy(sf.title_color, "BLACK");
-	strcpy(sf.back_lstyle, "BLACK");
-	strcpy(sf.back_color, "BLACK");
-	strcpy(sf.base_color, "BLACK");
-	strcpy(sf.base_lstyle, "BLACK");
-	strcpy(sf.right_color, "BLACK");
-	strcpy(sf.right_lstyle, "BLACK");
 	strcpy(sf.cube_color, "BLACK");
-	strcpy(sf.top_color, "BLACK");
-	strcpy(sf.bot_color, "BLACK");
 	strcpy(sf.droplines_color, "BLACK");
 	strcpy(sf.riselines_color, "BLACK");
 	strcpy(sf.marker_color, "BLACK");
