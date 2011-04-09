@@ -636,7 +636,7 @@ void SVGGLEDevice::reapsfont(void)  /* add aditional ps fonts,  e.g.  pstr = Tim
 	static int init_done;
 	FILE *fptr;
 	char *s;
-	char inbuff[90];
+	char inbuff[200];
 	if (init_done) return;
 	init_done = true;
 
