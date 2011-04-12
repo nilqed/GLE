@@ -249,6 +249,8 @@ void byte_code_error(int err) throw(ParserError) {
 	throw err_exp;
 }
 
+void clear_graph();
+
 void clear_run() {
 	char ss[500];
 	npath = 0;
@@ -257,6 +259,7 @@ void clear_run() {
 	if (strstr(ss,"FILLPATH")!=NULL) can_fillpath = true;
 	else can_fillpath = false;
 	g_drobj.clear();
+   clear_graph();
 }
 
 int gle_is_open() {

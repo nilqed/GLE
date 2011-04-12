@@ -144,6 +144,10 @@ void ensureDataSetCreatedAndSetUsed(int d) {
 	dp[d]->axisscale = true;
 }
 
+void clear_graph() {
+   g_inGraph = false;
+}
+
 // Font sizes in a graph are based in g_fontsz, but this was set in the original
 // GLE to a fixed proportion of the largest dimension of a graph. The size of an
 // axis is defined in terms of its base size, which is equal to g_fontsz.
