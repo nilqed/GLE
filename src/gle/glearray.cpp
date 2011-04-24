@@ -406,8 +406,7 @@ void GLECSVData::parseBlock() {
 	m_pos = 0;
 	m_size = m_buffer.size();
 	m_data = &m_buffer[0];
-	ignoreHeader();
-	GLECSVDataStatus status = readCell();
+	GLECSVDataStatus status = ignoreHeader();
 	while (status != GLECSVDataStatusEOF) {
 		status = readCell();
 	}
@@ -423,6 +422,7 @@ void GLECSVData::setDelims(const char* delims) {
 		m_delims[(int)delims[pos]] = true;
 		pos++;
 	}
+	m_lastDelimWasSpace = isDelim(' ') || isDelim('\t');
 }
 
 void GLECSVData::setCommentIndicator(const char* comment) {
@@ -459,6 +459,7 @@ bool GLECSVData::isComment(GLEBYTE ch) {
 		commentPos++;
 	}
 	if (commentPos == m_comment.size()) {
+		goBack();
 		return true;
 	} else {
 		m_pos = currentPos;
@@ -466,23 +467,24 @@ bool GLECSVData::isComment(GLEBYTE ch) {
 	}
 }
 
-void GLECSVData::skipTillEol() {
+GLECSVDataStatus GLECSVData::skipTillEol() {
 	while (true) {
 		GLEBYTE ch = readChar();
 		if (ch == 0) {
-			return;
+			return GLECSVDataStatusEOF;
 		}
 		if (isEol(ch)) {
-			removeTrailingEOLs();
-			return;
+			return readNewline(ch);
 		}
 	}
 }
 
-void GLECSVData::ignoreHeader() {
+GLECSVDataStatus GLECSVData::ignoreHeader() {
+	GLECSVDataStatus result = GLECSVDataStatusOK;
 	for (unsigned int i = 0; i < m_ignoreHeader; i++) {
-		skipTillEol();
+		result = skipTillEol();
 	}
+	return result;
 }
 
 void GLECSVData::createErrorString(const string& str) {
@@ -518,7 +520,7 @@ GLECSVDataStatus GLECSVData::readCellString(GLEBYTE quote) {
 			m_error.errorLine = m_lines;
 			m_error.errorColumn = getUTF8Column(cellPos);
 			createErrorString("unterminated string");
-			return removeTrailingEOLs();
+			return readNewline(ch);
 		} else if (ch == quote) {
 			GLEBYTE ch = readChar();
 			if (ch != quote) {
@@ -541,24 +543,30 @@ GLECSVDataStatus GLECSVData::readCell() {
 	unsigned int cellPos = lastCharPos();
 	while (true) {
 		if (ch == 0) {
-			createCell(cellSize, cellPos);
+			if (isSizeCheckOKEndOfLine(cellSize)) {
+				createCell(cellSize, cellPos);
+			}
 			return GLECSVDataStatusEOF;
 		} else if (isEol(ch)) {
-			createCell(cellSize, cellPos);
-			return removeTrailingEOLs();
+			if (isSizeCheckOKEndOfLine(cellSize)) {
+				createCell(cellSize, cellPos);
+			}
+			return readNewline(ch);
 		} else if (isDelim(ch)) {
-			createCell(cellSize, cellPos);
+			m_lastDelimWasSpace = isSpace(ch);
+			if (isSizeCheckOKAtDelim(ch, cellSize)) {
+				createCell(cellSize, cellPos);
+			}
 			if (isSpace(ch)) {
 				return removeTrailingSpace();
 			} else {
 				return GLECSVDataStatusOK;
 			}
 		} else if (isComment(ch)) {
-			if (cellSize != 0) {
+			if (isSizeCheckOKEndOfLine(cellSize)) {
 				createCell(cellSize, cellPos);
 			}
-			skipTillEol();
-			return GLECSVDataStatusEOL;
+			return skipTillEol();
 		}
 		cellCount++;
 		if (!isSpace(ch)) {
@@ -567,6 +575,27 @@ GLECSVDataStatus GLECSVData::readCell() {
 		ch = readChar();
 	}
 	return GLECSVDataStatusOK;
+}
+
+bool GLECSVData::isSizeCheckOKEndOfLine(unsigned int cellSize) {
+	if (cellSize == 0) {
+		if (m_nextLine) {
+			return false;
+		}
+		if (m_lastDelimWasSpace) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool GLECSVData::isSizeCheckOKAtDelim(GLEBYTE delim, unsigned int cellSize) {
+	if (cellSize == 0) {
+		if (delim == ' ' || delim == '\t') {
+			return false;
+		}
+	}
+	return true;
 }
 
 void GLECSVData::createCell(unsigned int cellSize, unsigned int cellPos) {
@@ -587,24 +616,27 @@ GLECSVDataStatus GLECSVData::removeTrailingSpace() {
 		}
 	} while (isSpace(ch));
 	if (isEol(ch)) {
-		return removeTrailingEOLs();
+		return readNewline(ch);
 	} else {
 		goBack();
 		return GLECSVDataStatusOK;
 	}
 }
 
-GLECSVDataStatus GLECSVData::removeTrailingEOLs() {
+GLECSVDataStatus GLECSVData::readNewline(GLEBYTE prevCh) {
 	m_lines++;
 	m_nextLine = true;
-	GLEBYTE ch;
-	do {
-		ch = readChar();
-		if (ch == 0) {
-			m_firstColumn = m_pos;
-			return GLECSVDataStatusEOF;
-		}
-	} while (isEol(ch));
+	GLEBYTE ch = readChar();
+	if (ch == 0) {
+		m_firstColumn = m_pos;
+		return GLECSVDataStatusEOF;
+	}
+	if (isEol(ch) && (ch != prevCh)) {
+		// Found, e.g., CR followed by LF (Windows encoding of new line)
+		m_firstColumn = m_pos;
+		return GLECSVDataStatusEOL;
+	}
+	// Found just CR or just LF (Unix / Mac encoding of new line)
 	goBack();
 	m_firstColumn = m_pos;
 	return GLECSVDataStatusEOL;
@@ -659,8 +691,9 @@ GLECSVDataStatus GLECSVData::skipSpacesAndFirstDelim(GLEBYTE ch) {
 			if (ch == 0) {
 				return GLECSVDataStatusEOF;
 			} else if (isEol(ch)) {
-				return removeTrailingEOLs();
+				return readNewline(ch);
 			} else if (isDelim(ch)) {
+				m_lastDelimWasSpace = isSpace(ch);
 				return GLECSVDataStatusOK;
 			} else {
 				goBack();

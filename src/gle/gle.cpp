@@ -101,7 +101,6 @@ void gle_cat_csv(vector<string>* files) {
 	for (unsigned int i = 0; i < files->size(); i++) {
 		string fname(files->at(i));
 		GLECSVData csvData;
-		csvData.setDelims(",");
 		csvData.read(fname);
 		GLECSVError* error = csvData.getError();
 		if (error->errorCode != GLECSVErrorNone) {

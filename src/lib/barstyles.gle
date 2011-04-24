@@ -52,7 +52,8 @@ sub bar_colormap x1 y1 x2 y2 b g
    box x2-x1 y2-y1 fill clear
 end sub
 
-sub bar_colormap_palette_labels x1 y1 x2 y2 value palette$ fmt$
+sub bar_colormap_palette_labels x1 y1 x2 y2 value palette$ fmt$ hei
+  default hei 0.23
   if value >= 0 then
     y1 = y1 + bar_gridline_width
     y2 = y2 + bar_gridline_width
@@ -64,7 +65,7 @@ sub bar_colormap_palette_labels x1 y1 x2 y2 value palette$ fmt$
   colormap y 0 1 0 1 1 bar_colormap_pixels x2-x1 y2-y1 palette palette$
   ! draw data labels
   gsave
-  set just bc hei 0.23
+  set just bc hei hei
   if value < 0 then y2 = yg(0)
   amove (x1+x2)/2 y2+0.1
   write format$(value, fmt$)

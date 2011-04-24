@@ -102,12 +102,41 @@ void test_csv_reader1() {
 	}
 }
 
-int main(void) {
-	test_csv_reader1();
-	return 0;
+void test_csv_reader2() {
+	unsigned int columns = 12;
+	const char* tokens[] = {
+		"17", "16", "2", "16", "16", "1", "17", "161947.9820", "161947.9381", "0.0439", "*", "*",
+		"100", "16", "85", "99", "16", "84", "100", "946121.8397", "946046.8191", "75.0206", "*", "23",
+		"101", "16", "86", "100", "16", "85", "101", "955521.9934", "955371.2682", "150.7252", "*", "*",
+		"119", "16", "104", "118", "16", "103", "119", "1122496.4662", "1122497.7256", "-1.2594", "*", "*" };
+	const char* input1 =
+			"!\n"
+	        "! Some comments\n"
+	        "!\n"
+	        " 17  16   2   16  16   1    17    161947.9820  161947.9381       0.0439          *             * \n"
+	        "100  16  85   99  16  84   100    946121.8397  946046.8191      75.0206          *             23\n"
+	        "101  16  86  100  16  85   101    955521.9934  955371.2682     150.7252          *             * !\n"
+	        "119  16 104  118  16 103   119   1122496.4662 1122497.7256      -1.2594          *             * !\n"
+	        "!120 16 105  119  16 104   120   1131738.8987 1131740.7524      -1.8537          *             * \n";
+	GLECSVData reader;
+	reader.readBuffer(input1);
+	GLECSVError* error = reader.getError();
+	unit_test(error->errorCode == GLECSVErrorNone);
+	unit_test(reader.getNbLines() == 4);
+	for (unsigned int i = 0; i < reader.getNbLines(); i++) {
+		unit_test(reader.getNbColumns(i) == columns);
+	}
+	unsigned int pos = 0;
+	for (unsigned int i = 0; i < reader.getNbLines(); i++) {
+		for (unsigned int j = 0; j < columns; j++) {
+			string cellValue = reader.getCellString(i, j);
+			unit_test(cellValue == tokens[pos++]);
+		}
+	}
 }
 
-
-
-
-
+int main(void) {
+	test_csv_reader1();
+	test_csv_reader2();
+	return 0;
+}

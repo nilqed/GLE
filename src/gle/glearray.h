@@ -154,6 +154,7 @@ protected:
 	GLECSVError m_error;
 	string m_fileName;
 	string m_comment;
+	bool m_lastDelimWasSpace;
 public:
 	GLECSVData();
 	~GLECSVData();
@@ -178,13 +179,15 @@ private:
 	bool isSpace(GLEBYTE ch);
 	bool isEol(GLEBYTE ch);
 	bool isComment(GLEBYTE ch);
-	void skipTillEol();
-	void ignoreHeader();
+	GLECSVDataStatus skipTillEol();
+	GLECSVDataStatus ignoreHeader();
 	GLECSVDataStatus readCellString(GLEBYTE quote);
 	GLECSVDataStatus readCell();
 	void createCell(unsigned int cellSize, unsigned int cellPos);
 	GLECSVDataStatus removeTrailingSpace();
-	GLECSVDataStatus removeTrailingEOLs();
+	GLECSVDataStatus readNewline(GLEBYTE prevCh);
+	bool isSizeCheckOKEndOfLine(unsigned int cellSize);
+	bool isSizeCheckOKAtDelim(GLEBYTE delim, unsigned int cellSize);
 	void goBack();
 	unsigned int lastCharPos();
 	GLEBYTE readChar();

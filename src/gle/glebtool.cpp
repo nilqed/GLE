@@ -184,7 +184,7 @@ int main(int argc, char** argv) {
 #ifndef __WIN32__
 		return do_setrelpath(argv + 2);
 #else
-      return 0;
+		return 0;
 #endif
 	} else if (option == "-latexdef") {
 		return do_latexdef(argv + 2);
