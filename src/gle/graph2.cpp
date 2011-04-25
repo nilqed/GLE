@@ -2706,14 +2706,31 @@ void GLELet::doHistogram() throw(ParserError) {
 	int bins = m_nrBins;
 	GLEDataPairs histData(getDataset(m_HistDS));
 	if (!hasFrom() || !hasTo()) {
+		// Take from axis range if explicitly given
+		GLEAxis* ax = &xx[GLE_AXIS_X];
+		if (!hasFrom() && ax->getRange()->hasMin()) {
+			setHasFrom(true);
+			setFrom(ax->getMin());
+		}
+		if (!hasTo() && ax->getRange()->hasMax()) {
+			setHasTo(true);
+			setTo(ax->getMax());
+		}
+		// Take from data range
 		GLERange range;
 		for (unsigned int i = 0; i < histData.size(); i++) {
 			range.updateRange(histData.getY(i), histData.getM(i));
 		}
 		roundrange(&range, false, false, 0.0);
 		if (range.validNotEmpty()) {
-			setFrom(range.getMin());
-			setTo(range.getMax());
+			if (!hasFrom()) {
+				setHasFrom(true);
+				setFrom(range.getMin());
+			}
+			if (!hasTo()) {
+				setHasTo(true);
+				setTo(range.getMax());
+			}
 		}
 	}
 	if (bins == -1 && !hasSteps()) {
@@ -2889,11 +2906,9 @@ void doLet(GLELet* let, bool nofirst) throw(ParserError) {
 	let->setFineTune(nofirst);
 	GLEAxis* ax = &xx[GLE_AXIS_X];
 	if (!let->hasFrom()) {
-		let->setHasFrom(true);
 		let->setFrom(ax->getMin());
 	}
 	if (!let->hasTo()) {
-		let->setHasTo(true);
 		let->setTo(ax->getMax());
 	}
 	if (let->isHistogram()) {
