@@ -106,6 +106,8 @@ int str_starts_with_trim(const string& str, const char* test);
 
 bool str_starts_with(const string& str, const char* find);
 
+bool str_i_starts_with(const string& str, const char* find);
+
 bool str_i_ends_with(const string& str, const char* find);
 
 void str_remove_quote(string& str);

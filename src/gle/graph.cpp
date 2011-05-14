@@ -148,6 +148,8 @@ void clear_graph() {
    g_inGraph = false;
 }
 
+void replace_exp(string& exp);
+
 // Font sizes in a graph are based in g_fontsz, but this was set in the original
 // GLE to a fixed proportion of the largest dimension of a graph. The size of an
 // axis is defined in terms of its base size, which is equal to g_fontsz.
@@ -1435,6 +1437,9 @@ bool is_dataset_identifier(const char* ds) {
 	int len = strlen(ds);
 	if (len <= 1 || toupper(ds[0]) != 'D') {
 		return false;
+	}
+	if (str_i_starts_with(ds, "d\\expr")) {
+		return true;
 	}
 	if (str_i_equals(ds, "dn")) {
 		return true;

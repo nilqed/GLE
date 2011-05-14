@@ -327,6 +327,15 @@ bool str_starts_with(const string& str, const char* find) {
 	return find[idx] == 0;
 }
 
+bool str_i_starts_with(const string& str, const char* find) {
+	int idx = 0;
+	int len = str.length();
+	while (idx < len && toupper(find[idx]) == toupper(str[idx])) {
+		idx++;
+	}
+	return find[idx] == 0;
+}
+
 bool str_i_ends_with(const string& str, const char* find) {
 	int f_len = strlen(find);
 	int s_len = str.length();
