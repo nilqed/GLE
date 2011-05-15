@@ -77,7 +77,6 @@ extern KeyEntry *kd[100];
 KeyInfo* g_keyInfo = 0;
 
 vector<GLELet*> g_letCmds;
-bool g_inGraph = false;
 int g_nbar = 0;
 int g_graph_background = GLE_FILL_CLEAR;
 
@@ -144,22 +143,50 @@ void ensureDataSetCreatedAndSetUsed(int d) {
 	dp[d]->axisscale = true;
 }
 
-void clear_graph() {
-   g_inGraph = false;
+void replace_exp(string& exp);
+
+GLEGraphBlockInstance::GLEGraphBlockInstance(GLEGraphBlockBase* parent):
+	GLEBlockInstance(parent)
+{
 }
 
-void replace_exp(string& exp);
+GLEGraphBlockInstance::~GLEGraphBlockInstance() {
+
+}
+
+void GLEGraphBlockInstance::executeLine(GLESourceLine& sline) {
+	execute_graph(sline, false);
+}
+
+void GLEGraphBlockInstance::endExecuteBlock() {
+	draw_graph(g_keyInfo);
+}
+
+GLEGraphBlockBase::GLEGraphBlockBase():
+	GLEBlockBase("graph", false)
+{
+}
+
+GLEGraphBlockBase::~GLEGraphBlockBase() {
+
+}
+
+GLEBlockInstance* GLEGraphBlockBase::beginExecuteBlockImpl(GLESourceLine& sline, int *pcode, int *cp) {
+	GLEGraphBlockInstance* graphBlock = new GLEGraphBlockInstance(this);
+	begin_graph();
+	return graphBlock;
+}
+
+bool GLEGraphBlockBase::checkLine(GLESourceLine& sline) {
+	return execute_graph(sline, true);
+}
 
 // Font sizes in a graph are based in g_fontsz, but this was set in the original
 // GLE to a fixed proportion of the largest dimension of a graph. The size of an
 // axis is defined in terms of its base size, which is equal to g_fontsz.
 // A useful value for base is 0.25
 
-void begin_graph(int *pcode, int *cp) throw (ParserError) {
-	if (g_inGraph) {
-		g_throw_parser_error("graph block can't be nested");
-	}
-	g_inGraph = true;
+void begin_graph() throw (ParserError) {
 	g_colormap = NULL;
 	for (unsigned int i = 0; i < g_letCmds.size(); i++) {
 		deleteLet(g_letCmds[i]);
@@ -190,11 +217,6 @@ void begin_graph(int *pcode, int *cp) throw (ParserError) {
 	g_get_hei(&g_fontsz);
 	set_sizelength();
 	dp[0] = new GLEDataSet(0);  /* dataset for default settings */
-}
-
-void end_graph() {
-	draw_graph(g_keyInfo);
-	g_inGraph = false;
 }
 
 bool execute_graph(GLESourceLine& sline, bool isCommandCheck) {

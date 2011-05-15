@@ -127,6 +127,8 @@ public:
 	inline GLESub* getSub() { return m_Sub; }
 };
 
+class GLEBlocks;
+
 class GLEParser {
 protected:
 	GLEScript* m_Script;
@@ -134,6 +136,7 @@ protected:
 	StringTokenizer m_tokens;
 	GLEPolish* m_polish;
 	GLESub* m_CrSub;
+	GLEBlocks* m_blockTypes;
 	string m_include;
 	int m_special;
 	bool m_auto_endif;
@@ -142,6 +145,7 @@ protected:
 public:
 	GLEParser(GLEScript* script, GLEPolish* polish);
 	~GLEParser();
+	GLEBlocks* getBlockTypes();
 	void initTokenizer();
 	double evalTokenToDouble() throw(ParserError);
 	void evalTokenToString(string* str) throw(ParserError);

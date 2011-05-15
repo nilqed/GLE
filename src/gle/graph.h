@@ -36,6 +36,28 @@
  *                                                                      *
  ************************************************************************/
 
+#include "gle-block.h"
+
+class GLEGraphBlockBase;
+
+class GLEGraphBlockInstance : public GLEBlockInstance {
+public:
+	GLEGraphBlockInstance(GLEGraphBlockBase* parent);
+	virtual ~GLEGraphBlockInstance();
+
+	virtual void executeLine(GLESourceLine& sline);
+	virtual void endExecuteBlock();
+};
+
+class GLEGraphBlockBase : public GLEBlockBase {
+public:
+	GLEGraphBlockBase();
+	virtual ~GLEGraphBlockBase();
+
+	virtual GLEBlockInstance* beginExecuteBlockImpl(GLESourceLine& sline, int *pcode, int *cp);
+	virtual bool checkLine(GLESourceLine& sline);
+};
+
 #define BEGINDEF extern
 
 #define GLE_GRAPH_LM_PLAIN    0
@@ -315,8 +337,7 @@ int get_dataset_identifier(const char* ds, bool def = false) throw(ParserError);
 int get_dataset_identifier(const string& ds, GLEParser* parser, bool def) throw(ParserError);
 
 double graph_bar_pos(double xpos, int bar, int set) throw(ParserError);
-void begin_graph(int *pcode, int *cp) throw (ParserError);
-void end_graph();
+void begin_graph() throw (ParserError);
 bool execute_graph(GLESourceLine& sline, bool isCommandCheck);
 void begin_key(int *pln, int *pcode, int *cp) throw (ParserError);
 void begin_tab(int *pln, int *pcode, int *cp);

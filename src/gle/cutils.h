@@ -162,3 +162,8 @@ int gle_pass_hex(const char* str, int from, int digits, int* err);
 void bool_vector_set_expand(vector<bool>* v, unsigned int i, bool value);
 
 bool bool_vector_is(vector<bool>* v, unsigned int i);
+
+void CUtilsAssertImpl(const char* expr, const char* file, int line, const char* function);
+
+#define CUtilsAssert(exp) \
+   if (!(exp)) CUtilsAssertImpl(#exp, __FILE__, __LINE__, __FUNCTION__)

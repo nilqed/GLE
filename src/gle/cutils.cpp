@@ -38,6 +38,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <errno.h>
 #include <string.h>
@@ -719,4 +720,9 @@ void bool_vector_set_expand(vector<bool>* v, unsigned int i, bool value) {
 bool bool_vector_is(vector<bool>* v, unsigned int i) {
 	if (i >= v->size()) return false;
 	else return (*v)[i];
+}
+
+void CUtilsAssertImpl(const char* expr, const char* file, int line, const char* function) {
+	cerr << "Internal error: '" << expr << "' in file '" << file << "' function: '" << function << "' line: " << line << endl;
+	exit(1);
 }

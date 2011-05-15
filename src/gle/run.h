@@ -55,17 +55,21 @@ const string& get_input_file();
 
 class GLESub;
 class GLESubMap;
+class GLEBlocks;
 
 class GLERun {
 protected:
 	GLEScript* m_Script;
 	GLEFileLocation* m_OutFile;
 	GLEVars* m_Vars;
+	GLEBlocks* m_blockTypes;
 	GLERC<GLEObjectRepresention> m_CrObj;
 	bool m_AllowBeforeSize[GLE_KW_NB];
 public:
 	GLERun(GLEScript* script, GLEFileLocation* outfile);
 	~GLERun();
+	void setBlockTypes(GLEBlocks* blocks);
+	GLEBlocks* getBlockTypes();
 	void setDeviceIsOpen(bool open);
 	void do_pcode(GLESourceLine &SLine,int *srclin, int *pcode, int plen, int *pend, bool& mkdrobjs) throw(ParserError);
 	void begin_object(const char* name, GLESub* sub) throw (ParserError);

@@ -36,11 +36,14 @@
  *                                                                      *
  ************************************************************************/
 
+#define GRAPHDEF extern
+
 #include "all.h"
 #include "mem_limits.h"
 #include "token.h"
 #include "core.h"
 #include "glearray.h"
+#include "graph.h"
 #include "polish.h"
 #include "pass.h"
 #include "var.h"
@@ -49,6 +52,7 @@
 #include "cutils.h"
 #include "gprint.h"
 #include "keyword.h"
+#include "gle-block.h"
 
 GLEParser* g_parser;
 
@@ -76,7 +80,6 @@ struct sub_st{
 struct sub_st *psub;
 
 #define skip_space
-#define dbg if ((gle_debug & 8)>0)
 
 char *mark_name[30];
 char *mrk_fname[61];
@@ -138,9 +141,17 @@ GLEParser::GLEParser(GLEScript* script, GLEPolish* polish) : m_lang(), m_tokens(
 	m_insub = false;
 	// difference between m_CrSub and m_insub:
 	// m_CrSub still points to last sub also after "end sub"
+
+	m_blockTypes = new GLEBlocks();
+	m_blockTypes->addBlock(GLE_OPBEGIN_GRAPH, new GLEGraphBlockBase());
 }
 
 GLEParser::~GLEParser() {
+	delete m_blockTypes;
+}
+
+GLEBlocks* GLEParser::getBlockTypes() {
+	return m_blockTypes;
 }
 
 void GLEParser::get_block_type(int type, string& result) {
@@ -1148,12 +1159,13 @@ GLESub* GLEParser::is_draw_sub(const string& str) {
 bool GLEParser::pass_block_specific(GLESourceLine& sourceLine, GLEPcode& pcode) {
 	for (int i = m_blocks.size() - 1; i >= 0; i--) {
 		GLESourceBlock* block = &m_blocks[i];
-		if (block->getType() == GLE_SRCBLK_MAGIC + GLE_OPBEGIN_GRAPH) {
-			if (execute_graph(sourceLine, true)) {
+		GLEBlockBase* blockType = getBlockTypes()->getBlockIfExists(block->getType() - GLE_SRCBLK_MAGIC);
+		if (blockType != 0) {
+			if (blockType->checkLine(sourceLine)) {
 				int pos_start = pcode.size();
 				pcode.addInt(0);
 				pcode.addInt(GLE_KW_BLOCK_COMMAND);
-				pcode.addInt(GLE_OPBEGIN_GRAPH);
+				pcode.addInt(block->getType() - GLE_SRCBLK_MAGIC);
 				pcode.setInt(pos_start, pcode.size()-pos_start);
 				return true;
 			}

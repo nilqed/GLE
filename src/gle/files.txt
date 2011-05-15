@@ -63,6 +63,7 @@ var.h \
 config.h \
 cmdline.h \
 glearray.h \
+gle-block.h \
 numberformat.h \
 builtin-double.h \
 gle-interface$(PATH_SEP)gle-base.h \
@@ -113,6 +114,7 @@ config.$(OBJ_SUFF) \
 numberformat.$(OBJ_SUFF) \
 glearray.$(OBJ_SUFF) \
 cmdline.$(OBJ_SUFF) \
+gle-block.$(OBJ_SUFF) \
 gle-sourcefile.$(OBJ_SUFF) \
 gle-interface.$(OBJ_SUFF) \
 gle-base.$(OBJ_SUFF) \

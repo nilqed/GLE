@@ -249,8 +249,6 @@ void byte_code_error(int err) throw(ParserError) {
 	throw err_exp;
 }
 
-void clear_graph();
-
 void clear_run() {
 	char ss[500];
 	npath = 0;
@@ -259,7 +257,6 @@ void clear_run() {
 	if (strstr(ss,"FILLPATH")!=NULL) can_fillpath = true;
 	else can_fillpath = false;
 	g_drobj.clear();
-   clear_graph();
 }
 
 int gle_is_open() {
@@ -473,6 +470,7 @@ GLERun::GLERun(GLEScript* script, GLEFileLocation* outfile) {
 	m_OutFile = outfile;
 	m_Vars = getVarsInstance();
 	m_CrObj = new GLEObjectRepresention();
+	m_blockTypes = 0;
 	for (int i = 0; i < GLE_KW_NB; i++) {
 		m_AllowBeforeSize[i] = false;
 	}
@@ -518,6 +516,14 @@ GLERun::~GLERun() {
 
 void GLERun::setDeviceIsOpen(bool open) {
 	done_open = open;
+}
+
+void GLERun::setBlockTypes(GLEBlocks* blocks) {
+	m_blockTypes = blocks;
+}
+
+GLEBlocks* GLERun::getBlockTypes() {
+	return m_blockTypes;
 }
 
 void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, int *pend, bool& mkdrobjs) throw(ParserError) {
@@ -756,7 +762,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					begin_tab(srclin,pcode,&cp);
 					break;
 				case 10: /* graph */
-					begin_graph(pcode,&cp);
+					getBlockTypes()->getBlock(GLE_OPBEGIN_GRAPH)->beginExecuteBlock(sline, pcode, &cp);
 					break;
 				case 11: /* xaxis */
 				case 12: /* yaxis */
@@ -1041,7 +1047,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				end_object();
 				break;
 			  case GLE_OPBEGIN_GRAPH:
-				end_graph();
+				getBlockTypes()->getBlock(jj)->endExecuteBlock();
 				break;
 			  default :
 				get_global_parser()->get_block_type(jj, temp_str);
@@ -1665,8 +1671,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			break;
 		  case GLE_KW_BLOCK_COMMAND:
 			readlong(jj); /* block type */
-			/* only graph block supported for now */
-			execute_graph(sline, false);
+			getBlockTypes()->getBlock(jj)->executeLine(sline);
 			break;
 		  default :
 		  	byte_code_error(PCODE_UNKNOWN_COMMAND);
