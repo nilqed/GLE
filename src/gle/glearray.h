@@ -184,7 +184,7 @@ private:
 	GLECSVDataStatus readCellString(GLEBYTE quote);
 	GLECSVDataStatus readCell();
 	void createCell(unsigned int cellSize, unsigned int cellPos);
-	GLECSVDataStatus removeTrailingSpace();
+	GLECSVDataStatus removeTrailingSpaceAndOneDelim();
 	GLECSVDataStatus readNewline(GLEBYTE prevCh);
 	bool isSizeCheckOKEndOfLine(unsigned int cellSize);
 	bool isSizeCheckOKAtDelim(GLEBYTE delim, unsigned int cellSize);
