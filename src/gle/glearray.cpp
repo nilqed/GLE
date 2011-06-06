@@ -557,11 +557,7 @@ GLECSVDataStatus GLECSVData::readCell() {
 			if (isSizeCheckOKAtDelim(ch, cellSize)) {
 				createCell(cellSize, cellPos);
 			}
-			if (isSpace(ch)) {
-				return removeTrailingSpaceAndOneDelim();
-			} else {
-				return GLECSVDataStatusOK;
-			}
+			return skipSpacesAndFirstDelim(ch);
 		} else if (isComment(ch)) {
 			if (isSizeCheckOKEndOfLine(cellSize)) {
 				createCell(cellSize, cellPos);
@@ -605,25 +601,6 @@ void GLECSVData::createCell(unsigned int cellSize, unsigned int cellPos) {
 	}
 	m_cellSize.push_back(cellSize);
 	m_cellPos.push_back(cellPos);
-}
-
-GLECSVDataStatus GLECSVData::removeTrailingSpaceAndOneDelim() {
-	GLEBYTE ch;
-	do {
-		ch = readChar();
-		if (ch == 0) {
-			return GLECSVDataStatusEOF;
-		}
-	} while (isSpace(ch));
-	if (isEol(ch)) {
-		return readNewline(ch);
-	} else if (isDelim(ch)) {
-		m_lastDelimWasSpace = false;
-		return GLECSVDataStatusOK;
-	} else {
-		goBack();
-		return GLECSVDataStatusOK;
-	}
 }
 
 GLECSVDataStatus GLECSVData::readNewline(GLEBYTE prevCh) {

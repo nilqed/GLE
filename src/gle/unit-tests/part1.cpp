@@ -135,8 +135,37 @@ void test_csv_reader2() {
 	}
 }
 
+void test_csv_reader3() {
+	unsigned int columns = 7;
+	const char* tokens[] = {
+		"Sample_Number", "V_Ne", "V_Ar", "V_Kr", "V_Xe", "NGT", "err_NGT",
+		"MI-1", "3.68", "4.72", "10.7", "1.59", "6.78", "0.89",
+		"MI-2a", "3.76", "5.07", "*", "1.71", "*", "0.82" };
+	const char* input1 =
+		" Sample_Number , V_Ne , V_Ar , V_Kr , V_Xe , NGT , err_NGT \n"
+		" MI-1 ,3.68,4.72,10.7,1.59,6.78,0.89\n"
+		" MI-2a ,3.76,5.07, * ,1.71, *,0.82 \n"
+        " \n";
+	GLECSVData reader;
+	reader.readBuffer(input1);
+	GLECSVError* error = reader.getError();
+	unit_test(error->errorCode == GLECSVErrorNone);
+	unit_test(reader.getNbLines() == 3);
+	for (unsigned int i = 0; i < reader.getNbLines(); i++) {
+		unit_test(reader.getNbColumns(i) == columns);
+	}
+	unsigned int pos = 0;
+	for (unsigned int i = 0; i < reader.getNbLines(); i++) {
+		for (unsigned int j = 0; j < columns; j++) {
+			string cellValue = reader.getCellString(i, j);
+			unit_test(cellValue == tokens[pos++]);
+		}
+	}
+}
+
 int main(void) {
 	test_csv_reader1();
 	test_csv_reader2();
+	test_csv_reader3();
 	return 0;
 }
