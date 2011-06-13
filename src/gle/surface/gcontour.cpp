@@ -357,7 +357,6 @@ void get_contour_values(GLEContourInfo* info, int ct) throw(ParserError) {
 
 void begin_contour(int *pln, int *pcode, int *cp) throw(ParserError) {
 	string data_file;
-	int smoothsub = 0;
 	vector<double> cval;
 	vector<string> clab;
 	// Create new contourinfo object

@@ -190,10 +190,6 @@ integer iget_(huge integer *bitmap, integer *n)
     static integer i2[2] = { 1,-1 };
     static integer i3[6] = { 1,0,0,1,1,0 };
 
-    /* Format strings */
-    static char fmt_100[] = "";
-    static char fmt_280[] = "";
-
     /* System generated locals */
     integer z_dim1, z_offset, i_1, i_2, i_3;
     static integer equiv_3[4], equiv_5[2];
@@ -229,10 +225,6 @@ integer iget_(huge integer *bitmap, integer *n)
 #define xy (equiv_7)
     static real zz;
     static integer nxidir, icv;
-
-    /* Assigned format variables */
-    char *jump_fmt;
-
 
 /*     this subroutine draws a contour through equal values of an array.
 */
@@ -424,7 +416,6 @@ L50:
 	goto L130;
     }
     jump = 0;
-    jump_fmt = fmt_100;
 /*     the next 15 statements (or so) detect boundaries. */
 L60:
     ix = 1;
@@ -637,7 +628,6 @@ L260:
     l = ks;
     iflag = 1;
     jump = 1;
-    jump_fmt = fmt_280;
     if (ks < 3) {
 	goto L270;
     }

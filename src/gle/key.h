@@ -39,6 +39,14 @@
 #ifndef INC_KEY_H
 #define INC_KEY_H
 
+class GLEKeyBlockBase : public GLEBlockWithSimpleKeywords {
+public:
+	GLEKeyBlockBase();
+	virtual ~GLEKeyBlockBase();
+
+	virtual GLEBlockInstance* beginExecuteBlockImpl(GLESourceLine& sline, int *pcode, int *cp);
+};
+
 class KeyEntry {
 public:
 	char lstyle[9];

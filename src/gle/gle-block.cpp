@@ -1,8 +1,11 @@
 
 #include "basicconf.h"
-#include "gle-block.h"
 #include "cutils.h"
+#include "gle-block.h"
 #include "tokens/Tokenizer.h"
+#include "gle-interface/gle-interface.h"
+
+void GLEParserInitTokenizer(Tokenizer* tokens);
 
 GLEBlockInstance::GLEBlockInstance(GLEBlockBase* parent):
 	m_parent(parent)
@@ -62,6 +65,29 @@ bool GLEBlockBase::allowRecursiveBlocks() const {
 
 const std::string GLEBlockBase::getBlockName() const {
 	return m_blockName;
+}
+
+GLEBlockWithSimpleKeywords::GLEBlockWithSimpleKeywords(const std::string& blockName, bool allowRecursiveBlocks):
+	GLEBlockBase(blockName, allowRecursiveBlocks)
+{
+}
+
+GLEBlockWithSimpleKeywords::~GLEBlockWithSimpleKeywords() {
+}
+
+bool GLEBlockWithSimpleKeywords::checkLine(GLESourceLine& sline) {
+	StringTokenizer tokens(sline.getCodeCStr());
+	GLEParserInitTokenizer(&tokens);
+	if (tokens.has_more_tokens()) {
+		const std::string token = tokens.next_token();
+		return m_keyWords.find(token) != m_keyWords.end();
+	} else {
+		return false;
+	}
+}
+
+void GLEBlockWithSimpleKeywords::addKeyWord(const char* keyword) {
+	m_keyWords.insert(keyword);
 }
 
 GLEBlocks::GLEBlocks() {

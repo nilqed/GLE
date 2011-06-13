@@ -40,6 +40,7 @@
 
 #include "all.h"
 #include "tokens/stokenizer.h"
+#include "cutils.h"
 #include "mem_limits.h"
 #include "token.h"
 #include "core.h"
@@ -50,7 +51,6 @@
 #include "graph.h"
 #include "begin.h"
 #include "axis.h"
-#include "cutils.h"
 #include "gprint.h"
 #include "key.h"
 #include "justify.h"

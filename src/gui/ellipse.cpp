@@ -496,7 +496,6 @@ void GLEEllipse::updateFromBBox()
 {
 	QPointF c;
 	double rx,ry;
-	double theta;
 	QPointF ba, bb;
 
 	if (isSet(BBoxCornerA) && isSet(BBoxCornerB) && isSet(Angle))
@@ -504,7 +503,6 @@ void GLEEllipse::updateFromBBox()
 		// Get the parameters
 		ba = getQtPoint(BBoxCornerA);
 		bb = getQtPoint(BBoxCornerB);
-		theta = getQtAngle(Angle);
 
 		// Locate the centre point
 		c.setX((ba.x() + bb.x())/2.0);
@@ -589,13 +587,12 @@ void GLEEllipse::updateEquationParameters()
 //		<< "For centre: " << c << "; angle: " << angle << "; radii: " << QSizeF(rx,ry);
 
 	// For debugging
-	double A, B, C, D, E, F;
+	double A, B, C, D, E;
 	A = equationParameters['A'];
 	B = equationParameters['B'];
 	C = equationParameters['C'];
 	D = equationParameters['D'];
 	E = equationParameters['E'];
-	F = equationParameters['F'];
 
 	QPointF p1,p2,p3,p4;
 	// Now work out the points where the ellipse touches
@@ -678,10 +675,6 @@ void GLEEllipse::linearTransform(const GLELinearEquation& ex, const GLELinearEqu
 	if (isSet(BBoxCornerA) && isSet(BBoxCornerB))
 	{
 		pointHash.clear();
-
-		// Get the old bounding box positions
-		QPointF bba = getQtPoint(BBoxCornerA, true);
-		QPointF bbb = getQtPoint(BBoxCornerB, true);
 
 		// Adjust the centre
 		QPointF c = getQtPoint(CentrePoint, true);

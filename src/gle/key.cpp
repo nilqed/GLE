@@ -39,15 +39,16 @@
 #include "all.h"
 #include "mem_limits.h"
 #include "token.h"
+#include "cutils.h"
 #include "core.h"
 #include "glearray.h"
 #include "polish.h"
 #include "pass.h"
+#include "gle-block.h"
 #include "key.h"
 #include "justify.h"
 #include "color.h"
 #include "gprint.h"
-#include "cutils.h"
 #include "op_def.h"
 #include "var.h"
 #include "sub.h"
@@ -123,115 +124,156 @@ public:
 	unsigned int linelen;
 };
 
-void begin_key(int *pln, int *pcode, int *cp) throw(ParserError) {
-    int nkd=0;
-    double khei=0,zzhei;
-    int st;
-    int ct;
-    int col = 0;
-    bool has_pattern = false;
-    KeyInfo info;
-    g_get_hei(&zzhei);
-    (*pln)++;
-    begin_init();
-    for (;;) {
-		st = begin_token(&pcode,cp,pln,srclin,tk,&ntk,outbuff);
-		if (!st) {
-			/* exit loop */
-			break;
-		}
-		/* line count variable*/
-		ct = 1;
-		while (ct<=ntk) {
-			skipspace;
-			kw("OFFSET") {
-				info.setOffsetX(next_exp);
-				info.setOffsetY(next_exp);
-			}
-			else kw("MARGINS") {
-				double mx = next_exp;
-				double my = next_exp;
-				info.setMarginXY(mx, my);
-			}
-			else kw("ABSOLUTE") {
-				if (ct <= ntk-1) {
-					info.setOffsetX(next_exp);
-					info.setOffsetY(next_exp);
-				}
-				info.setAbsolute(true);
-			}
-			else if (!has_pattern && str_i_equals(tk[ct],"BACKGROUND")) info.setBackgroundColor(next_color);
-			else kw("ROW") info.setBase(next_exp);
-			else kw("BASE") info.setBase(next_exp);
-			else kw("LPOS") info.setLinePos(next_exp);
-			else kw("LLEN") info.setLineLen(next_exp);
-			else kw("NOBOX") info.setNoBox(true);
-			else kw("NOLINE") info.setNoLines(true);
-			else kw("COMPACT") info.setCompact(true);
-			else kw("OFF") info.setDisabled(true);
-			else kw("HEI") khei = next_exp;
-			else kw("POSITION") next_str(info.getJustify());
-			else kw("POS") next_str(info.getJustify());
-			else kw("BOXCOLOR") info.setBoxColor(next_color);
-			else kw("SEPARATOR") {
-				if (nkd == 0) {
-					g_throw_parser_error("key: 'separator' should come after a valid key entry");
-				} else {
-					ct++;
-					kw("LSTYLE") {
-						kd[nkd]->sepstyle = (int)floor(next_exp + 0.5);
-					} else {
-						ct--;
-					}
-					col++;
-				}
-			}
-			else kw("JUSTIFY") {
-				next_str(info.getJustify());
-				info.setPosOrJust(false);
-			}
-			else kw("JUST") {
-				next_str(info.getJustify());
-				info.setPosOrJust(false);
-			}
-			else kw("DIST") info.setDist(next_exp);
-			else kw("COLDIST") info.setColDist(next_exp);
-			else {
-				if (ct==1) {
-					nkd++;
-					kd[nkd] = new KeyEntry(col);
-				}
-				if (nkd==0) return;
-				kw("TEXT") {
-					next_vquote_cpp(kd[nkd]->descrip);
-					if (g_get_tex_labels()) {
-						kd[nkd]->descrip.insert(0, "\\tex{");
-						kd[nkd]->descrip.append("}");
-					}
-				}
-				else kw("MARKER") {
-					kd[nkd]->marker = next_marker;
-				}
-				else kw("MSIZE") kd[nkd]->msize = next_exp;
-				else kw("MSCALE") kd[nkd]->msize = (next_exp) * zzhei;
-				else kw("COLOR") kd[nkd]->color = next_color;
-				else kw("FILL") kd[nkd]->fill = next_fill;
-				else kw("PATTERN") {
-					kd[nkd]->pattern = next_fill;
-					has_pattern = true;
-				}
-				else kw("BACKGROUND") kd[nkd]->background = next_fill;
-				else kw("LSTYLE") next_str(kd[nkd]->lstyle);
-				else kw("LINE") strcpy(kd[nkd]->lstyle,"1");
-				else kw("LWIDTH") kd[nkd]->lwidth = next_exp;
-				else g_throw_parser_error("unrecognised KEY sub command: '",tk[ct],"'");
-			}
-			ct++;
-		}
+class GLEKeyBlockInstance : public GLEBlockInstance {
+public:
+	GLEKeyBlockInstance(GLEKeyBlockBase* parent);
+	virtual ~GLEKeyBlockInstance();
+	virtual void executeLine(GLESourceLine& sline);
+	virtual void endExecuteBlock();
+
+private:
+	KeyInfo m_info;
+	int m_nkd;
+	int m_col;
+	bool m_hasPattern;
+};
+
+GLEKeyBlockInstance::GLEKeyBlockInstance(GLEKeyBlockBase* parent):
+	GLEBlockInstance(parent),
+	m_nkd(0),
+	m_col(0),
+	m_hasPattern(false)
+{
+}
+
+GLEKeyBlockInstance::~GLEKeyBlockInstance() {
+}
+
+void GLEKeyBlockInstance::executeLine(GLESourceLine& sline)	{
+	double zzhei;
+	g_get_hei(&zzhei);
+	begin_init();
+	int st = begin_token(sline, srclin, tk, &ntk, outbuff, true);
+	if (!st) {
+		/* exit loop */
+		return;
 	}
-	info.setHei(khei);
-	info.setNbEntries(nkd);
-	draw_key(&info);
+	/* line count variable*/
+	int ct = 1;
+	while (ct <= ntk) {
+		skipspace;
+		kw("OFFSET") {
+			m_info.setOffsetX(next_exp);
+			m_info.setOffsetY(next_exp);
+		}
+		else kw("MARGINS") {
+			double mx = next_exp;
+			double my = next_exp;
+			m_info.setMarginXY(mx, my);
+		}
+		else kw("ABSOLUTE") {
+			if (ct <= ntk-1) {
+				m_info.setOffsetX(next_exp);
+				m_info.setOffsetY(next_exp);
+			}
+			m_info.setAbsolute(true);
+		}
+		else if (!m_hasPattern && str_i_equals(tk[ct],"BACKGROUND")) m_info.setBackgroundColor(next_color);
+		else kw("ROW") m_info.setBase(next_exp);
+		else kw("BASE") m_info.setBase(next_exp);
+		else kw("LPOS") m_info.setLinePos(next_exp);
+		else kw("LLEN") m_info.setLineLen(next_exp);
+		else kw("NOBOX") m_info.setNoBox(true);
+		else kw("NOLINE") m_info.setNoLines(true);
+		else kw("COMPACT") m_info.setCompact(true);
+		else kw("OFF") m_info.setDisabled(true);
+		else kw("HEI") m_info.setHei(next_exp);
+		else kw("POSITION") next_str(m_info.getJustify());
+		else kw("POS") next_str(m_info.getJustify());
+		else kw("BOXCOLOR") m_info.setBoxColor(next_color);
+		else kw("SEPARATOR") {
+			if (m_nkd == 0) {
+				g_throw_parser_error("key: 'separator' should come after a valid key entry");
+			} else {
+				ct++;
+				kw("LSTYLE") {
+					kd[m_nkd]->sepstyle = (int)floor(next_exp + 0.5);
+				} else {
+					ct--;
+				}
+				m_col++;
+			}
+		}
+		else kw("JUSTIFY") {
+			next_str(m_info.getJustify());
+			m_info.setPosOrJust(false);
+		}
+		else kw("JUST") {
+			next_str(m_info.getJustify());
+			m_info.setPosOrJust(false);
+		}
+		else kw("DIST") m_info.setDist(next_exp);
+		else kw("COLDIST") m_info.setColDist(next_exp);
+		else {
+			if (ct==1) {
+				m_nkd++;
+				kd[m_nkd] = new KeyEntry(m_col);
+			}
+			if (m_nkd==0) return;
+			kw("TEXT") {
+				next_vquote_cpp(kd[m_nkd]->descrip);
+				if (g_get_tex_labels()) {
+					kd[m_nkd]->descrip.insert(0, "\\tex{");
+					kd[m_nkd]->descrip.append("}");
+				}
+			}
+			else kw("MARKER") {
+				kd[m_nkd]->marker = next_marker;
+			}
+			else kw("MSIZE") kd[m_nkd]->msize = next_exp;
+			else kw("MSCALE") kd[m_nkd]->msize = (next_exp) * zzhei;
+			else kw("COLOR") kd[m_nkd]->color = next_color;
+			else kw("FILL") kd[m_nkd]->fill = next_fill;
+			else kw("PATTERN") {
+				kd[m_nkd]->pattern = next_fill;
+				m_hasPattern = true;
+			}
+			else kw("BACKGROUND") kd[m_nkd]->background = next_fill;
+			else kw("LSTYLE") next_str(kd[m_nkd]->lstyle);
+			else kw("LINE") strcpy(kd[m_nkd]->lstyle,"1");
+			else kw("LWIDTH") kd[m_nkd]->lwidth = next_exp;
+			else g_throw_parser_error("unrecognised KEY sub command: '",tk[ct],"'");
+		}
+		ct++;
+	}
+}
+
+void GLEKeyBlockInstance::endExecuteBlock() {
+	m_info.setNbEntries(m_nkd);
+	draw_key(&m_info);
+}
+
+GLEKeyBlockBase::GLEKeyBlockBase():
+	GLEBlockWithSimpleKeywords("key", false)
+{
+	const char* commands[] = {
+		"OFFSET", "MARGINS", "ABSOLUTE", "BACKGROUND", "ROW",
+		"BASE", "LPOS", "LLEN", "NOBOX", "NOLINE", "COMPACT",
+		"OFF", "HEI", "POSITION", "POS", "BOXCOLOR", "SEPARATOR",
+		"LSTYLE", "JUSTIFY", "JUST", "DIST", "COLDIST", "TEXT",
+		"MARKER", "MSIZE", "MSCALE", "COLOR", "FILL", "PATTERN",
+		"LINE", "LWIDTH", ""};
+	for (int i = 0; commands[i][0] != 0; ++i) {
+		addKeyWord(commands[i]);
+	}
+}
+
+GLEKeyBlockBase::~GLEKeyBlockBase()
+{
+}
+
+GLEBlockInstance* GLEKeyBlockBase::beginExecuteBlockImpl(GLESourceLine& /* sline */, int* /* pcode */, int* /* cp */) {
+	return new GLEKeyBlockInstance(this);
 }
 
 KeyRCInfo::KeyRCInfo() {

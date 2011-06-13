@@ -79,7 +79,7 @@ void eval(int32 *pcode,int *cp,double *oval,char *ostr,int *otyp) {
 		/* place to put result string 			*/
 		/* place to put result type, 1=num, 2=str 	*/
 	union {double d; int32 l[1];} both;
-	int plen,i,c,cde;
+	int plen,i,c;
 	time_t today;
 	double xx;
 
@@ -105,7 +105,6 @@ void eval(int32 *pcode,int *cp,double *oval,char *ostr,int *otyp) {
 	dbg gprint(" plen = %d ",plen);
 	if (plen>1000) gprint("Expession is suspiciously int32 %d \n",plen);
 	for (c=(*cp)+1;c<=(plen+ *cp);c++) {
-	  cde = *(pcode+c);
 	  switch (*(pcode+c)) {
 		/* Special commands 1..9  ------------------------------- */
 		case 1:	/* Start of another expression (function param) */

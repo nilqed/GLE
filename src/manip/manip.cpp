@@ -584,7 +584,6 @@ void command_scroll_up() {
 extern string GLE_TOP_DIR;
 
 void init_gle_top(char** argv) {
-	bool has_top = false;
 	const char* top = getenv("GLE_TOP");
 	if (top == NULL || top[0] == 0) {
 		string exe_name;
@@ -610,7 +609,6 @@ void init_gle_top(char** argv) {
 			GLE_TOP_DIR = "$GLE_TOP";
 		}
 	} else {
-		has_top = true;
 		GLE_TOP_DIR = top;
 	}
 	StripDirSep(GLE_TOP_DIR);

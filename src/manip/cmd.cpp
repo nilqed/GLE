@@ -104,10 +104,9 @@ void do_command(char *cmd) {
 extern int moving_x, moving_y;
 
 void passcmd(char *source,char *tk[],int *ntok) {
-	int j,etype,i,ix,vidx,vtype=1;
+	int j,i,ix,vidx,vtype=1;
 	double v;
 	char *sp;
-	etype = 1;
 	find_mkey(tok(1),&ix);
 	if (strcmp(tok(2),"=")==0)  {
 		do_assign(tok(1),tok(3));
@@ -505,9 +504,8 @@ void m_tokinit(const char *termset) {
 }
 
 char *m_tokend(char *s) {
-	static char *p1,*p2,*ss,*p,savechar;
+	static char *p1,*p2,*p,savechar;
 	if (s!=NULL) {
-		ss = s;
 		p1 = s;
 	} else {
 		*p2 = savechar;
@@ -1072,22 +1070,18 @@ bool swap_def(char *s, RANGE *r) {
 
 void cmd_swap(char *range) {
 	RANGE rr;
-	int i,j;
+	int i;
 	if (!swap_def(range,&rr)) {
 		fner("Invalid range given (%s) expecting c1c2 or r1r2 \n",range);
 		return;
 	}
 	if (rr.colfirst) {
-	  j = max_y;
-	  if (rr.r2!=0) j = rr.r2;
 	  if (rr.c1==0 || rr.c2==0) {fner("Invalid range, expected c1c2\n"); return;}
 	  for (i=1;i<=max_y;i++) {
 		swap_cell(rr.c1,i,rr.c2,i);
 		show_ifcell(rr.c1,i); show_ifcell(rr.c2,i);
 	  }
 	} else {
-	  j = max_x;
-	  if (rr.c2!=0) j = rr.c2;
 	  if (rr.r1==0 || rr.r2==0) {fner("Invalid range, expected r1r2\n"); return;}
 	  for (i=1;i<=max_x;i++) {
 		swap_cell(i,rr.r1,i,rr.r2);

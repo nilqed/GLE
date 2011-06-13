@@ -177,7 +177,7 @@ integer *n;
     static real rm;
 #define sw (equiv_10)
 //    extern /* Subroutine */ int gd_message__();
-    static integer ierval[1], lm1, mm1;
+    static integer lm1, mm1;
     static real cos2, cos3, sin2, sin3;
 
 /*     (Smooth Curve Fitting) */
@@ -532,12 +532,7 @@ L370:
 L380:
     gd_message__("Cannot SMOOTH: Identical X and Y values", 24L);
 L390:
-    ierval[0] = i;
 L400:
-    ierval[0] = mode0;
-    ierval[0] = l0;
-    ierval[0] = m0;
-    ierval[0] = n0;
 
 L410:
     return 0;

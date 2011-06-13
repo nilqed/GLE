@@ -230,6 +230,10 @@ int str_i_cmp(const char* s1, const char* s2) {
 	}
 }
 
+bool str_i_less::operator()(const std::string& s1, const std::string& s2) const {
+	return str_i_cmp(s1.c_str(), s2.c_str()) < 0;
+}
+
 int str_i_str(const string& haystack, int from, const char* needle) {
 	int endIndex = haystack.length();
 	int patternLength = strlen(needle);

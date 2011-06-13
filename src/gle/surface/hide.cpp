@@ -610,7 +610,7 @@ void draw_axis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
 }
 
 void draw_zaxis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
-	float ux,uy,ux2,uy2,ux3,uy3,r,a,ta,r2,x,t1,tn;
+	float ux,uy,ux2,uy2,ux3,uy3,r,a,r2,x,t1,tn;
 	char buff[80];
 
 	if (!ax->on)
@@ -623,7 +623,6 @@ void draw_zaxis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
 		g_line(ux2,uy2);
 	}
 	fxy_polar(ux2-ux,uy2-uy,&r,&a);
-	ta = a ;
 	a = a + 90;
 	if (ax->ticklen == 0)
 		ax->ticklen = base*.001;
@@ -810,7 +809,7 @@ void seth2(int rx1, int ry1, float rz1, int rx2, int ry2, float rz2) {
 	float vx1,vx2,y1,y2;
 	int x1,x2;
 	float v,step;
-	int i,sd,visible;
+	int i,sd;
 
      /*        printf("seth2 %d %d %g, %d %d %g \n",rx1,ry1,rz1,rx2,ry2,rz2);
 	scr_getch(); */
@@ -831,7 +830,6 @@ void seth2(int rx1, int ry1, float rz1, int rx2, int ry2, float rz2) {
        sd = -1;
        if (x1<x2) sd = 1;
        step = step*sd;
-       visible = false;
        for (i=x1, v=y1; sd*i <= sd*x2; i+=sd, v+=step) {
 		if (get_h2(i) > v) set_h2(i, v);
        }

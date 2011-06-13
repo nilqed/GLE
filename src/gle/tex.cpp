@@ -219,8 +219,16 @@ IntStringHash m_Unicode;
 union both {float f;int l;} bth;
 #define outlong(v) *(out+((*lout)++)) = v
 #define outfloat(v) bth.f = v; *(out+((*lout)++)) = bth.l
-#define tofloat(fff) ((bth.l = fff),bth.f )
 #define tolong(fff) ((bth.f = fff),bth.l )
+
+float tofloat(int input) {
+	union both {
+		float f;
+		int l;
+	} bth;
+	bth.l = input;
+	return bth.f;
+}
 
 extern bool IS_INSTALL;
 extern CmdLineObj g_CmdLine;
@@ -639,7 +647,7 @@ void tex_get_char_code(uchar** in, int* code) {
 
 void tex_draw_accent(uchar **in, TexArgStrs* params, int *out, int *lout) {
 	double lef,dep,wid,hei;
-	double wid2,hei2,lef2,dep2,ww,h=0,cwid,cwid2;
+	double wid2,hei2,lef2,dep2,h=0,cwid,cwid2;
 	int ix,ix2;
 	int savefnt = p_fnt;
 	int newfnt = pass_font(params->getCStr1());
@@ -675,7 +683,6 @@ void tex_draw_accent(uchar **in, TexArgStrs* params, int *out, int *lout) {
 	lef *= p_hei;  dep *= p_hei;
 	lef2 *= p_hei; dep2 *= p_hei;
 	if (hei2>p_hei*(3.6/8.0)) h = hei2-p_hei*(3.6/8.0);
-	ww = lef2+wid2;
 	if (m == NULL) {
 		p_fntchar(p_fnt,ix2);
 	} else {
@@ -722,7 +729,6 @@ void tex_draw_accent_cmb(uchar **in, TexArgStrs* params, int *out, int *lout) {
 
 void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 	int ci;
-	int next_ci;
 	int ix;
 	char cmdstr[20];
 	double lef,wid,hei,dep,savehei;
@@ -762,7 +768,7 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 		p_pcode(pbuff,plen);
 		/*printf("this P=[%s]\n",pm.s[0]);*/
 		p_move(0,-0.8*p_hei);
-		next_ci = find_primcmd(cmdstr);
+		find_primcmd(cmdstr);
 
 		/* do a look ahead to see if there is a superscript */
 		/* but keep in pointing to current spot */
@@ -1371,11 +1377,9 @@ double tex_yend(void) {
 }
 
 void text_gprint(int *in,int ilen) {
-	int i,c,p_fnt,z;
-
+	int i,c,p_fnt;
 	for (i=0;i<ilen;i++) printf("%x ",*(in+i));
 	printf("\n");
-	z=0;
 	printf("# ");
 	double x = 0.0;
 	for (i=0;i<ilen;i++) {
@@ -1794,10 +1798,7 @@ void fftext_block(const string& s,double width,int justify) {
 }
 
 void cmd_token(uchar **in,char *cmdstr) {
-	int i;
-	char *s;
-	s = cmdstr;
-	i=0;
+	int i = 0;
 	if ( (!isalpha(**in)) && (**in != 0)) {
 		if ((*in)[0] == '\'' && (*in)[1] == '\'') {
 			// special case for two subsequent single quotes

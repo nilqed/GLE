@@ -82,7 +82,6 @@ void do_line(void);
 
 int main(int argc, char **argv) {
 	int ntok;
-	double oval;
 	int i;
 	FILE *fptr;
 	FILE *fout;
@@ -92,7 +91,6 @@ int main(int argc, char **argv) {
 	char outfile[80];
 
 	design = 1;
-	oval = pow(2.2,3.3);
 	token_equal();
 	strcpy(fname,*(++argv));
         s = strchr(fname,'.');

@@ -180,13 +180,12 @@ notnumber:	/* NOT a number, Is it a built in function */
 			}
 			{
 			char fcode[400];
-			int flen,nnn,vtype,nparam=0;
+			int flen,vtype,nparam=0;
 			if (*tok(ct+1)!=')') {
 			 while (*tok(ct)!=')') {
 				ct++;
 				nparam++;
 				vtype = *(plist+nparam-1);
-				nnn = *(plist+nparam);
 				flen = 0;
 				start_token = true;
 				polish((char*)"xx",fcode,&flen,&vtype);

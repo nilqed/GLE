@@ -446,7 +446,7 @@ int initializeArray(FILE *fp, int *cwi)
 {
     BOOL cont = TRUE, found = FALSE;
     long opos = ftell(fp);
-    int code = 0, width = 0, i = 0, error = 0;
+    int width = 0, i = 0, error = 0;
     register char *keyword;
 
     while (cont)
@@ -463,7 +463,7 @@ int initializeArray(FILE *fp, int *cwi)
                 keyword = linetoken(fp);
                 break;
             case CODE:
-                code = atoi(token(fp));
+                atoi(token(fp));
                 break;
             case XWIDTH:
                 width = atoi(token(fp));

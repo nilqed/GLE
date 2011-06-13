@@ -761,16 +761,14 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				case 18: /* tab  (tabbing, table) */
 					begin_tab(srclin,pcode,&cp);
 					break;
-				case 10: /* graph */
-					getBlockTypes()->getBlock(GLE_OPBEGIN_GRAPH)->beginExecuteBlock(sline, pcode, &cp);
+				case GLE_OPBEGIN_KEY:
+				case GLE_OPBEGIN_GRAPH:
+					getBlockTypes()->getBlock(i)->beginExecuteBlock(sline, pcode, &cp);
 					break;
 				case 11: /* xaxis */
 				case 12: /* yaxis */
 				case 13: /* x2axis */
 				case 14: /* y2axis */
-					break;
-				case 16: /* KEY */
-					begin_key(srclin,pcode,&cp);
 					break;
 				case 19: /* begin  clip */
 					g_beginclip();
@@ -1046,6 +1044,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				cp++;
 				end_object();
 				break;
+			  case GLE_OPBEGIN_KEY:
 			  case GLE_OPBEGIN_GRAPH:
 				getBlockTypes()->getBlock(jj)->endExecuteBlock();
 				break;

@@ -255,7 +255,6 @@ void X11GLEDevice::doLoadFont() {
 
                /******* Create color ************************/
 int X11GLEDevice::doDefineColor(int i) {
-    static int gotVisual=0;
     static Visual *vis;
     /* change NUM_COLTABLE_ENTRIES, when you add colors */
     const char *colors[] = {
@@ -297,8 +296,6 @@ int X11GLEDevice::doDefineColor(int i) {
 
     XColor exact_color,screen_color;	/* a.r. added TrueColor */
     vis = XDefaultVisualOfScreen(screen);
-    if (vis !=  NULL)
-	gotVisual=1;
     if (
             vis->c_class == PseudoColor
         ||  vis->c_class == DirectColor
@@ -704,14 +701,13 @@ void X11GLEDevice::narc(dbl r, dbl t1, dbl t2, dbl cx, dbl cy)
 #define CSTEP (360/6)
 void df_arcto(dbl x1,dbl y1,dbl x2,dbl y2,dbl rrr)
 {
-	double x0,y0,r1,a1,r2,a2,r3,a3,a4,sx,sy,ex,ey;
+	double x0,y0,r1,a1,r2,a2,r3,a4,sx,sy,ex,ey;
 	double bx1,by1,bx2,by2,dist,neg;
 	g_get_xy(&x0,&y0);
 	xy_polar(x1-x0,y1-y0,&r1,&a1);
 	xy_polar(x2-x1,y2-y1,&r2,&a2);
 	neg = 1;
 	a4 = (180-a2+a1);
-	a3 = a2 + (a4/2);
 	if ((a4/2)>90 && (a4/2)<180 ) neg = -1;
 	if ((a4/2)<0 && (a4/2)>-90 ) neg = -1;
 	r3 = neg*rrr/(tan((GLE_PI/180)*a4/2));
@@ -1056,11 +1052,7 @@ void X11GLEDevice::endclip() {
 struct X11_char_data {float wx,wy,x1,y1,x2,y2; };
 
 void X11GLEDevice::dochar(int font, int cc) {
-	char ss[2];
-
 	in_font = true;
-	ss[0] = cc;
-	ss[1] = 0;
 	if (safnt==0) safnt = pass_font("PLSR");
 	if (font_get_encoding(font)>2) {
 		my_char(font,cc);

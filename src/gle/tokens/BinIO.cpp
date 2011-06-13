@@ -139,7 +139,7 @@ void BinIO::read_str(string& str) {
   char *buf = new char[len+1];
   m_is->read(buf,len);
   char *buff_end = buf + len;
-  buff_end = 0;
+  *buff_end = 0;
   str = *buf;
   delete []buf;
 }

@@ -70,6 +70,11 @@ bool str_i_equals(const char* s1, const char* s2);
 bool str_ni_equals(const char* s1, const char* s2, int max);
 int str_i_cmp(const char* s1, const char* s2);
 
+struct str_i_less
+{
+  bool operator()(const std::string& s1, const std::string& s2) const;
+};
+
 char* str_i_str(const char* haystack, const char* needle);
 int str_i_str(const string& haystack, const char* needle);
 int str_i_str(const string& haystack, int from, const char* needle);

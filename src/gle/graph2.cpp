@@ -42,6 +42,7 @@
 
 #include "all.h"
 #include "tokens/stokenizer.h"
+#include "cutils.h"
 #include "bitmap/img2ps.h"
 #include "op_def.h"
 #include "mem_limits.h"
@@ -58,7 +59,6 @@
 #include "core.h"
 #include "axis.h"
 #include "file_io.h"
-#include "cutils.h"
 #include "gprint.h"
 #include "key.h"
 #include "glearray.h"
@@ -1230,12 +1230,9 @@ void doskip(char *s,int *ct) {
 }
 
 double get_next_exp(TOKENS tk,int ntok,int *curtok) {
-	static int elen,etype,cp,i;
+	static int i;
 	static double x;
 	(*curtok)++;
-	cp = 0;
-	elen = 0;
-	etype = 1;
 	dbg for (i=1;i<=ntok;i++)  gprint("{%s} ",(*tk)[i]);
 	dbg gprint("\n");
 	dbg gprint("**get exp token ct %d  {%s} \n",*curtok,(*tk)[*curtok]);

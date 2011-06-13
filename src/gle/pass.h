@@ -57,8 +57,11 @@ typedef struct op_key OPKEY[];
 #define GLE_OPBEGIN_SUB   7
 #define GLE_OPBEGIN_BOX   2
 #define GLE_OPBEGIN_GRAPH 10
+#define GLE_OPBEGIN_KEY   16
 
 class GLESubMap;
+
+void GLEParserInitTokenizer(Tokenizer* tokens);
 
 class GLESourceBlock {
 protected:

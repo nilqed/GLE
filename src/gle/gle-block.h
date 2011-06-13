@@ -6,6 +6,7 @@ class GLESourceLine;
 
 #include <vector>
 #include <map>
+#include <set>
 
 class GLEBlockInstance {
 public:
@@ -41,6 +42,20 @@ private:
 	std::string m_blockName;
 	bool m_allowRecursiveBlocks;
 	std::vector<GLEBlockInstance*> m_blockStack;
+};
+
+class GLEBlockWithSimpleKeywords : public GLEBlockBase {
+public:
+	GLEBlockWithSimpleKeywords(const std::string& blockName,
+			                   bool allowRecursiveBlocks);
+	virtual ~GLEBlockWithSimpleKeywords();
+
+	virtual bool checkLine(GLESourceLine& sline);
+
+	void addKeyWord(const char* keyword);
+
+private:
+	std::set<std::string, str_i_less> m_keyWords;
 };
 
 class GLEBlocks {

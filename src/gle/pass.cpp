@@ -39,6 +39,7 @@
 #define GRAPHDEF extern
 
 #include "all.h"
+#include "cutils.h"
 #include "mem_limits.h"
 #include "token.h"
 #include "core.h"
@@ -49,10 +50,10 @@
 #include "var.h"
 #include "sub.h"
 #include "op_def.h"
-#include "cutils.h"
 #include "gprint.h"
 #include "keyword.h"
 #include "gle-block.h"
+#include "key.h"
 
 GLEParser* g_parser;
 
@@ -105,6 +106,14 @@ void get_key_info(OPKEY lkey, int* count, int* width) {
 	}
 }
 
+void GLEParserInitTokenizer(Tokenizer* tokens) {
+	TokenizerLanguage* lang = tokens->get_language();
+	lang->setLineCommentTokens("!");
+	lang->setSpaceTokens(" \t\r\n");
+	lang->enableCComment();
+	lang->setSingleCharTokens(",;=@()[]{}");
+}
+
 GLESubCallAdditParam::GLESubCallAdditParam() {
 }
 
@@ -144,6 +153,7 @@ GLEParser::GLEParser(GLEScript* script, GLEPolish* polish) : m_lang(), m_tokens(
 
 	m_blockTypes = new GLEBlocks();
 	m_blockTypes->addBlock(GLE_OPBEGIN_GRAPH, new GLEGraphBlockBase());
+	m_blockTypes->addBlock(GLE_OPBEGIN_KEY, new GLEKeyBlockBase());
 }
 
 GLEParser::~GLEParser() {
@@ -243,10 +253,7 @@ void GLEParser::checkmode() throw(ParserError) {
 
 void GLEParser::initTokenizer() {
 	TokenizerLanguage* lang = getTokens()->get_language();
-	lang->setLineCommentTokens("!");
-	lang->setSpaceTokens(" \t\r\n");
-	lang->enableCComment();
-	lang->setSingleCharTokens(",;=@()[]{}");
+	GLEParserInitTokenizer(getTokens());
 		// ; -> allows more commands on single line
 		// = -> for variable assignments
 		// @ -> for user defined subroutine calls
@@ -260,7 +267,7 @@ void GLEParser::initTokenizer() {
 	multi->setEndToken(';');
 	multi->setEndToken(',');
 	multi->setEndToken(')');
-   multi->setEndToken(']');
+	multi->setEndToken(']');
 	lang->setMulti(multi);
 }
 
@@ -1360,9 +1367,6 @@ void GLEParser::passt(GLESourceLine &SLine, GLEPcode& pcode) throw(ParserError) 
 					cur_mode = 14;
 					break;
 				  case 15: /* curve */
-					break;
-				  case 16: /* KEY */
-					cur_mode = 16;
 					break;
 				  case 18: /* table */
 					cur_mode = 18;

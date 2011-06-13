@@ -40,6 +40,7 @@
 #include "all.h"
 #include "gle-interface/gle-interface.h"
 #include "mem_limits.h"
+#include "cutils.h"
 #include "graph.h"
 
 int glefitcf_(int *mode,float *x, float *y, int *l, int *m, float *u, float *v, int *n);
