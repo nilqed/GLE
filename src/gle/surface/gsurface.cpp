@@ -53,6 +53,7 @@
 #include "../token.h"
 #include "../gprint.h"
 #include "../cutils.h"
+#include "../gle-block.h"
 
 #define BEGINDEF extern
 #include "../begin.h"
@@ -89,14 +90,14 @@ float getf(void);
 int geton(void);
 //void pass_data(int *nx, int *ny, float *zmin, float *zmax);
 void pass_data(bool force_zdata);
-void pass_zdata(string,int *nx, int *ny, float *zmin, float *zmax);
+void pass_zdata(string,int *nx, int *ny, double *zmin, double *zmax);
 bool alloc_zdata(int nx, int ny);
 extern int trace_on,this_line;
 char input_file[80];
 static int xsample,ysample;
 
 static struct surface_struct sf;
-static float zmin = 10e10,zmax = -10e10;
+static double zmin = 10e10,zmax = -10e10;
 static float *z;
 static int nx,ny;
 static double dxmin,dymin,dxmax,dymax;
@@ -112,43 +113,47 @@ void clean_surface() {
 	sf.z = NULL;
 }
 
-void begin_surface(int *pln, int *pcode, int *cp) throw(ParserError) {
-	int li;
-	double ox, oy;
-	g_get_xy(&ox, &oy);
+class GLESurfaceBlockInstance : public GLEBlockInstance {
+public:
+	GLESurfaceBlockInstance(GLESurfaceBlockBase* parent);
+	virtual ~GLESurfaceBlockInstance();
+	virtual void executeLine(GLESourceLine& sline);
+	virtual void endExecuteBlock();
 
-	xsample = 1; ysample = 1;
-	zclipmin = 0;  zclipminset = false;
-	zclipmax = 0;  zclipmaxset = false;
+private:
+	GLEPoint m_origin;
+};
 
-	//dxmin = dymin = dxmax = dymax = 0;
-	zmin = 10e10; zmax = -10e10;
-	token_space();
+GLESurfaceBlockInstance::GLESurfaceBlockInstance(GLESurfaceBlockBase* parent):
+	GLEBlockInstance(parent)
+{
+	g_get_xy(&m_origin);
 	hide_defaults();
+}
 
-	// Start with pcode from the next line
-	(*pln)++;
+GLESurfaceBlockInstance::~GLESurfaceBlockInstance() {
+}
+
+void GLESurfaceBlockInstance::executeLine(GLESourceLine& sline) {
+	token_space();
 	begin_init();
-	while (true) {
-		int st = begin_token(&pcode,cp,pln,srclin,tk,&ntk,outbuff);
-		if (!st) {
-			/* exit loop */
-			break;
-		}
-		ct = 1;
-		pass_line();
+	int st = begin_token(sline, srclin, tk, &ntk, outbuff, true);
+	if (!st) {
+		return;
 	}
+	ct = 1;
+	pass_line();
+}
 
+void GLESurfaceBlockInstance::endExecuteBlock() {
 	if (nx==0 || ny==0) {
-//		gprint("No zdata to plot \n");
-//		return;
-// Create fake dataset for now...
+		// Create fake dataset for now...
 		nx = ny = 2;
 		alloc_zdata(nx,ny);
 		z[0] = z[1] = z[2] = z[3] = -GLE_INF;
 	}
 	if (zclipminset || zclipmaxset) {
-		for (li=0;li< nx*ny;li++) {
+		for (int li = 0; li< nx*ny; li++) {
 			if (zclipminset) if (z[li]<zclipmin) z[li] = zclipmin;
 			if (zclipmaxset) if (z[li]>zclipmax) z[li] = zclipmax;
 		}
@@ -166,7 +171,32 @@ void begin_surface(int *pln, int *pcode, int *cp) throw(ParserError) {
 	sf.zmin = zmin;
 	sf.zmax = zmax;
 	hide(z,nx,ny,zmin,zmax,&sf);
-	g_move(ox, oy);
+	g_move(m_origin);
+}
+
+GLESurfaceBlockBase::GLESurfaceBlockBase():
+	GLEBlockWithSimpleKeywords("surface", false)
+{
+	const char* commands[] = {
+		"SIZE", "TITLE", "CUBE", "DATA", "ZDATA", "ROTATE", "EYE",
+		"VIEW", "HARRAY", "ZCLIP", "SKIRT", "XLINES", "YLINES",
+		"TOP", "UNDERNEATH", "HIDDEN", "MARKER", "POINTS", "DROPLINES",
+		"RISELINES", "BASE", "BACK", "RIGHT", "ZCOLOUR", "ZCOLOR", "" };
+	for (int i = 0; commands[i][0] != 0; ++i) {
+		addKeyWord(commands[i]);
+	}
+	const char* axis[] = { "X", "Y", "Z", "" };
+	for (int i = 0; axis[i][0] != 0; ++i) {
+		addKeyWord(std::string(axis[i]) + "AXIS");
+		addKeyWord(std::string(axis[i]) + "TITLE");
+	}
+}
+
+GLESurfaceBlockBase::~GLESurfaceBlockBase() {
+}
+
+GLEBlockInstance* GLESurfaceBlockBase::beginExecuteBlockImpl(GLESourceLine& /* sline */, int* /* pcode */, int* /* cp */) {
+	return new GLESurfaceBlockInstance(this);
 }
 
 #define kw(k) if (str_i_equals(tk[ct],k))
@@ -201,36 +231,35 @@ int geton() {
 }
 
 void pass_line() throw(ParserError) {
-        if (ntk<1) return;
-        kw("SIZE") {sf.screenx = getf(); sf.screeny = getf();}
-        else kw("TITLE") pass_title();
-        else kw("CUBE") pass_cube();
+	if (ntk<1) return;
+	kw("SIZE") {sf.screenx = getf(); sf.screeny = getf();}
+	else kw("TITLE") pass_title();
+	else kw("CUBE") pass_cube();
 //        else kw("DATA") { pass_data(&nx,&ny,&zmin,&zmax); }
-        else kw("DATA") { pass_data(false); }
-        else kw("ZDATA") { pass_data(true); }
-        else kw("ROTATE") {sf.xrotate = getf(); sf.yrotate = getf(); sf.zrotate = getf();}
-        else kw("EYE") {sf.eye_x = getf(); sf.eye_y = getf(); sf.vdist = getf();}
-        else kw("VIEW") {sf.eye_x = getf(); sf.eye_y = getf(); sf.vdist = getf();}
-        else kw("HARRAY") sf.maxh = (int)getf();
-        else kw("ZCLIP") pass_zclip();
-        else kw("SKIRT") sf.skirt_on = geton();
-        else kw("XLINES") sf.xlines_on = geton();
-        else kw("YLINES") sf.ylines_on = geton();
-        else kw("TOP") pass_top();
-        else kw("UNDERNEATH") pass_bot();
-        else kw("HIDDEN") sf.hidden_on = geton();
-        else kw("MARKER") pass_marker();
-        else kw("POINTS") pass_data(false);
-        else kw("DROPLINES") pass_droplines();
-        else kw("RISELINES") pass_riselines();
-        else kw("HIDDEN") sf.hidden_on = geton();
-        else kw("BASE") pass_base();
-        else kw("BACK") pass_back();
-        else kw("RIGHT") pass_right();
-        else kw("ZCOLOUR") getstr(sf.zcolour);
-        else kw("ZCOLOR") getstr(sf.zcolour);
-        else if (str_i_str(tk[1],"AXIS")!=NULL)  pass_axis();
-        else if (str_i_str(tk[1],"TITLE")!=NULL)  pass_anytitle();
+	else kw("DATA") { pass_data(false); }
+	else kw("ZDATA") { pass_data(true); }
+	else kw("ROTATE") {sf.xrotate = getf(); sf.yrotate = getf(); sf.zrotate = getf();}
+	else kw("EYE") {sf.eye_x = getf(); sf.eye_y = getf(); sf.vdist = getf();}
+	else kw("VIEW") {sf.eye_x = getf(); sf.eye_y = getf(); sf.vdist = getf();}
+	else kw("HARRAY") sf.maxh = (int)getf();
+	else kw("ZCLIP") pass_zclip();
+	else kw("SKIRT") sf.skirt_on = geton();
+	else kw("XLINES") sf.xlines_on = geton();
+	else kw("YLINES") sf.ylines_on = geton();
+	else kw("TOP") pass_top();
+	else kw("UNDERNEATH") pass_bot();
+	else kw("HIDDEN") sf.hidden_on = geton();
+	else kw("MARKER") pass_marker();
+	else kw("POINTS") pass_data(false);
+	else kw("DROPLINES") pass_droplines();
+	else kw("RISELINES") pass_riselines();
+	else kw("BASE") pass_base();
+	else kw("BACK") pass_back();
+	else kw("RIGHT") pass_right();
+	else kw("ZCOLOUR") getstr(sf.zcolour);
+	else kw("ZCOLOR") getstr(sf.zcolour);
+	else if (str_i_str(tk[1],"AXIS")!=NULL)  pass_axis();
+	else if (str_i_str(tk[1],"TITLE")!=NULL)  pass_anytitle();
 	else {
 		stringstream err;
 		err << "illegal keyword in surface block: '" << tk[ct] << "'";
@@ -436,7 +465,7 @@ void pass_data(bool force_zdata) {
 
 /* data test.z [nx ny] */
 //void pass_data(int *nx, int *ny, float *zmin, float *zmax) {
-void pass_zdata(string fname,int *nx, int *ny, float *zmin, float *zmax) {
+void pass_zdata(string fname,int *nx, int *ny, double *zmin, double *zmax) {
         double v;
         int x,y,xx,yy;
         int c,b,mx = 0,my = 0,xcnt,ycnt;
@@ -604,30 +633,30 @@ void hide_enddefaults() {
 }
 
 void hide_defaults() {
-        /* Setup some defaults, */
-        memset(&sf,0,sizeof(sf));
-        sf.sizey = sf.sizex = 18;
-        sf.sizey = sf.sizex = sf.sizez = 18;
-        sf.screenx = 18; sf.screeny = 18;
-        sf.eye_x = -1;
-        sf.zaxis.type = 2;
-        sf.yaxis.type = 1;
-        sf.xaxis.on = sf.yaxis.on = sf.zaxis.on = true;
+	/* Setup some defaults, */
+	memset(&sf,0,sizeof(sf));
+	sf.sizey = sf.sizex = 18;
+	sf.sizey = sf.sizex = sf.sizez = 18;
+	sf.screenx = 18; sf.screeny = 18;
+	sf.eye_x = -1;
+	sf.zaxis.type = 2;
+	sf.yaxis.type = 1;
+	sf.xaxis.on = sf.yaxis.on = sf.zaxis.on = true;
 	sf.xaxis.min = 0;
 	sf.xaxis.max = 10;
 	sf.yaxis.min = 0;
 	sf.yaxis.max = 10;
 	sf.zaxis.min = 0;
 	sf.zaxis.max = 10;
-        sf.cube_hidden_on = true;
-        sf.cube_on = true;
-        sf.cube_front_on = false;
-        sf.xlines_on = true;
-        sf.ylines_on = true;
-        sf.hidden_on = true;
-        sf.top_on = true;
-        sf.bot_on = false;
-        sf.base_hidden = sf.right_hidden = sf.back_hidden = true;
+	sf.cube_hidden_on = true;
+	sf.cube_on = true;
+	sf.cube_front_on = false;
+	sf.xlines_on = true;
+	sf.ylines_on = true;
+	sf.hidden_on = true;
+	sf.top_on = true;
+	sf.bot_on = false;
+	sf.base_hidden = sf.right_hidden = sf.back_hidden = true;
 	strcpy(sf.title_color, "BLACK");
 	strcpy(sf.cube_color, "BLACK");
 	strcpy(sf.droplines_color, "BLACK");
@@ -641,4 +670,12 @@ void hide_defaults() {
 	strcpy(sf.zaxis.title_color, "BLACK");
 	nx = 0;
 	ny = 0;
+	xsample = 1;
+	ysample = 1;
+	zclipmin = 0;
+	zclipminset = false;
+	zclipmax = 0;
+	zclipmaxset = false;
+	zmin = GLE_INF;
+	zmax = -GLE_INF;
 }

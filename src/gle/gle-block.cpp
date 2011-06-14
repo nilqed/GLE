@@ -90,6 +90,10 @@ void GLEBlockWithSimpleKeywords::addKeyWord(const char* keyword) {
 	m_keyWords.insert(keyword);
 }
 
+void GLEBlockWithSimpleKeywords::addKeyWord(const std::string& keyword) {
+	m_keyWords.insert(keyword);
+}
+
 GLEBlocks::GLEBlocks() {
 }
 

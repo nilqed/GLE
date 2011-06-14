@@ -38,6 +38,8 @@
 #include "consolewindow.h"
 #include "dialogues.h"
 #include "3dviewer.h"
+#include "../gle/cutils.h"
+#include "../gle/gle-block.h"
 #include "../gle/surface/gsurface.h"
 // #include "downloader.h"
 

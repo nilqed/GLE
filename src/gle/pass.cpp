@@ -54,6 +54,7 @@
 #include "keyword.h"
 #include "gle-block.h"
 #include "key.h"
+#include "surface/gsurface.h"
 
 GLEParser* g_parser;
 
@@ -154,6 +155,7 @@ GLEParser::GLEParser(GLEScript* script, GLEPolish* polish) : m_lang(), m_tokens(
 	m_blockTypes = new GLEBlocks();
 	m_blockTypes->addBlock(GLE_OPBEGIN_GRAPH, new GLEGraphBlockBase());
 	m_blockTypes->addBlock(GLE_OPBEGIN_KEY, new GLEKeyBlockBase());
+	m_blockTypes->addBlock(GLE_OPBEGIN_SURF, new GLESurfaceBlockBase());
 }
 
 GLEParser::~GLEParser() {
@@ -1377,9 +1379,6 @@ void GLEParser::passt(GLESourceLine &SLine, GLEPcode& pcode) throw(ParserError) 
 					break;
 				  case 23: /* tex preamble */
 					cur_mode = 23;
-					break;
-				  case 24: /* surface */
-					cur_mode = 24;
 					break;
 				  case 25: /* letz */
 					cur_mode = 25;

@@ -53,6 +53,7 @@ public:
 	virtual bool checkLine(GLESourceLine& sline);
 
 	void addKeyWord(const char* keyword);
+	void addKeyWord(const std::string& keyword);
 
 private:
 	std::set<std::string, str_i_less> m_keyWords;

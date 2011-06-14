@@ -763,6 +763,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					break;
 				case GLE_OPBEGIN_KEY:
 				case GLE_OPBEGIN_GRAPH:
+				case GLE_OPBEGIN_SURF:
 					getBlockTypes()->getBlock(i)->beginExecuteBlock(sline, pcode, &cp);
 					break;
 				case 11: /* xaxis */
@@ -785,9 +786,6 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					break;
 				case 23: /* tex preamble */
 					begin_tex_preamble(srclin,pcode,&cp);
-					break;
-				case 24: /* surface */
-					begin_surface(srclin,pcode,&cp);
 					break;
 				case 25: /* letz */
 					begin_letz(srclin,pcode,&cp);
@@ -1046,6 +1044,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				break;
 			  case GLE_OPBEGIN_KEY:
 			  case GLE_OPBEGIN_GRAPH:
+			  case GLE_OPBEGIN_SURF:
 				getBlockTypes()->getBlock(jj)->endExecuteBlock();
 				break;
 			  default :

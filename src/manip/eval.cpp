@@ -98,7 +98,7 @@ void eval(int32 *pcode,int *cp,double *oval,char *ostr,int *otyp) {
 	}
 
 	if (*(pcode+(*cp)++)!=1) {
-		gprint("PCODE, Expecting expression, v=%ld cp=%d \n",*(pcode+(--*(cp))),*cp);
+		gprint("PCODE, Expecting expression, v=%ld cp=%d \n",*(pcode+((*cp)-1)),*cp);
 		return;
 	}
 	plen = *(pcode+*(cp));

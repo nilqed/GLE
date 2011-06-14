@@ -36,6 +36,14 @@
  *                                                                      *
  ************************************************************************/
 
+class GLESurfaceBlockBase : public GLEBlockWithSimpleKeywords {
+public:
+	GLESurfaceBlockBase();
+	virtual ~GLESurfaceBlockBase();
+
+	virtual GLEBlockInstance* beginExecuteBlockImpl(GLESourceLine& sline, int *pcode, int *cp);
+};
+
 typedef char MARKER[12];
 typedef char COLOR[12];
 typedef char LSTYLE[12];

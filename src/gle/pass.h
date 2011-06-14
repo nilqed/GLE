@@ -58,6 +58,7 @@ typedef struct op_key OPKEY[];
 #define GLE_OPBEGIN_BOX   2
 #define GLE_OPBEGIN_GRAPH 10
 #define GLE_OPBEGIN_KEY   16
+#define GLE_OPBEGIN_SURF  24
 
 class GLESubMap;
 

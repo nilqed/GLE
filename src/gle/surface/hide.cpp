@@ -43,6 +43,8 @@
 #include "../all.h"
 #include "../gprint.h"
 #include "../core.h"
+#include "../cutils.h"
+#include "../gle-block.h"
 #include "gsurface.h"
 
 typedef int int32;
