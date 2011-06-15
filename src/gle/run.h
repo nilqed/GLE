@@ -78,7 +78,7 @@ public:
 	void draw_object_subbyname(GLESub* sub, GLEObjectRepresention* newobj, GLEArrayImpl* path, GLEPoint* orig) throw (ParserError);
 	void draw_object_dynamic(int idx, GLEObjectRepresention* newobj, GLEArrayImpl* path, GLEPoint* orig) throw (ParserError);
 	void draw_object(const string& name, const char* newname) throw (ParserError);
-	void sub_call(GLESub* sub) throw(ParserError);
+	void sub_call(GLESub* sub, GLEArrayImpl* arguments = 0) throw(ParserError);
 	void sub_call(int idx, double *pval, char **pstr, int *npm, int *otyp) throw(ParserError);
 	void name_set(const char *n, double x1, double y1, double x2, double y2);
 	static GLEObjectRepresention* name_to_object(GLEObjectRepresention* obj, GLEArrayImpl* path, GLEJustify* just, unsigned int offs) throw (ParserError);

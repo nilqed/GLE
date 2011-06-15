@@ -55,6 +55,7 @@
 #include "gle-block.h"
 #include "key.h"
 #include "surface/gsurface.h"
+#include "run.h"
 
 GLEParser* g_parser;
 
@@ -566,6 +567,50 @@ void GLEParser::pass_subroutine_call(GLESubCallInfo* info, int poscol) throw(Par
 	}
 }
 
+void GLEParser::gen_subroutine_call_polish_arg(GLESubCallInfo* info, int i, GLEPcode& pcode) throw(ParserError) {
+	GLESub* sub = info->getSub();
+	try {
+		int vtype = sub->getParamType(i);
+		m_polish->polish(info->getParamVal(i).c_str(), pcode, &vtype);
+	} catch (ParserError err) {
+		if (info->getParamPos(i) != -2) {
+			/* in place given argument */
+			err.incColumn(info->getParamPos(i)-1);
+		} else {
+			/* default argument */
+			err.setParserString(info->getParamVal(i));
+		}
+		throw err;
+	}
+}
+
+void GLEParser::evaluate_subroutine_arguments(GLESubCallInfo* info, GLEArrayImpl* arguments) {
+	GLESub* sub = info->getSub();
+	int np = sub->getNbParam();
+	arguments->resize(np);
+	GLEPcodeList pcodeList;
+	for (int i = 0; i < np; i++) {
+		GLEPcode pcode(&pcodeList);
+		gen_subroutine_call_polish_arg(info, i, pcode);
+		double oval;
+		const char* ostr;
+		int cp = 0;
+		int otyp = sub->getParamType(i);
+		::eval((int*)&pcode[0], &cp, &oval, &ostr, &otyp);
+		if (sub->getParamType(i) == 2) {
+			if (otyp == 1) {
+				ostringstream str_cnv;
+				str_cnv << oval;
+				arguments->setObject(i, new GLEString(str_cnv.str()));
+			} else {
+				arguments->setObject(i, new GLEString(ostr));
+			}
+		} else {
+			arguments->setDouble(i, oval);
+		}
+	}
+}
+
 void GLEParser::gen_subroutine_call_code(GLESubCallInfo* info, GLEPcode& pcode) throw(ParserError) {
 	/* pass all arguments */
 	GLESub* sub = info->getSub();
@@ -574,24 +619,7 @@ void GLEParser::gen_subroutine_call_code(GLESubCallInfo* info, GLEPcode& pcode) 
 	int savelen = pcode.size();  /* Used to set acutal length at end */
 	pcode.addInt(0);             /* Length of expression */
 	for (int i = 0; i < np; i++) {
-		int vtype = sub->getParamType(i);
-		if (info->getParamPos(i) != -2) {
-			/* in place given argument */
-			try {
-				m_polish->polish(info->getParamVal(i).c_str(), pcode, &vtype);
-			} catch (ParserError err) {
-				err.incColumn(info->getParamPos(i)-1);
-				throw err;
-			}
-		} else {
-			/* default argument */
-			try {
-				m_polish->polish(info->getParamVal(i).c_str(), pcode, &vtype);
-			} catch (ParserError err) {
-				err.setParserString(info->getParamVal(i));
-				throw err;
-			}
-		}
+		gen_subroutine_call_polish_arg(info, i, pcode);
 	}
 	pcode.addFunction(sub->getIndex()+LOCAL_START_INDEX);
 	pcode.setInt(savelen, pcode.size() - savelen - 1);

@@ -168,6 +168,8 @@ public:
 	int get_anyexp(GLEPcode& pcode) throw(ParserError);
 	void pass_subroutine_call(GLESubCallInfo* info, int poscol) throw(ParserError);
 	void gen_subroutine_call_code(GLESubCallInfo* info, GLEPcode& pcode) throw(ParserError);
+	void gen_subroutine_call_polish_arg(GLESubCallInfo* info, int i, GLEPcode& pcode) throw(ParserError);
+	void evaluate_subroutine_arguments(GLESubCallInfo* info, GLEArrayImpl* arguments);
 	void get_subroutine_call(GLEPcode& pcode, string* name = NULL, int poscol = 0) throw(ParserError);
 	GLESub* get_subroutine_declaration(GLEPcode& pcode) throw(ParserError);
 	void get_subroutine_default_param(GLESub* sub) throw(ParserError);

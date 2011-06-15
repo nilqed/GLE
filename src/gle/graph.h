@@ -39,6 +39,7 @@
 #include "gle-block.h"
 
 class GLEGraphBlockBase;
+class GLEGraphDrawCommand;
 
 class GLEGraphBlockInstance : public GLEBlockInstance {
 public:
@@ -47,6 +48,13 @@ public:
 
 	virtual void executeLine(GLESourceLine& sline);
 	virtual void endExecuteBlock();
+
+	void doDrawCommand(GLESourceLine& sline);
+	void drawDrawCalls();
+	bool hasDrawCalls();
+
+private:
+	std::vector<GLEGraphDrawCommand*> m_drawCommands;
 };
 
 class GLEGraphBlockBase : public GLEBlockBase {
@@ -330,7 +338,7 @@ GRAPHDEF bar_struct *br[20];
 void vinit_axis(int i);
 void vinit_title_axis();
 void draw_bar(double x, double yf, double yt, double wd, bar_struct* barset, int di, GLEDataSet* toDataSet) throw(ParserError);
-void draw_user_function_calls(bool underneath) throw(ParserError);
+void draw_user_function_calls(bool underneath, GLEGraphBlockInstance* graphBlock) throw(ParserError);
 void get_dataset_ranges();
 void set_bar_axis_places();
 int get_dataset_identifier(const char* ds, bool def = false) throw(ParserError);
@@ -338,7 +346,7 @@ int get_dataset_identifier(const string& ds, GLEParser* parser, bool def) throw(
 
 double graph_bar_pos(double xpos, int bar, int set) throw(ParserError);
 void begin_graph() throw (ParserError);
-bool execute_graph(GLESourceLine& sline, bool isCommandCheck);
+bool execute_graph(GLESourceLine& sline, bool isCommandCheck, GLEGraphBlockInstance* graphBlock);
 void begin_key(int *pln, int *pcode, int *cp) throw (ParserError);
 void begin_tab(int *pln, int *pcode, int *cp);
 void begin_text(int *pln, int *pcode, int *cp, double w, int just);

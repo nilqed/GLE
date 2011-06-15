@@ -55,6 +55,8 @@
 #include "key.h"
 #include "justify.h"
 #include "file_io.h"
+#include "keyword.h"
+#include "run.h"
 
 #define GLEG_CMD_AXIS     1
 #define GLEG_CMD_LABELS   2
@@ -83,7 +85,7 @@ int g_graph_background = GLE_FILL_CLEAR;
 int freedataset(int i);
 void free_temp(void);
 void set_sizelength(void);
-void draw_graph(KeyInfo* keyinfo) throw (ParserError);
+void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (ParserError);
 void do_set_bar_color(const char* tk, bar_struct* bar, int type);
 void do_set_bar_style(const char* tk, bar_struct* bar);
 void do_axis_part_all(int xset) throw (ParserError);
@@ -145,21 +147,82 @@ void ensureDataSetCreatedAndSetUsed(int d) {
 
 void replace_exp(string& exp);
 
-GLEGraphBlockInstance::GLEGraphBlockInstance(GLEGraphBlockBase* parent):
-	GLEBlockInstance(parent)
+class GLEGraphDrawCommand {
+public:
+	GLEGraphDrawCommand();
+	virtual ~GLEGraphDrawCommand();
+
+	void createGraphDrawCommand(GLESourceLine& sline);
+	void draw();
+
+private:
+	GLESub* m_sub;
+	GLEArrayImpl m_arguments;
+};
+
+GLEGraphDrawCommand::GLEGraphDrawCommand():
+	m_sub(0)
 {
 }
 
-GLEGraphBlockInstance::~GLEGraphBlockInstance() {
+GLEGraphDrawCommand::~GLEGraphDrawCommand() {
+}
 
+void GLEGraphDrawCommand::createGraphDrawCommand(GLESourceLine& sline) {
+	GLEParser* parser = get_global_parser();
+	parser->setString(sline.getCodeCStr());
+	Tokenizer* tokens = parser->getTokens();
+	tokens->ensure_next_token_i("DRAW");
+	std::string subName(tokens->next_token());
+	str_to_uppercase(subName);
+	m_sub = sub_find((char*)subName.c_str());
+	if (m_sub != NULL) {
+		GLESubCallInfo info(m_sub);
+		parser->pass_subroutine_call(&info, tokens->token_pos_col());
+		parser->evaluate_subroutine_arguments(&info, &m_arguments);
+	} else {
+		g_throw_parser_error("function '", subName.c_str(), "' not defined");
+	}
+}
+
+void GLEGraphDrawCommand::draw() {
+	getGLERunInstance()->sub_call(m_sub, &m_arguments);
+}
+
+GLEGraphBlockInstance::GLEGraphBlockInstance(GLEGraphBlockBase* parent):
+	GLEBlockInstance(parent)
+{
+
+}
+
+GLEGraphBlockInstance::~GLEGraphBlockInstance() {
+	for (unsigned int i = 0; i < m_drawCommands.size(); ++i) {
+		delete m_drawCommands[i];
+	}
 }
 
 void GLEGraphBlockInstance::executeLine(GLESourceLine& sline) {
-	execute_graph(sline, false);
+	execute_graph(sline, false, this);
 }
 
 void GLEGraphBlockInstance::endExecuteBlock() {
-	draw_graph(g_keyInfo);
+	draw_graph(g_keyInfo, this);
+}
+
+void GLEGraphBlockInstance::doDrawCommand(GLESourceLine& sline) {
+	GLEGraphDrawCommand* cmd = new GLEGraphDrawCommand();
+	m_drawCommands.push_back(cmd);
+	cmd->createGraphDrawCommand(sline);
+}
+
+void GLEGraphBlockInstance::drawDrawCalls() {
+	for (unsigned int i = 0; i < m_drawCommands.size(); ++i) {
+		m_drawCommands[i]->draw();
+	}
+}
+
+bool GLEGraphBlockInstance::hasDrawCalls() {
+	return !m_drawCommands.empty();
 }
 
 GLEGraphBlockBase::GLEGraphBlockBase():
@@ -178,7 +241,7 @@ GLEBlockInstance* GLEGraphBlockBase::beginExecuteBlockImpl(GLESourceLine& sline,
 }
 
 bool GLEGraphBlockBase::checkLine(GLESourceLine& sline) {
-	return execute_graph(sline, true);
+	return execute_graph(sline, true, 0);
 }
 
 // Font sizes in a graph are based in g_fontsz, but this was set in the original
@@ -219,7 +282,7 @@ void begin_graph() throw (ParserError) {
 	dp[0] = new GLEDataSet(0);  /* dataset for default settings */
 }
 
-bool execute_graph(GLESourceLine& sline, bool isCommandCheck) {
+bool execute_graph(GLESourceLine& sline, bool isCommandCheck, GLEGraphBlockInstance* graphBlock) {
 	begin_init();
 	int st = begin_token(sline, srclin, tk, &ntk, outbuff, !isCommandCheck);
 	if (!st) {
@@ -286,6 +349,9 @@ bool execute_graph(GLESourceLine& sline, bool isCommandCheck) {
 	} else if (str_i_str(tk[ct],"TICKS") != NULL) {
 		if (isCommandCheck) return true;
 		do_axis_part_all(GLEG_CMD_TICKS);
+	} else if (str_i_str(tk[ct],"DRAW") != NULL) {
+		if (isCommandCheck) return true;
+		graphBlock->doDrawCommand(sline);
 	} else if (check_axis_command_name(tk[ct],"NAMES")) {
 		if (isCommandCheck) return true;
 		do_names(ct);
@@ -1219,7 +1285,7 @@ void prepare_graph_key_and_clip(double ox, double oy, KeyInfo* keyinfo) {
 	}
 }
 
-void draw_graph(KeyInfo* keyinfo) throw (ParserError) {
+void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (ParserError) {
 	GLERectangle box;
 	double ox,oy;
 
@@ -1355,14 +1421,14 @@ void draw_graph(KeyInfo* keyinfo) throw (ParserError) {
 	draw_bars();
 
 	/* Draw the function calls under the axis */
-	draw_user_function_calls(true);
+	draw_user_function_calls(true, graphBlock);
 
 	/* Draw the axis */
 	g_init_bounds();
 	graph_draw_axis(&box);
 
 	/* Draw the function calls on top of the axis */
-	draw_user_function_calls(false);
+	draw_user_function_calls(false, graphBlock);
 
 	/* Draw the lines and  markers */
 	draw_lines();

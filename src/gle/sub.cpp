@@ -430,7 +430,7 @@ void GLERun::sub_call(int idx, double *pval, char **pstr, int *npm, int *otyp) t
 }
 
 /* 	Run a user defined function  */
-void GLERun::sub_call(GLESub* sub) throw(ParserError) {
+void GLERun::sub_call(GLESub* sub, GLEArrayImpl* arguments) throw(ParserError) {
 	// Save current return value
 	int save_return_type = return_type;
 	double save_return_value = return_value;
@@ -443,6 +443,14 @@ void GLERun::sub_call(GLESub* sub) throw(ParserError) {
 	GLEVarMap* sub_map = sub->getLocalVars();
 	GLEVarMap* save_var_map = var_swap_local_map(sub_map);
 	var_alloc_local(sub_map);
+	// Copy parameters to local variables
+	if (arguments != 0) {
+		CUtilsAssert(sub->getNbParam() == (int)arguments->size());
+		for (int i = sub->getNbParam()-1; i >= 0; i--) {
+			int var = i | GLE_VAR_LOCAL_BIT;
+			getVars()->set(var, arguments->get(i));
+		}
+	}
 	// Run subroutine
 	int s_start = sub->getStart();
 	int s_end = sub->getEnd();

@@ -407,9 +407,9 @@ void box3d(double x1, double y1, double x2, double y2,double x3d,double y3d,int 
 	g_grestore();
 }
 
-void draw_user_function_calls(bool underneath) throw(ParserError) {
+void draw_user_function_calls(bool underneath, GLEGraphBlockInstance* graphBlock) throw(ParserError) {
 	vector<int>& calls = underneath ? g_funder : g_fcalls;
-	if (calls.size() != 0) {
+	if (calls.size() != 0 || graphBlock->hasDrawCalls()) {
 		GLEParser* parser = get_global_parser();
 		g_gsave();
 		g_beginclip();
@@ -429,6 +429,9 @@ void draw_user_function_calls(bool underneath) throw(ParserError) {
 			GLEPcode pcode(&pc_list);
 			parser->get_subroutine_call(pcode);
 			eval_pcode(pcode, &res);
+		}
+		if (!underneath) {
+			graphBlock->drawDrawCalls();
 		}
 		g_endclip();
 		g_grestore();
