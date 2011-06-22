@@ -74,8 +74,6 @@
 extern int trace_on;
 static int xxgrid[GLE_AXIS_MAX+1];
 
-extern int g_nkd, g_keycol;
-extern KeyEntry *kd[100];
 KeyInfo* g_keyInfo = 0;
 
 vector<GLELet*> g_letCmds;
@@ -255,8 +253,6 @@ void begin_graph() throw (ParserError) {
 		deleteLet(g_letCmds[i]);
 	}
 	g_letCmds.clear();
-	g_nkd = 0;
-	g_keycol = 0;
 	delete g_keyInfo;
 	g_keyInfo = new KeyInfo();
 	g_hscale = .7;
@@ -573,16 +569,17 @@ void do_key(int& ct) {
 		else kw("COLDIST") g_keyInfo->setColDist(next_exp);
 		else kw("OFF") g_keyInfo->setDisabled(true);
 		else kw("SEPARATOR") {
-			if (g_nkd == 0) {
+			KeyEntry* entry = g_keyInfo->lastEntry();
+			if (entry == 0) {
 				g_throw_parser_error("key: 'separator' should come after a valid key entry");
 			} else {
 				ct++;
 				kw("LSTYLE") {
-					kd[g_nkd]->sepstyle = (int)floor(next_exp + 0.5);
+					entry->sepstyle = (int)floor(next_exp + 0.5);
 				} else {
 					ct--;
 				}
-				g_keycol++;
+				g_keyInfo->addColumn();
 			}
 		}
 		else g_throw_parser_error("unrecognised KEY sub command: '",tk[ct],"'");
@@ -1269,7 +1266,6 @@ void graph_draw_axis(GLERectangle* box) {
 
 void prepare_graph_key_and_clip(double ox, double oy, KeyInfo* keyinfo) {
 	if (!keyinfo->hasHei()) keyinfo->setHei(g_fontsz);
-	keyinfo->setNbEntries(g_nkd);
 	measure_key(keyinfo);
 	if (keyinfo->getNbEntries() > 0 && !keyinfo->isDisabled() && !keyinfo->getNoBox() && keyinfo->getBackgroundColor() == (int)GLE_FILL_CLEAR) {
 		g_gsave();

@@ -76,7 +76,6 @@ extern vector<int> g_fcalls;
 extern vector<int> g_funder;
 extern GLEColorMap* g_colormap;
 
-extern int g_nkd, g_keycol;
 extern GLEGlobalSource* g_Source;
 
 void box3d(double x1, double y1, double x2, double y2,double x3d,double y3d,int sidecolor, int topcolor, int notop);
@@ -2925,8 +2924,6 @@ void doLet(GLELet* let, bool nofirst) throw(ParserError) {
 	}
 }
 
-extern KeyEntry *kd[100];
-
 void next_lstyle(char* s,int* ct) {
 	char next[200];
 	double temp;
@@ -3153,25 +3150,27 @@ void do_each_dataset_settings() {
 	}
 }
 
+extern KeyInfo* g_keyInfo;
+
 void do_dataset_key(int d) {
 	if (dp[d] != NULL && dp[d]->key_name != "") {
-		kd[++g_nkd] = new KeyEntry(g_keycol);
-		kd[g_nkd]->fill = dp[d]->key_fill;
-		kd[g_nkd]->pattern = dp[d]->key_pattern;
-		kd[g_nkd]->background = dp[d]->key_background;
-		kd[g_nkd]->color = dp[d]->color;
-		kd[g_nkd]->lwidth = dp[d]->lwidth;
-		kd[g_nkd]->marker = dp[d]->marker;
-		kd[g_nkd]->msize = dp[d]->msize;
-		strcpy(kd[g_nkd]->lstyle,dp[d]->lstyle);
-		if (kd[g_nkd]->lstyle[0] == 0 && dp[d]->line) {
-			kd[g_nkd]->lstyle[0] = '1';
-			kd[g_nkd]->lstyle[1] = 0;
+		KeyEntry* entry = g_keyInfo->createEntry();
+		entry->fill = dp[d]->key_fill;
+		entry->pattern = dp[d]->key_pattern;
+		entry->background = dp[d]->key_background;
+		entry->color = dp[d]->color;
+		entry->lwidth = dp[d]->lwidth;
+		entry->marker = dp[d]->marker;
+		entry->msize = dp[d]->msize;
+		strcpy(entry->lstyle,dp[d]->lstyle);
+		if (entry->lstyle[0] == 0 && dp[d]->line) {
+			entry->lstyle[0] = '1';
+			entry->lstyle[1] = 0;
 		}
-		kd[g_nkd]->descrip = dp[d]->key_name;
+		entry->descrip = dp[d]->key_name;
 		if (g_get_tex_labels()) {
-			kd[g_nkd]->descrip.insert(0, "\\tex{");
-			kd[g_nkd]->descrip.append("}");
+			entry->descrip.insert(0, "\\tex{");
+			entry->descrip.append("}");
 		}
 	}
 }

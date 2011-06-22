@@ -86,9 +86,6 @@ double get_next_exp(TOKENS tk,int ntk,int *curtok);
 #define KEY_FILL_HEI_FY 0.66
 #define KEY_FILL_HEI_FX 0.7
 
-KeyEntry *kd[100];
-int g_nkd, g_keycol;
-
 class ParseGeneralKeyInfo {
 public:
 	ParseGeneralKeyInfo() {
@@ -133,15 +130,11 @@ public:
 
 private:
 	KeyInfo m_info;
-	int m_nkd;
-	int m_col;
 	bool m_hasPattern;
 };
 
 GLEKeyBlockInstance::GLEKeyBlockInstance(GLEKeyBlockBase* parent):
 	GLEBlockInstance(parent),
-	m_nkd(0),
-	m_col(0),
 	m_hasPattern(false)
 {
 }
@@ -160,6 +153,7 @@ void GLEKeyBlockInstance::executeLine(GLESourceLine& sline)	{
 	}
 	/* line count variable*/
 	int ct = 1;
+	KeyEntry* entry = m_info.lastEntry();
 	while (ct <= ntk) {
 		skipspace;
 		kw("OFFSET") {
@@ -192,16 +186,16 @@ void GLEKeyBlockInstance::executeLine(GLESourceLine& sline)	{
 		else kw("POS") next_str(m_info.getJustify());
 		else kw("BOXCOLOR") m_info.setBoxColor(next_color);
 		else kw("SEPARATOR") {
-			if (m_nkd == 0) {
+			if (entry == 0) {
 				g_throw_parser_error("key: 'separator' should come after a valid key entry");
 			} else {
 				ct++;
 				kw("LSTYLE") {
-					kd[m_nkd]->sepstyle = (int)floor(next_exp + 0.5);
+					entry->sepstyle = (int)floor(next_exp + 0.5);
 				} else {
 					ct--;
 				}
-				m_col++;
+				m_info.addColumn();
 			}
 		}
 		else kw("JUSTIFY") {
@@ -215,41 +209,41 @@ void GLEKeyBlockInstance::executeLine(GLESourceLine& sline)	{
 		else kw("DIST") m_info.setDist(next_exp);
 		else kw("COLDIST") m_info.setColDist(next_exp);
 		else {
-			if (ct==1) {
-				m_nkd++;
-				kd[m_nkd] = new KeyEntry(m_col);
+			if (ct == 1) {
+				entry = m_info.createEntry();
 			}
-			if (m_nkd==0) return;
+			if (entry == 0) {
+				return;
+			}
 			kw("TEXT") {
-				next_vquote_cpp(kd[m_nkd]->descrip);
+				next_vquote_cpp(entry->descrip);
 				if (g_get_tex_labels()) {
-					kd[m_nkd]->descrip.insert(0, "\\tex{");
-					kd[m_nkd]->descrip.append("}");
+					entry->descrip.insert(0, "\\tex{");
+					entry->descrip.append("}");
 				}
 			}
 			else kw("MARKER") {
-				kd[m_nkd]->marker = next_marker;
+				entry->marker = next_marker;
 			}
-			else kw("MSIZE") kd[m_nkd]->msize = next_exp;
-			else kw("MSCALE") kd[m_nkd]->msize = (next_exp) * zzhei;
-			else kw("COLOR") kd[m_nkd]->color = next_color;
-			else kw("FILL") kd[m_nkd]->fill = next_fill;
+			else kw("MSIZE") entry->msize = next_exp;
+			else kw("MSCALE") entry->msize = (next_exp) * zzhei;
+			else kw("COLOR") entry->color = next_color;
+			else kw("FILL") entry->fill = next_fill;
 			else kw("PATTERN") {
-				kd[m_nkd]->pattern = next_fill;
+				entry->pattern = next_fill;
 				m_hasPattern = true;
 			}
-			else kw("BACKGROUND") kd[m_nkd]->background = next_fill;
-			else kw("LSTYLE") next_str(kd[m_nkd]->lstyle);
-			else kw("LINE") strcpy(kd[m_nkd]->lstyle,"1");
-			else kw("LWIDTH") kd[m_nkd]->lwidth = next_exp;
-			else g_throw_parser_error("unrecognised KEY sub command: '",tk[ct],"'");
+			else kw("BACKGROUND") entry->background = next_fill;
+			else kw("LSTYLE") next_str(entry->lstyle);
+			else kw("LINE") strcpy(entry->lstyle, "1");
+			else kw("LWIDTH") entry->lwidth = next_exp;
+			else g_throw_parser_error("unrecognised KEY sub command: '", tk[ct], "'");
 		}
 		ct++;
 	}
 }
 
 void GLEKeyBlockInstance::endExecuteBlock() {
-	m_info.setNbEntries(m_nkd);
 	draw_key(&m_info);
 }
 
@@ -326,7 +320,14 @@ KeyInfo::KeyInfo() {
 	m_NbEntries = 0;
 	m_ExtraY = 0.0;
 	m_BackgroundColor = GLE_FILL_CLEAR;
+	m_col = 0;
 	strcpy(m_Justify, "");
+}
+
+KeyInfo::~KeyInfo() {
+	for (size_t i = 0; i < m_entries.size(); ++i) {
+		delete m_entries[i];
+	}
 }
 
 void KeyInfo::setOffsetX(double x) {
@@ -370,6 +371,20 @@ void KeyInfo::expandToRow(int row) {
 	}
 }
 
+KeyEntry* KeyInfo::createEntry() {
+	KeyEntry* entry = new KeyEntry(m_col);
+	m_entries.push_back(entry);
+	return entry;
+}
+
+KeyEntry* KeyInfo::lastEntry() {
+	if (m_entries.empty()) {
+		return 0;
+	} else {
+		return m_entries.back();
+	}
+}
+
 void draw_key(KeyInfo* info) {
 	if (info->getNbEntries() == 0) {
 		return;
@@ -387,7 +402,7 @@ void draw_key(KeyInfo* info) {
 void measure_key_v_recent(KeyInfo* info, GLEPoint* orig) {
 	/* Add separator dist */
 	for (int i = 1; i <= info->getNbEntries(); i++) {
-		info->getCol(kd[i]->column)->size += kd[i]->sepdist;
+		info->getCol(info->getEntry(i)->column)->size += info->getEntry(i)->sepdist;
 	}
 	/* Compute sum of column widths and max number of rows */
 	int maxrow = 0;
@@ -515,30 +530,31 @@ void do_draw_key_v35(double ox, double oy, KeyInfo* info){
 	KeyRCInfo* col_info = info->getCol(0);
 	g_set_hei(info->getHei());
 	for (int i = info->getNbEntries(); i >= 1; i--) {
+		KeyEntry* entry = info->getEntry(i);
 		g_move(ox+0.6*cr, oy+0.6*cr+cr*(info->getNbEntries()-i));
-		if (kd[i]->color != 0) g_set_color(kd[i]->color);
+		if (entry->color != 0) g_set_color(entry->color);
 		if (col_info->hasMarker()) {
 			g_rmove(cr/2, info->getHei()*.35);
-			double z = kd[i]->msize;
+			double z = entry->msize;
 			if (z==0) z = info->getHei();
-			if (kd[i]->marker!=0) g_marker(kd[i]->marker, z);
+			if (entry->marker!=0) g_marker(entry->marker, z);
 			g_rmove(cr, -info->getHei()*.35);
 		}
 		if (col_info->hasLine()) {
 			double savelw;
-			g_set_line_style(kd[i]->lstyle);
+			g_set_line_style(entry->lstyle);
 			g_get_line_width(&savelw);
-			g_set_line_width(kd[i]->lwidth);
+			g_set_line_width(entry->lwidth);
 			g_rmove(0.0, cr*.3);
-			if (kd[i]->lstyle[0] == 0) g_rmove(1.5*cr, 0.0);
+			if (entry->lstyle[0] == 0) g_rmove(1.5*cr, 0.0);
 			else g_rline(1.5*cr, 0.0);
 			g_rmove(cr/2, -cr*.3);
 			g_set_line_style("1");
 			g_set_line_width(savelw);
 		}
 		if (col_info->hasFill()) {
-			if (kd[i]->fill!=0) {
-				g_set_fill(kd[i]->fill);
+			if (entry->fill!=0) {
+				g_set_fill(entry->fill);
 				double cx, cy;
 				g_get_xy(&cx,&cy);
 				g_box_fill(cx,cy,cx+cr*.7, cy+cr*.66);
@@ -546,9 +562,9 @@ void do_draw_key_v35(double ox, double oy, KeyInfo* info){
 			}
 			g_rmove(1.3*cr, 0.0);
 		}
-		if (kd[i]->color != 0) g_set_color(info->getDefaultColor());
+		if (entry->color != 0) g_set_color(info->getDefaultColor());
 		g_set_just(JUST_LEFT);
-		if (kd[i]->descrip != "") g_text((char*)kd[i]->descrip.c_str());
+		if (entry->descrip != "") g_text((char*)entry->descrip.c_str());
 	}
 }
 
@@ -593,7 +609,7 @@ void measure_key(KeyInfo* info) {
 	}
 	/* Use fill somewhere? */
 	for (int i = 1; i <= info->getNbEntries(); i++) {
-		if (kd[i]->fill != 0) info->setHasFill(true);
+		if (info->getEntry(i)->fill != 0) info->setHasFill(true);
 	}
 	/* Empty key? */
 	if (info->getNbEntries() == 0) {
@@ -606,28 +622,29 @@ void measure_key(KeyInfo* info) {
 	// cout << "key height: " << khei << endl;
 	double linePos = 1e30;
 	for (int i = 1; i <= info->getNbEntries(); i++) {
-		int col = kd[i]->column;
+		KeyEntry* entry = info->getEntry(i);
+		int col = entry->column;
 		KeyRCInfo* colinfo = info->expandToCol(col);
 		int row = colinfo->elems;
 		info->expandToRow(row);
-		if (!str_only_space(kd[i]->descrip)) {
+		if (!str_only_space(entry->descrip)) {
 			double bl, br, bu, bd;
-			g_measure(kd[i]->descrip,&bl,&br,&bu,&bd);
+			g_measure(entry->descrip,&bl,&br,&bu,&bd);
 			if (colinfo->size < br) colinfo->size = br;
 			if (-bd > info->getRow(row)->descent) info->getRow(row)->descent = -bd;
 			// size should not include descent, only ascent of the text
 			if (bu > info->getRow(row)->size) info->getRow(row)->size = bu;
-			// cout << "key = " << kd[i]->descrip << " bl = " << bl << " br = " << br << " bu = " << bu << " bd = " << bd << endl;
+			// cout << "key = " << entry->descrip << " bl = " << bl << " br = " << br << " bu = " << bu << " bd = " << bd << endl;
 			if (bu/2 < linePos) linePos = bu/2;
 		}
 		/* Set booleans: kl = lstyle, km = marker, kf = fill */
-		if (kd[i]->lstyle[0] == 0 && kd[i]->lwidth > 0) {
-			strcpy(kd[i]->lstyle, "1");
+		if (entry->lstyle[0] == 0 && entry->lwidth > 0) {
+			strcpy(entry->lstyle, "1");
 		}
-		if (kd[i]->lstyle[0] != 0) colinfo->setHasLine(true);
-		if (kd[i]->lwidth > 0) colinfo->setHasLine(true);
-		if (kd[i]->marker != 0) colinfo->setHasMarker(true);
-		if (kd[i]->fill != 0) colinfo->setHasFill(true);
+		if (entry->lstyle[0] != 0) colinfo->setHasLine(true);
+		if (entry->lwidth > 0) colinfo->setHasLine(true);
+		if (entry->marker != 0) colinfo->setHasMarker(true);
+		if (entry->fill != 0) colinfo->setHasFill(true);
 		/* Adjust row height in case of fill */
 		if (info->hasFill()) {
 			if (rowhi*KEY_FILL_HEI_FY > info->getRow(row)->size) {
@@ -635,13 +652,13 @@ void measure_key(KeyInfo* info) {
 				info->getRow(row)->size = rowhi*KEY_FILL_HEI_FY;
 			}
 		}
-		if (kd[i]->marker != 0) {
-			double z = kd[i]->msize;
+		if (entry->marker != 0) {
+			double z = entry->msize;
 			if (z == 0) z = khei;
 			GLEMeasureBox marksize;
 			marksize.measureStart();
 			g_move(0.0, 0.0);
-			g_marker(kd[i]->marker,z);
+			g_marker(entry->marker,z);
 			marksize.measureEnd();
 			if (info->isCompact() && !info->isNoLines()) {
 				double yval = marksize.getYMin();
@@ -702,12 +719,12 @@ void draw_key_after_measure(KeyInfo* info) {
 		do_draw_key(ox+info->getComputedMargins()->getX(), oy+info->getComputedMargins()->getY()+info->getExtraY(), false, info);
 		int prev_col = 0;
 		for (int i = 1; i <= info->getNbEntries(); i++) {
-			if (prev_col != kd[i]->column) {
-				prev_col = kd[i]->column;
-				if (i > 1 && kd[i-1]->sepstyle != -1) {
+			if (prev_col != info->getEntry(i)->column) {
+				prev_col = info->getEntry(i)->column;
+				if (i > 1 && info->getEntry(i - 1)->sepstyle != -1) {
 					char msep[9];
 					// should implement g_set_line_style that takes int
-					sprintf(msep, "%d", kd[i-1]->sepstyle);
+					sprintf(msep, "%d", info->getEntry(i - 1)->sepstyle);
 					g_set_line_style(msep);
 					double xsep = ox+info->getComputedMargins()->getX()+info->getCol(prev_col)->offs-info->getColDist()/2;
 					g_move(xsep, oy);
@@ -733,57 +750,58 @@ void do_draw_key(double ox, double oy, bool notxt, KeyInfo* info) {
 	double rowhi = info->getBase();
 	g_set_hei(khei);
 	for (int i = 1; i <= info->getNbEntries(); i++) {
-		if (prev_col != kd[i]->column) {
+		KeyEntry* entry = info->getEntry(i);
+		if (prev_col != entry->column) {
 			row = 0;
-			prev_col = kd[i]->column;
+			prev_col = entry->column;
 		}
 		KeyRCInfo* col_info = info->getCol(prev_col);
 		cx = ox+col_info->offs;
 		cy = oy+info->getRow(row)->offs;
 		g_move(cx, cy);
 		g_update_bounds(cx, cy);
-		if (kd[i]->color!=0) g_set_color(kd[i]->color);
+		if (entry->color!=0) g_set_color(entry->color);
 		if (col_info->hasMarker()) {
 			g_rmove(col_info->mleft, info->getLinePos());
-			if (col_info->hasLine() && info->isCompact() && !info->isNoLines() && kd[i]->lstyle[0] != 0) {
-				g_set_line_style(kd[i]->lstyle);
+			if (col_info->hasLine() && info->isCompact() && !info->isNoLines() && entry->lstyle[0] != 0) {
+				g_set_line_style(entry->lstyle);
 				g_get_line_width(&savelw);
-				g_set_line_width(kd[i]->lwidth);
+				g_set_line_width(entry->lwidth);
 				g_rmove(-info->getLineLen()/2, 0.0);
 				g_rline(info->getLineLen(), 0.0);
 				g_rmove(-info->getLineLen()/2, 0.0);
 				g_set_line_style("1");
 				g_set_line_width(savelw);
 			}
-			if (kd[i]->marker != 0) {
-				double z = kd[i]->msize;
+			if (entry->marker != 0) {
+				double z = entry->msize;
 				if (z == 0) z = khei;
-				g_marker(kd[i]->marker, z);
+				g_marker(entry->marker, z);
 			}
 			g_rmove(col_info->mright+info->getDist(),-info->getLinePos());
 		}
 		if (col_info->hasLine() && !info->isCompact() && !info->isNoLines()) {
-			g_set_line_style(kd[i]->lstyle);
+			g_set_line_style(entry->lstyle);
 			g_get_line_width(&savelw);
-			g_set_line_width(kd[i]->lwidth);
+			g_set_line_width(entry->lwidth);
 			g_rmove(0.0,info->getLinePos());
-			if (kd[i]->lstyle[0]==0) g_rmove(info->getLineLen(),0.0);
+			if (entry->lstyle[0]==0) g_rmove(info->getLineLen(),0.0);
 			else g_rline(info->getLineLen(),0.0);
 			g_rmove(info->getDist(),-info->getLinePos());
 			g_set_line_style("1");
 			g_set_line_width(savelw);
 		}
-		if (kd[i]->color!=0) g_set_color(info->getDefaultColor());
+		if (entry->color!=0) g_set_color(info->getDefaultColor());
 		if (col_info->hasFill()) {
-			if (kd[i]->fill!=0) {
+			if (entry->fill!=0) {
 				int save_color;
-				if (kd[i]->pattern != -1 && kd[i]->pattern != (int)GLE_FILL_CLEAR) {
-					g_set_fill(kd[i]->pattern);
-					g_set_pattern_color(kd[i]->fill);
-					g_set_background(kd[i]->background);
+				if (entry->pattern != -1 && entry->pattern != (int)GLE_FILL_CLEAR) {
+					g_set_fill(entry->pattern);
+					g_set_pattern_color(entry->fill);
+					g_set_background(entry->background);
 				} else {
 					g_set_pattern_color(GLE_COLOR_BLACK);
-					g_set_fill(kd[i]->fill);
+					g_set_fill(entry->fill);
 				}
 				g_get_xy(&cx,&cy);
 				g_box_fill(cx,cy,cx+rowhi*KEY_FILL_HEI_FX, cy+rowhi*KEY_FILL_HEI_FY);
@@ -804,7 +822,7 @@ void do_draw_key(double ox, double oy, bool notxt, KeyInfo* info) {
 		g_get_xy(&cx,&cy);
 		if (!notxt) {
 			g_set_just(JUST_LEFT);
-			if (kd[i]->descrip != "") g_text((char*)kd[i]->descrip.c_str());
+			if (entry->descrip != "") g_text((char*)entry->descrip.c_str());
 		} else {
 			g_update_bounds(cx+col_info->size, cy+info->getRow(row)->size);
 		}

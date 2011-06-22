@@ -88,6 +88,7 @@ protected:
 	int m_MaxRow, m_Color, m_BoxColor, m_NbEntries, m_BackgroundColor;
 	vector<KeyRCInfo> m_ColInfo;
 	vector<KeyRCInfo> m_RowInfo;
+	vector<KeyEntry*> m_entries;
 	double m_Hei, m_Base, m_LinePos, m_LineLen, m_ExtraY;
 	double m_MarginX, m_MarginY, m_TotHei, m_ColDist, m_Dist;
 	double m_OffsX, m_OffsY;
@@ -96,14 +97,20 @@ protected:
 	char m_Justify[34];
 	GLEPoint m_ComputedMargins;
 	GLERectangle m_Rect;
+	int m_col;
+
 public:
 	KeyInfo();
+	~KeyInfo();
 	KeyRCInfo* expandToCol(int col);
 	void expandToRow(int row);
 	void setOffsetX(double x);
 	void setOffsetY(double y);
 	void setBoxColor(int col);
 	void initPosition();
+	KeyEntry* createEntry();
+	KeyEntry* lastEntry();
+	inline void addColumn() { m_col++; }
 	inline int getBackgroundColor() { return m_BackgroundColor; }
 	inline void setBackgroundColor(int col) { m_BackgroundColor = col; }
 	inline bool hasFill() { return m_Fill; }
@@ -158,12 +165,12 @@ public:
 	inline void setNoLines(bool val) { m_NoLines = val; }
 	inline GLERectangle* getRect() { return &m_Rect; }
 	inline GLEPoint* getComputedMargins() { return &m_ComputedMargins; }
-	inline int getNbEntries() { return m_NbEntries; }
-	inline void setNbEntries(int nb) { m_NbEntries = nb; }
+	inline int getNbEntries() { return m_entries.size(); }
 	inline double getExtraY() { return m_ExtraY; }
 	inline void setExtraY(double v) { m_ExtraY = v; }
 	inline void setDisabled(bool dis) { m_Disabled = dis; }
 	inline bool isDisabled() { return m_Disabled; }
+	inline KeyEntry* getEntry(int i) { return m_entries[i]; }
 };
 
 void draw_key(KeyInfo* info);
