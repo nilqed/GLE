@@ -745,21 +745,21 @@ void do_draw_key(double ox, double oy, bool notxt, KeyInfo* info) {
 		if (kd[i]->color!=0) g_set_color(kd[i]->color);
 		if (col_info->hasMarker()) {
 			g_rmove(col_info->mleft, info->getLinePos());
+			g_get_line_width(&savelw);
+			g_set_line_width(kd[i]->lwidth);
 			if (col_info->hasLine() && info->isCompact() && !info->isNoLines() && kd[i]->lstyle[0] != 0) {
 				g_set_line_style(kd[i]->lstyle);
-				g_get_line_width(&savelw);
-				g_set_line_width(kd[i]->lwidth);
 				g_rmove(-info->getLineLen()/2, 0.0);
 				g_rline(info->getLineLen(), 0.0);
 				g_rmove(-info->getLineLen()/2, 0.0);
 				g_set_line_style("1");
-				g_set_line_width(savelw);
 			}
 			if (kd[i]->marker != 0) {
 				double z = kd[i]->msize;
 				if (z == 0) z = khei;
 				g_marker(kd[i]->marker, z);
 			}
+			g_set_line_width(savelw);         
 			g_rmove(col_info->mright+info->getDist(),-info->getLinePos());
 		}
 		if (col_info->hasLine() && !info->isCompact() && !info->isNoLines()) {
