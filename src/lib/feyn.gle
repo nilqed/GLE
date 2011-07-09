@@ -48,10 +48,13 @@
 ! fa    - slope         | slope: center->initial
 ! fl    - length        | angle length
 ! fc    -               | +1 - counterclockwise
+! fsx,fsy         - 	| starting point for feyn2 functions
+! fxx,fyy         -     | intermediate points for feyn2 functions
 ! ffx,ffy         - final point
 ! fx1,fy1,...     - temporary coordinates
 ! f1,f2,...       - temporary variables
 ! fi,fm,fd        - for loops
+! flastl$	  - type of last drawn line
 
 pi = 3.14159265358979323846264338328
 ! sin table
@@ -128,6 +131,10 @@ sub feyn2 xx yy x y
     fx2 = x-xx
     fy2 = y-yy
     fr = fx1*fy2-fx2*fy1
+    fxx = xx
+    fyy = yy
+    fsx = xpos()
+    fsy = ypos()
     if abs(fr)<sqr(fe) then
         fr = -1
     else ! finding center
@@ -190,6 +197,7 @@ end sub
 
 ! Fermion line from the current point to x,y
 sub Fermion x y
+    flastl$ = "Fermion"
     @feyn x y
     if fl>0 then
         begin origin
@@ -203,6 +211,7 @@ end sub
 
 ! Fermion line from the current point via xx,yy to x,y
 sub Fermion2 xx yy x y
+    flastl$ = "Fermion2"
     @feyn2 xx yy x y
     if fr<0 then
         @Fermion x y
@@ -225,6 +234,7 @@ DoubleF = 0    ! correction due to final   slant
 
 ! Double line from the current point to x,y
 sub Double x y
+    flastl$ = "Double"
     @feyn x y
     if fl>0 then
         begin origin
@@ -245,6 +255,7 @@ end sub
 
 ! Double line from the current point via xx,yy to x,y
 sub Double2 xx yy x y
+    flastl$ = "Double2"
     @feyn2 xx yy x y
     if fr<DoubleA+fe then
         @Double x y
@@ -268,6 +279,7 @@ DashF = 0.5  ! fraction of the period that is filled
 
 ! Higgs (dashed) line from the current point to x,y
 sub Dash x y
+    flastl$ = "Dash"
     @feyn x y
     if fl>0 then
         fn = fix(fl/DashL+1.5-DashF)
@@ -293,6 +305,7 @@ end sub
 
 ! Higgs (dashed) line from the current point via xx,yy to x,y
 sub Dash2 xx yy x y
+    flastl$ = "Dash2"
     @feyn2 xx yy x y
     if fr<0 then
         @Dash x y
@@ -326,6 +339,7 @@ PhotonN = 0    ! correction to the number of half-waves
 
 ! Vector boson (zigzag) line from the current point to x,y
 sub Zigzag x y
+    flastl$ = "Zigzag"
     @feyn x y
     if fl>0 then
         fn = fix(fl/PhotonL+0.5+PhotonN)
@@ -354,6 +368,7 @@ end sub
 
 ! Vector boson (zigzag) line from the current point via xx,yy to x,y
 sub Zigzag2 xx yy x y
+    flastl$ = "ZigZag2"
     @feyn2 xx yy x y
     if fr<PhotonA+fe then
         @Zigzag x y
@@ -468,6 +483,7 @@ end sub
 
 ! Photon line from the current point to x,y
 sub Photon x y
+    flastl$ = "Photon"
     @feyn x y
     if fl>0 then
         fn = fix(fl/PhotonL+0.5+PhotonN)
@@ -514,6 +530,7 @@ end sub
 
 ! Photon line from the current point via xx,yy to x,y
 sub Photon2 xx yy x y
+    flastl$ = "Photon2"
     @feyn2 xx yy x y
     if fr<PhotonA+fe then
         @Photon x y
@@ -1090,6 +1107,7 @@ GluonW = 1  ! Winding coefficient, should be >1/pi
 
 ! Gluon line from the current point to x,y
 sub Gluon x y
+    flastl$ = "Gluon"
     @feyn x y
     if fl>0 then
         fn = fix(0.5*fl/PhotonL-GluonW)
@@ -1176,6 +1194,7 @@ end sub
 
 ! Gluon line from the current point via xx,yy to x,y
 sub Gluon2 xx yy x y
+    flastl$ = "Gluon2"
     @feyn2 xx yy x y
     if fr<PhotonA+fe then
         @Gluon x y
@@ -1602,6 +1621,89 @@ sub Arrow f
         end origin
         grestore
     end if
+end sub
+
+ShadowL = 0.2  ! length
+ShadowA = 0.1  ! amplitude
+ShadowC$ = "white"
+
+! Shadows lines below the last line, fraction F from the beginning
+sub Shadow f
+    if fl>0 then
+        gsave
+        amove fx fy
+        begin origin
+            if fr>0 then
+                f1 = fa+fc*(f*fl+90)
+                fx1 = 0
+                fy1 = -fc*fr
+            else
+                f1 = fa
+                fx1 = f*fl
+                fy1 = 0
+            end if
+            begin rotate f1
+                amove fx1 fy1
+                begin origin
+                    amove -.5*ShadowL -ShadowA
+                    box ShadowL 2*ShadowA fill ShadowC$ nobox
+		end origin
+            end rotate
+        end origin
+        grestore
+    end if
+    !redraw line
+
+    if flastl$="Fermion" then
+    	amove fx fy
+	@Fermion ffx ffy
+    end if
+    if flastl$="Fermion2" then
+    	amove fsx fsy
+	@Fermion2 fxx fyy ffx ffy
+    end if
+    if flastl$="Double" then
+    	amove fx fy
+	@Double ffx ffy
+    end if
+    if flastl$="Double2" then
+    	amove fsx fsy
+	@Double2 fxx fyy ffx ffy
+    end if
+    if flastl$="Dash" then
+    	amove fx fy
+	@Dash ffx ffy
+    end if
+    if flastl$="Dash2" then
+    	amove fsx fsy
+	@Dash2 fxx fyy ffx ffy
+    end if
+    if flastl$="Zigzag" then
+    	amove fx fy
+	@Zigzag ffx ffy
+    end if
+    if flastl$="Zigzag2" then
+    	amove fsx fsy
+	@Zigzag2 fxx fyy ffx ffy
+    end if
+    if flastl$="Photon" then
+    	amove fx fy
+	@Photon ffx ffy
+    end if
+    if flastl$="Photon2" then
+    	amove fsx fsy
+	@Photon2 fxx fyy ffx ffy
+    end if
+    if flastl$="Gluon" then
+    	amove fx fy
+	@Gluon ffx ffy
+    end if
+    if flastl$="Gluon2" then
+   	amove fsx fsy
+	@Gluon2 fxx fyy ffx ffy
+    end if
+
+
 end sub
 
 MomL = 0.35 ! half-length
