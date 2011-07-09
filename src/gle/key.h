@@ -85,7 +85,7 @@ public:
 
 class KeyInfo {
 protected:
-	int m_MaxRow, m_Color, m_BoxColor, m_NbEntries, m_BackgroundColor;
+	int m_MaxRow, m_Color, m_BoxColor, m_BackgroundColor;
 	vector<KeyRCInfo> m_ColInfo;
 	vector<KeyRCInfo> m_RowInfo;
 	vector<KeyEntry*> m_entries;

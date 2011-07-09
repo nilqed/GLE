@@ -317,7 +317,6 @@ KeyInfo::KeyInfo() {
 	m_NoLines = false;
 	m_Disabled = false;
 	m_BoxColor = 0;
-	m_NbEntries = 0;
 	m_ExtraY = 0.0;
 	m_BackgroundColor = GLE_FILL_CLEAR;
 	m_col = 0;
@@ -401,7 +400,7 @@ void draw_key(KeyInfo* info) {
 
 void measure_key_v_recent(KeyInfo* info, GLEPoint* orig) {
 	/* Add separator dist */
-	for (int i = 1; i <= info->getNbEntries(); i++) {
+	for (int i = 0; i < info->getNbEntries(); i++) {
 		info->getCol(info->getEntry(i)->column)->size += info->getEntry(i)->sepdist;
 	}
 	/* Compute sum of column widths and max number of rows */
@@ -529,7 +528,7 @@ void do_draw_key_v35(double ox, double oy, KeyInfo* info){
 	double cr = info->getBase();
 	KeyRCInfo* col_info = info->getCol(0);
 	g_set_hei(info->getHei());
-	for (int i = info->getNbEntries(); i >= 1; i--) {
+	for (int i = info->getNbEntries() - 1; i >= 0; i--) {
 		KeyEntry* entry = info->getEntry(i);
 		g_move(ox+0.6*cr, oy+0.6*cr+cr*(info->getNbEntries()-i));
 		if (entry->color != 0) g_set_color(entry->color);
@@ -608,7 +607,7 @@ void measure_key(KeyInfo* info) {
 		info->setLineLen(1.5*rowhi);
 	}
 	/* Use fill somewhere? */
-	for (int i = 1; i <= info->getNbEntries(); i++) {
+	for (int i = 0; i < info->getNbEntries(); i++) {
 		if (info->getEntry(i)->fill != 0) info->setHasFill(true);
 	}
 	/* Empty key? */
@@ -620,8 +619,8 @@ void measure_key(KeyInfo* info) {
 	/* Measure all labels and count rows in each column */
 	g_set_hei(khei);
 	// cout << "key height: " << khei << endl;
-	double linePos = 1e30;
-	for (int i = 1; i <= info->getNbEntries(); i++) {
+	double linePos = GLE_INF;
+	for (int i = 0; i < info->getNbEntries(); i++) {
 		KeyEntry* entry = info->getEntry(i);
 		int col = entry->column;
 		KeyRCInfo* colinfo = info->expandToCol(col);
@@ -718,7 +717,7 @@ void draw_key_after_measure(KeyInfo* info) {
 	} else {
 		do_draw_key(ox+info->getComputedMargins()->getX(), oy+info->getComputedMargins()->getY()+info->getExtraY(), false, info);
 		int prev_col = 0;
-		for (int i = 1; i <= info->getNbEntries(); i++) {
+		for (int i = 0; i < info->getNbEntries(); i++) {
 			if (prev_col != info->getEntry(i)->column) {
 				prev_col = info->getEntry(i)->column;
 				if (i > 1 && info->getEntry(i - 1)->sepstyle != -1) {
@@ -749,7 +748,7 @@ void do_draw_key(double ox, double oy, bool notxt, KeyInfo* info) {
 	double khei = info->getHei();
 	double rowhi = info->getBase();
 	g_set_hei(khei);
-	for (int i = 1; i <= info->getNbEntries(); i++) {
+	for (int i = 0; i < info->getNbEntries(); i++) {
 		KeyEntry* entry = info->getEntry(i);
 		if (prev_col != entry->column) {
 			row = 0;
