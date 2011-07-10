@@ -77,6 +77,7 @@ extern vector<int> g_funder;
 extern GLEColorMap* g_colormap;
 
 extern GLEGlobalSource* g_Source;
+extern GLEGraphBlockData* g_graphBlockData;
 
 void box3d(double x1, double y1, double x2, double y2,double x3d,double y3d,int sidecolor, int topcolor, int notop);
 void var_clear_local(void);
@@ -89,6 +90,7 @@ void do_draw_fsteps(double* xt, double* yt, int* m, int npts, GLEDataSet* ds);
 void do_draw_hist(double* xt, double* yt, int* m, int npts, GLEDataSet* ds);
 void do_draw_bar(double* xt, double* yt, int* m, int npts, GLEDataSet* ds);
 void do_draw_impulses(double* xt, double* yt, int* m, int npts, GLEDataSet* ds);
+void do_dataset_key_entries();
 
 bool hasDataset(int di) {
 	return di > 0 && di <= ndata && dp[di] != NULL && !dp[di]->undefined();
@@ -3117,7 +3119,7 @@ void do_each_dataset_settings() {
 	/* Add dataset to key */
 	for (int dn = 1; dn <= ndata; dn++) {
 		if (dp[dn] != NULL && dp[dn]->axisscale) {
-			do_dataset_key(dn);
+			g_graphBlockData->getOrder()->addDataSet(dn);
 			/* automatically turn on labels on axis for this dataset */
 			for (int dim = GLE_DIM_X; dim <= GLE_DIM_Y; dim++) {
 				GLEAxis* ax = &xx[dp[dn]->getDim(dim)->getAxis()];
@@ -3125,6 +3127,7 @@ void do_each_dataset_settings() {
 			}
 		}
 	}
+	do_dataset_key_entries();
 	// If no dataset is used, then scale based on all datasets
 	bool has = false;
 	for (int dn = 1; dn <= ndata; dn++) {
@@ -3171,6 +3174,29 @@ void do_dataset_key(int d) {
 		if (g_get_tex_labels()) {
 			entry->descrip.insert(0, "\\tex{");
 			entry->descrip.append("}");
+		}
+	}
+}
+
+void do_dataset_key_entries()
+{
+	GLEArrayImpl* order = g_graphBlockData->getOrder()->getArray();
+	for (unsigned int i = 0; i < order->size(); ++i) {
+		if (order->getType(i) == GLEObjectTypeInt) {
+			do_dataset_key(order->getInt(i));
+		}
+		if (order->getType(i) == GLEObjectTypeClassInstance) {
+			GLEClassInstance* classInstance = static_cast<GLEClassInstance*>(order->getObject(i));
+			if (classInstance->getDefinition() == g_graphBlockData->getGraphBlockBase()->getClassDefinitions()->getKeySeparator()) {
+				if (i == 0 || i + 1 == order->size()) {
+					g_throw_parser_error("key separator not in between key entries");
+				}
+				KeyEntry* entry = g_keyInfo->lastEntry();
+				if (classInstance->getArray()->size() > 0) {
+					entry->sepstyle = classInstance->getArray()->getInt(0);
+				}
+				g_keyInfo->addColumn();
+			}
 		}
 	}
 }

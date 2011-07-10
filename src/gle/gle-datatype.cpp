@@ -588,6 +588,12 @@ void GLEArrayImpl::addObject(GLEDataObject* v) {
 	GLE_MC_SET_OBJECT(&m_Data[len], v);
 }
 
+void GLEArrayImpl::addInt(int v) {
+	unsigned int len = m_Length;
+	ensure(len+1);
+	GLE_MC_SET_INT(&m_Data[len], v);
+}
+
 void GLEArrayImpl::set(unsigned int i, const GLEMemoryCell* cell) {
 	if (cell->Type == GLE_MC_OBJECT) {
 		setObject(i, cell->Entry.ObjectVal);
@@ -829,3 +835,41 @@ void GLEObjectRepresention::copyChildrenRecursive(GLEObjectRepresention* newobj,
 		}
 	}
 }
+
+GLEClassDefinition::GLEClassDefinition(const char* name):
+	m_Name(new GLEString(name)),
+	m_FieldNames(new GLEArrayImpl())
+{
+}
+
+void GLEClassDefinition::addField(const char* fieldName) {
+	m_FieldNames->addObject(new GLEString(fieldName));
+}
+
+int GLEClassDefinition::getType() {
+	return GLEObjectTypeClassDefinition;
+}
+
+bool GLEClassDefinition::equals(GLEDataObject* obj) {
+	return false;
+}
+
+void GLEClassDefinition::print(ostream& out) const {
+}
+
+GLEClassInstance::GLEClassInstance(GLEClassDefinition* definition):
+	m_Definition(definition)
+{
+}
+
+int GLEClassInstance::getType() {
+	return GLEObjectTypeClassInstance;
+}
+
+bool GLEClassInstance::equals(GLEDataObject* obj) {
+	return false;
+}
+
+void GLEClassInstance::print(ostream& out) const {
+}
+

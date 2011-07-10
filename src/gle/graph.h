@@ -40,6 +40,47 @@
 
 class GLEGraphBlockBase;
 class GLEGraphDrawCommand;
+class GLEGraphBlockData;
+
+class GLEInternalClassDefinitions : public GLERefCountObject
+{
+public:
+	GLEInternalClassDefinitions();
+
+	inline GLEClassDefinition* getKeySeparator() { return m_keySeparator.get(); }
+
+public:
+	GLERC<GLEClassDefinition> m_keySeparator;
+};
+
+class GLEGraphDataSetOrder : public GLERefCountObject
+{
+public:
+	GLEGraphDataSetOrder(GLEGraphBlockData* data);
+
+	void addDataSet(int dataSetID);
+	void addObject(GLEDataObject* object);
+	inline GLEArrayImpl* getArray() { return m_order.get(); }
+	inline GLEGraphBlockData* getData() { return m_data; }
+
+private:
+	GLEGraphBlockData* m_data;
+	GLERC<GLEArrayImpl> m_order;
+	std::set<int> m_isIn;
+};
+
+class GLEGraphBlockData
+{
+public:
+	GLEGraphBlockData(GLEGraphBlockBase* graphBlockBase);
+
+	inline GLEGraphBlockBase* getGraphBlockBase() { return m_graphBlockBase; }
+	inline GLEGraphDataSetOrder* getOrder() { return m_order.get(); }
+
+private:
+	GLEGraphBlockBase* m_graphBlockBase;
+	GLERC<GLEGraphDataSetOrder> m_order;
+};
 
 class GLEGraphBlockInstance : public GLEBlockInstance {
 public:
@@ -64,6 +105,11 @@ public:
 
 	virtual GLEBlockInstance* beginExecuteBlockImpl(GLESourceLine& sline, int *pcode, int *cp);
 	virtual bool checkLine(GLESourceLine& sline);
+
+	inline GLEInternalClassDefinitions* getClassDefinitions() { return m_classDefinitions.get(); }
+
+private:
+	GLERC<GLEInternalClassDefinitions> m_classDefinitions;
 };
 
 #define BEGINDEF extern
@@ -345,7 +391,7 @@ int get_dataset_identifier(const char* ds, bool def = false) throw(ParserError);
 int get_dataset_identifier(const string& ds, GLEParser* parser, bool def) throw(ParserError);
 
 double graph_bar_pos(double xpos, int bar, int set) throw(ParserError);
-void begin_graph() throw (ParserError);
+void begin_graph(GLEGraphBlockBase* graphBlockBase) throw (ParserError);
 bool execute_graph(GLESourceLine& sline, bool isCommandCheck, GLEGraphBlockInstance* graphBlock);
 void begin_key(int *pln, int *pcode, int *cp) throw (ParserError);
 void begin_tab(int *pln, int *pcode, int *cp);

@@ -75,6 +75,7 @@ extern int trace_on;
 static int xxgrid[GLE_AXIS_MAX+1];
 
 KeyInfo* g_keyInfo = 0;
+GLEGraphBlockData* g_graphBlockData = 0;
 
 vector<GLELet*> g_letCmds;
 int g_nbar = 0;
@@ -141,9 +142,39 @@ void ensureDataSetCreated(int d) {
 void ensureDataSetCreatedAndSetUsed(int d) {
 	ensureDataSetCreated(d);
 	dp[d]->axisscale = true;
+	g_graphBlockData->getOrder()->addDataSet(d);
 }
 
 void replace_exp(string& exp);
+
+GLEInternalClassDefinitions::GLEInternalClassDefinitions() {
+	m_keySeparator = new GLEClassDefinition("key_separator");
+	m_keySeparator->addField("lstyle");
+}
+
+GLEGraphDataSetOrder::GLEGraphDataSetOrder(GLEGraphBlockData* data):
+	m_data(data),
+	m_order(new GLEArrayImpl())
+{
+}
+
+void GLEGraphDataSetOrder::addDataSet(int dataSetID) {
+	std::set<int>::iterator found(m_isIn.find(dataSetID));
+	if (found == m_isIn.end()) {
+		m_isIn.insert(dataSetID);
+		m_order->addInt(dataSetID);
+	}
+}
+
+void GLEGraphDataSetOrder::addObject(GLEDataObject* object) {
+	m_order->addObject(object);
+}
+
+GLEGraphBlockData::GLEGraphBlockData(GLEGraphBlockBase* graphBlockBase):
+	m_graphBlockBase(graphBlockBase),
+	m_order(new GLEGraphDataSetOrder(this))
+{
+}
 
 class GLEGraphDrawCommand {
 public:
@@ -224,7 +255,8 @@ bool GLEGraphBlockInstance::hasDrawCalls() {
 }
 
 GLEGraphBlockBase::GLEGraphBlockBase():
-	GLEBlockBase("graph", false)
+	GLEBlockBase("graph", false),
+	m_classDefinitions(new GLEInternalClassDefinitions())
 {
 }
 
@@ -234,7 +266,7 @@ GLEGraphBlockBase::~GLEGraphBlockBase() {
 
 GLEBlockInstance* GLEGraphBlockBase::beginExecuteBlockImpl(GLESourceLine& sline, int *pcode, int *cp) {
 	GLEGraphBlockInstance* graphBlock = new GLEGraphBlockInstance(this);
-	begin_graph();
+	begin_graph(this);
 	return graphBlock;
 }
 
@@ -247,7 +279,7 @@ bool GLEGraphBlockBase::checkLine(GLESourceLine& sline) {
 // axis is defined in terms of its base size, which is equal to g_fontsz.
 // A useful value for base is 0.25
 
-void begin_graph() throw (ParserError) {
+void begin_graph(GLEGraphBlockBase* graphBlockBase) throw (ParserError) {
 	g_colormap = NULL;
 	for (unsigned int i = 0; i < g_letCmds.size(); i++) {
 		deleteLet(g_letCmds[i]);
@@ -255,6 +287,8 @@ void begin_graph() throw (ParserError) {
 	g_letCmds.clear();
 	delete g_keyInfo;
 	g_keyInfo = new KeyInfo();
+	delete g_graphBlockData;
+	g_graphBlockData = new GLEGraphBlockData(graphBlockBase);
 	g_hscale = .7;
 	g_vscale = .7;
 	g_discontinuityThreshold = GLE_INF;
@@ -569,17 +603,12 @@ void do_key(int& ct) {
 		else kw("COLDIST") g_keyInfo->setColDist(next_exp);
 		else kw("OFF") g_keyInfo->setDisabled(true);
 		else kw("SEPARATOR") {
-			KeyEntry* entry = g_keyInfo->lastEntry();
-			if (entry == 0) {
-				g_throw_parser_error("key: 'separator' should come after a valid key entry");
-			} else {
-				ct++;
-				kw("LSTYLE") {
-					entry->sepstyle = (int)floor(next_exp + 0.5);
-				} else {
-					ct--;
-				}
-				g_keyInfo->addColumn();
+			GLEClassDefinition* keySeparatorDefinition = g_graphBlockData->getGraphBlockBase()->getClassDefinitions()->getKeySeparator();
+			GLEClassInstance* keySeparator = new GLEClassInstance(keySeparatorDefinition);
+			g_graphBlockData->getOrder()->addObject(keySeparator);
+			ct++;
+			kw("LSTYLE") {
+				keySeparator->getArray()->addInt((int)floor(next_exp + 0.5));
 			}
 		}
 		else g_throw_parser_error("unrecognised KEY sub command: '",tk[ct],"'");

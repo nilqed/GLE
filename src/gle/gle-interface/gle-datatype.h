@@ -54,7 +54,9 @@ typedef enum {
 	GLEObjectTypeColor,
 	GLEObjectTypeDynamicSub,
 	GLEObjectTypeObjectRep,
-	GLEObjectTypePoint
+	GLEObjectTypePoint,
+	GLEObjectTypeClassDefinition,
+	GLEObjectTypeClassInstance
 } GLEObjectType;
 
 class GLEDataObject : public GLERefCountObject {
@@ -235,6 +237,7 @@ public:
 	DLLFCT GLEDataObject* getObject(unsigned int i);
 	DLLFCT GLERC<GLEString> getString(unsigned int i);
 	void addObject(GLEDataObject* v);
+	void addInt(int v);
 	void ensure(unsigned int size);
 	void resize(unsigned int size);
 	void extend(unsigned int size);
@@ -303,6 +306,31 @@ public:
 	inline bool hasSub() { return !m_DynSub.isNull(); }
 	inline GLEDynamicSub* getSub() { return m_DynSub.get(); }
 	inline void setSub(GLEDynamicSub* sub) { m_DynSub = sub; }
+};
+
+class GLEClassDefinition : public GLEDataObject {
+protected:
+	GLERC<GLEString> m_Name;
+	GLERC<GLEArrayImpl> m_FieldNames;
+public:
+	GLEClassDefinition(const char* name);
+	void addField(const char* fieldName);
+	virtual int getType();
+	virtual bool equals(GLEDataObject* obj);
+	virtual void print(ostream& out) const;
+};
+
+class GLEClassInstance : public GLEDataObject {
+protected:
+	GLERC<GLEClassDefinition> m_Definition;
+	GLEArrayImpl m_Data;
+public:
+	GLEClassInstance(GLEClassDefinition* definition);
+	virtual int getType();
+	virtual bool equals(GLEDataObject* obj);
+	virtual void print(ostream& out) const;
+	inline GLEClassDefinition* getDefinition() { return m_Definition.get(); }
+	inline GLEArrayImpl* getArray() { return &m_Data; }
 };
 
 #endif

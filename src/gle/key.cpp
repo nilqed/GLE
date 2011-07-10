@@ -720,7 +720,7 @@ void draw_key_after_measure(KeyInfo* info) {
 		for (int i = 0; i < info->getNbEntries(); i++) {
 			if (prev_col != info->getEntry(i)->column) {
 				prev_col = info->getEntry(i)->column;
-				if (i > 1 && info->getEntry(i - 1)->sepstyle != -1) {
+				if (i >= 1 && info->getEntry(i - 1)->sepstyle != -1) {
 					char msep[9];
 					// should implement g_set_line_style that takes int
 					sprintf(msep, "%d", info->getEntry(i - 1)->sepstyle);
