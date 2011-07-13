@@ -211,87 +211,103 @@ bar_struct::bar_struct() {
 	}
 }
 
-void draw_bars() {
+GLEGraphPartBars::GLEGraphPartBars() {
+}
+
+GLEGraphPartBars::~GLEGraphPartBars() {
+}
+
+std::set<int> GLEGraphPartBars::getLayers() {
+	std::set<int> result;
+	result.insert(GLE_GRAPH_LAYER_BAR);
+	return result;
+}
+
+void GLEGraphPartBars::drawLayer(int layer) {
 	for (int b = 1; b <= g_nbar; b++) {
-		if (br[b] == 0 || br[b]->ngrp == 0) {
+		drawBar(b);
+	}
+}
+
+void GLEGraphPartBars::drawBar(int b) {
+	if (br[b] == 0 || br[b]->ngrp == 0) {
+		ostringstream err;
+		err << "bar set " << b << " not properly defined";
+		g_throw_parser_error(err.str());
+	}
+	int nbars = br[b]->ngrp;
+	double min_int = bar_get_min_interval_bars(b);
+	if (br[b]->width == 0) br[b]->width = min_int/(nbars * 2);
+	if (br[b]->dist == 0) br[b]->dist = br[b]->width * 1.4;
+	g_gsave();
+	for (int bi = 0; bi < nbars; bi++) {
+		int df = br[b]->from[bi];
+		int dt = br[b]->to[bi];
+		// validate "to" dataset
+		if (!hasDataset(dt)) {
 			ostringstream err;
-			err << "bar set " << b << " not properly defined";
+			err << "bar dataset d" << dt << " not defined";
 			g_throw_parser_error(err.str());
 		}
-		int nbars = br[b]->ngrp;
-		double min_int = bar_get_min_interval_bars(b);
-		if (br[b]->width == 0) br[b]->width = min_int/(nbars * 2);
-		if (br[b]->dist == 0) br[b]->dist = br[b]->width * 1.4;
-		g_gsave();
-		for (int bi = 0; bi < nbars; bi++) {
-			int df = br[b]->from[bi];
-			int dt = br[b]->to[bi];
-			// validate "to" dataset
-			if (!hasDataset(dt)) {
+		// set bar style
+		g_set_line_width(br[b]->lwidth[bi]);
+		g_set_line_style(&br[b]->lstyle[bi][0]);
+		if (br[b]->color[bi] == 0) br[b]->color[bi] = GLE_COLOR_BLACK;
+		g_set_color(br[b]->color[bi]);
+		if (br[b]->pattern[bi] != -1 && br[b]->pattern[bi] != (int)GLE_FILL_CLEAR) {
+			g_set_fill(br[b]->pattern[bi]);
+			g_set_pattern_color(br[b]->fill[bi]);
+			g_set_background(br[b]->background[bi]);
+		} else {
+			g_set_fill(br[b]->fill[bi]);
+			g_set_pattern_color(GLE_COLOR_BLACK);
+		}
+		// compute sizes
+		double bwid = br[b]->width;
+		double bdis = br[b]->dist;
+		double whole_wid = (nbars-1) * bdis + bwid;
+		// get data
+		GLEDataSet* toDataSet = dp[dt];
+		toDataSet->checkRanges();
+		GLEDataPairs toData(toDataSet);
+		// check if has "from" dataset
+		bool hasfrom = hasDataset(df);
+		if (hasfrom) {
+			if (dp[df]->np != dp[dt]->np) {
 				ostringstream err;
-				err << "bar dataset d" << dt << " not defined";
+				err << "bar 'from' dataset d" << df << " and 'to' dataset d" << dt << " ";
+				err << "have a different number of points (" << dp[df]->np << " <> " << dp[dt]->np << ")";
 				g_throw_parser_error(err.str());
 			}
-			// set bar style
-			g_set_line_width(br[b]->lwidth[bi]);
-			g_set_line_style(&br[b]->lstyle[bi][0]);
-			if (br[b]->color[bi] == 0) br[b]->color[bi] = GLE_COLOR_BLACK;
-			g_set_color(br[b]->color[bi]);
-			if (br[b]->pattern[bi] != -1 && br[b]->pattern[bi] != (int)GLE_FILL_CLEAR) {
-				g_set_fill(br[b]->pattern[bi]);
-				g_set_pattern_color(br[b]->fill[bi]);
-				g_set_background(br[b]->background[bi]);
-			} else {
-				g_set_fill(br[b]->fill[bi]);
-				g_set_pattern_color(GLE_COLOR_BLACK);
-			}
-			// compute sizes
-			double bwid = br[b]->width;
-			double bdis = br[b]->dist;
-			double whole_wid = (nbars-1) * bdis + bwid;
-			// get data
-			GLEDataSet* toDataSet = dp[dt];
-			toDataSet->checkRanges();
-			GLEDataPairs toData(toDataSet);
-			// check if has "from" dataset
-			bool hasfrom = hasDataset(df);
-			if (hasfrom) {
-				if (dp[df]->np != dp[dt]->np) {
+			GLEDataPairs fromData(dp[df]);
+			for (unsigned int i = 0; i < dp[dt]->np; i++) {
+				if (fromData.getM(i) != toData.getM(i)) {
 					ostringstream err;
 					err << "bar 'from' dataset d" << df << " and 'to' dataset d" << dt << " ";
-					err << "have a different number of points (" << dp[df]->np << " <> " << dp[dt]->np << ")";
+					err << "have inconsistent missing values at point " << (i + 1);
 					g_throw_parser_error(err.str());
 				}
-				GLEDataPairs fromData(dp[df]);
-				for (unsigned int i = 0; i < dp[dt]->np; i++) {
-					if (fromData.getM(i) != toData.getM(i)) {
-						ostringstream err;
-						err << "bar 'from' dataset d" << df << " and 'to' dataset d" << dt << " ";
-						err << "have inconsistent missing values at point " << (i + 1);
-						g_throw_parser_error(err.str());
-					}
-					if (!equals_rel(fromData.getX(i), toData.getX(i))) {
-						ostringstream err;
-						err << "bar 'from' dataset d" << df << " and 'to' dataset d" << dt << " ";
-						err << "have different x-values at point " << (i + 1) << " (";
-						err << fromData.getX(i) << " <> " << toData.getX(i) << ")";
-						g_throw_parser_error(err.str());
-					}
-					if (!toData.getM(i)) {
-						draw_bar(toData.getX(i) - whole_wid/2 + bi*bdis, fromData.getY(i), toData.getY(i), bwid, br[b], bi, toDataSet);
-					}
+				if (!equals_rel(fromData.getX(i), toData.getX(i))) {
+					ostringstream err;
+					err << "bar 'from' dataset d" << df << " and 'to' dataset d" << dt << " ";
+					err << "have different x-values at point " << (i + 1) << " (";
+					err << fromData.getX(i) << " <> " << toData.getX(i) << ")";
+					g_throw_parser_error(err.str());
 				}
-			} else {
-				for (unsigned int i = 0; i < dp[dt]->np; i++) {
-					if (!toData.getM(i)) {
-						draw_bar(toData.getX(i) - whole_wid/2 + bi*bdis, 0.0, toData.getY(i), bwid, br[b], bi, toDataSet);
-					}
+				if (!toData.getM(i)) {
+					draw_bar(toData.getX(i) - whole_wid/2 + bi*bdis, fromData.getY(i), toData.getY(i), bwid, br[b], bi, toDataSet);
 				}
-
 			}
+		} else {
+			for (unsigned int i = 0; i < dp[dt]->np; i++) {
+				if (!toData.getM(i)) {
+					draw_bar(toData.getX(i) - whole_wid/2 + bi*bdis, 0.0, toData.getY(i), bwid, br[b], bi, toDataSet);
+				}
+			}
+
 		}
-		g_grestore();
 	}
+	g_grestore();
 }
 
 double graph_bar_pos(double xpos, int bar, int set) throw(ParserError) {
@@ -406,37 +422,6 @@ void box3d(double x1, double y1, double x2, double y2,double x3d,double y3d,int 
 	g_set_path(false);
 	g_newpath();
 	g_grestore();
-}
-
-void draw_user_function_calls(bool underneath, GLEGraphBlockInstance* graphBlock) throw(ParserError) {
-	vector<int>& calls = underneath ? g_funder : g_fcalls;
-	if (calls.size() != 0 || graphBlock->hasDrawCalls()) {
-		GLEParser* parser = get_global_parser();
-		g_gsave();
-		g_beginclip();
-		g_set_path(true);
-		g_newpath();
-		g_box_stroke(xbl, ybl, xbl+xlength, ybl+ylength, false);
-		g_clip();
-		g_set_path(false);
-		g_set_hei(g_fontsz);
-		for (vector<int>::size_type i = 0; i < calls.size(); i++) {
-			double res;
-			string str(g_Source->getLineCode(calls[i]));
-			parser->setString(str.c_str());
-			Tokenizer* tokens = parser->getTokens();
-			tokens->is_next_token_i("UNDER");
-			GLEPcodeList pc_list;
-			GLEPcode pcode(&pc_list);
-			parser->get_subroutine_call(pcode);
-			eval_pcode(pcode, &res);
-		}
-		if (!underneath) {
-			graphBlock->drawDrawCalls();
-		}
-		g_endclip();
-		g_grestore();
-	}
 }
 
 void gr_thrownomiss(void) {
@@ -591,98 +576,115 @@ GLERC<GLEDataPairs> transform_data(GLEDataSet* ds, bool isline = true) {
 	return data;
 }
 
-void draw_fills() {
-	for (int n = 1; n <= nfd; n++) {
-		if (fd[n]->type == 0) return;
-		struct fill_data *ff = fd[n];
-		int dn = ff->da;
-		if (!hasDataset(dn)) {
-			gprint("no data in fill dataset");
-			return;
-		}
-		GLEDataSet* daDS = dp[dn];
-		daDS->checkRanges();
-		/* set clipping region */
-		daDS->clip(&ff->xmin, &ff->ymin);
-		daDS->clip(&ff->xmax, &ff->ymax);
-		g_beginclip();		/* saves current clipping */
-		g_set_path(true);
-		g_newpath();
-		GLERectangle clipBox;
-		clipBox.initRange();
-		GLEPoint pMin(fnXY(ff->xmin, ff->ymin, daDS));
-		GLEPoint pMax(fnXY(ff->xmax, ff->ymax, daDS));
-		clipBox.updateRange(&pMin);
-		clipBox.updateRange(&pMax);
-		g_box_stroke(&clipBox);
-		g_clip();		/* sets current path to be clipping */
-		vector<double> fvec;
-		GLERC<GLEDataPairs> data1 = transform_data(dp[dn]);
-		GLERC<GLEDataPairs> data2;
-		data1->noMissing();
-		if (data1->size() < 1) {
-			continue;
-		}
-		double *xt = data1->getX();
-		double *yt = data1->getY();
-		double x2, y2;
-		double ymx = ff->ymax;
-		switch(ff->type) {
-			case 1: /* x1,d1 */
-				ymx = ff->ymin;
-			case 2: /* d1,x2 */
-				fill_vec(*xt, ymx, *xt, *yt, &fvec);
-				for (unsigned int i = 0; i < data1->size()-1; i++, xt++, yt++) {
-					fill_vec(*xt, *yt, *(xt+1), *(yt+1), &fvec);
-				}
-				fill_vec(*xt, *yt, *xt, ymx, &fvec);
-				fill_vec(*xt, ymx, data1->getX(0), ymx, &fvec);
-				break;
-			case 3: /* d1,d2 */
-				for (unsigned int i = 0; i < data1->size()-1; i++, xt++, yt++) {
-					fill_vec(*xt, *yt, *(xt+1), *(yt+1), &fvec);
-					x2 = *(xt+1); y2 = *(yt+1);
-				}
-				data2 = transform_data(dp[ff->db]);
-				data2->noMissing();
-				if (data2->size() < 1) {
-					break;
-				}
-				xt = data2->getX() + data2->size() - 1;
-				yt = data2->getY() + data2->size() - 1;
-				fill_vec(x2, y2, *xt, *yt, &fvec);
-				for (unsigned int i = 0; i < data2->size()-1; i++, xt--, yt--) {
-					fill_vec(*xt, *yt, *(xt-1), *(yt-1), &fvec);
-				}
-				fill_vec(*xt, *yt, data1->getX(0), data1->getY(0), &fvec);
-				break;
-			case 4: /* d1 */
-				for (unsigned int i = 0; i < data1->size()-1; i++, xt++, yt++) {
-					fill_vec(*xt, *yt, *(xt+1), *(yt+1), &fvec);
-				}
-				fill_vec(*xt, *yt, data1->getX(0), data1->getY(0), &fvec);
-				break;
-		}
-		/* Paint the region defined */
-		g_set_fill(ff->color);
-		g_newpath();
-		if (fvec.size() >= 4) {
-			g_move(fnXY(fvec[0], fvec[1], daDS));
-			double lastx = fvec[0];
-			double lasty = fvec[1];
-			for (int i = 0; i <= (int)fvec.size()-4; i += 4) {
-				if (lastx != fvec[i] || lasty != fvec[i+1])  {
-					g_closepath();
-					g_move(fnXY(fvec[i], fvec[i+1], daDS));
-				}
-				g_line(fnXY(fvec[i+2], fvec[i+3], daDS));
-				lastx = fvec[i+2]; lasty = fvec[i+3];
+GLEGraphPartFills::GLEGraphPartFills() {
+}
+
+GLEGraphPartFills::~GLEGraphPartFills() {
+}
+
+std::set<int> GLEGraphPartFills::getLayers() {
+	std::set<int> result;
+	result.insert(GLE_GRAPH_LAYER_FILL);
+	return result;
+}
+
+void GLEGraphPartFills::drawFill(int n) {
+	struct fill_data *ff = fd[n];
+	int dn = ff->da;
+	if (!hasDataset(dn)) {
+		gprint("no data in fill dataset");
+		return;
+	}
+	GLEDataSet* daDS = dp[dn];
+	daDS->checkRanges();
+	/* set clipping region */
+	daDS->clip(&ff->xmin, &ff->ymin);
+	daDS->clip(&ff->xmax, &ff->ymax);
+	g_beginclip();		/* saves current clipping */
+	g_set_path(true);
+	g_newpath();
+	GLERectangle clipBox;
+	clipBox.initRange();
+	GLEPoint pMin(fnXY(ff->xmin, ff->ymin, daDS));
+	GLEPoint pMax(fnXY(ff->xmax, ff->ymax, daDS));
+	clipBox.updateRange(&pMin);
+	clipBox.updateRange(&pMax);
+	g_box_stroke(&clipBox);
+	g_clip();		/* sets current path to be clipping */
+	vector<double> fvec;
+	GLERC<GLEDataPairs> data1 = transform_data(dp[dn]);
+	GLERC<GLEDataPairs> data2;
+	data1->noMissing();
+	if (data1->size() < 1) {
+		return;
+	}
+	double *xt = data1->getX();
+	double *yt = data1->getY();
+	double x2, y2;
+	double ymx = ff->ymax;
+	switch(ff->type) {
+		case 1: /* x1,d1 */
+			ymx = ff->ymin;
+		case 2: /* d1,x2 */
+			fill_vec(*xt, ymx, *xt, *yt, &fvec);
+			for (unsigned int i = 0; i < data1->size()-1; i++, xt++, yt++) {
+				fill_vec(*xt, *yt, *(xt+1), *(yt+1), &fvec);
 			}
+			fill_vec(*xt, *yt, *xt, ymx, &fvec);
+			fill_vec(*xt, ymx, data1->getX(0), ymx, &fvec);
+			break;
+		case 3: /* d1,d2 */
+			for (unsigned int i = 0; i < data1->size()-1; i++, xt++, yt++) {
+				fill_vec(*xt, *yt, *(xt+1), *(yt+1), &fvec);
+				x2 = *(xt+1); y2 = *(yt+1);
+			}
+			data2 = transform_data(dp[ff->db]);
+			data2->noMissing();
+			if (data2->size() < 1) {
+				break;
+			}
+			xt = data2->getX() + data2->size() - 1;
+			yt = data2->getY() + data2->size() - 1;
+			fill_vec(x2, y2, *xt, *yt, &fvec);
+			for (unsigned int i = 0; i < data2->size()-1; i++, xt--, yt--) {
+				fill_vec(*xt, *yt, *(xt-1), *(yt-1), &fvec);
+			}
+			fill_vec(*xt, *yt, data1->getX(0), data1->getY(0), &fvec);
+			break;
+		case 4: /* d1 */
+			for (unsigned int i = 0; i < data1->size()-1; i++, xt++, yt++) {
+				fill_vec(*xt, *yt, *(xt+1), *(yt+1), &fvec);
+			}
+			fill_vec(*xt, *yt, data1->getX(0), data1->getY(0), &fvec);
+			break;
+	}
+	/* Paint the region defined */
+	g_set_fill(ff->color);
+	g_newpath();
+	if (fvec.size() >= 4) {
+		g_move(fnXY(fvec[0], fvec[1], daDS));
+		double lastx = fvec[0];
+		double lasty = fvec[1];
+		for (int i = 0; i <= (int)fvec.size()-4; i += 4) {
+			if (lastx != fvec[i] || lasty != fvec[i+1])  {
+				g_closepath();
+				g_move(fnXY(fvec[i], fvec[i+1], daDS));
+			}
+			g_line(fnXY(fvec[i+2], fvec[i+3], daDS));
+			lastx = fvec[i+2]; lasty = fvec[i+3];
 		}
-		g_closepath();
-		g_fill();
-		g_set_path(false);
-		g_endclip();
+	}
+	g_closepath();
+	g_fill();
+	g_set_path(false);
+	g_endclip();
+}
+
+void GLEGraphPartFills::drawLayer(int layer) {
+	for (int n = 1; n <= nfd; n++) {
+		if (fd[n]->type != 0) {
+			drawFill(n);
+		}
 	}
 }
 
@@ -804,47 +806,63 @@ void draw_err() {
 	g_grestore();
 }
 
-void draw_lines() {
+GLEGraphPartLines::GLEGraphPartLines() {
+}
+
+GLEGraphPartLines::~GLEGraphPartLines() {
+}
+
+std::set<int> GLEGraphPartLines::getLayers() {
+	std::set<int> result;
+	result.insert(GLE_GRAPH_LAYER_LINE);
+	return result;
+}
+
+void GLEGraphPartLines::drawLayer(int layer) {
 	double oldlwidth;
 	char oldlstyle[10];
 	g_gsave();
 	g_get_line_style(oldlstyle);
 	g_get_line_width(&oldlwidth);
 	for (int dn = 1; dn <= ndata; dn++) {
-		last_vecx = GLE_INF;
-		last_vecy = GLE_INF;
 		if (hasDataset(dn) && (dp[dn]->line || dp[dn]->lstyle[0] != 0)) {
-			GLEDataSet* dataSet = dp[dn];
-			dataSet->checkRanges();
-			GLERC<GLEDataPairs> data = transform_data(dataSet);
 			g_set_line_style(oldlstyle);      /* use defaults for each */
 			g_set_line_width(oldlwidth);      /* use defaults for each */
-			g_set_line_style(dp[dn]->lstyle);
-			g_set_color(dp[dn]->color);
-			g_set_line_width(dp[dn]->lwidth); /* does nothing if arg = 0 */
-			switch (dp[dn]->line_mode) {
-				case GLE_GRAPH_LM_PLAIN:
-					do_draw_lines(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
-					break;
-				case GLE_GRAPH_LM_STEPS:
-					do_draw_steps(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
-					break;
-				case GLE_GRAPH_LM_FSTEPS:
-					do_draw_fsteps(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
-					break;
-				case GLE_GRAPH_LM_HIST:
-					do_draw_hist(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
-					break;
-				case GLE_GRAPH_LM_IMPULSES:
-					do_draw_impulses(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
-					break;
-				case GLE_GRAPH_LM_BAR:
-					do_draw_bar(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
-					break;
-			}
+			drawLine(dn);
 		}
-	} /* end for*/
+	}
 	g_grestore();
+}
+
+void GLEGraphPartLines::drawLine(int dn) {
+	GLEDataSet* dataSet = dp[dn];
+	dataSet->checkRanges();
+	GLERC<GLEDataPairs> data = transform_data(dataSet);
+	g_set_line_style(dp[dn]->lstyle);
+	g_set_color(dp[dn]->color);
+	g_set_line_width(dp[dn]->lwidth); /* does nothing if arg = 0 */
+	last_vecx = GLE_INF;
+	last_vecy = GLE_INF;
+	switch (dp[dn]->line_mode) {
+		case GLE_GRAPH_LM_PLAIN:
+			do_draw_lines(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
+			break;
+		case GLE_GRAPH_LM_STEPS:
+			do_draw_steps(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
+			break;
+		case GLE_GRAPH_LM_FSTEPS:
+			do_draw_fsteps(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
+			break;
+		case GLE_GRAPH_LM_HIST:
+			do_draw_hist(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
+			break;
+		case GLE_GRAPH_LM_IMPULSES:
+			do_draw_impulses(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
+			break;
+		case GLE_GRAPH_LM_BAR:
+			do_draw_bar(data->getX(), data->getY(), data->getM(), data->size(), dataSet);
+			break;
+	}
 }
 
 void do_draw_lines(double* xt, double* yt, int* m, int npnts, GLEDataSet* ds) {
@@ -1030,81 +1048,96 @@ void draw_vec(double x1, double y1, double x2, double y2, GLEDataSet* ds) {
 	last_vecy = y2;
 }
 
-void draw_markers() throw (ParserError) {
+GLEGraphPartMarkers::GLEGraphPartMarkers() {
+}
+
+GLEGraphPartMarkers::~GLEGraphPartMarkers() {
+}
+
+std::set<int> GLEGraphPartMarkers::getLayers() {
+	std::set<int> result;
+	result.insert(GLE_GRAPH_LAYER_MARKER);
+	return result;
+}
+
+void GLEGraphPartMarkers::drawLayer(int layer) {
 	double oldlwidth;
-	char oldlstyle[10];
 	g_gsave();
-	g_get_line_style(oldlstyle);
 	g_get_line_width(&oldlwidth);
 	for (int dn = 1; dn <= ndata; dn++) {
 		if (dp[dn] != NULL && dp[dn]->marker != 0) {
-			GLEDataSet* dataSet = dp[dn];
-			dataSet->checkRanges();
-			GLERC<GLEDataPairs> data = transform_data(dataSet, false);
 			g_set_line_width(oldlwidth); /* use defaults for each */
-			g_set_color(dataSet->color);
-			g_set_line_width(dataSet->lwidth);
-			double msize = dataSet->msize;
-			if (msize == 0) msize = g_fontsz;
-			if (dataSet->mscale != 0) msize = msize * dataSet->mscale;
-			double mdist = dataSet->mdist;
-			if (mdist == 0) {
-				GLEDataPairs mdataPairs;
-				if (dataSet->mdata != 0) {
-					GLEDataSet* mdataSet = getDataset(dataSet->mdata, "marker mdata");
-					mdataPairs.copyDimension(mdataSet, 1);
-					mdataSet->validateNbPoints(data->size(), "marker mdata");
-				}
-				for (unsigned int i = 0; i < data->size(); i++) {
-					if (!data->getM(i)) {
-						double dval = 1.0;
-						if (dataSet->mdata != 0) {
-							dval = mdataPairs.getY(i);
-						}
-						draw_mark(data->getX(i), data->getY(i), dataSet->marker, msize, dval, dataSet);
-					}
-				}
-			} else {
-				data->noMissing();
-				double* xt = data->getX();
-				double* yt = data->getY();
-				if (data->size() >= 1) {
-					double len = 0.0;
-					double x0 = fnx(xt[0], dataSet);
-					double y0 = fny(yt[0], dataSet);
-					for (unsigned int i = 1; i < data->size(); i++) {
-						double x = fnx(xt[i], dataSet);
-						double y = fny(yt[i], dataSet);
-						len += sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
-						x0 = x; y0 = y;
-					}
-					x0 = fnx(xt[0], dataSet);
-					y0 = fny(yt[0], dataSet);
-					double prev_dist = mdist - fmod(len, mdist)/2.0;
-					for (unsigned int i = 1; i < data->size(); i++) {
-						double x = fnx(xt[i], dataSet);
-						double y = fny(yt[i], dataSet);
-						double dist = sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
-						while (prev_dist + dist > mdist) {
-							double offs = mdist - prev_dist;
-							double xp = (offs*x + (dist-offs)*x0)/dist;
-							double yp = (offs*y + (dist-offs)*y0)/dist;
-							if (xp >= xbl && xp <= xbl+xlength && yp >= ybl && yp <= ybl+ylength) {
-								g_move(xp, yp);
-								g_marker2(dataSet->marker,msize,1);
-							}
-							x0 = xp; y0 = yp;
-							dist = sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
-							prev_dist = 0.0;
-						}
-						prev_dist += dist;
-						x0 = x; y0 = y;
-					}
-				}
-			}
+			drawMarkers(dn);
 		}
 	}
 	g_grestore();
+}
+
+void GLEGraphPartMarkers::drawMarkers(int dn) {
+	GLEDataSet* dataSet = dp[dn];
+	dataSet->checkRanges();
+	GLERC<GLEDataPairs> data = transform_data(dataSet, false);
+	g_set_color(dataSet->color);
+	g_set_line_width(dataSet->lwidth);
+	g_set_line_style("1");
+	double msize = dataSet->msize;
+	if (msize == 0) msize = g_fontsz;
+	if (dataSet->mscale != 0) msize = msize * dataSet->mscale;
+	double mdist = dataSet->mdist;
+	if (mdist == 0) {
+		GLEDataPairs mdataPairs;
+		if (dataSet->mdata != 0) {
+			GLEDataSet* mdataSet = getDataset(dataSet->mdata, "marker mdata");
+			mdataPairs.copyDimension(mdataSet, 1);
+			mdataSet->validateNbPoints(data->size(), "marker mdata");
+		}
+		for (unsigned int i = 0; i < data->size(); i++) {
+			if (!data->getM(i)) {
+				double dval = 1.0;
+				if (dataSet->mdata != 0) {
+					dval = mdataPairs.getY(i);
+				}
+				draw_mark(data->getX(i), data->getY(i), dataSet->marker, msize, dval, dataSet);
+			}
+		}
+	} else {
+		data->noMissing();
+		double* xt = data->getX();
+		double* yt = data->getY();
+		if (data->size() >= 1) {
+			double len = 0.0;
+			double x0 = fnx(xt[0], dataSet);
+			double y0 = fny(yt[0], dataSet);
+			for (unsigned int i = 1; i < data->size(); i++) {
+				double x = fnx(xt[i], dataSet);
+				double y = fny(yt[i], dataSet);
+				len += sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
+				x0 = x; y0 = y;
+			}
+			x0 = fnx(xt[0], dataSet);
+			y0 = fny(yt[0], dataSet);
+			double prev_dist = mdist - fmod(len, mdist)/2.0;
+			for (unsigned int i = 1; i < data->size(); i++) {
+				double x = fnx(xt[i], dataSet);
+				double y = fny(yt[i], dataSet);
+				double dist = sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
+				while (prev_dist + dist > mdist) {
+					double offs = mdist - prev_dist;
+					double xp = (offs*x + (dist-offs)*x0)/dist;
+					double yp = (offs*y + (dist-offs)*y0)/dist;
+					if (xp >= xbl && xp <= xbl+xlength && yp >= ybl && yp <= ybl+ylength) {
+						g_move(xp, yp);
+						g_marker2(dataSet->marker,msize,1);
+					}
+					x0 = xp; y0 = yp;
+					dist = sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
+					prev_dist = 0.0;
+				}
+				prev_dist += dist;
+				x0 = x; y0 = y;
+			}
+		}
+	}
 }
 
 void draw_mark(double x, double y, int mrk, double msize, double dval, GLEDataSet* ds) throw (ParserError) {

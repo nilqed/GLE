@@ -41,6 +41,17 @@
 class GLEGraphBlockBase;
 class GLEGraphDrawCommand;
 class GLEGraphBlockData;
+class GLEGraphBlockInstance;
+
+const int GLE_GRAPH_LAYER_UNDEFINED = -1;
+const int GLE_GRAPH_LAYER_GRID = 100;
+const int GLE_GRAPH_LAYER_FILL = 200;
+const int GLE_GRAPH_LAYER_BAR = 300;
+const int GLE_GRAPH_LAYER_AXIS = 400;
+const int GLE_GRAPH_LAYER_DRAW_COMMAND = 500;
+const int GLE_GRAPH_LAYER_LINE = 600;
+const int GLE_GRAPH_LAYER_ERROR_BAR = 700;
+const int GLE_GRAPH_LAYER_MARKER = 800;
 
 class GLEInternalClassDefinitions : public GLERefCountObject
 {
@@ -82,6 +93,133 @@ private:
 	GLERC<GLEGraphDataSetOrder> m_order;
 };
 
+class GLEGraphPart
+{
+public:
+	GLEGraphPart();
+	virtual ~GLEGraphPart();
+
+	virtual std::set<int> getLayers() = 0;
+	virtual void drawLayer(int layer) = 0;
+};
+
+class GLEGraphPartGrid : public GLEGraphPart
+{
+public:
+	GLEGraphPartGrid();
+	virtual ~GLEGraphPartGrid();
+
+	virtual std::set<int> getLayers();
+	virtual void drawLayer(int layer);
+};
+
+class GLEGraphPartFills : public GLEGraphPart
+{
+public:
+	GLEGraphPartFills();
+	virtual ~GLEGraphPartFills();
+
+	virtual std::set<int> getLayers();
+	virtual void drawLayer(int layer);
+
+	void drawFill(int n);
+};
+
+class GLEGraphPartBars : public GLEGraphPart
+{
+public:
+	GLEGraphPartBars();
+	virtual ~GLEGraphPartBars();
+
+	virtual std::set<int> getLayers();
+	virtual void drawLayer(int layer);
+
+	void drawBar(int b);
+};
+
+/*
+
+GLEGraphPartXXX::GLEGraphPartXXX() {
+}
+
+GLEGraphPartXXX::~GLEGraphPartXXX() {
+}
+
+std::set<int> GLEGraphPartXXX::getLayers() {
+	std::set<int> result;
+	result.insert(GLE_GRAPH_LAYER_);
+	return result;
+}
+
+void GLEGraphPartXXX::drawLayer(int layer) {
+}
+
+ */
+
+class GLEGraphPartAxis : public GLEGraphPart
+{
+public:
+	GLEGraphPartAxis();
+	virtual ~GLEGraphPartAxis();
+
+	virtual std::set<int> getLayers();
+	virtual void drawLayer(int layer);
+
+	void setBox(GLERectangle* box);
+
+private:
+	GLERectangle* m_box;
+};
+
+class GLEGraphPartLines : public GLEGraphPart
+{
+public:
+	GLEGraphPartLines();
+	virtual ~GLEGraphPartLines();
+
+	virtual std::set<int> getLayers();
+	virtual void drawLayer(int layer);
+
+	void drawLine(int dn);
+};
+
+class GLEGraphPartErrorBars : public GLEGraphPart
+{
+public:
+	GLEGraphPartErrorBars();
+	virtual ~GLEGraphPartErrorBars();
+
+	virtual std::set<int> getLayers();
+	virtual void drawLayer(int layer);
+};
+
+class GLEGraphPartMarkers : public GLEGraphPart
+{
+public:
+	GLEGraphPartMarkers();
+	virtual ~GLEGraphPartMarkers();
+
+	virtual std::set<int> getLayers();
+	virtual void drawLayer(int layer);
+
+	void drawMarkers(int dn);
+};
+
+class GLEGraphDrawCommands : public GLEGraphPart
+{
+public:
+	GLEGraphDrawCommands();
+	virtual ~GLEGraphDrawCommands();
+
+	virtual std::set<int> getLayers();
+	virtual void drawLayer(int layer);
+
+	void doDrawCommand(GLESourceLine& sline, GLEGraphBlockInstance* graphBlock);
+
+private:
+	GLEVectorAutoDelete<GLEGraphDrawCommand> m_drawCommands;
+};
+
 class GLEGraphBlockInstance : public GLEBlockInstance {
 public:
 	GLEGraphBlockInstance(GLEGraphBlockBase* parent);
@@ -91,11 +229,19 @@ public:
 	virtual void endExecuteBlock();
 
 	void doDrawCommand(GLESourceLine& sline);
-	void drawDrawCalls();
-	bool hasDrawCalls();
+
+	int getLayer() const;
+	int getLayerWithDefault(int defaultLayer) const;
+
+	void drawParts(const GLEPoint& origin);
+
+	GLEGraphPartAxis* getAxis();
 
 private:
-	std::vector<GLEGraphDrawCommand*> m_drawCommands;
+	int m_layer;
+	GLEGraphDrawCommands* m_drawCommands;
+	GLEGraphPartAxis* m_axis;
+	GLEVectorAutoDelete<GLEGraphPart> m_graphParts;
 };
 
 class GLEGraphBlockBase : public GLEBlockBase {
@@ -142,9 +288,6 @@ void do_smooth(void);
 void window_set(bool showError) throw(ParserError);
 void reset_axis_ranges();
 bool should_autorange_based_on_lets();
-void draw_bars(void);
-void draw_lines(void);
-void draw_fills(void);
 void draw_err(void);
 void deleteLet(GLELet* let);
 GLELet* parseLet(GLESourceLine& sline) throw(ParserError);
@@ -155,7 +298,6 @@ void request(void);
 void bar_reset();
 void doskip(char *s,int *ct);
 void store_window_bounds_to_vars();
-void draw_markers(void) throw (ParserError);
 void do_dataset_key(int d);
 void do_bigfile_compatibility() throw(ParserError);
 void ensureDataSetCreated(int d);
@@ -384,7 +526,6 @@ GRAPHDEF bar_struct *br[20];
 void vinit_axis(int i);
 void vinit_title_axis();
 void draw_bar(double x, double yf, double yt, double wd, bar_struct* barset, int di, GLEDataSet* toDataSet) throw(ParserError);
-void draw_user_function_calls(bool underneath, GLEGraphBlockInstance* graphBlock) throw(ParserError);
 void get_dataset_ranges();
 void set_bar_axis_places();
 int get_dataset_identifier(const char* ds, bool def = false) throw(ParserError);
@@ -452,3 +593,31 @@ public:
 	inline const string& getPaletteFunction() { return m_palette; }
 	inline GLEZData* getData() { return m_Data; }
 };
+
+
+/**
+ * Layers:
+ *
+ * 	- background (fill)
+ * 	- color map
+ * 	- grid
+ * 	- fills (e.g., fill x1,d1 color gray50)
+ *		 struct fill_data {
+ *			int da,db;
+ *			int type;
+ *			int color;
+ *			double xmin,ymin,xmax,ymax;
+ *		 };
+ * 	- bars (e.g., bar d3 from d1 width 0.6 fill gray30)
+ *       class bar_struct {
+ *	        int ngrp;
+ *	        int from[20];
+ *	        int to[20];
+ *	        double width,dist;
+ *          ...
+ * 	- axis
+ * 	- lines
+ * 	- error bars
+ * 	- markers
+ * 	- key
+ */

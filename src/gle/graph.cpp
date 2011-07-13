@@ -178,19 +178,22 @@ GLEGraphBlockData::GLEGraphBlockData(GLEGraphBlockBase* graphBlockBase):
 
 class GLEGraphDrawCommand {
 public:
-	GLEGraphDrawCommand();
+	GLEGraphDrawCommand(int layer);
 	virtual ~GLEGraphDrawCommand();
 
 	void createGraphDrawCommand(GLESourceLine& sline);
 	void draw();
+	int getLayer() const;
 
 private:
 	GLESub* m_sub;
 	GLEArrayImpl m_arguments;
+	int m_layer;
 };
 
-GLEGraphDrawCommand::GLEGraphDrawCommand():
-	m_sub(0)
+GLEGraphDrawCommand::GLEGraphDrawCommand(int layer):
+	m_sub(0),
+	m_layer(layer)
 {
 }
 
@@ -218,16 +221,73 @@ void GLEGraphDrawCommand::draw() {
 	getGLERunInstance()->sub_call(m_sub, &m_arguments);
 }
 
-GLEGraphBlockInstance::GLEGraphBlockInstance(GLEGraphBlockBase* parent):
-	GLEBlockInstance(parent)
-{
+int GLEGraphDrawCommand::getLayer() const {
+	return m_layer;
+}
 
+GLEGraphPart::GLEGraphPart() {
+}
+
+GLEGraphPart::~GLEGraphPart() {
+}
+
+GLEGraphDrawCommands::GLEGraphDrawCommands() {
+}
+
+GLEGraphDrawCommands::~GLEGraphDrawCommands() {
+}
+
+std::set<int> GLEGraphDrawCommands::getLayers() {
+	std::set<int> result;
+	for (int i = 0; i < int(m_drawCommands.size()); ++i) {
+		result.insert(m_drawCommands[i]->getLayer());
+	}
+	return result;
+}
+
+void GLEGraphDrawCommands::drawLayer(int layer) {
+	g_gsave();
+	g_beginclip();
+	g_set_path(true);
+	g_newpath();
+	g_box_stroke(xbl, ybl, xbl+xlength, ybl+ylength, false);
+	g_clip();
+	g_set_path(false);
+	g_set_hei(g_fontsz);
+	for (int i = 0; i < int(m_drawCommands.size()); ++i) {
+		if (m_drawCommands[i]->getLayer() == layer) {
+			m_drawCommands[i]->draw();
+		}
+	}
+	g_endclip();
+	g_grestore();
+}
+
+void GLEGraphDrawCommands::doDrawCommand(GLESourceLine& sline, GLEGraphBlockInstance* graphBlock)
+{
+	GLEGraphDrawCommand* cmd = new GLEGraphDrawCommand(graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_DRAW_COMMAND));
+	m_drawCommands.push_back(cmd);
+	cmd->createGraphDrawCommand(sline);
+}
+
+GLEGraphBlockInstance::GLEGraphBlockInstance(GLEGraphBlockBase* parent):
+	GLEBlockInstance(parent),
+	m_layer(GLE_GRAPH_LAYER_UNDEFINED)
+{
+	m_drawCommands = new GLEGraphDrawCommands();
+	m_axis = new GLEGraphPartAxis();
+
+	m_graphParts.push_back(new GLEGraphPartGrid());
+	m_graphParts.push_back(new GLEGraphPartFills());
+	m_graphParts.push_back(new GLEGraphPartBars());
+	m_graphParts.push_back(m_axis);
+	m_graphParts.push_back(m_drawCommands);
+	m_graphParts.push_back(new GLEGraphPartLines());
+	m_graphParts.push_back(new GLEGraphPartErrorBars());
+	m_graphParts.push_back(new GLEGraphPartMarkers());
 }
 
 GLEGraphBlockInstance::~GLEGraphBlockInstance() {
-	for (unsigned int i = 0; i < m_drawCommands.size(); ++i) {
-		delete m_drawCommands[i];
-	}
 }
 
 void GLEGraphBlockInstance::executeLine(GLESourceLine& sline) {
@@ -239,19 +299,42 @@ void GLEGraphBlockInstance::endExecuteBlock() {
 }
 
 void GLEGraphBlockInstance::doDrawCommand(GLESourceLine& sline) {
-	GLEGraphDrawCommand* cmd = new GLEGraphDrawCommand();
-	m_drawCommands.push_back(cmd);
-	cmd->createGraphDrawCommand(sline);
+	m_drawCommands->doDrawCommand(sline, this);
 }
 
-void GLEGraphBlockInstance::drawDrawCalls() {
-	for (unsigned int i = 0; i < m_drawCommands.size(); ++i) {
-		m_drawCommands[i]->draw();
+int GLEGraphBlockInstance::getLayer() const {
+	return m_layer;
+}
+
+int GLEGraphBlockInstance::getLayerWithDefault(int defaultLayer) const {
+	if (m_layer == GLE_GRAPH_LAYER_UNDEFINED) {
+		return defaultLayer;
+	} else {
+		return m_layer;
 	}
 }
 
-bool GLEGraphBlockInstance::hasDrawCalls() {
-	return !m_drawCommands.empty();
+void GLEGraphBlockInstance::drawParts(const GLEPoint& origin) {
+	typedef std::set<int> LayerSet;
+	LayerSet allLayers;
+	GLEVectorAutoDelete<LayerSet> partLayers;
+	for (int i = 0; i < int(m_graphParts.size()); ++i) {
+		LayerSet layers(m_graphParts[i]->getLayers());
+		allLayers.insert(layers.begin(), layers.end());
+		partLayers.push_back(new LayerSet(layers.begin(), layers.end()));
+	}
+	for (LayerSet::const_iterator layer(allLayers.begin()); layer != allLayers.end(); ++layer) {
+		for (int i = 0; i < int(m_graphParts.size()); ++i) {
+			if (partLayers[i]->count(*layer) != 0) {
+				g_move(origin);
+				m_graphParts[i]->drawLayer(*layer);
+			}
+		}
+	}
+}
+
+GLEGraphPartAxis* GLEGraphBlockInstance::getAxis() {
+	return m_axis;
 }
 
 GLEGraphBlockBase::GLEGraphBlockBase():
@@ -1265,7 +1348,19 @@ void draw_axis_pos(int axis, double xpos, double ypos, bool xy, bool grid, GLERe
 	draw_axis(&xx[axis], box, grid);
 }
 
-void graph_draw_grids() {
+GLEGraphPartGrid::GLEGraphPartGrid() {
+}
+
+GLEGraphPartGrid::~GLEGraphPartGrid() {
+}
+
+std::set<int> GLEGraphPartGrid::getLayers() {
+	std::set<int> result;
+	result.insert(GLE_GRAPH_LAYER_GRID);
+	return result;
+}
+
+void GLEGraphPartGrid::drawLayer(int layer) {
 	GLERectangle box;
 	box.initRange();
 	draw_axis_pos(GLE_AXIS_Y0, xbl, ybl, true, true, &box);
@@ -1276,21 +1371,40 @@ void graph_draw_grids() {
 	draw_axis_pos(GLE_AXIS_X2, xbl, ybl+ylength, false, true, &box);
 }
 
-void graph_draw_axis(GLERectangle* box) {
+GLEGraphPartAxis::GLEGraphPartAxis():
+	m_box(0)
+{
+}
+
+GLEGraphPartAxis::~GLEGraphPartAxis() {
+}
+
+std::set<int> GLEGraphPartAxis::getLayers() {
+	std::set<int> result;
+	result.insert(GLE_GRAPH_LAYER_AXIS);
+	return result;
+}
+
+void GLEGraphPartAxis::drawLayer(int layer) {
+	g_init_bounds();
 	// y-axis should *not* influence position of title!
-	draw_axis_pos(GLE_AXIS_Y0, xbl, ybl, true, false, box);
-	draw_axis_pos(GLE_AXIS_Y, xbl, ybl, true, false, box);
-	draw_axis_pos(GLE_AXIS_Y2, xbl+xlength, ybl, true, false, box);
+	draw_axis_pos(GLE_AXIS_Y0, xbl, ybl, true, false, m_box);
+	draw_axis_pos(GLE_AXIS_Y, xbl, ybl, true, false, m_box);
+	draw_axis_pos(GLE_AXIS_Y2, xbl+xlength, ybl, true, false, m_box);
 	GLEMeasureBox measure;
 	measure.measureStart();
-	draw_axis_pos(GLE_AXIS_X, xbl, ybl, false, false, box);
-	draw_axis_pos(GLE_AXIS_X0, xbl, ybl, false, false, box);
-	draw_axis_pos(GLE_AXIS_X2, xbl, ybl+ylength, false, false, box);
+	draw_axis_pos(GLE_AXIS_X, xbl, ybl, false, false, m_box);
+	draw_axis_pos(GLE_AXIS_X0, xbl, ybl, false, false, m_box);
+	draw_axis_pos(GLE_AXIS_X2, xbl, ybl+ylength, false, false, m_box);
 	g_update_bounds(xbl+xlength/2, ybl+ylength);
 	measure.measureEnd();
-	draw_axis_pos(GLE_AXIS_T, xbl, measure.getYMax(), true, false, box);
+	draw_axis_pos(GLE_AXIS_T, xbl, measure.getYMax(), true, false, m_box);
 	// otherwise it does not work if all axis are disabled!
-	g_update_bounds_box(box);
+	g_update_bounds_box(m_box);
+}
+
+void GLEGraphPartAxis::setBox(GLERectangle* box) {
+	m_box = box;
 }
 
 void prepare_graph_key_and_clip(double ox, double oy, KeyInfo* keyinfo) {
@@ -1375,7 +1489,8 @@ void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (Pars
 		GLEMeasureBox measure;
 		GLEDevice* old_device = g_set_dummy_device();
 		measure.measureStart();
-		graph_draw_axis(&dummy);
+		graphBlock->getAxis()->setBox(&dummy);
+		graphBlock->getAxis()->drawLayer(GLE_GRAPH_LAYER_UNDEFINED);
 		measure.measureEnd();
 		g_restore_device(old_device);
 		if (g_auto_s_h) {
@@ -1435,37 +1550,13 @@ void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (Pars
 		g_colormap = NULL;
 	}
 
-	/* draw the grids */
-	graph_draw_grids();
+	graphBlock->getAxis()->setBox(&box);
 
-	/* Lets do any filling now. */
-	draw_fills();
-	g_move(ox,oy);
-
-	/* Draw the bars */
-	draw_bars();
-
-	/* Draw the function calls under the axis */
-	draw_user_function_calls(true, graphBlock);
-
-	/* Draw the axis */
-	g_init_bounds();
-	graph_draw_axis(&box);
-
-	/* Draw the function calls on top of the axis */
-	draw_user_function_calls(false, graphBlock);
-
-	/* Draw the lines and  markers */
-	draw_lines();
-	g_move(ox,oy);
+	GLEPoint origin(ox, oy);
+	graphBlock->drawParts(origin);
 
 	/* Draw the error bars */
 	draw_err();
-	g_move(ox,oy);
-
-	/* Draw markers, */
-	/* (after lines so symbol blanking [white markers] will work) */
-	draw_markers();
 
 	/* Draw the key */
 	if (keyinfo->getNbEntries() > 0 && !keyinfo->isDisabled() && !keyinfo->getNoBox() && keyinfo->getBackgroundColor() == (int)GLE_FILL_CLEAR) {
