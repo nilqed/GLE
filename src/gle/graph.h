@@ -44,14 +44,14 @@ class GLEGraphBlockData;
 class GLEGraphBlockInstance;
 
 const int GLE_GRAPH_LAYER_UNDEFINED = -1;
-const int GLE_GRAPH_LAYER_GRID = 100;
-const int GLE_GRAPH_LAYER_FILL = 200;
-const int GLE_GRAPH_LAYER_BAR = 300;
-const int GLE_GRAPH_LAYER_AXIS = 400;
-const int GLE_GRAPH_LAYER_DRAW_COMMAND = 500;
-const int GLE_GRAPH_LAYER_LINE = 600;
-const int GLE_GRAPH_LAYER_ERROR_BAR = 700;
-const int GLE_GRAPH_LAYER_MARKER = 800;
+const int GLE_GRAPH_LAYER_GRID = 200;
+const int GLE_GRAPH_LAYER_FILL = 300;
+const int GLE_GRAPH_LAYER_BAR = 400;
+const int GLE_GRAPH_LAYER_AXIS = 500;
+const int GLE_GRAPH_LAYER_DRAW_COMMAND = 600;
+const int GLE_GRAPH_LAYER_LINE = 700;
+const int GLE_GRAPH_LAYER_ERROR_BAR = 800;
+const int GLE_GRAPH_LAYER_MARKER = 900;
 
 class GLEInternalClassDefinitions : public GLERefCountObject
 {
@@ -137,25 +137,6 @@ public:
 	void drawBar(int b);
 };
 
-/*
-
-GLEGraphPartXXX::GLEGraphPartXXX() {
-}
-
-GLEGraphPartXXX::~GLEGraphPartXXX() {
-}
-
-std::set<int> GLEGraphPartXXX::getLayers() {
-	std::set<int> result;
-	result.insert(GLE_GRAPH_LAYER_);
-	return result;
-}
-
-void GLEGraphPartXXX::drawLayer(int layer) {
-}
-
- */
-
 class GLEGraphPartAxis : public GLEGraphPart
 {
 public:
@@ -191,6 +172,8 @@ public:
 
 	virtual std::set<int> getLayers();
 	virtual void drawLayer(int layer);
+
+	void drawErrorBars(int dn);
 };
 
 class GLEGraphPartMarkers : public GLEGraphPart
@@ -232,6 +215,7 @@ public:
 
 	int getLayer() const;
 	int getLayerWithDefault(int defaultLayer) const;
+	void setLayer(int layer);
 
 	void drawParts(const GLEPoint& origin);
 
@@ -281,14 +265,13 @@ void iffree(void *p, const char *s);
 void setrange(double x, double y, int m);
 void gdraw_key(KeyInfo* info);
 void copy_default(int d);
-void do_dataset(int d) throw(ParserError);
+void do_dataset(int d, GLEGraphBlockInstance* graphBlock) throw(ParserError);
 void do_each_dataset_settings();
 void fill_vec(double x1, double y1, double x2, double y2, vector<double>* vec);
 void do_smooth(void);
 void window_set(bool showError) throw(ParserError);
 void reset_axis_ranges();
 bool should_autorange_based_on_lets();
-void draw_err(void);
 void deleteLet(GLELet* let);
 GLELet* parseLet(GLESourceLine& sline) throw(ParserError);
 GLELet* parseLet(const string& letFct, int codeLine) throw(ParserError);
@@ -436,6 +419,9 @@ public:
 	double mscale;
 	bool line;
 	double rx1,ry1,rx2,ry2;
+	int layer_line;
+	int layer_marker;
+	int layer_error;
 	GLEDataSetDimension dims[2];
 	GLEArrayImpl m_data;
 	GLEArrayImpl m_dataBackup;

@@ -784,26 +784,49 @@ void draw_err(GLEDataSet* dataSet, const string& errdescr, bool isUp, bool isHor
 	}
 }
 
-void draw_err() {
-	g_gsave();
+GLEGraphPartErrorBars::GLEGraphPartErrorBars() {
+}
+
+GLEGraphPartErrorBars::~GLEGraphPartErrorBars() {
+}
+
+std::set<int> GLEGraphPartErrorBars::getLayers() {
+	std::set<int> result;
 	for (int dn = 1; dn <= ndata; dn++) {
 		if (hasDataset(dn)) {
 			GLEDataSet* dataSet = dp[dn];
-			if (dataSet->errup.size() != 0) {
-				draw_err(dataSet, dataSet->errup, true, false, dataSet->errwidth, "error up");
-			}
-			if (dataSet->errdown.size() != 0) {
-				draw_err(dataSet, dataSet->errdown, false, false, dataSet->errwidth, "error down");
-			}
-			if (dataSet->herrup.size() != 0) {
-				draw_err(dataSet, dataSet->herrup, true, true, dataSet->herrwidth, "error right");
-			}
-			if (dataSet->herrdown.size() != 0) {
-				draw_err(dataSet, dataSet->herrdown, false, true, dataSet->herrwidth, "error left");
+			if (!dataSet->errup.empty() || !dataSet->errdown.empty() || !dataSet->herrup.empty() || !dataSet->herrdown.empty()) {
+				result.insert(dp[dn]->layer_error);
 			}
 		}
 	}
+	return result;
+}
+
+void GLEGraphPartErrorBars::drawLayer(int layer) {
+	g_gsave();
+	for (int dn = 1; dn <= ndata; dn++) {
+		if (hasDataset(dn) && dp[dn]->layer_error == layer) {
+			drawErrorBars(dn);
+		}
+	}
 	g_grestore();
+}
+
+void GLEGraphPartErrorBars::drawErrorBars(int dn) {
+	GLEDataSet* dataSet = dp[dn];
+	if (dataSet->errup.size() != 0) {
+		draw_err(dataSet, dataSet->errup, true, false, dataSet->errwidth, "error up");
+	}
+	if (dataSet->errdown.size() != 0) {
+		draw_err(dataSet, dataSet->errdown, false, false, dataSet->errwidth, "error down");
+	}
+	if (dataSet->herrup.size() != 0) {
+		draw_err(dataSet, dataSet->herrup, true, true, dataSet->herrwidth, "error right");
+	}
+	if (dataSet->herrdown.size() != 0) {
+		draw_err(dataSet, dataSet->herrdown, false, true, dataSet->herrwidth, "error left");
+	}
 }
 
 GLEGraphPartLines::GLEGraphPartLines() {
@@ -814,7 +837,11 @@ GLEGraphPartLines::~GLEGraphPartLines() {
 
 std::set<int> GLEGraphPartLines::getLayers() {
 	std::set<int> result;
-	result.insert(GLE_GRAPH_LAYER_LINE);
+	for (int dn = 1; dn <= ndata; dn++) {
+		if (hasDataset(dn) && (dp[dn]->line || dp[dn]->lstyle[0] != 0)) {
+			result.insert(dp[dn]->layer_line);
+		}
+	}
 	return result;
 }
 
@@ -825,7 +852,7 @@ void GLEGraphPartLines::drawLayer(int layer) {
 	g_get_line_style(oldlstyle);
 	g_get_line_width(&oldlwidth);
 	for (int dn = 1; dn <= ndata; dn++) {
-		if (hasDataset(dn) && (dp[dn]->line || dp[dn]->lstyle[0] != 0)) {
+		if (hasDataset(dn) && dp[dn]->layer_line == layer && (dp[dn]->line || dp[dn]->lstyle[0] != 0)) {
 			g_set_line_style(oldlstyle);      /* use defaults for each */
 			g_set_line_width(oldlwidth);      /* use defaults for each */
 			drawLine(dn);
@@ -1056,7 +1083,11 @@ GLEGraphPartMarkers::~GLEGraphPartMarkers() {
 
 std::set<int> GLEGraphPartMarkers::getLayers() {
 	std::set<int> result;
-	result.insert(GLE_GRAPH_LAYER_MARKER);
+	for (int dn = 1; dn <= ndata; dn++) {
+		if (dp[dn] != NULL && dp[dn]->marker != 0) {
+			result.insert(dp[dn]->layer_marker);
+		}
+	}
 	return result;
 }
 
@@ -1065,7 +1096,7 @@ void GLEGraphPartMarkers::drawLayer(int layer) {
 	g_gsave();
 	g_get_line_width(&oldlwidth);
 	for (int dn = 1; dn <= ndata; dn++) {
-		if (dp[dn] != NULL && dp[dn]->marker != 0) {
+		if (dp[dn] != NULL && dp[dn]->marker != 0 && dp[dn]->layer_marker == layer) {
 			g_set_line_width(oldlwidth); /* use defaults for each */
 			drawMarkers(dn);
 		}
@@ -3034,90 +3065,150 @@ void next_svg_iter(int* s, int* ct) {
 
 #define next_dn  (ct+=1,skipspace,atoi(tk[ct]+1))
 
-void do_dataset(int d) throw(ParserError) {
-	int ct=2;
-	while (ct<=ntk)
-	{
-	     kw("LINE") 	dp[d]->line = true;
-	else kw("LSTYLE") 	next_lstyle(dp[d]->lstyle,&ct);
-/* allow variable for line style */
-/*	else kw("LSTYLE") 	dp[d]->lstyle = next_exp;*/
-	else kw("LWIDTH") 	dp[d]->lwidth = next_exp;
-	else kw("MARKER") 	dp[d]->marker = next_marker;
-	else kw("MDATA") 	dp[d]->mdata = next_dn;
-	else kw("COLOR") 	dp[d]->color = next_color;
-	else kw("KEYFILL") 	dp[d]->key_fill = next_color;
-	else kw("MSIZE") 	dp[d]->msize = next_exp;
-	else kw("MDIST") 	dp[d]->mdist = next_exp;
-	else kw("MSCALE") 	dp[d]->mscale = next_exp;
-	else kw("KEY") 		next_vquote_cpp(dp[d]->key_name);
-	else kw("AUTOSCALE") 	dp[d]->autoscale = true;
-	else kw("AUTO") 	dp[d]->autoscale = true;
-	else kw("NOMISS") 	dp[d]->nomiss = true;
-	else kw("NOMISSING") 	dp[d]->nomiss = true;
-	else kw("FILE")         next_vquote(dp[d]->bigfile);
-	else kw("BIGFILE")      next_vquote(dp[d]->bigfile);
-	else kw("STEPS")        dp[d]->line_mode = GLE_GRAPH_LM_STEPS;
-	else kw("FSTEPS")       dp[d]->line_mode = GLE_GRAPH_LM_FSTEPS;
-	else kw("HIST")         dp[d]->line_mode = GLE_GRAPH_LM_HIST;
-	else kw("BAR")          dp[d]->line_mode = GLE_GRAPH_LM_BAR;
-	else kw("IMPULSES")     dp[d]->line_mode = GLE_GRAPH_LM_IMPULSES;
-	else kw("XAXIS")        dp[d]->getDim(GLE_DIM_X)->setAxis(GLE_AXIS_X);
-	else kw("YAXIS")        dp[d]->getDim(GLE_DIM_Y)->setAxis(GLE_AXIS_Y);
-	else kw("X2AXIS")       dp[d]->getDim(GLE_DIM_X)->setAxis(GLE_AXIS_X2);
-	else kw("Y2AXIS")       dp[d]->getDim(GLE_DIM_Y)->setAxis(GLE_AXIS_Y2);
-	else kw("X0AXIS")       dp[d]->getDim(GLE_DIM_X)->setAxis(GLE_AXIS_X0);
-	else kw("Y0AXIS")       dp[d]->getDim(GLE_DIM_Y)->setAxis(GLE_AXIS_Y0);
-	else kw("SMOOTH") 	{
-		dp[d]->smoothm = false;
-		dp[d]->smooth = true;
-		dp[d]->line = true;
+void fixup_err(string& err) {
+	if (err.size() >= 1 && toupper(err[0]) == 'D') {
+		// If d[i] is used, then this should be converted now
+		int dataset = get_dataset_identifier(err.c_str(), false);
+		std::ostringstream fixupName;
+		fixupName << "d" << dataset;
+		err = fixupName.str();
 	}
-	else kw("SMOOTHM") 	{
-		dp[d]->smoothm = true;
-		dp[d]->smooth = true;
-		dp[d]->line = true;
-	}
-	else kw("SVG_SMOOTH") {
-		//next_svg_iter(&dp[d]->svg_iter,&ct);
-		dp[d]->svg_iter = (int) next_exp;
-		if (dp[d]->svg_iter == 0) dp[d]->svg_iter = 1; // if they say svg_smooth they want it at least once
-		//printf("iter = %d\n",dp[d]->svg_iter);
-		dp[d]->svg_smooth = true;
-		dp[d]->smoothm = false;
-		dp[d]->smooth = false;
-		dp[d]->line = true;
-	}
-	else kw("DERESOLVE") {
-		dp[d]->deresolve = (int) next_exp;
-		dp[d]->deresolve_avg = false;
-		if (str_i_equals(tk[ct+1], "AVERAGE")) {
-			dp[d]->deresolve_avg = true;
-			ct++;
+}
+
+void do_dataset(int d, GLEGraphBlockInstance* graphBlock) throw(ParserError) {
+	int ct = 2;
+	while (ct <= ntk)	{
+		kw("LINE") {
+			dp[d]->line = true;
+			dp[d]->layer_line = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_LINE);
+		} else kw("LSTYLE") {
+			next_lstyle(dp[d]->lstyle,&ct);
+			dp[d]->layer_line = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_LINE);
+		} else kw("LWIDTH") {
+			dp[d]->lwidth = next_exp;
+		} else kw("MARKER") {
+			dp[d]->marker = next_marker;
+			dp[d]->layer_marker = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_MARKER);
+		} else kw("MDATA") {
+			dp[d]->mdata = next_dn;
+		} else kw("COLOR") {
+			dp[d]->color = next_color;
+		} else kw("KEYFILL") {
+			dp[d]->key_fill = next_color;
+		} else kw("MSIZE") {
+			dp[d]->msize = next_exp;
+		} else kw("MDIST") {
+			dp[d]->mdist = next_exp;
+		} else kw("MSCALE") {
+			dp[d]->mscale = next_exp;
+		} else kw("KEY") {
+			next_vquote_cpp(dp[d]->key_name);
+		} else kw("AUTOSCALE") {
+			dp[d]->autoscale = true;
+		} else kw("AUTO") {
+			dp[d]->autoscale = true;
+		} else kw("NOMISS") {
+			dp[d]->nomiss = true;
+		} else kw("NOMISSING") {
+			dp[d]->nomiss = true;
+		} else kw("FILE") {
+			next_vquote(dp[d]->bigfile);
+		} else kw("BIGFILE") {
+			next_vquote(dp[d]->bigfile);
+		} else kw("STEPS") {
+			dp[d]->line_mode = GLE_GRAPH_LM_STEPS;
+			dp[d]->layer_line = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_LINE);
+		} else kw("FSTEPS") {
+			dp[d]->line_mode = GLE_GRAPH_LM_FSTEPS;
+			dp[d]->layer_line = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_LINE);
+		} else kw("HIST") {
+			dp[d]->line_mode = GLE_GRAPH_LM_HIST;
+			dp[d]->layer_line = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_LINE);
+		} else kw("BAR") {
+			dp[d]->line_mode = GLE_GRAPH_LM_BAR;
+			dp[d]->layer_line = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_LINE);
+		} else kw("IMPULSES") {
+			dp[d]->line_mode = GLE_GRAPH_LM_IMPULSES;
+			dp[d]->layer_line = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_LINE);
+		} else kw("XAXIS") {
+			dp[d]->getDim(GLE_DIM_X)->setAxis(GLE_AXIS_X);
+		} else kw("YAXIS") {
+			dp[d]->getDim(GLE_DIM_Y)->setAxis(GLE_AXIS_Y);
+		} else kw("X2AXIS") {
+			dp[d]->getDim(GLE_DIM_X)->setAxis(GLE_AXIS_X2);
+		} else kw("Y2AXIS") {
+			dp[d]->getDim(GLE_DIM_Y)->setAxis(GLE_AXIS_Y2);
+		} else kw("X0AXIS") {
+			dp[d]->getDim(GLE_DIM_X)->setAxis(GLE_AXIS_X0);
+		} else kw("Y0AXIS") {
+			dp[d]->getDim(GLE_DIM_Y)->setAxis(GLE_AXIS_Y0);
+		} else kw("SMOOTH") {
+			dp[d]->line = true;
+			dp[d]->layer_line = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_LINE);
+			dp[d]->smoothm = false;
+			dp[d]->smooth = true;
+		} else kw("SMOOTHM") 	{
+			dp[d]->line = true;
+			dp[d]->layer_line = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_LINE);
+			dp[d]->smoothm = true;
+			dp[d]->smooth = true;
+		} else kw("SVG_SMOOTH") {
+			dp[d]->line = true;
+			dp[d]->layer_line = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_LINE);
+			dp[d]->svg_iter = (int) next_exp;
+			if (dp[d]->svg_iter == 0) dp[d]->svg_iter = 1; // if they say svg_smooth they want it at least once
+			dp[d]->svg_smooth = true;
+			dp[d]->smoothm = false;
+			dp[d]->smooth = false;
+		} else kw("DERESOLVE") {
+			dp[d]->deresolve = (int) next_exp;
+			dp[d]->deresolve_avg = false;
+			if (str_i_equals(tk[ct+1], "AVERAGE")) {
+				dp[d]->deresolve_avg = true;
+				ct++;
+			}
+		} else kw("XMIN") {
+			dp[d]->getDim(GLE_DIM_X)->getRange()->setMinSet(next_exp);
+		} else kw("XMAX") {
+			dp[d]->getDim(GLE_DIM_X)->getRange()->setMaxSet(next_exp);
+		} else kw("YMIN") {
+			dp[d]->getDim(GLE_DIM_Y)->getRange()->setMinSet(next_exp);
+		} else kw("YMAX") {
+			dp[d]->getDim(GLE_DIM_Y)->getRange()->setMaxSet(next_exp);
+		} else kw("HERR") {
+			next_str_cpp(dp[d]->herrup);
+			fixup_err(dp[d]->herrup);
+			dp[d]->herrdown = dp[d]->herrup;
+			dp[d]->layer_error = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_ERROR_BAR);
+		} else kw("HERRLEFT") {
+			next_str_cpp(dp[d]->herrup);
+			fixup_err(dp[d]->herrup);
+			dp[d]->layer_error = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_ERROR_BAR);
+		} else kw("HERRRIGHT") {
+			next_str_cpp(dp[d]->herrdown);
+			fixup_err(dp[d]->herrdown);
+			dp[d]->layer_error = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_ERROR_BAR);
+		} else kw("HERRWIDTH") {
+			dp[d]->herrwidth = next_exp;
+		} else kw("ERR") {
+			next_str_cpp(dp[d]->errup);
+			fixup_err(dp[d]->errup);
+			dp[d]->errdown = dp[d]->errup;
+			dp[d]->layer_error = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_ERROR_BAR);
+		} else kw("ERRUP") {
+			next_str_cpp(dp[d]->errup);
+			fixup_err(dp[d]->errup);
+			dp[d]->layer_error = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_ERROR_BAR);
+		} else kw("ERRDOWN") {
+			next_str_cpp(dp[d]->errdown);
+			fixup_err(dp[d]->errdown);
+			dp[d]->layer_error = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_ERROR_BAR);
+		} else kw("ERRWIDTH") {
+			dp[d]->errwidth = next_exp;
+		} else {
+			g_throw_parser_error("unrecognised GRAPH DN sub command: '",tk[ct],"'");
 		}
-	}
-	else kw("XMIN") dp[d]->getDim(GLE_DIM_X)->getRange()->setMinSet(next_exp);
-	else kw("XMAX") dp[d]->getDim(GLE_DIM_X)->getRange()->setMaxSet(next_exp);
-	else kw("YMIN") dp[d]->getDim(GLE_DIM_Y)->getRange()->setMinSet(next_exp);
-	else kw("YMAX") dp[d]->getDim(GLE_DIM_Y)->getRange()->setMaxSet(next_exp);
-	else kw("HERR") {
-		next_str_cpp(dp[d]->herrup);
-		dp[d]->herrdown = dp[d]->herrup;
-	}
-	else kw("HERRLEFT")	next_str_cpp(dp[d]->herrup);
-	else kw("HERRRIGHT")	next_str_cpp(dp[d]->herrdown);
-	else kw("HERRWIDTH")	dp[d]->herrwidth = next_exp;
-	else kw("ERR") {
-		next_str_cpp(dp[d]->errup);
-		dp[d]->errdown = dp[d]->errup;
-	}
-	else kw("ERRUP")	next_str_cpp(dp[d]->errup);
-	else kw("ERRDOWN")	next_str_cpp(dp[d]->errdown);
-	else kw("ERRWIDTH")	dp[d]->errwidth = next_exp;
-	else {
-		g_throw_parser_error("unrecognised GRAPH DN sub command: '",tk[ct],"'");
-	}
-	ct++;
+		ct++;
 	}
 	// some options imply "di line"
 	if (dp[d]->line_mode != GLE_GRAPH_LM_PLAIN) {
@@ -3882,6 +3973,9 @@ GLEDataSet::GLEDataSet(int identifier) {
 	color = GLE_COLOR_BLACK;
 	mscale = 0;
 	line = 0;
+	layer_line = GLE_GRAPH_LAYER_LINE;
+	layer_marker = GLE_GRAPH_LAYER_MARKER;
+	layer_error = GLE_GRAPH_LAYER_ERROR_BAR;
 	rx1 = ry1 = rx2 = ry2 = 0;
 	initBackup();
 	getDim(0)->setAxis(GLE_AXIS_X);
@@ -3947,6 +4041,9 @@ void GLEDataSet::copy(GLEDataSet* other) {
 	ry1 = other->ry1;
 	rx2 = other->rx2;
 	ry2 = other->ry2;
+	layer_line = other->layer_line;
+	layer_marker = other->layer_marker;
+	layer_error = other->layer_error;
 	initBackup();
 	getDim(0)->copy(other->getDim(0));
 	getDim(1)->copy(other->getDim(1));

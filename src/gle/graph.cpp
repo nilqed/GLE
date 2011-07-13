@@ -107,15 +107,11 @@ void do_noticks(int& ct);
 void do_names(int& ct);
 void do_places(int& ct);
 void do_title(int& ct);
-void do_datasets(int& ct);
+void do_datasets(int& ct, GLEGraphBlockInstance* graphBlock);
 bool is_dataset_identifier(const char* ds);
 GLESub* sub_find(const string& s);
 
 GLEAxis xx[GLE_AXIS_MAX+1];
-
-vector<int> g_fcalls;
-vector<int> g_funder;
-
 GLEColorMap* g_colormap;
 
 bool check_axis_command_name(const char* name, const char* cmp) {
@@ -314,6 +310,10 @@ int GLEGraphBlockInstance::getLayerWithDefault(int defaultLayer) const {
 	}
 }
 
+void GLEGraphBlockInstance::setLayer(int layer) {
+	m_layer = layer;
+}
+
 void GLEGraphBlockInstance::drawParts(const GLEPoint& origin) {
 	typedef std::set<int> LayerSet;
 	LayerSet allLayers;
@@ -438,12 +438,22 @@ bool execute_graph(GLESourceLine& sline, bool isCommandCheck, GLEGraphBlockInsta
 	} else kw("DISCONTINUITY") {
 		if (isCommandCheck) return true;
 		do_discontinuity();
-	} else kw("UNDER") {
-		if (isCommandCheck) return true;
-		g_funder.push_back(sline.getGlobalLineNo() - 1);
 	} else kw("BACKGROUND") {
 		if (isCommandCheck) return true;
 		g_graph_background = next_color;
+	} else kw("BEGIN") {
+		ct++;
+		kw("LAYER") {
+			if (isCommandCheck) return true;
+			graphBlock->setLayer(int(floor(next_exp + 0.5)));
+		}
+	} else kw("END") {
+		ct++;
+		kw("LAYER") {
+			if (isCommandCheck) return true;
+			graphBlock->setLayer(GLE_GRAPH_LAYER_UNDEFINED);
+
+		}
 	} else if (check_axis_command_name(tk[ct],"NOTICKS")) {
 		if (isCommandCheck) return true;
 		do_noticks(ct);
@@ -476,17 +486,9 @@ bool execute_graph(GLESourceLine& sline, bool isCommandCheck, GLEGraphBlockInsta
 		do_title(ct);
 	} else if (is_dataset_identifier(tk[ct])) {
 		if (isCommandCheck) return true;
-		do_datasets(ct);
+		do_datasets(ct, graphBlock);
 	} else if (do_remaining_entries(ct, isCommandCheck)) {
 		if (isCommandCheck) return true;
-	} else {
-		string fct_name(tk[ct]);
-		str_to_uppercase(fct_name);
-		GLESub* sub = sub_find((char*)fct_name.c_str());
-		if (sub != NULL) {
-			if (isCommandCheck) return true;
-			g_fcalls.push_back(sline.getGlobalLineNo() - 1);
-		}
 	}
 	return false;
 }
@@ -837,15 +839,15 @@ void do_title(int& ct) {
 	}
 }
 
-void do_datasets(int& ct) {
+void do_datasets(int& ct, GLEGraphBlockInstance* graphBlock) {
 	int d = get_dataset_identifier(tk[1]); /* dataset number (right$(k$,2))  (0=dn) */
 	if (d != 0) {
 		ensureDataSetCreatedAndSetUsed(d);
-		do_dataset(d);
+		do_dataset(d, graphBlock);
 	} else {
 		for (d = 0; d < MAX_NB_DATA; d++) {
 			if (dp[d] != NULL) {
-				do_dataset(d);
+				do_dataset(d, graphBlock);
 			}
 		}
 	}
@@ -1555,9 +1557,6 @@ void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (Pars
 	GLEPoint origin(ox, oy);
 	graphBlock->drawParts(origin);
 
-	/* Draw the error bars */
-	draw_err();
-
 	/* Draw the key */
 	if (keyinfo->getNbEntries() > 0 && !keyinfo->isDisabled() && !keyinfo->getNoBox() && keyinfo->getBackgroundColor() == (int)GLE_FILL_CLEAR) {
 		g_endclip();
@@ -1612,8 +1611,6 @@ void graph_init() {
 	xx[GLE_AXIS_T].off = true;
 	graph_freebars();
 	graph_free();
-	g_fcalls.clear();
-	g_funder.clear();
 }
 
 void iffree(void *p, const char *s) {
