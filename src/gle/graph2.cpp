@@ -197,6 +197,7 @@ bar_struct::bar_struct() {
 	y3d = 0.0;
 	notop = false;
 	horiz = false;
+	layer = 0;
 	for (int i = 0; i < 20; i++) {
 		from[i] = 0;
 		to[i] = 0;
@@ -217,15 +218,29 @@ GLEGraphPartBars::GLEGraphPartBars() {
 GLEGraphPartBars::~GLEGraphPartBars() {
 }
 
+bool GLEGraphPartBars::shouldDraw(int /* b */) {
+	return true;
+}
+
 std::set<int> GLEGraphPartBars::getLayers() {
 	std::set<int> result;
-	result.insert(GLE_GRAPH_LAYER_BAR);
+	for (int b = 1; b <= g_nbar; b++) {
+		if (shouldDraw(b)) {
+			result.insert(br[b]->layer);
+		}
+	}
 	return result;
 }
 
-void GLEGraphPartBars::drawLayer(int layer) {
-	for (int b = 1; b <= g_nbar; b++) {
-		drawBar(b);
+void GLEGraphPartBars::drawLayerObject(int layer, GLEMemoryCell* object) {
+	GLEClassInstance* classObj = getGLEClassInstance(object, g_graphBlockData->getGraphBlockBase()->getClassDefinitions()->getBar());
+	if (classObj != 0) {
+		int index = classObj->getArray()->getInt(0);
+		if (shouldDraw(index) && br[index]->layer == layer) {
+			g_gsave();
+			drawBar(index);
+			g_grestore();
+		}
 	}
 }
 
@@ -239,7 +254,6 @@ void GLEGraphPartBars::drawBar(int b) {
 	double min_int = bar_get_min_interval_bars(b);
 	if (br[b]->width == 0) br[b]->width = min_int/(nbars * 2);
 	if (br[b]->dist == 0) br[b]->dist = br[b]->width * 1.4;
-	g_gsave();
 	for (int bi = 0; bi < nbars; bi++) {
 		int df = br[b]->from[bi];
 		int dt = br[b]->to[bi];
@@ -307,7 +321,6 @@ void GLEGraphPartBars::drawBar(int b) {
 
 		}
 	}
-	g_grestore();
 }
 
 double graph_bar_pos(double xpos, int bar, int set) throw(ParserError) {
@@ -582,10 +595,30 @@ GLEGraphPartFills::GLEGraphPartFills() {
 GLEGraphPartFills::~GLEGraphPartFills() {
 }
 
+bool GLEGraphPartFills::shouldDraw(int n) {
+	return fd[n]->type != 0;
+}
+
 std::set<int> GLEGraphPartFills::getLayers() {
 	std::set<int> result;
-	result.insert(GLE_GRAPH_LAYER_FILL);
+	for (int n = 1; n <= nfd; n++) {
+		if (shouldDraw(n)) {
+			result.insert(fd[n]->layer);
+		}
+	}
 	return result;
+}
+
+void GLEGraphPartFills::drawLayerObject(int layer, GLEMemoryCell* object) {
+	GLEClassInstance* classObj = getGLEClassInstance(object, g_graphBlockData->getGraphBlockBase()->getClassDefinitions()->getFill());
+	if (classObj != 0) {
+		int index = classObj->getArray()->getInt(0);
+		if (shouldDraw(index) && fd[index]->layer == layer) {
+			g_gsave();
+			drawFill(index);
+			g_grestore();
+		}
+	}
 }
 
 void GLEGraphPartFills::drawFill(int n) {
@@ -678,14 +711,6 @@ void GLEGraphPartFills::drawFill(int n) {
 	g_fill();
 	g_set_path(false);
 	g_endclip();
-}
-
-void GLEGraphPartFills::drawLayer(int layer) {
-	for (int n = 1; n <= nfd; n++) {
-		if (fd[n]->type != 0) {
-			drawFill(n);
-		}
-	}
 }
 
 void fill_vec(double x1, double y1, double x2, double y2, vector<double>* vec) {
@@ -790,27 +815,43 @@ GLEGraphPartErrorBars::GLEGraphPartErrorBars() {
 GLEGraphPartErrorBars::~GLEGraphPartErrorBars() {
 }
 
+bool GLEGraphPartErrorBars::shouldDraw(int dn) {
+	if (hasDataset(dn)) {
+		GLEDataSet* dataSet = dp[dn];
+		if (!dataSet->errup.empty() || !dataSet->errdown.empty() || !dataSet->herrup.empty() || !dataSet->herrdown.empty()) {
+			return true;
+		}
+	}
+	return false;
+}
+
 std::set<int> GLEGraphPartErrorBars::getLayers() {
 	std::set<int> result;
 	for (int dn = 1; dn <= ndata; dn++) {
-		if (hasDataset(dn)) {
-			GLEDataSet* dataSet = dp[dn];
-			if (!dataSet->errup.empty() || !dataSet->errdown.empty() || !dataSet->herrup.empty() || !dataSet->herrdown.empty()) {
-				result.insert(dp[dn]->layer_error);
-			}
+		if (shouldDraw(dn)) {
+			result.insert(dp[dn]->layer_error);
 		}
 	}
 	return result;
 }
 
-void GLEGraphPartErrorBars::drawLayer(int layer) {
-	g_gsave();
+void GLEGraphPartErrorBars::addToOrder(GLEGraphDataSetOrder* order) {
 	for (int dn = 1; dn <= ndata; dn++) {
-		if (hasDataset(dn) && dp[dn]->layer_error == layer) {
-			drawErrorBars(dn);
+		if (shouldDraw(dn)) {
+			order->addDataSet(dn);
 		}
 	}
-	g_grestore();
+}
+
+void GLEGraphPartErrorBars::drawLayerObject(int layer, GLEMemoryCell* object) {
+	if (object->Type == GLE_MC_INT) {
+		int dn = object->Entry.IntVal;
+		if (shouldDraw(dn) && dp[dn]->layer_error == layer) {
+			g_gsave();
+			drawErrorBars(dn);
+			g_grestore();
+		}
+	}
 }
 
 void GLEGraphPartErrorBars::drawErrorBars(int dn) {
@@ -835,30 +876,37 @@ GLEGraphPartLines::GLEGraphPartLines() {
 GLEGraphPartLines::~GLEGraphPartLines() {
 }
 
+bool GLEGraphPartLines::shouldDraw(int dn) {
+	return hasDataset(dn) && (dp[dn]->line || dp[dn]->lstyle[0] != 0);
+}
+
 std::set<int> GLEGraphPartLines::getLayers() {
 	std::set<int> result;
 	for (int dn = 1; dn <= ndata; dn++) {
-		if (hasDataset(dn) && (dp[dn]->line || dp[dn]->lstyle[0] != 0)) {
+		if (shouldDraw(dn)) {
 			result.insert(dp[dn]->layer_line);
 		}
 	}
 	return result;
 }
 
-void GLEGraphPartLines::drawLayer(int layer) {
-	double oldlwidth;
-	char oldlstyle[10];
-	g_gsave();
-	g_get_line_style(oldlstyle);
-	g_get_line_width(&oldlwidth);
+void GLEGraphPartLines::addToOrder(GLEGraphDataSetOrder* order) {
 	for (int dn = 1; dn <= ndata; dn++) {
-		if (hasDataset(dn) && dp[dn]->layer_line == layer && (dp[dn]->line || dp[dn]->lstyle[0] != 0)) {
-			g_set_line_style(oldlstyle);      /* use defaults for each */
-			g_set_line_width(oldlwidth);      /* use defaults for each */
-			drawLine(dn);
+		if (shouldDraw(dn)) {
+			order->addDataSet(dn);
 		}
 	}
-	g_grestore();
+}
+
+void GLEGraphPartLines::drawLayerObject(int layer, GLEMemoryCell* object) {
+	if (object->Type == GLE_MC_INT) {
+		int dn = object->Entry.IntVal;
+		if (shouldDraw(dn) && dp[dn]->layer_line == layer) {
+			g_gsave();
+			drawLine(dn);
+			g_grestore();
+		}
+	}
 }
 
 void GLEGraphPartLines::drawLine(int dn) {
@@ -1081,27 +1129,37 @@ GLEGraphPartMarkers::GLEGraphPartMarkers() {
 GLEGraphPartMarkers::~GLEGraphPartMarkers() {
 }
 
+bool GLEGraphPartMarkers::shouldDraw(int dn) {
+	return hasDataset(dn) && dp[dn]->marker != 0;
+}
+
 std::set<int> GLEGraphPartMarkers::getLayers() {
 	std::set<int> result;
 	for (int dn = 1; dn <= ndata; dn++) {
-		if (dp[dn] != NULL && dp[dn]->marker != 0) {
+		if (shouldDraw(dn)) {
 			result.insert(dp[dn]->layer_marker);
 		}
 	}
 	return result;
 }
 
-void GLEGraphPartMarkers::drawLayer(int layer) {
-	double oldlwidth;
-	g_gsave();
-	g_get_line_width(&oldlwidth);
+void GLEGraphPartMarkers::addToOrder(GLEGraphDataSetOrder* order) {
 	for (int dn = 1; dn <= ndata; dn++) {
-		if (dp[dn] != NULL && dp[dn]->marker != 0 && dp[dn]->layer_marker == layer) {
-			g_set_line_width(oldlwidth); /* use defaults for each */
-			drawMarkers(dn);
+		if (shouldDraw(dn)) {
+			order->addDataSet(dn);
 		}
 	}
-	g_grestore();
+}
+
+void GLEGraphPartMarkers::drawLayerObject(int layer, GLEMemoryCell* object) {
+	if (object->Type == GLE_MC_INT) {
+		int dn = object->Entry.IntVal;
+		if (shouldDraw(dn) && dp[dn]->layer_marker == layer) {
+			g_gsave();
+			drawMarkers(dn);
+			g_grestore();
+		}
+	}
 }
 
 void GLEGraphPartMarkers::drawMarkers(int dn) {

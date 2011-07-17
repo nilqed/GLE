@@ -43,15 +43,15 @@ class GLEGraphDrawCommand;
 class GLEGraphBlockData;
 class GLEGraphBlockInstance;
 
-const int GLE_GRAPH_LAYER_UNDEFINED = -1;
-const int GLE_GRAPH_LAYER_GRID = 200;
-const int GLE_GRAPH_LAYER_FILL = 300;
-const int GLE_GRAPH_LAYER_BAR = 400;
-const int GLE_GRAPH_LAYER_DRAW_COMMAND = 500;
-const int GLE_GRAPH_LAYER_AXIS = 600;
-const int GLE_GRAPH_LAYER_LINE = 700;
-const int GLE_GRAPH_LAYER_ERROR_BAR = 800;
-const int GLE_GRAPH_LAYER_MARKER = 900;
+const int GLE_GRAPH_LAYER_UNDEFINED    = -1;
+const int GLE_GRAPH_LAYER_GRID         = 200;
+const int GLE_GRAPH_LAYER_FILL         = 350;
+const int GLE_GRAPH_LAYER_BAR          = 350;
+const int GLE_GRAPH_LAYER_AXIS         = 500;
+const int GLE_GRAPH_LAYER_LINE         = 700;
+const int GLE_GRAPH_LAYER_ERROR_BAR    = 700;
+const int GLE_GRAPH_LAYER_MARKER       = 700;
+const int GLE_GRAPH_LAYER_DRAW_COMMAND = 700;
 
 class GLEInternalClassDefinitions : public GLERefCountObject
 {
@@ -59,9 +59,15 @@ public:
 	GLEInternalClassDefinitions();
 
 	inline GLEClassDefinition* getKeySeparator() { return m_keySeparator.get(); }
+	inline GLEClassDefinition* getDrawCommand() { return m_drawCommand.get(); }
+	inline GLEClassDefinition* getFill() { return m_fill.get(); }
+	inline GLEClassDefinition* getBar() { return m_bar.get(); }
 
 public:
 	GLERC<GLEClassDefinition> m_keySeparator;
+	GLERC<GLEClassDefinition> m_drawCommand;
+	GLERC<GLEClassDefinition> m_fill;
+	GLERC<GLEClassDefinition> m_bar;
 };
 
 class GLEGraphDataSetOrder : public GLERefCountObject
@@ -100,7 +106,9 @@ public:
 	virtual ~GLEGraphPart();
 
 	virtual std::set<int> getLayers() = 0;
-	virtual void drawLayer(int layer) = 0;
+	virtual void drawLayer(int layer);
+	virtual void addToOrder(GLEGraphDataSetOrder* order);
+	virtual void drawLayerObject(int layer, GLEMemoryCell* object);
 };
 
 class GLEGraphPartGrid : public GLEGraphPart
@@ -120,8 +128,9 @@ public:
 	virtual ~GLEGraphPartFills();
 
 	virtual std::set<int> getLayers();
-	virtual void drawLayer(int layer);
+	virtual void drawLayerObject(int layer, GLEMemoryCell* object);
 
+	bool shouldDraw(int n);
 	void drawFill(int n);
 };
 
@@ -132,8 +141,9 @@ public:
 	virtual ~GLEGraphPartBars();
 
 	virtual std::set<int> getLayers();
-	virtual void drawLayer(int layer);
+	virtual void drawLayerObject(int layer, GLEMemoryCell* object);
 
+	bool shouldDraw(int n);
 	void drawBar(int b);
 };
 
@@ -159,8 +169,10 @@ public:
 	virtual ~GLEGraphPartLines();
 
 	virtual std::set<int> getLayers();
-	virtual void drawLayer(int layer);
+	virtual void addToOrder(GLEGraphDataSetOrder* order);
+	virtual void drawLayerObject(int layer, GLEMemoryCell* object);
 
+	bool shouldDraw(int dn);
 	void drawLine(int dn);
 };
 
@@ -171,8 +183,10 @@ public:
 	virtual ~GLEGraphPartErrorBars();
 
 	virtual std::set<int> getLayers();
-	virtual void drawLayer(int layer);
+	virtual void addToOrder(GLEGraphDataSetOrder* order);
+	virtual void drawLayerObject(int layer, GLEMemoryCell* object);
 
+	bool shouldDraw(int dn);
 	void drawErrorBars(int dn);
 };
 
@@ -183,8 +197,10 @@ public:
 	virtual ~GLEGraphPartMarkers();
 
 	virtual std::set<int> getLayers();
-	virtual void drawLayer(int layer);
+	virtual void addToOrder(GLEGraphDataSetOrder* order);
+	virtual void drawLayerObject(int layer, GLEMemoryCell* object);
 
+	bool shouldDraw(int dn);
 	void drawMarkers(int dn);
 };
 
@@ -195,7 +211,7 @@ public:
 	virtual ~GLEGraphDrawCommands();
 
 	virtual std::set<int> getLayers();
-	virtual void drawLayer(int layer);
+	virtual void drawLayerObject(int layer, GLEMemoryCell* object);
 
 	void doDrawCommand(GLESourceLine& sline, GLEGraphBlockInstance* graphBlock);
 
@@ -217,12 +233,17 @@ public:
 	int getLayerWithDefault(int defaultLayer) const;
 	void setLayer(int layer);
 
-	void drawParts(const GLEPoint& origin);
+	void drawParts();
 
 	GLEGraphPartAxis* getAxis();
+	void setData(GLEGraphBlockData* data);
+	GLEGraphBlockData* getData();
+	GLEGraphBlockBase* getGraphBlockBase();
 
 private:
+	GLEGraphBlockBase* m_graphBlockBase;
 	int m_layer;
+	GLEGraphBlockData* m_data;
 	GLEGraphDrawCommands* m_drawCommands;
 	GLEGraphPartAxis* m_axis;
 	GLEVectorAutoDelete<GLEGraphPart> m_graphParts;
@@ -308,6 +329,7 @@ char *un_quote(char *ct);
 #define next_quote(s) (ct+=1,skipspace,strcpy(s,un_quote(tk[ct])))
 
 struct fill_data {
+	int layer;
 	int da,db;	/* fill from, too */
 	int type; 	/* 1= x1,d1, 2=d1,x2, 3=d1,d2, 4=d1 */
 	int color;
@@ -472,6 +494,7 @@ public:
 	double x3d,y3d;
 	bool horiz;
 	string style[20];
+	int layer;
 	bar_struct();
 };
 
@@ -518,7 +541,7 @@ int get_dataset_identifier(const char* ds, bool def = false) throw(ParserError);
 int get_dataset_identifier(const string& ds, GLEParser* parser, bool def) throw(ParserError);
 
 double graph_bar_pos(double xpos, int bar, int set) throw(ParserError);
-void begin_graph(GLEGraphBlockBase* graphBlockBase) throw (ParserError);
+void begin_graph(GLEGraphBlockBase* graphBlockBase, GLEGraphBlockInstance* graphBlock) throw (ParserError);
 bool execute_graph(GLESourceLine& sline, bool isCommandCheck, GLEGraphBlockInstance* graphBlock);
 void begin_key(int *pln, int *pcode, int *cp) throw (ParserError);
 void begin_tab(int *pln, int *pcode, int *cp);

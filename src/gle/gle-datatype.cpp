@@ -873,3 +873,15 @@ bool GLEClassInstance::equals(GLEDataObject* obj) {
 void GLEClassInstance::print(ostream& out) const {
 }
 
+GLEClassInstance* getGLEClassInstance(GLEMemoryCell* object, GLEClassDefinition* def) {
+	if (object->Type == GLE_MC_OBJECT) {
+		GLEDataObject* dataObject = object->Entry.ObjectVal;
+		if (dataObject->getType() == GLEObjectTypeClassInstance) {
+			GLEClassInstance* classInstance = static_cast<GLEClassInstance*>(dataObject);
+			if (classInstance->getDefinition() == def) {
+				return classInstance;
+			}
+		}
+	}
+	return 0;
+}

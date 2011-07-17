@@ -333,4 +333,6 @@ public:
 	inline GLEArrayImpl* getArray() { return &m_Data; }
 };
 
+GLEClassInstance* getGLEClassInstance(GLEMemoryCell* object, GLEClassDefinition* def);
+
 #endif

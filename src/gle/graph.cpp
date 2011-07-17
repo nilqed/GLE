@@ -93,8 +93,8 @@ void graph_freebars();
 double get_next_exp(TOKENS tk,int ntk,int *curtok);
 void data_command(GLESourceLine& sline);
 void do_discontinuity();
-void do_bar(int& ct);
-void do_fill(int& ct);
+void do_bar(int& ct, GLEGraphBlockInstance* graphBlock);
+void do_fill(int& ct, GLEGraphBlockInstance* graphBlock);
 void do_hscale(int& ct);
 void do_letsave(GLESourceLine& sline);
 void do_size(int& ct);
@@ -146,6 +146,12 @@ void replace_exp(string& exp);
 GLEInternalClassDefinitions::GLEInternalClassDefinitions() {
 	m_keySeparator = new GLEClassDefinition("key_separator");
 	m_keySeparator->addField("lstyle");
+	m_drawCommand = new GLEClassDefinition("draw_command");
+	m_drawCommand->addField("index");
+	m_fill = new GLEClassDefinition("fill");
+	m_fill->addField("index");
+	m_bar = new GLEClassDefinition("bar");
+	m_bar->addField("index");
 }
 
 GLEGraphDataSetOrder::GLEGraphDataSetOrder(GLEGraphBlockData* data):
@@ -227,6 +233,15 @@ GLEGraphPart::GLEGraphPart() {
 GLEGraphPart::~GLEGraphPart() {
 }
 
+void GLEGraphPart::drawLayer(int /* layer */) {
+}
+
+void GLEGraphPart::addToOrder(GLEGraphDataSetOrder* /* order */) {
+}
+
+void GLEGraphPart::drawLayerObject(int /* layer */, GLEMemoryCell* /* object */) {
+}
+
 GLEGraphDrawCommands::GLEGraphDrawCommands() {
 }
 
@@ -241,34 +256,44 @@ std::set<int> GLEGraphDrawCommands::getLayers() {
 	return result;
 }
 
-void GLEGraphDrawCommands::drawLayer(int layer) {
-	g_gsave();
-	g_beginclip();
-	g_set_path(true);
-	g_newpath();
-	g_box_stroke(xbl, ybl, xbl+xlength, ybl+ylength, false);
-	g_clip();
-	g_set_path(false);
-	g_set_hei(g_fontsz);
-	for (int i = 0; i < int(m_drawCommands.size()); ++i) {
-		if (m_drawCommands[i]->getLayer() == layer) {
-			m_drawCommands[i]->draw();
+void GLEGraphDrawCommands::drawLayerObject(int layer, GLEMemoryCell* object) {
+	GLEClassInstance* classObj = getGLEClassInstance(object, g_graphBlockData->getGraphBlockBase()->getClassDefinitions()->getDrawCommand());
+	if (classObj != 0) {
+		int index = classObj->getArray()->getInt(0);
+		if (m_drawCommands[index]->getLayer() == layer) {
+			g_gsave();
+			g_beginclip();
+			g_set_path(true);
+			g_newpath();
+			g_box_stroke(xbl, ybl, xbl+xlength, ybl+ylength, false);
+			g_clip();
+			g_set_path(false);
+			g_set_hei(g_fontsz);
+			m_drawCommands[index]->draw();
+			g_endclip();
+			g_grestore();
 		}
 	}
-	g_endclip();
-	g_grestore();
 }
 
 void GLEGraphDrawCommands::doDrawCommand(GLESourceLine& sline, GLEGraphBlockInstance* graphBlock)
 {
+	int index = m_drawCommands.size();
 	GLEGraphDrawCommand* cmd = new GLEGraphDrawCommand(graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_DRAW_COMMAND));
 	m_drawCommands.push_back(cmd);
+	GLEGraphDataSetOrder* order = graphBlock->getData()->getOrder();
+	GLEClassDefinition* classDef = graphBlock->getGraphBlockBase()->getClassDefinitions()->getDrawCommand();
+	GLEClassInstance* classObj = new GLEClassInstance(classDef);
+	order->addObject(classObj);
+	classObj->getArray()->addInt(index);
 	cmd->createGraphDrawCommand(sline);
 }
 
 GLEGraphBlockInstance::GLEGraphBlockInstance(GLEGraphBlockBase* parent):
 	GLEBlockInstance(parent),
-	m_layer(GLE_GRAPH_LAYER_UNDEFINED)
+	m_graphBlockBase(parent),
+	m_layer(GLE_GRAPH_LAYER_UNDEFINED),
+	m_data(0)
 {
 	m_drawCommands = new GLEGraphDrawCommands();
 	m_axis = new GLEGraphPartAxis();
@@ -277,10 +302,10 @@ GLEGraphBlockInstance::GLEGraphBlockInstance(GLEGraphBlockBase* parent):
 	m_graphParts.push_back(new GLEGraphPartFills());
 	m_graphParts.push_back(new GLEGraphPartBars());
 	m_graphParts.push_back(m_axis);
-	m_graphParts.push_back(m_drawCommands);
 	m_graphParts.push_back(new GLEGraphPartLines());
 	m_graphParts.push_back(new GLEGraphPartErrorBars());
 	m_graphParts.push_back(new GLEGraphPartMarkers());
+	m_graphParts.push_back(m_drawCommands);
 }
 
 GLEGraphBlockInstance::~GLEGraphBlockInstance() {
@@ -314,10 +339,14 @@ void GLEGraphBlockInstance::setLayer(int layer) {
 	m_layer = layer;
 }
 
-void GLEGraphBlockInstance::drawParts(const GLEPoint& origin) {
+void GLEGraphBlockInstance::drawParts() {
 	typedef std::set<int> LayerSet;
 	LayerSet allLayers;
 	GLEVectorAutoDelete<LayerSet> partLayers;
+	GLEGraphDataSetOrder* order = getData()->getOrder();
+	for (int i = 0; i < int(m_graphParts.size()); ++i) {
+		m_graphParts[i]->addToOrder(order);
+	}
 	for (int i = 0; i < int(m_graphParts.size()); ++i) {
 		LayerSet layers(m_graphParts[i]->getLayers());
 		allLayers.insert(layers.begin(), layers.end());
@@ -326,8 +355,15 @@ void GLEGraphBlockInstance::drawParts(const GLEPoint& origin) {
 	for (LayerSet::const_iterator layer(allLayers.begin()); layer != allLayers.end(); ++layer) {
 		for (int i = 0; i < int(m_graphParts.size()); ++i) {
 			if (partLayers[i]->count(*layer) != 0) {
-				g_move(origin);
 				m_graphParts[i]->drawLayer(*layer);
+			}
+		}
+		GLEArrayImpl* orderArray = order->getArray();
+		for (unsigned int j = 0; j < orderArray->size(); ++j) {
+			for (int i = 0; i < int(m_graphParts.size()); ++i) {
+				if (partLayers[i]->count(*layer) != 0) {
+					m_graphParts[i]->drawLayerObject(*layer, orderArray->get(j));
+				}
 			}
 		}
 	}
@@ -335,6 +371,18 @@ void GLEGraphBlockInstance::drawParts(const GLEPoint& origin) {
 
 GLEGraphPartAxis* GLEGraphBlockInstance::getAxis() {
 	return m_axis;
+}
+
+void GLEGraphBlockInstance::setData(GLEGraphBlockData* data) {
+	m_data = data;
+}
+
+GLEGraphBlockData* GLEGraphBlockInstance::getData() {
+	return m_data;
+}
+
+GLEGraphBlockBase* GLEGraphBlockInstance::getGraphBlockBase() {
+	return m_graphBlockBase;
 }
 
 GLEGraphBlockBase::GLEGraphBlockBase():
@@ -349,7 +397,7 @@ GLEGraphBlockBase::~GLEGraphBlockBase() {
 
 GLEBlockInstance* GLEGraphBlockBase::beginExecuteBlockImpl(GLESourceLine& sline, int *pcode, int *cp) {
 	GLEGraphBlockInstance* graphBlock = new GLEGraphBlockInstance(this);
-	begin_graph(this);
+	begin_graph(this, graphBlock);
 	return graphBlock;
 }
 
@@ -362,7 +410,7 @@ bool GLEGraphBlockBase::checkLine(GLESourceLine& sline) {
 // axis is defined in terms of its base size, which is equal to g_fontsz.
 // A useful value for base is 0.25
 
-void begin_graph(GLEGraphBlockBase* graphBlockBase) throw (ParserError) {
+void begin_graph(GLEGraphBlockBase* graphBlockBase, GLEGraphBlockInstance* graphBlock) throw (ParserError) {
 	g_colormap = NULL;
 	for (unsigned int i = 0; i < g_letCmds.size(); i++) {
 		deleteLet(g_letCmds[i]);
@@ -372,6 +420,7 @@ void begin_graph(GLEGraphBlockBase* graphBlockBase) throw (ParserError) {
 	g_keyInfo = new KeyInfo();
 	delete g_graphBlockData;
 	g_graphBlockData = new GLEGraphBlockData(graphBlockBase);
+	graphBlock->setData(g_graphBlockData);
 	g_hscale = .7;
 	g_vscale = .7;
 	g_discontinuityThreshold = GLE_INF;
@@ -404,13 +453,13 @@ bool execute_graph(GLESourceLine& sline, bool isCommandCheck, GLEGraphBlockInsta
 	int ct = 1;
 	if (str_i_equals(tk[ct],"BAR")) {
 		if (isCommandCheck) return true;
-		do_bar(ct);
+		do_bar(ct, graphBlock);
 	} else if (str_i_equals(tk[ct],"DATA")) {
 		if (isCommandCheck) return true;
 		data_command(sline);
 	} else kw("FILL") {
 		if (isCommandCheck) return true;
-		do_fill(ct);
+		do_fill(ct, graphBlock);
 	} else kw("HSCALE") {
 		if (isCommandCheck) return true;
 		do_hscale(ct);
@@ -493,7 +542,7 @@ bool execute_graph(GLESourceLine& sline, bool isCommandCheck, GLEGraphBlockInsta
 	return false;
 }
 
-void do_bar(int& ct) {
+void do_bar(int& ct, GLEGraphBlockInstance* graphBlock) {
 	/* bar d1,d2,d3 from d4,d5,d6 color red,green,blue fill grey,blue,green
 		dist exp, width exp, LSTYLE 3,445,1
 		3dbar .5 .5 top black,black,black side red,green,blue  notop */
@@ -502,6 +551,12 @@ void do_bar(int& ct) {
 	g_nbar++;
 	br[g_nbar] = new bar_struct();
 	br[g_nbar]->ngrp = 0;
+	GLEGraphDataSetOrder* order = graphBlock->getData()->getOrder();
+	GLEClassDefinition* classDef = graphBlock->getGraphBlockBase()->getClassDefinitions()->getBar();
+	GLEClassInstance* classObj = new GLEClassInstance(classDef);
+	order->addObject(classObj);
+	classObj->getArray()->addInt(g_nbar);
+	br[g_nbar]->layer = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_FILL);
 	ct = 2;
 	ss = strtok(tk[ct],",");
 	while (ss!=NULL) {
@@ -513,7 +568,6 @@ void do_bar(int& ct) {
  	  }
 	  ss = strtok(0,",");
 	}
-
 	br[g_nbar]->horiz = false;
 	for (int i = 0; i <= ng; i++) {
 		br[g_nbar]->color[i] = g_get_grey(0.0);
@@ -523,64 +577,60 @@ void do_bar(int& ct) {
 		g_get_line_width(&br[g_nbar]->lwidth[i]);
 		strcpy(br[g_nbar]->lstyle[i] ,"1\0");
 	}
-
 	ct++;
-	while (ct<=ntk)  {
-		kw("DIST") 	br[g_nbar]->dist = next_exp;
-	   else kw("WIDTH") 	br[g_nbar]->width = next_exp;
-	   else kw("3D") {
-		br[g_nbar]->x3d = next_exp;
-		br[g_nbar]->y3d = next_exp;
+	while (ct<=ntk) {
+		kw("DIST") {
+			br[g_nbar]->dist = next_exp;
+		} else kw("WIDTH") {
+			br[g_nbar]->width = next_exp;
+		} else kw("3D") {
+			br[g_nbar]->x3d = next_exp;
+			br[g_nbar]->y3d = next_exp;
+		} else kw("NOTOP") {
+			br[g_nbar]->notop = true;
+		} else kw("HORIZ") {
+			br[g_nbar]->horiz = true;
+		} else kw("LSTYLE") {
+			next_str((char *) br[g_nbar]->lstyle);
+		} else kw("STYLE") {
+			ct += 1;
+			do_set_bar_style(tk[ct], br[g_nbar]);
+		} else kw("LWIDTH") {
+			br[g_nbar]->lwidth[0] = next_exp;
+		} else kw("FROM") {
+			fi = 0;
+			ct +=1;
+			ss = strtok(tk[ct],",");
+			while (ss!=NULL) {
+				if (toupper(*ss)=='D') {
+					int di = get_dataset_identifier(ss);
+					ensureDataSetCreatedAndSetUsed(di);
+					br[g_nbar]->from[fi++] = di;
+				}
+				ss = strtok(0,",");
+			}
+	   } else kw("COLOR") {
+		   ct += 1;
+		   do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_COLOR);
+	   } else kw("SIDE") {
+		   ct += 1;
+		   do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_SIDE);
+	   } else kw("TOP") {
+		   ct += 1;
+		   do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_TOP);
+	   } else kw("FILL") {
+		   ct++;
+		   do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_FILL);
+	   } else kw("PATTERN") {
+		   ct++;
+		   do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_PATTERN);
+	   } else kw("BACKGROUND") {
+		   ct++;
+		   do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_BACKGROUND);
+	   } else {
+		   g_throw_parser_error("unrecognised bar sub command '", tk[ct], "'");
 	   }
-	   else kw("NOTOP") 	br[g_nbar]->notop = true;
-	   else kw("HORIZ") 	br[g_nbar]->horiz = true;
-	   else kw("LSTYLE") 	next_str((char *) br[g_nbar]->lstyle);
-	   else kw("STYLE") {
-	   	ct += 1;
-		do_set_bar_style(tk[ct], br[g_nbar]);
-	   }
-	   else kw("LWIDTH") 	br[g_nbar]->lwidth[0] = next_exp;
-	   else kw("FROM") {
-		fi = 0;
-		ct +=1;
-		ss = strtok(tk[ct],",");
-		while (ss!=NULL) {
-		  if (toupper(*ss)=='D') {
-			int di = get_dataset_identifier(ss);
-			ensureDataSetCreatedAndSetUsed(di);
-			br[g_nbar]->from[fi++] = di;
-		  }
-		  ss = strtok(0,",");
-		}
-	   }
-	   else kw("COLOR") {
-		ct += 1;
-		do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_COLOR);
-	   }
-	   else kw("SIDE") {
-		ct += 1;
-		do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_SIDE);
-	   }
-	   else kw("TOP") {
-		ct += 1;
-		do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_TOP);
-	   }
-	   else kw("FILL") {
-		ct++;
-		do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_FILL);
-	   }
-	   else kw("PATTERN") {
-		ct++;
-		do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_PATTERN);
-	   }
-	   else kw("BACKGROUND") {
-		ct++;
-		do_set_bar_color(tk[ct], br[g_nbar], BAR_SET_BACKGROUND);
-	   }
-	   else {
-		g_throw_parser_error("unrecognised bar sub command '", tk[ct], "'");
-	   }
-	  ct++;
+	   ct++;
 	}
 }
 
@@ -588,13 +638,21 @@ void do_bar(int& ct) {
 /* fill d1,x2 color green xmin 1 xmax 2 ymin 1 ymax 2   */
 /* fill d1,d2 color green xmin 1 xmax 2 ymin 1 ymax 2   */
 /* fill d1 color green xmin 1 xmax 2 ymin 1 ymax 2      */
-void do_fill(int& ct) {
-	char *ss,s1[40],s2[40];
+void do_fill(int& ct, GLEGraphBlockInstance* graphBlock) {
 	fd[++nfd] = FD_CAST myallocz(sizeof(*fd[1]));
+	GLEGraphDataSetOrder* order = graphBlock->getData()->getOrder();
+	GLEClassDefinition* classDef = graphBlock->getGraphBlockBase()->getClassDefinitions()->getFill();
+	GLEClassInstance* classObj = new GLEClassInstance(classDef);
+	order->addObject(classObj);
+	classObj->getArray()->addInt(nfd);
+	fd[nfd]->layer = graphBlock->getLayerWithDefault(GLE_GRAPH_LAYER_FILL);
+	char s1[40],s2[40];
 	ct = 2;
 	strcpy(s1,strtok(tk[ct],","));
-	ss = strtok(0,",");
-	if (ss==NULL) strcpy(s2,""); else {
+	char *ss = strtok(0,",");
+	if (ss == NULL) {
+		strcpy(s2,"");
+	} else {
 		strcpy(s2,ss);
 		strtok(0,",");
 	}
@@ -619,8 +677,12 @@ void do_fill(int& ct) {
 	} else {
 		g_throw_parser_error("invalid fill option, wanted d1,d2 or x1,d1 or d1,x2 or d1");
 	}
-	if (fd[nfd]->da != 0) ensureDataSetCreatedAndSetUsed(fd[nfd]->da);
-	if (fd[nfd]->db != 0) ensureDataSetCreatedAndSetUsed(fd[nfd]->db);
+	if (fd[nfd]->da != 0) {
+		ensureDataSetCreatedAndSetUsed(fd[nfd]->da);
+	}
+	if (fd[nfd]->db != 0) {
+		ensureDataSetCreatedAndSetUsed(fd[nfd]->db);
+	}
 	ct++;
 	fd[nfd]->color = g_get_grey(1.0-nfd*.1);
 	fd[nfd]->xmin = -GLE_INF;
@@ -628,12 +690,18 @@ void do_fill(int& ct) {
 	fd[nfd]->ymin = -GLE_INF;
 	fd[nfd]->ymax = GLE_INF;
 	while (ct<=ntk)  {
-		kw("COLOR") 	{ct++; fd[nfd]->color = pass_color_var(tk[ct]);}
-	   else kw("XMIN") 	fd[nfd]->xmin = next_exp;
-	   else kw("XMAX") 	fd[nfd]->xmax = next_exp;
-	   else kw("YMIN") 	fd[nfd]->ymin = next_exp;
-	   else kw("YMAX") 	fd[nfd]->ymax = next_exp;
-	   else {
+	   kw("COLOR") {
+		   ct++;
+		   fd[nfd]->color = pass_color_var(tk[ct]);
+	   } else kw("XMIN") {
+		   fd[nfd]->xmin = next_exp;
+	   } else kw("XMAX") {
+		   fd[nfd]->xmax = next_exp;
+	   } else kw("YMIN") {
+		   fd[nfd]->ymin = next_exp;
+	   } else kw("YMAX") {
+		   fd[nfd]->ymax = next_exp;
+	   } else {
 		g_throw_parser_error("unrecognised fill sub command: '", tk[ct], "'");
 	   }
 	   ct++;
@@ -1554,8 +1622,7 @@ void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (Pars
 
 	graphBlock->getAxis()->setBox(&box);
 
-	GLEPoint origin(ox, oy);
-	graphBlock->drawParts(origin);
+	graphBlock->drawParts();
 
 	/* Draw the key */
 	if (keyinfo->getNbEntries() > 0 && !keyinfo->isDisabled() && !keyinfo->getNoBox() && keyinfo->getBackgroundColor() == (int)GLE_FILL_CLEAR) {
