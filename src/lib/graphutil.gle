@@ -324,8 +324,10 @@ sub bar_draw_error_intervals data$ err$ bar
    next i
 end sub
 
-sub draw_box_plot ds0
+sub boxplot ds0 boxwidth msize
    default ds0 1
+   default boxwidth 0.4
+   default msize 1.5
    set cap round
    for i = 1 to ndata("d"+num$(ds0))
       local x = dataxvalue("d"+num$(ds0), i)
@@ -350,6 +352,11 @@ sub draw_box_plot ds0
       amove xg(x)-boxwidth/2 yg(maxv)
       aline xg(x)+boxwidth/2 yg(maxv)
       amove xg(x) yg(meanv)
-      marker fdiamond 1.5*boxwidth
+      marker fdiamond msize*boxwidth
    next i
+end sub
+
+sub draw_box_plot ds0
+   !compatibility
+   boxplot ds0 0.4 1.5
 end sub
