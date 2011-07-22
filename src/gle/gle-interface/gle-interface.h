@@ -372,7 +372,7 @@ public:
 class DLLCLASS GLEColor : public GLEDataObject {
 protected:
 	bool m_Transparent;
-	double m_Red, m_Green, m_Blue;
+	double m_Red, m_Green, m_Blue, m_Alpha;
 	string* m_Name;
 public:
 	GLEColor();
@@ -389,9 +389,11 @@ public:
 	inline double getRed() { return m_Red; }
 	inline double getGreen() { return m_Green; }
 	inline double getBlue() { return m_Blue; }
+	inline bool hasAlpha() { return float_to_color_comp(m_Alpha) != 255; }
 	inline unsigned char getRedI() { return float_to_color_comp(m_Red); }
 	inline unsigned char getGreenI() { return float_to_color_comp(m_Green); }
 	inline unsigned char getBlueI() { return float_to_color_comp(m_Blue); }
+	inline unsigned char getAlphaI() { return float_to_color_comp(m_Alpha); }
 	inline void setRed(double v) { m_Red = v; }
 	inline void setGreen(double v) { m_Green = v; }
 	inline void setBlue(double v) { m_Blue = v; }

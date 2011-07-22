@@ -2582,7 +2582,7 @@ void GLELet::parseFitFunction(const string& fct, GLEParser* parser) throw(Parser
 		} else if (str_i_equals(token, "FORMAT")) {
 			parser->evalTokenToString(&m_format);
 		} else if (str_i_equals(token, "RSQ")) {
-			parser->evalTokenToString(&m_rsq);
+			m_rsq = tokens->next_token();
 		} else if (str_i_equals(token, "FROM")) {
 			setHasFrom(true);
 			setFrom(parser->evalTokenToDouble());

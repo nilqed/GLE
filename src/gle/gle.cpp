@@ -631,7 +631,7 @@ bool has_pdflatex(CmdLineObj* cmdline) {
 	}
 }
 
-bool has_eps_based_device(CmdLineArgSet* device, CmdLineObj& cmdline) {
+bool has_eps_or_pdf_based_device(CmdLineArgSet* device, CmdLineObj& cmdline) {
 	if (cmdline.hasOption(GLE_OPT_TEX)) return true;
 	if (device->hasValue(GLE_DEVICE_EPS)) return true;
 	if (device->hasValue(GLE_DEVICE_PDF)) return true;
@@ -755,6 +755,7 @@ protected:
 	bool m_HasEPSFile;
 	bool m_HasTempDotDir;
 	bool m_HasTempFile;
+	bool m_CairoPDF;
 public:
 	GLELoadOneFileManager(GLEScript* script, CmdLineObj* cmdline, GLEFileLocation* outname);
 	~GLELoadOneFileManager();
@@ -781,6 +782,7 @@ GLELoadOneFileManager::GLELoadOneFileManager(GLEScript* script, CmdLineObj* cmdl
 	m_HasEPSFile = false;
 	m_HasTempDotDir = false;
 	m_HasTempFile = false;
+	m_CairoPDF = false;
 }
 
 GLELoadOneFileManager::~GLELoadOneFileManager() {
@@ -797,7 +799,12 @@ void GLELoadOneFileManager::update_bounding_box() {
 
 bool GLELoadOneFileManager::process_one_file_eps() throw(ParserError) {
 	CmdLineArgSet* device = (CmdLineArgSet*)m_CmdLine->getOption(GLE_OPT_DEVICE)->getArg(0);
-	m_Device = g_select_device(GLE_DEVICE_EPS);
+	if (m_CmdLine->hasOption(GLE_OPT_CAIRO)) {
+		m_CairoPDF = true;
+		m_Device = g_select_device(GLE_DEVICE_CAIRO_PDF);
+	} else {
+		m_Device = g_select_device(GLE_DEVICE_EPS);
+	}
 	m_Device->setRecordingEnabled(true);
 	/* In some cases two passes are required to measure size of TeX objects */
 	int done = 1;
@@ -1020,9 +1027,9 @@ void load_one_file_sub(GLEScript* script, CmdLineObj& cmdline, size_t* exit_code
 	GLELoadOneFileManager manager(script, &cmdline, &out_name);
 	CmdLineArgSet* device = (CmdLineArgSet*)cmdline.getOption(GLE_OPT_DEVICE)->getArg(0);
 	if (device->hasValue(GLE_DEVICE_PDF) && cmdline.hasOption(GLE_OPT_CAIRO)) {
-		g_select_device(GLE_DEVICE_CAIRO_PDF);
-		DrawIt(script, &out_name, &cmdline);
-	} else if (has_eps_based_device(device, cmdline)) {
+		 g_select_device(GLE_DEVICE_CAIRO_PDF);
+		 DrawIt(script, &out_name, &cmdline);
+	} else if (has_eps_or_pdf_based_device(device, cmdline)) {
 		if (device->hasValue(GLE_DEVICE_EPS) && !out_name.isStdout()) {
 			/* Delete output .eps so that QGLE does not display previous rendering if there are errors */
 			DeleteFileWithExt(out_name.getFullPath(), ".eps");

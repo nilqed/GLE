@@ -324,9 +324,9 @@ sub bar_draw_error_intervals data$ err$ bar
    next i
 end sub
 
-sub boxplot ds0 boxwidth msize
+sub boxplot ds0 bwidth msize
    default ds0 1
-   default boxwidth 0.4
+   default bwidth 0.4
    default msize 1.5
    set cap round
    for i = 1 to ndata("d"+num$(ds0))
@@ -339,24 +339,60 @@ sub boxplot ds0 boxwidth msize
       local q50 = datayvalue("d"+num$(ds0+3), i)
       local q75 = datayvalue("d"+num$(ds0+4), i)
       local maxv = datayvalue("d"+num$(ds0+5), i)
-      amove xg(x)-boxwidth/2 yg(minv)
-      aline xg(x)+boxwidth/2 yg(minv)
+      amove xg(x)-bwidth/2 yg(minv)
+      aline xg(x)+bwidth/2 yg(minv)
       amove xg(x) yg(minv)
       aline xg(x) yg(q25)
-      amove xg(x)-boxwidth/2 yg(q25)
-      box boxwidth yg(q75)-yg(q25)
-      amove xg(x)-boxwidth/2 yg(q50)
-      aline xg(x)+boxwidth/2 yg(q50)
+      amove xg(x)-bwidth/2 yg(q25)
+      box bwidth yg(q75)-yg(q25)
+      amove xg(x)-bwidth/2 yg(q50)
+      aline xg(x)+bwidth/2 yg(q50)
       amove xg(x) yg(q75)
       aline xg(x) yg(maxv)
-      amove xg(x)-boxwidth/2 yg(maxv)
-      aline xg(x)+boxwidth/2 yg(maxv)
+      amove xg(x)-bwidth/2 yg(maxv)
+      aline xg(x)+bwidth/2 yg(maxv)
       amove xg(x) yg(meanv)
-      marker fdiamond msize*boxwidth
+      marker fdiamond msize*bwidth
    next i
 end sub
 
 sub draw_box_plot ds0
    !compatibility
    boxplot ds0 0.4 1.5
+end sub
+
+sub energylevel ds$ factor color$
+   default ds$ "d1"
+   default factor 1.0
+   default color "black"
+   local hist_prev_x = 0
+   local hist_x1, hist_x2
+   local hist_has_prev = 0
+   set color color$
+   for i = 1 to ndata(ds$)
+      local hist_valid = 1
+      if (i < ndata(ds$)) then
+         hist_x2 = (dataxvalue(ds$, i+1) + dataxvalue(ds$, i))/2
+         if (hist_has_prev = 1) then
+            hist_x1 = (hist_prev_x + dataxvalue(ds$, i))/2
+         else
+            hist_x1 = 2*dataxvalue(ds$, i) - hist_x2
+         end if
+      else
+         if (hist_has_prev = 1) then
+            hist_x1 = (hist_prev_x + dataxvalue(ds$, i))/2
+            hist_x2 = 2*dataxvalue(ds$, i) - hist_x1;
+         else
+            hist_valid = 0
+         end if
+      end if
+      if (hist_valid = 1) then
+         local xmid = (hist_x1 + hist_x2) / 2
+         local len = (hist_x2 - hist_x1) / 2
+         amove xg(xmid - len*factor) yg(datayvalue(ds$, i))
+         aline xg(xmid + len*factor) yg(datayvalue(ds$, i))
+      end if
+      hist_has_prev = 1
+      hist_prev_x = dataxvalue(ds$, i)
+   next i
 end sub

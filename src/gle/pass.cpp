@@ -915,25 +915,25 @@ void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
 
 int pass_color_var(const char *s) throw(ParserError) {
 	int result = 0;
-   double xx = 0.0;
-   string token(s);
-   if (token.empty()) {
-      g_throw_parser_error("expecting color name, but found empty string");
-   } else if (pass_color_hash_value(token, &result, g_get_throws_error())) {
-      return result;
+	double xx = 0.0;
+	string token(s);
+	if (token.empty()) {
+		g_throw_parser_error("expecting color name, but found empty string");
+	} else if (pass_color_hash_value(token, &result, g_get_throws_error())) {
+		return result;
 	} else if (is_float(token)) {
-      string expr(string("CVTGRAY(") + token + ")");
+		string expr(string("CVTGRAY(") + token + ")");
 		polish_eval((char*)expr.c_str(), &xx);
-   } else if (str_i_str(s, "RGB") != NULL) {
+	} else if (str_i_str(s, "RGB") != NULL) {
 		polish_eval((char*)s, &xx);
-	} else if (token.length() > 2 && token[0] == '(' && token[token.length() - 1] == ')') { 
-      string expr(string("CVTGRAY") + token);
-		polish_eval((char*)expr.c_str(), &xx);  
-   } else if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
-      string expr(string("CVTCOLOR(") + token + ")");
+	} else if (token.length() > 2 && token[0] == '(' && token[token.length() - 1] == ')') {
+		string expr(string("CVTGRAY") + token);
+		polish_eval((char*)expr.c_str(), &xx);
+	} else if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
+		string expr(string("CVTCOLOR(") + token + ")");
 		polish_eval((char*)expr.c_str(), &xx);
 	} else {
-      return pass_color_list_or_fill(token, g_get_throws_error());
+		return pass_color_list_or_fill(token, g_get_throws_error());
 	}
 	memcpy(&result, &xx, sizeof(int));
 	return result;

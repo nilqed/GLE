@@ -1788,8 +1788,7 @@ void GLEFont::setStyle(GLEFontStyle style, GLEFont* font) {
 }
 
 GLEColor::GLEColor() {
-	m_Red = m_Blue = m_Green = 0.0;
-	m_Transparent = true;
+	m_Red = m_Blue = m_Green = m_Alpha = 0.0;
 	m_Name = NULL;
 }
 
@@ -1797,6 +1796,7 @@ GLEColor::GLEColor(double r, double g, double b) {
 	m_Red = r;
 	m_Green = g;
 	m_Blue = b;
+	m_Alpha = 1.0;
 	m_Transparent = false;
 	m_Name = NULL;
 }
@@ -1815,6 +1815,7 @@ bool GLEColor::equals(GLEDataObject* obj) {
 	return m_Red == other->m_Red &&
 	       m_Green == other->m_Green &&
 	       m_Blue == other->m_Blue &&
+	       m_Alpha == other->m_Alpha &&
 	       m_Transparent == other->m_Transparent;
 }
 
@@ -1838,7 +1839,11 @@ void GLEColor::toString(ostream& out) {
 			}
 		}
 		if (!found) {
-			out << "rgb255(" << (int)getRedI() << "," << (int)getGreenI() << "," << (int)getBlueI() << ")";
+			if (hasAlpha()) {
+				out << "rgba255(" << (int)getRedI() << "," << (int)getGreenI() << "," << (int)getBlueI() << "," << (int)getAlphaI() << ")";
+			} else {
+				out << "rgb255(" << (int)getRedI() << "," << (int)getGreenI() << "," << (int)getBlueI() << ")";
+			}
 		}
 	}
 }
@@ -1854,6 +1859,7 @@ void GLEColor::setName(const string& name) {
 
 void GLEColor::setRGB(double r, double g, double b) {
 	m_Red = r; m_Green = g; m_Blue = b;
+	m_Alpha = 1.0;
 	m_Transparent = false;
 }
 
@@ -1861,6 +1867,7 @@ void GLEColor::setRGB255(int r, int g, int b) {
 	m_Red   = ((double)r) / 255.0;
 	m_Green = ((double)g) / 255.0;
 	m_Blue  = ((double)b) / 255.0;
+	m_Alpha = 1.0;
 	m_Transparent = false;
 }
 
@@ -1873,6 +1880,7 @@ void GLEColor::setHexValue(unsigned int v) {
 	m_Blue  = ((double)blue) / 255.0;
 	// cout << "RGB(" << red << "," << green << "," << blue << ") -> ";
 	// cout << "RGB(" << m_Red << "," << m_Green << "," << m_Blue << ")" << endl;
+	m_Alpha = 1.0;
 	m_Transparent = false;
 }
 
