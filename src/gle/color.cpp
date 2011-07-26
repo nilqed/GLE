@@ -389,3 +389,47 @@ void GLEColorList::defineOldGLEColors() {
 	defineOldColor("VIOLET_WEB", 0x4F2F4F);
 	defineOldColor("YELLOW_GREEN", 0x99CC32);
 }
+
+
+void update_color_foreground(GLEColor* updateMe, GLEColor* color) {
+	updateMe->setRGBA(color->getRed(), color->getGreen(), color->getBlue(), color->getAlpha());
+	updateMe->setTransparent(color->isTransparent());
+	updateMe->setName(color->getNameS());
+}
+
+void update_color_fill_pattern(GLEColor* updateMe, GLEPatternFill* fill) {
+	if (updateMe->isFill() && updateMe->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
+		GLEPatternFill* myFill = static_cast<GLEPatternFill*>(updateMe->getFill());
+		myFill->setFillDescription(fill->getFillDescription());
+	} else {
+		updateMe->setFill(new GLEPatternFill(fill->getFillDescription()));
+	}
+	updateMe->setTransparent(false);
+}
+
+void update_color_fill_background(GLEColor* updateMe, GLEColor* color) {
+	if (updateMe->isFill() && updateMe->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
+		GLEPatternFill* myFill = static_cast<GLEPatternFill*>(updateMe->getFill());
+		myFill->setBackground(color);
+	} else {
+		GLEPatternFill* myFill = new GLEPatternFill(0X02010020);
+		myFill->setBackground(color);
+		updateMe->setFill(myFill);
+	}
+	updateMe->setTransparent(false);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

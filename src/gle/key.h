@@ -50,8 +50,8 @@ public:
 class KeyEntry {
 public:
 	char lstyle[9];
-	int color, fill;
-	int pattern, background;
+	GLERC<GLEColor> color;
+	GLERC<GLEColor> fill;
 	int marker;
 	int column;
 	double msize,lwidth;
@@ -61,6 +61,7 @@ public:
 public:
 	KeyEntry(int col);
 	~KeyEntry();
+	bool hasFill() const;
 };
 
 class KeyRCInfo {
@@ -85,7 +86,9 @@ public:
 
 class KeyInfo {
 protected:
-	int m_MaxRow, m_Color, m_BoxColor, m_BackgroundColor;
+	int m_MaxRow, m_Color;
+	GLERC<GLEColor> m_BoxColor;
+	GLERC<GLEColor> m_BackgroundColor;
 	vector<KeyRCInfo> m_ColInfo;
 	vector<KeyRCInfo> m_RowInfo;
 	vector<KeyEntry*> m_entries;
@@ -106,13 +109,13 @@ public:
 	void expandToRow(int row);
 	void setOffsetX(double x);
 	void setOffsetY(double y);
-	void setBoxColor(int col);
+	void setBoxColor(const GLERC<GLEColor>& col);
 	void initPosition();
 	KeyEntry* createEntry();
 	KeyEntry* lastEntry();
 	inline void addColumn() { m_col++; }
-	inline int getBackgroundColor() { return m_BackgroundColor; }
-	inline void setBackgroundColor(int col) { m_BackgroundColor = col; }
+	inline GLERC<GLEColor> getBackgroundColor() { return m_BackgroundColor; }
+	inline void setBackgroundColor(const GLERC<GLEColor>& col) { m_BackgroundColor = col; }
 	inline bool hasFill() { return m_Fill; }
 	inline void setHasFill(bool val) { m_Fill = val; }
 	inline double getOffsetX() { return m_OffsX; }
@@ -157,7 +160,7 @@ public:
 	inline bool hasLineLen() { return m_LineLen >= 0; }
 	inline double getLineLen() { return m_LineLen; }
 	inline void setLineLen(double Len) { m_LineLen = Len; }
-	inline int getBoxColor() { return m_BoxColor; }
+	inline GLERC<GLEColor> getBoxColor() { return m_BoxColor; }
 	inline bool hasBoxColor() { return m_HasBoxColor; }
 	inline bool isCompact() { return m_Compact; }
 	inline bool isNoLines() { return m_NoLines; }

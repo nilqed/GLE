@@ -871,20 +871,27 @@ bool pass_color_hash_value(const string& color, int* result, IThrowsError* error
    }
 }
 
-int pass_color_list_or_fill(const string& color, IThrowsError* error) {
+GLERC<GLEColor> pass_color_list_or_fill(const string& color, IThrowsError* error) {
+	GLERC<GLEColor> result;
 	string uc_color;
 	str_to_uppercase(color, uc_color);
 	GLEColor* gleColor = GLEGetColorList()->get(uc_color);
 	if (gleColor != NULL) {
-		return (int)gleColor->getHexValueGLE();
+		result = gleColor->clone();
 	} else {
-		int result = 0;
-		if (gt_firstval_err(op_fill_typ, uc_color.c_str(), &result)) {
-			return result;
+		int fillDescr = 0;
+		if (gt_firstval_err(op_fill_typ, uc_color.c_str(), &fillDescr)) {
+			result = new GLEColor();
+			if (unsigned(fillDescr) == GLE_FILL_CLEAR) {
+				result->setTransparent(true);
+			} else {
+				result->setFill(new GLEPatternFill(fillDescr));
+			}
 		} else {
-         throw error->throwError("found '", color.c_str(), "', but expecting color or fill specification");
+			throw error->throwError("found '", color.c_str(), "', but expecting color or fill specification");
 		}
 	}
+	return result;
 }
 
 void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
@@ -909,34 +916,44 @@ void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
 		polish(expr.c_str(), pcode, &vtype);
 	} else {
 		pcode.addInt(8);
-		pcode.addInt(pass_color_list_or_fill(token, &m_tokens));
+		GLERC<GLEColor> color(pass_color_list_or_fill(token, &m_tokens));
+		if (color->isFill()) {
+			CUtilsAssert(color->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN);
+			pcode.addInt(static_cast<GLEPatternFill*>(color->getFill())->getFillDescription());
+		} else {
+			pcode.addInt(color->getHexValueGLE());
+		}
 	}
 }
 
-int pass_color_var(const char *s) throw(ParserError) {
+GLERC<GLEColor> pass_color_var(const char *s) throw(ParserError) {
+	GLERC<GLEColor> color(new GLEColor());
 	int result = 0;
 	double xx = 0.0;
 	string token(s);
 	if (token.empty()) {
 		g_throw_parser_error("expecting color name, but found empty string");
 	} else if (pass_color_hash_value(token, &result, g_get_throws_error())) {
-		return result;
+		color->setHexValue(result);
 	} else if (is_float(token)) {
 		string expr(string("CVTGRAY(") + token + ")");
 		polish_eval((char*)expr.c_str(), &xx);
+		color->setDoubleEncoding(xx);
 	} else if (str_i_str(s, "RGB") != NULL) {
 		polish_eval((char*)s, &xx);
+		color->setDoubleEncoding(xx);
 	} else if (token.length() > 2 && token[0] == '(' && token[token.length() - 1] == ')') {
 		string expr(string("CVTGRAY") + token);
 		polish_eval((char*)expr.c_str(), &xx);
+		color->setDoubleEncoding(xx);
 	} else if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
 		string expr(string("CVTCOLOR(") + token + ")");
 		polish_eval((char*)expr.c_str(), &xx);
+		color->setDoubleEncoding(xx);
 	} else {
-		return pass_color_list_or_fill(token, g_get_throws_error());
+		color = pass_color_list_or_fill(token, g_get_throws_error());
 	}
-	memcpy(&result, &xx, sizeof(int));
-	return result;
+	return color;
 }
 
 /*
@@ -1491,7 +1508,10 @@ void GLEParser::passt(GLESourceLine &SLine, GLEPcode& pcode) throw(ParserError) 
 				pcode.setLast(GLE_KW_COMMENT);
 				temp_str =  m_tokens.next_token();
 				str_remove_quote(temp_str);
-				GLEGetColorList()->defineColor(temp_str, pass_color_var(m_tokens.next_token().c_str()));
+				{
+					GLERC<GLEColor> color(pass_color_var(m_tokens.next_token().c_str()));
+					GLEGetColorList()->defineColor(temp_str, color.get());
+				}
 				break;
 			  case GLE_KW_COMPATIBILITY:
 				pcode.setLast(GLE_KW_COMMENT);

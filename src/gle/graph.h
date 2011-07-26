@@ -330,10 +330,10 @@ char *un_quote(char *ct);
 
 struct fill_data {
 	int layer;
-	int da,db;	/* fill from, too */
+	int da, db;	/* fill from, too */
 	int type; 	/* 1= x1,d1, 2=d1,x2, 3=d1,d2, 4=d1 */
-	int color;
-	double xmin,ymin,xmax,ymax;
+	GLERC<GLEColor> color;
+	double xmin, ymin, xmax, ymax;
 };
 
 class GLEDataSet;
@@ -415,9 +415,8 @@ public:
 	char lstyle[9];
 	string key_name;
 	char *bigfile;
-	int key_fill;
-	int key_pattern;
-	int key_background;
+	GLERC<GLEColor> key_fill;
+	GLERC<GLEColor> color;
 	double errwidth;
 	string errup;
 	string errdown;
@@ -437,7 +436,6 @@ public:
 	bool deresolve_avg;       /* dresolve + average points */
 	int line_mode;
 	int mdata;
-	int color;
 	double mscale;
 	bool line;
 	double rx1,ry1,rx2,ry2;
@@ -484,12 +482,10 @@ public:
 	double width,dist;
 	double lwidth[20];
 	char lstyle[20][9];
-	int fill[20];
-	int color[20];
-	int side[20];
-	int top[20];
-	int pattern[20];
-	int background[20];
+	GLERC<GLEColor> fill[20];
+	GLERC<GLEColor> color[20];
+	GLERC<GLEColor> side[20];
+	GLERC<GLEColor> top[20];
 	int notop;
 	double x3d,y3d;
 	bool horiz;

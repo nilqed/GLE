@@ -79,7 +79,7 @@ extern GLEColorMap* g_colormap;
 extern GLEGlobalSource* g_Source;
 extern GLEGraphBlockData* g_graphBlockData;
 
-void box3d(double x1, double y1, double x2, double y2,double x3d,double y3d,int sidecolor, int topcolor, int notop);
+void box3d(double x1, double y1, double x2, double y2,double x3d, double y3d, const GLERC<GLEColor>& sidecolor, const GLERC<GLEColor>& topcolor, int notop);
 void var_clear_local(void);
 void do_svg_smooth(double* , int);
 void draw_errbar(double x, double y, double eup, double ewid, GLEDataSet* ds);
@@ -203,12 +203,10 @@ bar_struct::bar_struct() {
 		to[i] = 0;
 		lwidth[i] = 0.0;
 		lstyle[i][0] = 0;
-		fill[i] = GLE_COLOR_BLACK;
-		color[i] = GLE_COLOR_BLACK;
-		side[i] = GLE_COLOR_BLACK;
-		top[i] = GLE_COLOR_BLACK;
-		pattern[i] = -1;
-		background[i] = GLE_FILL_CLEAR;
+		fill[i] = g_get_color_hex(GLE_COLOR_BLACK);
+		color[i] = g_get_color_hex(GLE_COLOR_BLACK);
+		side[i] = g_get_color_hex(GLE_COLOR_BLACK);
+		top[i] = g_get_color_hex(GLE_COLOR_BLACK);
 	}
 }
 
@@ -266,16 +264,11 @@ void GLEGraphPartBars::drawBar(int b) {
 		// set bar style
 		g_set_line_width(br[b]->lwidth[bi]);
 		g_set_line_style(&br[b]->lstyle[bi][0]);
-		if (br[b]->color[bi] == 0) br[b]->color[bi] = GLE_COLOR_BLACK;
-		g_set_color(br[b]->color[bi]);
-		if (br[b]->pattern[bi] != -1 && br[b]->pattern[bi] != (int)GLE_FILL_CLEAR) {
-			g_set_fill(br[b]->pattern[bi]);
-			g_set_pattern_color(br[b]->fill[bi]);
-			g_set_background(br[b]->background[bi]);
-		} else {
-			g_set_fill(br[b]->fill[bi]);
-			g_set_pattern_color(GLE_COLOR_BLACK);
+		if (br[b]->color[bi].isNull()) {
+			br[b]->color[bi] = g_get_color_hex(GLE_COLOR_BLACK);
 		}
+		g_set_color(br[b]->color[bi]);
+		g_set_fill(br[b]->fill[bi]);
 		// compute sizes
 		double bwid = br[b]->width;
 		double bdis = br[b]->dist;
@@ -354,8 +347,8 @@ void draw_bar(double x, double yf, double yt, double wd, bar_struct* barset, int
 	double y2 = yt;
 	double x3d = barset->x3d;
 	double y3d = barset->y3d;
-	int topcolor = barset->top[di];
-	int sidecolor = barset->side[di];
+	GLERC<GLEColor> topcolor = barset->top[di];
+	GLERC<GLEColor> sidecolor = barset->side[di];
 	int notop = barset->notop;
 	if (barset->horiz) {
 		toDataSet->clip(&y1, &x1);
@@ -394,7 +387,7 @@ void draw_bar(double x, double yf, double yt, double wd, bar_struct* barset, int
 	}
 }
 
-void box3d(double x1, double y1, double x2, double y2,double x3d,double y3d,int sidecolor, int topcolor, int notop) {
+void box3d(double x1, double y1, double x2, double y2, double x3d, double y3d, const GLERC<GLEColor>& sidecolor, const GLERC<GLEColor>& topcolor, int notop) {
 	/* assuming x3d is positive for the moment */
 	double xx;
 	if (x1>x2) { xx = x1; x1 = x2; x2 = xx;}
@@ -413,7 +406,7 @@ void box3d(double x1, double y1, double x2, double y2,double x3d,double y3d,int 
 	g_line(x2+x3d,y2+y3d);
 	g_line(x2,y2);
 	g_line(x2,y1);
-	if (topcolor!=0) {
+	if (!topcolor.isNull()) {
 	   g_set_fill(sidecolor);
 	   g_fill();
 	}
@@ -425,7 +418,7 @@ void box3d(double x1, double y1, double x2, double y2,double x3d,double y3d,int 
 	 g_line(x1+x3d,y2+y3d);
 	 g_line(x1,y2);
 	 g_line(x2,y2);
-	 if (topcolor!=0) {
+	 if (!topcolor.isNull()) {
 		g_set_fill(topcolor);
 		g_fill();
 	 }
@@ -3341,8 +3334,6 @@ void do_dataset_key(int d) {
 	if (dp[d] != NULL && dp[d]->key_name != "") {
 		KeyEntry* entry = g_keyInfo->createEntry();
 		entry->fill = dp[d]->key_fill;
-		entry->pattern = dp[d]->key_pattern;
-		entry->background = dp[d]->key_background;
 		entry->color = dp[d]->color;
 		entry->lwidth = dp[d]->lwidth;
 		entry->marker = dp[d]->marker;
@@ -4005,8 +3996,7 @@ GLEDataSet::GLEDataSet(int identifier) {
 	key_name = "";
 	bigfile = NULL;
 	key_fill = 0;
-	key_pattern = -1;
-	key_background = GLE_FILL_CLEAR;
+	color = g_get_color_hex(GLE_COLOR_BLACK);
 	errup[0] = 0;
 	errdown[0] = 0;
 	errwidth = 0.0;
@@ -4028,7 +4018,6 @@ GLEDataSet::GLEDataSet(int identifier) {
 	deresolve_avg = false;  /* dresolve + average points */
 	line_mode = GLE_GRAPH_LM_PLAIN;
 	mdata = 0;
-	color = GLE_COLOR_BLACK;
 	mscale = 0;
 	line = 0;
 	layer_line = GLE_GRAPH_LAYER_LINE;
@@ -4070,8 +4059,6 @@ void GLEDataSet::copy(GLEDataSet* other) {
 	inverted = other->inverted;
 	strcpy(lstyle, other->lstyle);
 	key_fill = other->key_fill;
-	key_pattern = other->key_pattern;
-	key_background = other->key_background;
 	errup = other->errup;
 	errdown = other->errdown;
 	errwidth = other->errwidth;

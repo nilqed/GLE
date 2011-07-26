@@ -228,12 +228,20 @@ void GLEKeyBlockInstance::executeLine(GLESourceLine& sline)	{
 			else kw("MSIZE") entry->msize = next_exp;
 			else kw("MSCALE") entry->msize = (next_exp) * zzhei;
 			else kw("COLOR") entry->color = next_color;
-			else kw("FILL") entry->fill = next_fill;
-			else kw("PATTERN") {
-				entry->pattern = next_fill;
-				m_hasPattern = true;
+			else kw("FILL") {
+				GLERC<GLEColor> fillColor(next_fill);
+				update_color_foreground(entry->fill.get(), fillColor.get());
+			} else kw("PATTERN") {
+				GLERC<GLEColor> fillPattern(next_fill);
+				if (fillPattern->isFill() && fillPattern->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
+					update_color_fill_pattern(entry->fill.get(), static_cast<GLEPatternFill*>(fillPattern->getFill()));
+				} else {
+					g_throw_parser_error("expected fill pattern");
+				}
+			} else kw("BACKGROUND") {
+				GLERC<GLEColor> backColor(next_fill);
+				update_color_fill_background(entry->fill.get(), backColor.get());
 			}
-			else kw("BACKGROUND") entry->background = next_fill;
 			else kw("LSTYLE") next_str(entry->lstyle);
 			else kw("LINE") strcpy(entry->lstyle, "1");
 			else kw("LWIDTH") entry->lwidth = next_exp;
@@ -318,7 +326,7 @@ KeyInfo::KeyInfo() {
 	m_Disabled = false;
 	m_BoxColor = 0;
 	m_ExtraY = 0.0;
-	m_BackgroundColor = GLE_FILL_CLEAR;
+	m_BackgroundColor = g_get_fill_clear();
 	m_col = 0;
 	strcpy(m_Justify, "");
 }
@@ -339,7 +347,7 @@ void KeyInfo::setOffsetY(double y) {
 	m_HasOffset = true;
 }
 
-void KeyInfo::setBoxColor(int col) {
+void KeyInfo::setBoxColor(const GLERC<GLEColor>& col) {
 	m_BoxColor = col;
 	m_HasBoxColor = true;
 }
@@ -390,8 +398,8 @@ void draw_key(KeyInfo* info) {
 	}
 	GLEPoint savept;
 	g_get_xy(&savept);
-	if (info->getBackgroundColor() == (int)GLE_FILL_CLEAR) {
-		info->setBackgroundColor(GLE_COLOR_WHITE);
+	if (info->getBackgroundColor()->isTransparent()) {
+		info->setBackgroundColor(g_get_color_hex(GLE_COLOR_WHITE));
 	}
 	measure_key(info);
 	draw_key_after_measure(info);
@@ -531,7 +539,9 @@ void do_draw_key_v35(double ox, double oy, KeyInfo* info){
 	for (int i = info->getNbEntries() - 1; i >= 0; i--) {
 		KeyEntry* entry = info->getEntry(i);
 		g_move(ox+0.6*cr, oy+0.6*cr+cr*(info->getNbEntries()-i));
-		if (entry->color != 0) g_set_color(entry->color);
+		if (!entry->color.isNull()) {
+			g_set_color(entry->color);
+		}
 		if (col_info->hasMarker()) {
 			g_rmove(cr/2, info->getHei()*.35);
 			double z = entry->msize;
@@ -552,7 +562,7 @@ void do_draw_key_v35(double ox, double oy, KeyInfo* info){
 			g_set_line_width(savelw);
 		}
 		if (col_info->hasFill()) {
-			if (entry->fill!=0) {
+			if (entry->hasFill()) {
 				g_set_fill(entry->fill);
 				double cx, cy;
 				g_get_xy(&cx,&cy);
@@ -561,7 +571,9 @@ void do_draw_key_v35(double ox, double oy, KeyInfo* info){
 			}
 			g_rmove(1.3*cr, 0.0);
 		}
-		if (entry->color != 0) g_set_color(info->getDefaultColor());
+		if (!entry->color.isNull()) {
+			g_set_color(info->getDefaultColor());
+		}
 		g_set_just(JUST_LEFT);
 		if (entry->descrip != "") g_text((char*)entry->descrip.c_str());
 	}
@@ -608,7 +620,9 @@ void measure_key(KeyInfo* info) {
 	}
 	/* Use fill somewhere? */
 	for (int i = 0; i < info->getNbEntries(); i++) {
-		if (info->getEntry(i)->fill != 0) info->setHasFill(true);
+		if (info->getEntry(i)->hasFill()) {
+			info->setHasFill(true);
+		}
 	}
 	/* Empty key? */
 	if (info->getNbEntries() == 0) {
@@ -643,7 +657,9 @@ void measure_key(KeyInfo* info) {
 		if (entry->lstyle[0] != 0) colinfo->setHasLine(true);
 		if (entry->lwidth > 0) colinfo->setHasLine(true);
 		if (entry->marker != 0) colinfo->setHasMarker(true);
-		if (entry->fill != 0) colinfo->setHasFill(true);
+		if (entry->hasFill()) {
+			colinfo->setHasFill(true);
+		}
 		/* Adjust row height in case of fill */
 		if (info->hasFill()) {
 			if (rowhi*KEY_FILL_HEI_FY > info->getRow(row)->size) {
@@ -708,7 +724,7 @@ void draw_key_after_measure(KeyInfo* info) {
 	g_get_fill(&old_fill);
 	double ox = info->getRect()->getXMin();
 	double oy = info->getRect()->getYMin();
-	if (!info->getNoBox() && info->getBackgroundColor() != (int)GLE_FILL_CLEAR) {
+	if (!info->getNoBox() && !info->getBackgroundColor()->isTransparent()) {
 		g_set_fill(info->getBackgroundColor());
 		g_box_fill(info->getRect());
 	}
@@ -759,7 +775,9 @@ void do_draw_key(double ox, double oy, bool notxt, KeyInfo* info) {
 		cy = oy+info->getRow(row)->offs;
 		g_move(cx, cy);
 		g_update_bounds(cx, cy);
-		if (entry->color!=0) g_set_color(entry->color);
+		if (!entry->color.isNull()) {
+			g_set_color(entry->color);
+		}
 		if (col_info->hasMarker()) {
 			g_rmove(col_info->mleft, info->getLinePos());
 			g_get_line_width(&savelw);
@@ -790,24 +808,19 @@ void do_draw_key(double ox, double oy, bool notxt, KeyInfo* info) {
 			g_set_line_style("1");
 			g_set_line_width(savelw);
 		}
-		if (entry->color!=0) g_set_color(info->getDefaultColor());
+		if (!entry->color.isNull()) {
+			g_set_color(info->getDefaultColor());
+		}
 		if (col_info->hasFill()) {
-			if (entry->fill!=0) {
+			if (entry->hasFill()) {
 				int save_color;
-				if (entry->pattern != -1 && entry->pattern != (int)GLE_FILL_CLEAR) {
-					g_set_fill(entry->pattern);
-					g_set_pattern_color(entry->fill);
-					g_set_background(entry->background);
-				} else {
-					g_set_pattern_color(GLE_COLOR_BLACK);
-					g_set_fill(entry->fill);
-				}
+				g_set_fill(entry->fill);
 				g_get_xy(&cx,&cy);
 				g_box_fill(cx,cy,cx+rowhi*KEY_FILL_HEI_FX, cy+rowhi*KEY_FILL_HEI_FY);
 				g_get_color(&save_color);
 				if (info->hasBoxColor()) {
-					int boxcolor = info->getBoxColor();
-					if (boxcolor != (int)GLE_FILL_CLEAR) {
+					GLERC<GLEColor> boxcolor = info->getBoxColor();
+					if (!boxcolor->isTransparent()) {
 						g_set_color(boxcolor);
 						g_box_stroke(cx,cy,cx+rowhi*KEY_FILL_HEI_FX, cy+rowhi*KEY_FILL_HEI_FY);
 						g_set_color(save_color);
@@ -833,13 +846,18 @@ KeyEntry::KeyEntry(int col) {
 	column = col;
 	sepstyle = -1;
 	sepdist = 0.0;
-	pattern = -1;
 	lstyle[0] = 0;
 	lwidth = 0.0;
-	color = 0; fill = 0;
-	marker = 0; msize = 0.0;
-	background = GLE_FILL_CLEAR;
+	color = 0;
+	marker = 0;
+	msize = 0.0;
+	fill = new GLEColor();
+	fill->setTransparent(true);
 }
 
 KeyEntry::~KeyEntry() {
+}
+
+bool KeyEntry::hasFill() const {
+	return !fill.isNull() && !fill->isTransparent();
 }

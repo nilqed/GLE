@@ -1024,13 +1024,6 @@ void numtrim(char **d,char *s,double dticks) {
 	if (nonzero!=NULL) *(nonzero+1) = 0;
 }
 
-void print_axis(GLEAxis *ax) {
-	cout << "Axis ticks off: " << ax->ticks_off << "\tAxis ticks length: "
-	     << ax->ticks_length << "\tAxis ticks color: " << ax->ticks_color << endl;
-	cout << "Axis subticks off: " << ax->subticks_off << "\tAxis subticks length: "
-	     << ax->subticks_length << "\tAxis subticks color: "  << ax->subticks_color << endl;
-}
-
 bool axis_is_max(int axis) {
 	return axis == GLE_AXIS_X2 || axis == GLE_AXIS_Y2;
 }
@@ -1121,7 +1114,6 @@ GLEAxis::~GLEAxis() {
 }
 
 void GLEAxis::init(int i) {
-	int c;
 	format = ""; title = "";
 	clearNoTicks();
 	names.clear(); places.clear(); noplaces.clear();
@@ -1144,9 +1136,7 @@ void GLEAxis::init(int i) {
 	label_angle = 0.0;
 	has_subticks_onoff = false;
 	has_label_onoff = false;
-	g_get_color(&c);
-	color = c; side_color = c; ticks_color = c;
-	label_color = c; subticks_color = c;
+	setColor(g_get_color());
 	side_lwidth = -1; ticks_lwidth = -1; subticks_lwidth = -1; label_lwidth = -1;
 	lgset = GLE_AXIS_LOG_DEFAULT;
 	has_ftick = false; ftick = 0.0;
@@ -1382,4 +1372,12 @@ void GLEAxis::makeUpRange(GLEAxis* copy, GLEAxis* orth, bool extend, bool tozero
 		}
 	}
 	getRange()->copyIfNotSet(drange);
+}
+
+
+void GLEAxis::setColor(const GLERC<GLEColor>& color) {
+	side_color = color;
+	ticks_color = color;
+	label_color = color;
+	subticks_color = color;
 }

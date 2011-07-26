@@ -369,26 +369,63 @@ public:
 	inline void setNumber(int value) { m_Number = value; }
 };
 
+enum GLEFillType {
+	GLE_FILL_TYPE_PATTERN
+};
+
+class GLEFillBase : public GLERefCountObject {
+public:
+	GLEFillBase();
+	virtual ~GLEFillBase();
+	virtual GLEFillType getFillType() = 0;
+};
+
+class GLEPatternFill : public GLEFillBase {
+public:
+	GLEPatternFill(int fillDescr);
+	virtual ~GLEPatternFill();
+	virtual GLEFillType getFillType();
+
+	inline void setFillDescription(int fillDescription) { m_fillDescription = fillDescription; }
+	inline int getFillDescription() const { return m_fillDescription; }
+	inline void setBackground(GLEColor* color) { m_background = color; }
+	inline GLEColor* getBackground() const { return m_background.get(); }
+
+private:
+	int m_fillDescription;
+	GLERC<GLEColor> m_background;
+};
+
 class DLLCLASS GLEColor : public GLEDataObject {
 protected:
 	bool m_Transparent;
 	double m_Red, m_Green, m_Blue, m_Alpha;
 	string* m_Name;
+	GLERC<GLEFillBase> m_Fill;
 public:
 	GLEColor();
 	GLEColor(double r, double g, double b);
+	GLEColor(double r, double g, double b, double a);
+	explicit GLEColor(double gray);
 	~GLEColor();
 	virtual int getType();
 	virtual bool equals(GLEDataObject* obj);
 	DLLFCT void setRGB(double r, double g, double b);
+	DLLFCT void setRGBA(double r, double g, double b, double a);
 	DLLFCT void setRGB255(int r, int g, int b);
+	void setGray(double gray);
 	DLLFCT const char* getName();
 	void setName(const string& name);
+	void setName(const string* name);
 	void setHexValue(unsigned int v);
+	void setDoubleEncoding(double v);
+	double getDoubleEncoding();
 	unsigned int getHexValueGLE();
+	GLEColor* clone();
 	inline double getRed() { return m_Red; }
 	inline double getGreen() { return m_Green; }
 	inline double getBlue() { return m_Blue; }
+	inline double getAlpha() { return m_Alpha; }
 	inline bool hasAlpha() { return float_to_color_comp(m_Alpha) != 255; }
 	inline unsigned char getRedI() { return float_to_color_comp(m_Red); }
 	inline unsigned char getGreenI() { return float_to_color_comp(m_Green); }
@@ -397,10 +434,18 @@ public:
 	inline void setRed(double v) { m_Red = v; }
 	inline void setGreen(double v) { m_Green = v; }
 	inline void setBlue(double v) { m_Blue = v; }
-	inline bool isTransparent() { return m_Transparent; }
+	inline bool isTransparent() const { return m_Transparent; }
 	inline void setTransparent(bool transp) { m_Transparent = transp; }
+	inline bool isFill() const { return !m_Fill.isNull(); }
+	inline GLEFillBase* getFill() { return m_Fill.get(); }
+	inline void setFill(GLEFillBase* fill) { m_Fill = fill; }
 	DLLFCT void toString(ostream& out);
+	inline std::string* getNameS() { return m_Name; }
 };
+
+void update_color_foreground(GLEColor* updateMe, GLEColor* color);
+void update_color_fill_pattern(GLEColor* updateMe, GLEPatternFill* fill);
+void update_color_fill_background(GLEColor* updateMe, GLEColor* color);
 
 // Each drawable object has a reference to a property store
 // To, e.g., get the line width of a given object, call:

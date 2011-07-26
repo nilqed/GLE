@@ -231,6 +231,18 @@ int g_get_grey(double v) {
 	return c.l;
 }
 
+GLERC<GLEColor> g_get_fill_clear() {
+	GLERC<GLEColor> color(new GLEColor());
+	color->setTransparent(true);
+	return color;
+}
+
+GLERC<GLEColor> g_get_color_hex(int hexValue) {
+	GLERC<GLEColor> color(new GLEColor());
+	color->setHexValue(hexValue);
+	return color;
+}
+
 void g_color_set_black(colortyp& color) {
 	color.b[B_F] = 1;
 	color.b[B_R] = 0;
@@ -1561,6 +1573,8 @@ int g_hash_string_to_color(const string& str, colortyp* c) {
 void g_set_fill(GLEColor* color) {
 	if (color == NULL || color->isTransparent()) {
 		g.fill.l = GLE_FILL_CLEAR;
+	} else if (color->isFill() && color->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
+		g.fill.l = static_cast<GLEPatternFill*>(color->getFill())->getFillDescription();
 	} else {
 		g.fill.b[B_B] = float_to_color_comp(color->getBlue());
 		g.fill.b[B_G] = float_to_color_comp(color->getGreen());
@@ -1568,6 +1582,10 @@ void g_set_fill(GLEColor* color) {
 		g.fill.b[B_F] = 1;
 	}
 	g.dev->set_fill(g.fill.l);
+}
+
+void g_set_fill(const GLERC<GLEColor>& color) {
+	g_set_fill(color.get());
 }
 
 void g_set_color(GLEColor* color) {
@@ -1578,29 +1596,10 @@ void g_set_color(GLEColor* color) {
 	g.dev->set_color(g.color.l);
 }
 
-void g_set_rgbf(double rr, double gg, double bb, double ff) {
-	/* Fill pattern is left as-is */
-	g.color.b[B_R] = (unsigned char) rr*255;
-	g.color.b[B_G] = (unsigned char) gg*255;
-	g.color.b[B_B] = (unsigned char) bb*255;
-	g.color.b[B_F] = (unsigned char) ff*255;
-	g.dev->set_color(g.color.l);
-}
-
-void g_set_rgbf_fill(double rr, double gg, double bb, double ff) {
-	/* Fill pattern is left as-is */
-	g.fill.b[B_R] = (unsigned char) rr*255;
-	g.fill.b[B_G] = (unsigned char) gg*255;
-	g.fill.b[B_B] = (unsigned char) bb*255;
-	g.fill.b[B_F] = (unsigned char) ff*255;
-	g.dev->set_fill(g.fill.l);
-}
-
-void g_get_rgbf(double *rr, double *gg, double *bb, double *ff) {
-	*rr = g.color.b[B_R]/255;
-	*gg = g.color.b[B_G]/255;
-	*bb = g.color.b[B_B]/255;
-	*ff = g.color.b[B_F]/255;
+void g_set_color(const GLERC<GLEColor>& color) {
+	if (!color.isNull()) {
+		g_set_color(color.get());
+	}
 }
 
 void g_set_color(int l) {
@@ -1611,6 +1610,12 @@ void g_set_color(int l) {
 
 void g_get_color(int *l) {
 	*l = g.color.l;
+}
+
+GLERC<GLEColor> g_get_color() {
+	GLERC<GLEColor> color(new GLEColor());
+	color->setHexValue(g.color.l);
+	return color;
 }
 
 void g_get_colortyp(colortyp *color) {

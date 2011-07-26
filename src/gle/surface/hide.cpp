@@ -101,7 +101,7 @@ float smin_x,smax_x,smin_y,smax_y,smin_z,smax_z;
 
 void g_set_color_if_defined(const char* s) {
 	if (s != NULL && s[0] != 0) {
-		int color = pass_color_var(s);
+		GLERC<GLEColor> color = pass_color_var(s);
 		g_set_color(color);
 	}
 }

@@ -161,7 +161,7 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 	if (plen > 1000) {
 		gprint("Expression is suspiciously long %d \n",plen);
 	}
-	union {double d; int l[1];} both;
+	union {double d; int l[2];} both;
 	char *ss2, *ss;
 	double x1, y1, x2, y2;
 	double xx, yy;
@@ -778,9 +778,10 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 			break;         
 		case 109: /* CVTCOLOR(c$) */
 			*otyp = 1;
-			both.l[0] = pass_color_var(stk_str[nstk]);
-			both.l[1] = 0;
-			memcpy(&stk[nstk],&both.d,sizeof(double));
+			{
+				GLERC<GLEColor> color(pass_color_var(stk_str[nstk]));
+				stk[nstk] = color->getDoubleEncoding();
+			}
 			break;
 		case 107: /* RGB(.4,.4,.2) */
 			colvar.b[B_F] = 1;

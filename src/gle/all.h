@@ -40,6 +40,7 @@
 #define INCLUDE_ALL
 
 #include "basicconf.h"
+#include "gle-interface/gle-base.h"
 
 #include <fstream>
 #include <sstream>

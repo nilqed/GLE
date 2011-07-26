@@ -91,7 +91,6 @@ public:
 	double base;
 	double length;
 	double shift;
-	int color;
 	int label_font;
 	double label_hei;
 	double label_scale;
@@ -114,11 +113,14 @@ public:
 	double side_lwidth,label_lwidth;
 	char side_lstyle[9];
 	int title_font;
-	int ticks_color,side_color,subticks_color,label_color;
 	double title_dist, title_adist;
 	double title_hei, title_scale;
 	int title_rot,title_off;
-	int title_color;	/* 0=normal, 1=rotate 180 */
+	GLERC<GLEColor> title_color;	/* 0=normal, 1=rotate 180 */
+	GLERC<GLEColor> ticks_color;
+	GLERC<GLEColor> side_color;
+	GLERC<GLEColor> subticks_color;
+	GLERC<GLEColor> label_color;
 	int names_ds;
 	double label_angle;
 	bool grid, gridtop;
@@ -156,6 +158,7 @@ public:
 	void performRoundRange(GLERange* range, bool extend, bool tozero);
 	void roundDataRange(bool extend, bool tozero);
 	void makeUpRange(GLEAxis* copy, GLEAxis* orth, bool extend, bool tozero);
+	void setColor(const GLERC<GLEColor>& color);
 	inline bool isPlace(double pos, int* cnt, double delta) { return axis_is_pos(pos, cnt, delta, places); }
 	inline bool isPlaceRel(double pos, int* cnt) { return axis_is_pos_perc(pos, cnt, 1e-6, places); }
 	inline bool isNoPlace(double pos, int* cnt, double delta) { return axis_is_pos(pos, cnt, delta, noplaces); }
@@ -205,4 +208,3 @@ public:
 
 void init_measure_by_axis(GLEAxis* ax, double ox, double oy, double llen);
 void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid); /* Draws the axis */
-void print_axis(GLEAxis *ax);

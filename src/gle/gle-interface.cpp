@@ -1787,22 +1787,57 @@ void GLEFont::setStyle(GLEFontStyle style, GLEFont* font) {
 	}
 }
 
-GLEColor::GLEColor() {
-	m_Red = m_Blue = m_Green = m_Alpha = 0.0;
-	m_Name = NULL;
+GLEFillBase::GLEFillBase() {
 }
 
-GLEColor::GLEColor(double r, double g, double b) {
-	m_Red = r;
-	m_Green = g;
-	m_Blue = b;
-	m_Alpha = 1.0;
-	m_Transparent = false;
-	m_Name = NULL;
+GLEFillBase::~GLEFillBase() {
+}
+
+GLEPatternFill::GLEPatternFill(int fillDescr) :
+	m_fillDescription(fillDescr)
+{
+}
+
+GLEPatternFill::~GLEPatternFill() {
+}
+
+GLEFillType GLEPatternFill::getFillType() {
+	return GLE_FILL_TYPE_PATTERN;
+}
+
+GLEColor::GLEColor() :
+	m_Name(0)
+{
+	setGray(0);
+}
+
+GLEColor::GLEColor(double r, double g, double b) :
+	m_Name(0)
+{
+	setRGB(r, g, b);
+}
+
+GLEColor::GLEColor(double r, double g, double b, double a) :
+	m_Name(0)
+{
+	setRGBA(r, g, b, a);
+}
+
+GLEColor::GLEColor(double gray) :
+	m_Name(0)
+{
+	setGray(gray);
 }
 
 GLEColor::~GLEColor() {
 	if (m_Name != NULL) delete m_Name;
+}
+
+GLEColor* GLEColor::clone() {
+	GLEColor* result = new GLEColor(m_Red, m_Green, m_Blue, m_Alpha);
+	result->setTransparent(isTransparent());
+	result->setName(m_Name);
+	return result;
 }
 
 int GLEColor::getType() {
@@ -1853,8 +1888,17 @@ const char* GLEColor::getName() {
 }
 
 void GLEColor::setName(const string& name) {
-	if (m_Name != NULL) delete m_Name;
+	delete m_Name;
 	m_Name = new string(name);
+}
+
+void GLEColor::setName(const string* name) {
+	delete m_Name;
+	if (name != 0) {
+		m_Name = new std::string(*name);
+	} else {
+		m_Name = 0;
+	}
 }
 
 void GLEColor::setRGB(double r, double g, double b) {
@@ -1863,25 +1907,42 @@ void GLEColor::setRGB(double r, double g, double b) {
 	m_Transparent = false;
 }
 
-void GLEColor::setRGB255(int r, int g, int b) {
-	m_Red   = ((double)r) / 255.0;
-	m_Green = ((double)g) / 255.0;
-	m_Blue  = ((double)b) / 255.0;
-	m_Alpha = 1.0;
+void GLEColor::setRGBA(double r, double g, double b, double a) {
+	m_Red = r; m_Green = g; m_Blue = b; m_Alpha = a;
 	m_Transparent = false;
+}
+
+void GLEColor::setRGB255(int r, int g, int b) {
+	setRGB(((double)r) / 255.0, ((double)g) / 255.0, ((double)b) / 255.0);
+}
+
+void GLEColor::setGray(double gray) {
+	setRGB(gray, gray, gray);
 }
 
 void GLEColor::setHexValue(unsigned int v) {
 	unsigned int red   = (v >> 16) & 0xFF;
 	unsigned int green = (v >> 8) & 0xFF;
 	unsigned int blue  = v & 0xFF;
-	m_Red   = ((double)red) / 255.0;
-	m_Green = ((double)green) / 255.0;
-	m_Blue  = ((double)blue) / 255.0;
-	// cout << "RGB(" << red << "," << green << "," << blue << ") -> ";
-	// cout << "RGB(" << m_Red << "," << m_Green << "," << m_Blue << ")" << endl;
-	m_Alpha = 1.0;
-	m_Transparent = false;
+	setRGB(((double)red) / 255.0, ((double)green) / 255.0, ((double)blue) / 255.0);
+}
+
+void GLEColor::setDoubleEncoding(double v) {
+	int value = 0;
+	memcpy((void*)&value, (void*)&v, sizeof(int));
+	setHexValue(value);
+}
+
+double GLEColor::getDoubleEncoding() {
+	double result;
+	union {
+		double d;
+		int l[2];
+	} both;
+	both.l[0] = getHexValueGLE();
+	both.l[1] = 0;
+	memcpy(&result, &both.d, sizeof(double));
+	return result;
 }
 
 unsigned int GLEColor::getHexValueGLE() {

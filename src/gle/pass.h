@@ -239,7 +239,6 @@ int gt_firstval(OPKEY lkey, const char *s);
 bool gt_firstval_err(OPKEY lkey, const char *s, int* result);
 int gt_index(OPKEY lkey,char *s);
 int gt_optional(OPKEY lkey, int *curtok, TOKENS tk, int *ntok, int *pcode, int *plen);
-int pass_color(const char *s) throw(ParserError);
 int pass_justify(const char *s);
 int pass_marker(char *s) throw(ParserError);
 void get_color(TOKENS tk,int *ntok,int *curtok,int *pcode,int *plen);

@@ -79,7 +79,7 @@ GLEGraphBlockData* g_graphBlockData = 0;
 
 vector<GLELet*> g_letCmds;
 int g_nbar = 0;
-int g_graph_background = GLE_FILL_CLEAR;
+GLERC<GLEColor> g_graph_background;
 
 int freedataset(int i);
 void free_temp(void);
@@ -570,10 +570,9 @@ void do_bar(int& ct, GLEGraphBlockInstance* graphBlock) {
 	}
 	br[g_nbar]->horiz = false;
 	for (int i = 0; i <= ng; i++) {
-		br[g_nbar]->color[i] = g_get_grey(0.0);
-		br[g_nbar]->fill[i] = g_get_grey(i == 0 ? 0.0 : 1.0-ng/i);
+		br[g_nbar]->color[i] = new GLEColor(0.0);
+		br[g_nbar]->fill[i] = new GLEColor(i == 0 ? 0.0 : 1.0 - ng/i);
 		br[g_nbar]->from[i] = 0;
-		br[g_nbar]->pattern[i] = -1;
 		g_get_line_width(&br[g_nbar]->lwidth[i]);
 		strcpy(br[g_nbar]->lstyle[i] ,"1\0");
 	}
@@ -639,7 +638,7 @@ void do_bar(int& ct, GLEGraphBlockInstance* graphBlock) {
 /* fill d1,d2 color green xmin 1 xmax 2 ymin 1 ymax 2   */
 /* fill d1 color green xmin 1 xmax 2 ymin 1 ymax 2      */
 void do_fill(int& ct, GLEGraphBlockInstance* graphBlock) {
-	fd[++nfd] = FD_CAST myallocz(sizeof(*fd[1]));
+	fd[++nfd] = new fill_data();
 	GLEGraphDataSetOrder* order = graphBlock->getData()->getOrder();
 	GLEClassDefinition* classDef = graphBlock->getGraphBlockBase()->getClassDefinitions()->getFill();
 	GLEClassInstance* classObj = new GLEClassInstance(classDef);
@@ -684,7 +683,7 @@ void do_fill(int& ct, GLEGraphBlockInstance* graphBlock) {
 		ensureDataSetCreatedAndSetUsed(fd[nfd]->db);
 	}
 	ct++;
-	fd[nfd]->color = g_get_grey(1.0-nfd*.1);
+	fd[nfd]->color = new GLEColor(1.0 - nfd * 0.1);
 	fd[nfd]->xmin = -GLE_INF;
 	fd[nfd]->xmax = GLE_INF;
 	fd[nfd]->ymin = -GLE_INF;
@@ -971,7 +970,7 @@ void do_axis(int axis, bool craxis) throw (ParserError) {
 	int ct = 2;
 	while (ct <= ntk)  {
 		kw("BASE") xx[axis].base = next_exp;
-		else kw("COLOR") xx[axis].color = (int) next_exp;
+		else kw("COLOR") xx[axis].setColor(next_color);
 		else kw("DSUBTICKS") xx[axis].dsubticks = next_exp;
 		else kw("DTICKS") {
 			xx[axis].dticks = next_exp;
@@ -1245,47 +1244,59 @@ void do_discontinuity() {
 	}
 }
 
+void ensure_fill_created(bar_struct* bar, int fi) {
+	if (bar->fill[fi].isNull()) {
+		bar->fill[fi] = new GLEColor();
+		bar->fill[fi]->setTransparent(true);
+	}
+}
+
+void update_key_fill(bar_struct* bar, int fi) {
+	int dataset = bar->to[fi];
+	if (dp[dataset] != NULL) {
+		dp[dataset]->key_fill = bar->fill[fi];
+	}
+}
+
 void do_set_bar_color(const char* tk, bar_struct* bar, int type) {
 	/* Use tokenizer that jumps over () pairs to be able to parse CVTRGB(...) */
 	int fi = 0;
-	int dataset = 0;
 	string tokstr = (const char*)tk;
 	level_char_separator separator(",", "", "(", ")");
 	tokenizer<level_char_separator> tokens(tokstr, separator);
 	while (tokens.has_more()) {
-		int color = pass_color_var(tokens.next_token().c_str());
+		GLERC<GLEColor> color(pass_color_var(tokens.next_token().c_str()));
 		switch (type) {
 			case BAR_SET_COLOR:
-				bar->color[fi++] = color;
+				bar->color[fi] = color;
 				break;
 			case BAR_SET_FILL:
-				bar->fill[fi] = color;
-				dataset = bar->to[fi++];
-				if (dp[dataset] != NULL) {
-					dp[dataset]->key_fill = color;
-				}
+				ensure_fill_created(bar, fi);
+				update_color_foreground(bar->fill[fi].get(), color.get());
+				update_key_fill(bar, fi);
 				break;
 			case BAR_SET_TOP:
-				bar->top[fi++] = color;
+				bar->top[fi] = color;
 				break;
 			case BAR_SET_SIDE:
-				bar->side[fi++] = color;
+				bar->side[fi] = color;
 				break;
 			case BAR_SET_PATTERN:
-				bar->pattern[fi] = color;
-				dataset = bar->to[fi++];
-				if (dp[dataset] != NULL) {
-					dp[dataset]->key_pattern = color;
+				if (color->isFill() && color->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
+					ensure_fill_created(bar, fi);
+					update_color_fill_pattern(bar->fill[fi].get(), static_cast<GLEPatternFill*>(color->getFill()));
+					update_key_fill(bar, fi);
+				} else {
+					g_throw_parser_error("expected fill pattern");
 				}
 				break;
 			case BAR_SET_BACKGROUND:
-				bar->background[fi] = color;
-				dataset = bar->to[fi++];
-				if (dp[dataset] != NULL) {
-					dp[dataset]->key_background = color;
-				}
+				ensure_fill_created(bar, fi);
+				update_color_fill_background(bar->fill[fi].get(), color.get());
+				update_key_fill(bar, fi);
 				break;
 		}
+		fi++;
 	}
 }
 
@@ -1480,7 +1491,7 @@ void GLEGraphPartAxis::setBox(GLERectangle* box) {
 void prepare_graph_key_and_clip(double ox, double oy, KeyInfo* keyinfo) {
 	if (!keyinfo->hasHei()) keyinfo->setHei(g_fontsz);
 	measure_key(keyinfo);
-	if (keyinfo->getNbEntries() > 0 && !keyinfo->isDisabled() && !keyinfo->getNoBox() && keyinfo->getBackgroundColor() == (int)GLE_FILL_CLEAR) {
+	if (keyinfo->getNbEntries() > 0 && !keyinfo->isDisabled() && !keyinfo->getNoBox() && keyinfo->getBackgroundColor()->isTransparent()) {
 		g_gsave();
 		g_beginclip();
 		g_set_path(true);
@@ -1604,7 +1615,7 @@ void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (Pars
 	gr_thrownomiss();
 
 	/* Draw graph background */
-	if (g_graph_background != (int)GLE_FILL_CLEAR) {
+	if (!g_graph_background->isTransparent()) {
 		int old_fill;
 		g_get_fill(&old_fill);
 		g_set_fill(g_graph_background);
@@ -1625,7 +1636,7 @@ void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (Pars
 	graphBlock->drawParts();
 
 	/* Draw the key */
-	if (keyinfo->getNbEntries() > 0 && !keyinfo->isDisabled() && !keyinfo->getNoBox() && keyinfo->getBackgroundColor() == (int)GLE_FILL_CLEAR) {
+	if (keyinfo->getNbEntries() > 0 && !keyinfo->isDisabled() && !keyinfo->getNoBox() && keyinfo->getBackgroundColor()->isTransparent()) {
 		g_endclip();
 		g_grestore();
 	}
@@ -1671,7 +1682,7 @@ void graph_freebars() {
 }
 
 void graph_init() {
-	g_graph_background = GLE_FILL_CLEAR;
+	g_graph_background = g_get_fill_clear();
 	ndata = 0; nfd = 0; g_nbar = 0;
 	xx[GLE_AXIS_X0].off = true;
 	xx[GLE_AXIS_Y0].off = true;

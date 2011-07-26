@@ -41,6 +41,8 @@
 
 #include "tokens/Tokenizer.h"
 
+class GLEColor;
+
 #define SC (char *)
 #define UC (unsigned char *)
 
@@ -69,8 +71,7 @@ int df_circle_stroke(dbl r);
 int df_narc(dbl r,dbl t1,dbl t2,dbl cx,dbl cy);
 int mem_total(void);
 int mem_worst(void);
-int pass_color(const char *s) throw(ParserError);
-int pass_color_var(const char *s) throw(ParserError);
+GLERC<GLEColor> pass_color_var(const char *s) throw(ParserError);
 int pass_font(const char *s);
 int pass_justify(const char *s);
 int pass_marker(char *s) throw(ParserError);
