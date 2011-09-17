@@ -161,9 +161,7 @@ DISTFILES += readme.txt \
              images/reload.png \
              images/reload_red.png
 
-linux-g++ {
-	LIBS += -ldl
-}
+LIBS += $$QMAKE_LIBS_DYNLOAD
 
 # link against the GLE library (unix -> Linux and Mac OS/X)
 unix {
