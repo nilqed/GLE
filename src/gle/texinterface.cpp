@@ -1170,6 +1170,8 @@ bool create_pdf_file_ghostscript(GLEFileLocation* fname, int dpi, GLEScript* scr
 	int img_hi = GLEBBoxToPixels(dpi, bb.getY());
 	gsargs << " -g" << img_wd << "x" << img_hi;
 	gsargs << " -sDEVICE=pdfwrite";
+	gsargs << " -dPDFSETTINGS=/prepress -dMaxSubsetPct=100 -dSubsetFonts=true";
+	gsargs << " -dEmbedAllFonts=true -dAutoRotatePages=/None";
 	string outputfile;
 	if (fname->isStdout()) {
 		gsargs << " -sOutputFile=-";
