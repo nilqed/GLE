@@ -913,9 +913,8 @@ void TeXObject::output(ostream& os) {
 	}
 	os << "\\makebox(0,0)[lb]{";
 	if (!isBlack()) {
-		rgb01 c1;
-		g_colortyp_to_rgb01(getColor(), &c1);
-		os << "\\color[rgb]{" << c1.red << "," << c1.green << "," << c1.blue << "}";
+		GLERC<GLEColor> color(getColor());
+		os << "\\color[rgb]{" << color->getRed() << "," << color->getGreen() << "," << color->getBlue() << "}";
 	}
 	getObject()->outputLines(os);
 	for (int i = 0; i < closeb; i++) {
@@ -932,7 +931,8 @@ void TeXObject::getDimensions(double* x1, double *y1, double *x2, double *y2) {
 }
 
 int TeXObject::isBlack() {
-	return g_is_black(getColor());
+	GLEColor* color = getColor();
+	return color == 0 || color->getHexValueGLE() == GLE_COLOR_BLACK;
 }
 
 TeXHashObject::TeXHashObject(const string& line) : m_Line(line) {
@@ -1006,8 +1006,8 @@ void TeXObjectInfo::setJustify(int just) {
 	m_Status |= TEX_OBJ_INF_HAS_JUSTIFY;
 }
 
-void TeXObjectInfo::setColor(colortyp* color) {
-	m_Color = *color;
+void TeXObjectInfo::setColor(const GLERC<GLEColor>& color) {
+	m_Color = color;
 	m_Status |= TEX_OBJ_INF_HAS_COLOR;
 }
 
@@ -1024,7 +1024,7 @@ void TeXObjectInfo::initializeAll() {
 		g_get_just(&m_Just);
 	}
 	if ((m_Status & TEX_OBJ_INF_HAS_COLOR) == 0) {
-		g_get_colortyp(&m_Color);
+		m_Color = g_get_color();
 	}
 }
 

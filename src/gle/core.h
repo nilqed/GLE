@@ -92,7 +92,7 @@ public:
 struct gmodel {
 	double image[3][3];
 	double fontn,fontsz;	/* up to here for font caching */
-	colortyp color;
+	GLERC<GLEColor> color;
 	GLERC<GLEColor> fill;
 	double lwidth,lstyled,curx,cury;
 	double endx,endy;
@@ -344,10 +344,6 @@ void g_psarrow(double x1, double y1, double x2, double y2, int flag);
 void g_arc(double r, double t1, double t2, double cx, double cy, int arrow);
 void g_narc(double r, double t1, double t2, double cx, double cy, int arrow);
 
-void g_get_colortyp(colortyp *color);
-void g_colortyp_to_rgb01(colortyp* c1, rgb01 *c2);
-int g_is_black(colortyp *color);
-
 bool g_is_bbtweak();
 double g_get_angle_deg();
 void g_get_scale(double* sx, double* sy);
@@ -429,9 +425,7 @@ int g_arrow_tip();
 void g_get_xy(GLEPoint* pt);
 void g_move(const GLEPoint& pt);
 void g_clear_matrix();
-void g_set_color(GLEColor* color);
 void g_set_color(const GLERC<GLEColor>& color);
-void g_set_fill(GLEColor* color);
 void g_set_fill(int fill);
 void g_set_fill(const GLERC<GLEColor>& fill);
 bool g_is_filled(void);
@@ -445,8 +439,6 @@ int g_hash_string_to_color(const string& str, colortyp* c);
 int g_verbosity();
 
 int font_get_encoding(int ff);
-int g_get_grey(double g);
-
 void d_devcmd(char *s);
 void g_arcto(dbl x1,dbl y1,dbl x2,dbl y2,dbl rrr);
 void g_beginclip(void);

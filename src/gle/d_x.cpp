@@ -870,8 +870,9 @@ void X11GLEDevice::bezier(dbl x1,dbl y1,dbl x2,dbl y2,dbl x3,dbl y3)
 	}
 }
 /*---------------------------------------------------------------------------*/
-void X11GLEDevice::set_color(int f)			/* colors slightly changed a.r. */
+void X11GLEDevice::set_color(const GLERC<GLEColor>& color)			/* colors slightly changed a.r. */
 {
+	int f = color->getHexValueGLE();
 	int i;
 	colortyp  cc;
 	cc.l = f;

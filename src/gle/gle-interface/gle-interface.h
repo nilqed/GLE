@@ -425,6 +425,7 @@ public:
 	double getDoubleEncoding();
 	void setHexValueGLE(unsigned int hexValue);
 	unsigned int getHexValueGLE();
+	double getGray();
 	GLEColor* clone();
 	inline double getRed() { return m_Red; }
 	inline double getGreen() { return m_Green; }

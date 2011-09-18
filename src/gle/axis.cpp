@@ -1107,7 +1107,6 @@ GLEAxisQuantileScale::~GLEAxisQuantileScale() {
 }
 
 GLEAxis::GLEAxis() : format() {
-	init(0);
 }
 
 GLEAxis::~GLEAxis() {

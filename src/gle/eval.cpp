@@ -740,13 +740,10 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 			stk[++nstk] = yy;
 			break;
 		case 105: /* CVTGRAY(.5) */
-			colvar.b[B_F] = 1;
-			colvar.b[B_R] = (unsigned char) floor(stk[nstk]*255);
-			colvar.b[B_G] = colvar.b[B_R];
-			colvar.b[B_B] = colvar.b[B_R];
-			both.l[0] = colvar.l;
-			both.l[1] = 0;
-			memcpy(&stk[nstk],&both.d,sizeof(double));
+			{
+				GLERC<GLEColor> color(new GLEColor(stk[nstk]));
+				stk[nstk] = color->getDoubleEncoding();
+			}
 			break;
 		case 106: /* CVTINT(2) */
 			*otyp = 1;
@@ -784,26 +781,19 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 			}
 			break;
 		case 107: /* RGB(.4,.4,.2) */
-			colvar.b[B_F] = 1;
-			colvar.b[B_B] = float_to_color_comp(stk[nstk]);
-			colvar.b[B_G] = float_to_color_comp(stk[nstk-1]);
-			colvar.b[B_R] = float_to_color_comp(stk[nstk-2]);
-			nstk -= 2;
-			both.l[0] = colvar.l;
-			both.l[1] = 0;
-			memcpy(&both.l[0],&colvar.l,sizeof(int));
-			memcpy(&stk[nstk],&both.d,sizeof(double));
+			{
+				GLERC<GLEColor> color(new GLEColor(stk[nstk-2], stk[nstk-1], stk[nstk]));
+				nstk -= 2;
+				stk[nstk] = color->getDoubleEncoding();
+			}
 			break;
 		case 140: /* RGB255(.4,.4,.2) */
-			colvar.b[B_F] = 1;
-			colvar.b[B_B] = float_to_color_comp_255(stk[nstk]);
-			colvar.b[B_G] = float_to_color_comp_255(stk[nstk-1]);
-			colvar.b[B_R] = float_to_color_comp_255(stk[nstk-2]);
-			nstk -= 2;
-			both.l[0] = colvar.l;
-			both.l[1] = 0;
-			memcpy(&both.l[0],&colvar.l,sizeof(int));
-			memcpy(&stk[nstk],&both.d,sizeof(double));
+			{
+				GLERC<GLEColor> color(new GLEColor());
+				color->setRGB255(stk[nstk-2], stk[nstk-1], stk[nstk]);
+				nstk -= 2;
+				stk[nstk] = color->getDoubleEncoding();
+			}
 			break;
 		case 60+FN_NDATA: /* Number of datapoints in a dateset */
 			*otyp = 1;
@@ -939,7 +929,6 @@ void eval(int *pcode, int *cp, double *oval, const char **ostr, int *otyp) throw
 		both.l[1] = 0;
 		dbg gprint("Constant %ld \n",both.l[0]);
 		memcpy(oval,&both.d,sizeof(both.d));
-		memcpy(&both.d,oval,sizeof(both.d));
 		++(*cp);
 		return;
 	}

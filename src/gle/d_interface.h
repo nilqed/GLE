@@ -85,7 +85,7 @@ public:
 	virtual void opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError) = 0;
 	virtual void pscomment(char* ss) = 0;
 	virtual void reverse(void)    /* reverse the order of stuff in the current path */ = 0;
-	virtual void set_color(int f) = 0;
+	virtual void set_color(const GLERC<GLEColor>& color) = 0;
 	virtual void set_fill(const GLERC<GLEColor>& fill) = 0;
 	virtual void set_line_cap(int i) = 0;
 	virtual void set_line_join(int i) = 0;
@@ -127,7 +127,7 @@ protected:
 	FILE *psfile;
 	int i,l,j;
 	int m_FillMethod;
-	colortyp g_cur_color;
+	GLERC<GLEColor> m_currentColor;
 	GLERC<GLEColor> m_currentFill;
 	GLEPoint m_BBox;
 public:
@@ -167,7 +167,7 @@ public:
 	virtual void opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError);
 	virtual void pscomment(char* ss);
 	virtual void reverse(void)    /* reverse the order of stuff in the current path */;
-	virtual void set_color(int f);
+	virtual void set_color(const GLERC<GLEColor>& color);
 	virtual void set_fill(const GLERC<GLEColor>& fill);
 	virtual void set_line_cap(int i);
 	virtual void set_line_join(int i);
@@ -190,7 +190,7 @@ public:
 	virtual const char* getExtension();
 	virtual void getRecordedBytes(string* output);
 protected:
-	void set_color(colortyp& color);
+	void set_color_impl(const GLERC<GLEColor>& color);
 	void ddfill(GLERectangle* bounds = NULL);
 	void shadeGLE();
 	void shadeBoundedIfThenElse1(GLERectangle* bounds, double step1);
@@ -224,7 +224,7 @@ protected:
 	cairo_surface_t *surface;
 	cairo_t *cr;
 	int m_FillMethod;
-	colortyp g_cur_color;
+	GLERC<GLEColor> m_currentColor;
 	GLERC<GLEColor> m_currentFill;
 public:
 	GLECairoDevice(bool showerror);
@@ -262,7 +262,7 @@ public:
 	virtual void opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError);
 	virtual void pscomment(char* ss);
 	virtual void reverse(void)    /* reverse the order of stuff in the current path */;
-	virtual void set_color(int f);
+	virtual void set_color(const GLERC<GLEColor>& color);
 	virtual void set_fill(const GLERC<GLEColor>& fill);
 	virtual void set_fill_method(int m);
 	virtual void set_line_cap(int i);
@@ -282,7 +282,7 @@ public:
 	virtual FILE* get_file_pointer(void);
 	virtual int getDeviceType();
 protected:
-	void set_color(colortyp& color);
+	void set_color_impl(const GLERC<GLEColor>& color);
 	void ddfill(GLERectangle* bounds = NULL);
 	void shadePattern();
 	void shadeGLE();
@@ -371,7 +371,7 @@ public:
 	virtual void opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError);
 	virtual void pscomment(char* ss);
 	virtual void reverse(void)    /* reverse the order of stuff in the current path */;
-	virtual void set_color(int f);
+	virtual void set_color(const GLERC<GLEColor>& color);
 	virtual void set_fill(const GLERC<GLEColor>& fill);
 	virtual void set_line_cap(int i);
 	virtual void set_line_join(int i);
@@ -472,7 +472,7 @@ public:
 	virtual void opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError);
 	virtual void pscomment(char* ss);
 	virtual void reverse(void)    /* reverse the order of stuff in the current path */;
-	virtual void set_color(int f);
+	virtual void set_color(const GLERC<GLEColor>& color);
 	virtual void set_fill(const GLERC<GLEColor>& fill);
 	virtual void set_line_cap(int i);
 	virtual void set_line_join(int i);

@@ -1992,6 +1992,10 @@ unsigned int GLEColor::getHexValueGLE() {
 	}
 }
 
+double GLEColor::getGray() {
+	return (getRed() * 3.0 + getGreen() * 2.0 + getBlue()) / 6.0;
+}
+
 GLEPropertyStore::GLEPropertyStore(GLEPropertyStoreModel* model) {
 	m_Model = model;
 	m_Values.ensure(model->getNumberOfProperties());
@@ -2174,14 +2178,9 @@ GLEPropertyColor::~GLEPropertyColor() {
 }
 
 bool GLEPropertyColor::isEqualToState(GLEPropertyStore* store) {
-	rgb01 rgb;
-	colortyp color;
-	g_get_colortyp(&color);
-	g_colortyp_to_rgb01(&color, &rgb);
+	GLERC<GLEColor> color(g_get_color());
 	GLEColor* gle_color = store->getColorProperty(this);
-	return equals_rel_fine(rgb.red, gle_color->getRed()) &&
-	       equals_rel_fine(rgb.blue, gle_color->getBlue()) &&
-	       equals_rel_fine(rgb.green, gle_color->getGreen());
+	return color->equalsApprox(gle_color);
 }
 
 void GLEPropertyColor::updateState(GLEPropertyStore* store) {
@@ -2317,12 +2316,7 @@ void GLEPropertyArrowAngle::updateState(GLEPropertyStore* store) {
 }
 
 void GLEInitColorProperty(GLEPropertyStore* prop) {
-	rgb01 rgb;
-	colortyp color;
-	g_get_colortyp(&color);
-	g_colortyp_to_rgb01(&color, &rgb);
-	GLEColor* gcolor = new GLEColor(rgb.red, rgb.green, rgb.blue);
-	prop->setColorProperty(GLEDOPropertyColor, gcolor);
+	prop->setColorProperty(GLEDOPropertyColor, g_get_color()->clone());
 }
 
 void GLEInitSimpleLineProperties(GLEPropertyStore* prop) {

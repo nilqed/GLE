@@ -220,15 +220,6 @@ void g_dfont(const char *s) {
 	g.dev->dfont((char*)s);
 }
 
-int g_get_grey(double v) {
-	colortyp c;
-	c.b[B_F] = (unsigned)( (char)  1 );
-	c.b[B_R] = (unsigned)( (char) 255*v );
-	c.b[B_G] = (unsigned)( (char) 255*v );
-	c.b[B_B] = (unsigned)( (char) 255*v );
-	return c.l;
-}
-
 GLERC<GLEColor> g_get_fill_clear() {
 	GLERC<GLEColor> color(new GLEColor());
 	color->setTransparent(true);
@@ -239,13 +230,6 @@ GLERC<GLEColor> g_get_color_hex(int hexValue) {
 	GLERC<GLEColor> color(new GLEColor());
 	color->setHexValue(hexValue);
 	return color;
-}
-
-void g_color_set_black(colortyp& color) {
-	color.b[B_F] = 1;
-	color.b[B_R] = 0;
-	color.b[B_G] = 0;
-	color.b[B_B] = 0;
 }
 
 void g_hint(char *s) {
@@ -1152,7 +1136,7 @@ void g_clear() {
 	ngsave = 0;
 	g.fontn = 0.0;
 	g.fontsz = 0.0;		   /* up to here for font caching */
-	g_color_set_black(g.color);
+	g.color = color_or_fill_from_int(GLE_COLOR_BLACK);
 	g.fill = g_get_fill_clear();
 	g.lwidth = 0.0;
 	g.lstyled = 0.0;
@@ -1601,11 +1585,8 @@ void g_set_fill_pattern(const GLERC<GLEColor>& pattern) {
 }
 
 void g_set_color(GLEColor* color) {
-	g.color.b[B_B] = float_to_color_comp(color->getBlue());
-	g.color.b[B_G] = float_to_color_comp(color->getGreen());
-	g.color.b[B_R] = float_to_color_comp(color->getRed());
-	g.color.b[B_F] = 1;
-	g.dev->set_color(g.color.l);
+	g.color = color->clone();
+	g.dev->set_color(g.color);
 }
 
 void g_set_color(const GLERC<GLEColor>& color) {
@@ -1616,32 +1597,16 @@ void g_set_color(const GLERC<GLEColor>& color) {
 
 void g_set_color(int l) {
 	if (l==0) return;
-	g.color.l = l;
-	g.dev->set_color(g.color.l);
+	g.color->setHexValueGLE(l);
+	g.dev->set_color(g.color);
 }
 
 void g_get_color(int *l) {
-	*l = g.color.l;
+	*l = g.color->getHexValueGLE();
 }
 
 GLERC<GLEColor> g_get_color() {
-	GLERC<GLEColor> color(new GLEColor());
-	color->setHexValue(g.color.l);
-	return color;
-}
-
-void g_get_colortyp(colortyp *color) {
-	*color = g.color;
-}
-
-void g_colortyp_to_rgb01(colortyp* c1, rgb01 *c2) {
-	c2->red = (double)c1->b[B_R]/255;
-	c2->green = (double)c1->b[B_G]/255;
-	c2->blue = (double)c1->b[B_B]/255;
-}
-
-int g_is_black(colortyp* color) {
-	return color->b[B_R] == 0 && color->b[B_G] == 0 && color->b[B_B] == 0;
+	return g.color->clone();
 }
 
 void g_set_fill_method(const char* meth) {
@@ -1693,12 +1658,13 @@ void g_grestore() {
 void g_get_state(gmodel *s) {
 	*s = g;
 	s->fill = g.fill->clone();
+	s->color = g.color->clone();
 }
 
 void g_set_state(gmodel* s) {
 	g_set_matrix(s->image, &g, s);
 	g = *s;
-	g.dev->set_color(g.color.l);
+	g.dev->set_color(g.color);
 	g.dev->set_fill(g.fill);
 	g.dev->set_line_width(g.lwidth);
 	g.dev->set_line_style(g.lstyle);
@@ -1707,7 +1673,7 @@ void g_set_state(gmodel* s) {
 }
 
 void g_set_partial_state(gmodel* s) {
-	g_set_color(s->color.l);
+	g_set_color(s->color);
 	g_set_fill(s->fill);
 	g_set_line_width(s->lwidth);
 	g_set_line_style(s->lstyle);

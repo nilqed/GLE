@@ -307,9 +307,7 @@ void GLECairoDevice::shadePattern(void) {
 		if (background->getHexValueGLE() == (unsigned int)GLE_COLOR_WHITE) {
 			cairo_set_source_rgb(icr, 1.0, 1.0, 1.0);
 		} else {
-			colortyp col;
-			col.l = background->getHexValueGLE();
-			cairo_set_source_rgb(icr, col.b[B_R]/255.0, col.b[B_G]/255.0, col.b[B_B]/255.0);
+			cairo_set_source_rgb(icr, background->getRed(), background->getGreen(), background->getBlue());
 		}
 		cairo_rectangle(icr, -1, -1, (xstep+1), (ystep+1));
 		cairo_fill(icr);
@@ -347,7 +345,6 @@ void GLECairoDevice::shadePattern(void) {
 			cairo_stroke(icr);
 		}
 	}
-	cairo_set_source_rgb(icr, g_cur_color.b[B_R]/255.0, g_cur_color.b[B_G]/255.0, g_cur_color.b[B_B]/255.0);
 	cairo_pattern_t *pattern = cairo_pattern_create_for_surface(isurface);
 	cairo_pattern_set_extend(pattern, CAIRO_EXTEND_REPEAT);
 	cairo_matrix_init_scale(&matrix, 160.0, 160.0);
@@ -455,24 +452,14 @@ void GLECairoDevice::shade(GLERectangle* bounds) {
 		cairo_save(cr);
 		GLERC<GLEColor> background(get_fill_background(m_currentFill.get()));
 		if (!background->isTransparent()) {
-			if (background->getHexValueGLE() == (int)GLE_COLOR_WHITE) {
-				cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-			} else {
-				colortyp col;
-				col.l = background->getHexValueGLE();
-				set_color(col);
-			}
+			cairo_set_source_rgb(cr, background->getRed(), background->getGreen(), background->getBlue());
 			cairo_fill_preserve(cr);
 		}
 		// Implemented by using path as clip and then painting strokes over the clip
 		cairo_clip(cr);
 		cairo_new_path(cr);
 		GLERC<GLEColor> foreground(get_fill_foreground(m_currentFill.get()));
-		if (foreground->getHexValueGLE() == GLE_COLOR_BLACK) {
-			cairo_set_source_rgb(cr, 0, 0, 0);
-		} else {
-			cairo_set_source_rgb(cr, foreground->getRed(), foreground->getGreen(), foreground->getBlue());
-		}
+		cairo_set_source_rgb(cr, foreground->getRed(), foreground->getGreen(), foreground->getBlue());
 		colortyp cur_fill;
 		cur_fill.l = m_currentFill->getHexValueGLE();
 		cairo_set_line_width(cr, (double)(cur_fill.b[B_R]/160.0));
@@ -556,16 +543,17 @@ void GLECairoDevice::reverse(void)    /* reverse the order of stuff in the curre
 	cout << "reverse not yet implemented" << endl;
 }
 
-void GLECairoDevice::set_color(colortyp& color) {
-	cairo_set_source_rgb(cr, color.b[B_R]/255.0, color.b[B_G]/255.0, color.b[B_B]/255.0);
+void GLECairoDevice::set_color_impl(const GLERC<GLEColor>& color) {
+	cairo_set_source_rgb(cr, color->getRed(), color->getGreen(), color->getBlue());
 }
 
 void GLECairoDevice::set_color() {
-	set_color(g_cur_color);
+	set_color_impl(m_currentColor);
 }
-void GLECairoDevice::set_color(int f) {
+
+void GLECairoDevice::set_color(const GLERC<GLEColor>& color) {
 	g_flush();
-	g_cur_color.l = f;
+	m_currentColor = color;
 	set_color();
 }
 
@@ -647,9 +635,7 @@ void GLECairoDevice::stroke(void) {
 }
 
 void GLECairoDevice::set_fill(void) {
-	colortyp cur_fill;
-	cur_fill.l = m_currentFill->getHexValueGLE();
-	set_color(cur_fill);
+	set_color_impl(m_currentFill);
 }
 
 void GLECairoDevice::xdbox(double x1, double y1, double x2, double y2) {

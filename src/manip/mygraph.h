@@ -41,7 +41,6 @@ int g_set_font_width(double v);
 int draw_key(int nkd, double koffsetx, double koffsety, char *kpos, double khei, int knobox);
 int font_get_encoding(int ff);
 int my_char(int ff, int cc);
-int32 g_get_grey(double g);
 int g_get_just(int *j);
 int g_set_just(int j);
 int g_curve(int32 *pcode);

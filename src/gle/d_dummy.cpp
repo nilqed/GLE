@@ -157,7 +157,7 @@ void GLEDummyDevice::pscomment(char* ss) {
 void GLEDummyDevice::reverse(void)    /* reverse the order of stuff in the current path */ {
 }
 
-void GLEDummyDevice::set_color(int f) {
+void GLEDummyDevice::set_color(const GLERC<GLEColor>& color) {
 }
 
 void GLEDummyDevice::set_fill(const GLERC<GLEColor>& fill) {

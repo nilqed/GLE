@@ -896,13 +896,14 @@ GLERC<GLEColor> pass_color_list_or_fill(const string& color, IThrowsError* error
 
 void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
 	int vtype = 1;
-   int result = 0;
+    int result = 0;
 	string& token = m_tokens.next_token();
 	if (pass_color_hash_value(token, &result, &m_tokens)) {
-		pcode.addInt(8);
-		pcode.addInt(result);
-   } else if (is_float(token)) {
-      string expr(string("CVTGRAY(") + token + ")");
+		GLEColor color;
+		color.setHexValue(result);
+		pcode.addDoubleExpression(color.getDoubleEncoding());
+    } else if (is_float(token)) {
+        string expr(string("CVTGRAY(") + token + ")");
 		polish(expr.c_str(), pcode, &vtype);
 	} else if (str_i_str(token.c_str(), "RGB") != NULL) {
 		m_tokens.pushback_token();
@@ -915,14 +916,8 @@ void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
 		string expr(string("CVTCOLOR(") + token + ")");
 		polish(expr.c_str(), pcode, &vtype);
 	} else {
-		pcode.addInt(8);
 		GLERC<GLEColor> color(pass_color_list_or_fill(token, &m_tokens));
-		if (color->isFill()) {
-			CUtilsAssert(color->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN);
-			pcode.addInt(static_cast<GLEPatternFill*>(color->getFill())->getFillDescription());
-		} else {
-			pcode.addInt(color->getHexValueGLE());
-		}
+		pcode.addDoubleExpression(color->getDoubleEncoding());
 	}
 }
 
@@ -1102,7 +1097,7 @@ void GLEParser::get_font(GLEPcode& pcode) throw (ParserError) {
 		return;
 	}
 	pcode.addInt(8);
-   pcode.addInt(get_font_index(token, &m_tokens));
+    pcode.addInt(get_font_index(token, &m_tokens));
 }
 
 int pass_font(const char *p) {
@@ -1135,20 +1130,20 @@ void GLEParser::get_papersize(GLEPcode& pcode) throw (ParserError) {
 void GLEParser::get_justify(GLEPcode& pcode) throw (ParserError) {
 	const string& token = m_tokens.next_token();
 	if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
-   	int etype = 1;
+		int etype = 1;
 		string parse("JUSTIFY(" + token + ")");
 		polish(parse.c_str(), pcode, &etype);
 		return;
 	}
-   pcode.addInt(8);
+    pcode.addInt(8);
 	pcode.addInt(get_first(token, op_justify));
 }
 
 int pass_justify(const char *s) {
    string token(s);
 	if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
-      int result = 0;
-      double xx = 0.0;
+		int result = 0;
+      	double xx = 0.0;
 		string parse("JUSTIFY(" + token + ")");
 		polish_eval((char*)parse.c_str(), &xx);
 		memcpy(&result, &xx, sizeof(int));

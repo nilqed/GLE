@@ -85,28 +85,28 @@ public:
 class TeXObjectInfo {
 protected:
 	int m_Status;
-	colortyp m_Color;
+	GLERC<GLEColor> m_Color;
 	int m_Just;
 	double m_Xp, m_Yp;
 public:
 	TeXObjectInfo();
 	void setJustify(int just);
 	void setPosition(double xp, double yp);
-	void setColor(colortyp* color);
+	void setColor(const GLERC<GLEColor>& color);
 	void initializeAll();
 	inline void setFlag(int flag) { m_Status |= flag; }
 	inline int getFlags() { return m_Status; }
 	inline int getJustify() { return m_Just; }
 	inline double getXp() { return m_Xp; }
 	inline double getYp() { return m_Yp; }
-	inline colortyp* getColor() { return &m_Color; }
+	inline GLEColor* getColor() { return m_Color.get(); }
 };
 
 class TeXObject {
 protected:
 	double m_Xp, m_Yp, m_DXp, m_DYp, m_Angle;
 	TeXHashObject* m_Object;
-	colortyp m_Color;
+	GLERC<GLEColor> m_Color;
 public:
 	TeXObject();
 	void output(ostream& os);
@@ -124,8 +124,8 @@ public:
 	inline double getDYp() { return m_DYp; }
 	inline const string& getLine() { return m_Object->getLine(); }
 	inline int hasObject() { return m_Object != NULL; }
-	inline void setColor(colortyp* color) { m_Color = *color; }
-	inline colortyp* getColor() { return &m_Color; }
+	inline void setColor(const GLERC<GLEColor>& color) { m_Color = color; }
+	inline GLEColor* getColor() { return m_Color.get(); }
 };
 
 class TeXSize {
