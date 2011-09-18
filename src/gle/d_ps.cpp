@@ -123,12 +123,11 @@ PSGLEDevice::PSGLEDevice(bool eps) : GLEDevice() {
 	m_IsPageSize = false;
 	first_ellipse = 1;
 	ps_nvec = 0;
-	g_cur_fill_color.l = GLE_COLOR_BLACK;
 	m_Out = NULL;
 	m_OutputFile = NULL;
 	m_OutputBuffer = NULL;
 	m_FillMethod = GLE_FILL_METHOD_DEFAULT;
-	m_Background = GLE_COLOR_WHITE;
+	m_currentFill = g_get_fill_clear();
 }
 
 PSGLEDevice::~PSGLEDevice() {
@@ -362,8 +361,11 @@ void PSGLEDevice::fill() {
 }
 
 void PSGLEDevice::ddfill(GLERectangle* bounds) {
-	if (g_cur_fill.b[B_F] == 255) return; /* clear fill, do nothing */
-	if (g_cur_fill.b[B_F] == 2) {
+	colortyp cur_fill;
+	cur_fill.l = m_currentFill->getHexValueGLE();
+	if (cur_fill.b[B_F] == 255) {
+		return; /* clear fill, do nothing */
+	} else if (cur_fill.b[B_F] == 2) {
 		shade(bounds);
 		return;
 	}
@@ -373,8 +375,10 @@ void PSGLEDevice::ddfill(GLERectangle* bounds) {
 }
 
 void PSGLEDevice::shadeGLE() {
-	double step1 = g_cur_fill.b[B_B]/160.0;
-	double step2 = g_cur_fill.b[B_G]/160.0;
+	colortyp cur_fill;
+	cur_fill.l = m_currentFill->getHexValueGLE();
+	double step1 = cur_fill.b[B_B]/160.0;
+	double step2 = cur_fill.b[B_G]/160.0;
 	if (step1 > 0) {
 		out() << -40.0 << " " << step1 << " " << 40.0 << " { /x exch def" << endl;
 		out() << "x 0 moveto 40 x add 40 lineto stroke" << endl;
@@ -406,8 +410,10 @@ void PSGLEDevice::shadeBoundedIfThenElse2(GLERectangle* bounds, double step2) {
 }
 
 void PSGLEDevice::shadeBounded(GLERectangle* bounds) {
-	double step1 = g_cur_fill.b[B_B]/160.0;
-	double step2 = g_cur_fill.b[B_G]/160.0;
+	colortyp cur_fill;
+	cur_fill.l = m_currentFill->getHexValueGLE();
+	double step1 = cur_fill.b[B_B]/160.0;
+	double step2 = cur_fill.b[B_G]/160.0;
 	out() << "2 setlinecap" << endl;
 	if (step1 > 0) {
 		int p0 = (int)ceil((bounds->getYMax()-bounds->getXMin())/step1-1e-6);
@@ -452,8 +458,10 @@ void PSGLEDevice::shadeBounded(GLERectangle* bounds) {
 }
 
 void PSGLEDevice::shadePostScript() {
-	int step1 = g_cur_fill.b[B_B];
-	int step2 = g_cur_fill.b[B_G];
+	colortyp cur_fill;
+	cur_fill.l = m_currentFill->getHexValueGLE();
+	int step1 = cur_fill.b[B_B];
+	int step2 = cur_fill.b[B_G];
 	out() << "<< /PatternType 1" << endl;
 	out() << "/PaintType 1" << endl;
 	out() << "/TilingType 1" << endl;
@@ -466,22 +474,26 @@ void PSGLEDevice::shadePostScript() {
 	out() << "{ pop" << endl;
 	out() << "0 setlinecap" << endl;
 	out() << "0 setlinejoin" << endl;
-	if (m_Background != (int)GLE_FILL_CLEAR) {
-		if (m_Background == (int)GLE_COLOR_WHITE) {
+	GLERC<GLEColor> background(get_fill_background(m_currentFill.get()));
+	if (!background->isTransparent()) {
+		if (background->getHexValueGLE() == (unsigned int)GLE_COLOR_WHITE) {
 			out() << "1 setgray" << endl;
 		} else {
 			colortyp col;
-			col.l = m_Background;
+			col.l = background->getHexValueGLE();
 			set_color(col);
 		}
 		out() << "-1 -1 " << (xstep+1) << " " << (ystep+1) << " rectfill" << endl;
 	}
-	if (g_cur_fill_color.l == GLE_COLOR_BLACK) {
+	GLERC<GLEColor> foreground(get_fill_foreground(m_currentFill.get()));
+	if (foreground->getHexValueGLE() == GLE_COLOR_BLACK) {
 		out() << "0 setgray" << endl;
 	} else {
-		set_color(g_cur_fill_color);
+		colortyp foreground_color;
+		foreground_color.l = foreground->getHexValueGLE();
+		set_color(foreground_color);
 	}
-	out() << (int)g_cur_fill.b[B_R] << " setlinewidth" << endl;
+	out() << (int)cur_fill.b[B_R] << " setlinewidth" << endl;
 	if (step1 > 0) {
 		out() << "0 0 moveto" << endl;
 		out() << xstep << " " << ystep << " l" << endl;
@@ -520,13 +532,14 @@ void PSGLEDevice::shadePostScript() {
 void PSGLEDevice::shade(GLERectangle* bounds) {
 	if (m_FillMethod == GLE_FILL_METHOD_GLE ||
 	   (m_FillMethod == GLE_FILL_METHOD_DEFAULT && bounds != NULL)) {
-		if (m_Background != (int)GLE_FILL_CLEAR) {
+		GLERC<GLEColor> background(get_fill_background(m_currentFill.get()));
+		if (!background->isTransparent()) {
 			out() << "gsave" << endl;
-			if (m_Background == (int)GLE_COLOR_WHITE) {
+			if (background->getHexValueGLE() == (unsigned int)GLE_COLOR_WHITE) {
 				out() << "1 setgray" << endl;
 			} else {
 				colortyp col;
-				col.l = m_Background;
+				col.l = background->getHexValueGLE();
 				set_color(col);
 			}
 			out() << "fill" << endl;
@@ -536,12 +549,17 @@ void PSGLEDevice::shade(GLERectangle* bounds) {
 		out() << "gsave" << endl;
 		out() << "clip" << endl;
 		out() << "newpath" << endl;
-		if (g_cur_fill_color.l == GLE_COLOR_BLACK) {
+		GLERC<GLEColor> foreground(get_fill_foreground(m_currentFill.get()));
+		if (foreground->getHexValueGLE() == GLE_COLOR_BLACK) {
 			out() << "0 setgray" << endl;
 		} else {
-			set_color(g_cur_fill_color);
+			colortyp foreground_color;
+			foreground_color.l = foreground->getHexValueGLE();
+			set_color(foreground_color);
 		}
-		out() << (double)(g_cur_fill.b[B_R]/160.0) << " setlinewidth" << endl;
+		colortyp cur_fill;
+		cur_fill.l = m_currentFill->getHexValueGLE();
+		out() << (double)(cur_fill.b[B_R]/160.0) << " setlinewidth" << endl;
 		if (m_FillMethod == GLE_FILL_METHOD_DEFAULT && bounds != NULL) {
 			shadeBounded(bounds);
 		} else {
@@ -823,11 +841,9 @@ void PSGLEDevice::set_color() {
 }
 
 void PSGLEDevice::set_fill() {
-	set_color(g_cur_fill);
-}
-
-void PSGLEDevice::set_background(int b) {
-	m_Background = b;
+	colortyp cur_fill;
+	cur_fill.l = m_currentFill->getHexValueGLE();
+	set_color(cur_fill);
 }
 
 void PSGLEDevice::set_fill_method(int m) {
@@ -840,12 +856,8 @@ void PSGLEDevice::set_color(int f) {
 	set_color();
 }
 
-void PSGLEDevice::set_fill(int f) {
-	g_cur_fill.l = f;
-}
-
-void PSGLEDevice::set_pattern_color(int c) {
-	g_cur_fill_color.l = c;
+void PSGLEDevice::set_fill(const GLERC<GLEColor>& fill) {
+	m_currentFill = fill;
 }
 
 void PSGLEDevice::beginclip() {
@@ -855,10 +867,10 @@ void PSGLEDevice::beginclip() {
 void PSGLEDevice::endclip() {
 	g_flush();
 	out() << "grestore" << endl;
-	gmodel* state = (gmodel*) myallocz(SIZEOFSTATE);
+	gmodel* state = new gmodel();
 	g_get_state(state);
 	g_set_state(state);
-	myfree(state);
+	delete state;
 }
 
 struct psfont_struct {char *sname; char *lname;};

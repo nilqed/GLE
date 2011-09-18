@@ -117,7 +117,6 @@ int g_scale(double sx,double sy);
 int g_update_bounds(double x,double y);
 int g_set_color(int32 l);
 int g_set_end(dbl x,dbl y);
-int g_set_fill(int32 f);
 int g_set_line_cap(int i);
 int g_set_line_join(int i);
 int g_set_line_miterlimit(double d);

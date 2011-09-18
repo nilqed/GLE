@@ -1794,8 +1794,10 @@ GLEFillBase::~GLEFillBase() {
 }
 
 GLEPatternFill::GLEPatternFill(int fillDescr) :
-	m_fillDescription(fillDescr)
+	m_fillDescription(fillDescr),
+	m_background(new GLEColor())
 {
+	m_background->setHexValueGLE(GLE_COLOR_WHITE);
 }
 
 GLEPatternFill::~GLEPatternFill() {
@@ -1803,6 +1805,12 @@ GLEPatternFill::~GLEPatternFill() {
 
 GLEFillType GLEPatternFill::getFillType() {
 	return GLE_FILL_TYPE_PATTERN;
+}
+
+GLEFillBase* GLEPatternFill::clone() {
+	GLEPatternFill* result = new GLEPatternFill(m_fillDescription);
+	result->setBackground(m_background->clone());
+	return result;
 }
 
 GLEColor::GLEColor() :
@@ -1837,11 +1845,22 @@ GLEColor* GLEColor::clone() {
 	GLEColor* result = new GLEColor(m_Red, m_Green, m_Blue, m_Alpha);
 	result->setTransparent(isTransparent());
 	result->setName(m_Name);
+	if (isFill()) {
+		result->setFill(getFill()->clone());
+	}
 	return result;
 }
 
 int GLEColor::getType() {
 	return GLEObjectTypeColor;
+}
+
+bool GLEColor::equalsApprox(GLEColor* other) {
+	return equals_rel_fine(m_Red, other->m_Red) &&
+		   equals_rel_fine(m_Green, other->m_Green) &&
+		   equals_rel_fine(m_Blue, other->m_Blue) &&
+		   equals_rel_fine(m_Alpha, other->m_Alpha) &&
+		   m_Transparent == other->m_Transparent;
 }
 
 bool GLEColor::equals(GLEDataObject* obj) {
@@ -1928,26 +1947,43 @@ void GLEColor::setHexValue(unsigned int v) {
 }
 
 void GLEColor::setDoubleEncoding(double v) {
-	int value = 0;
-	memcpy((void*)&value, (void*)&v, sizeof(int));
-	setHexValue(value);
+	union {
+		double d;
+		int l[2];
+	} both;
+	both.d = v;
+	setHexValueGLE(both.l[0]);
 }
 
 double GLEColor::getDoubleEncoding() {
-	double result;
 	union {
 		double d;
 		int l[2];
 	} both;
 	both.l[0] = getHexValueGLE();
 	both.l[1] = 0;
-	memcpy(&result, &both.d, sizeof(double));
-	return result;
+	return both.d;
+}
+
+void GLEColor::setHexValueGLE(unsigned int hexValue) {
+	if (hexValue == GLE_FILL_CLEAR) {
+		setGray(0);
+		m_Fill = 0;
+		setTransparent(true);
+	} else if ((hexValue & 0X02000000) != 0) {
+		setGray(0);
+		setFill(new GLEPatternFill(hexValue));
+	} else {
+		setHexValue(hexValue);
+	}
 }
 
 unsigned int GLEColor::getHexValueGLE() {
 	if (isTransparent()) {
 		return GLE_FILL_CLEAR;
+	} else if (isFill() && getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
+		GLEPatternFill* myFill = static_cast<GLEPatternFill*>(getFill());
+		return myFill->getFillDescription();
 	} else {
 		unsigned int red = float_to_color_comp(m_Red);
 		unsigned int green = float_to_color_comp(m_Green);
@@ -2159,17 +2195,8 @@ GLEPropertyFillColor::~GLEPropertyFillColor() {
 }
 
 bool GLEPropertyFillColor::isEqualToState(GLEPropertyStore* store) {
-	rgb01 rgb;
-	colortyp color;
-	g_get_fill_colortyp(&color);
-	GLEColor* gle_color = store->getColorProperty(this);
-	if (gle_color->isTransparent() != (color.l == (int)GLE_FILL_CLEAR)) {
-		return false;
-	}
-	g_colortyp_to_rgb01(&color, &rgb);
-	return equals_rel_fine(rgb.red, gle_color->getRed()) &&
-	       equals_rel_fine(rgb.blue, gle_color->getBlue()) &&
-	       equals_rel_fine(rgb.green, gle_color->getGreen());
+	GLERC<GLEColor> curr_fill(g_get_fill());
+	return curr_fill->equalsApprox(store->getColorProperty(this));
 }
 
 void GLEPropertyFillColor::updateState(GLEPropertyStore* store) {
@@ -2361,15 +2388,6 @@ void GLEInitArrowProperties(GLEPropertyStore* prop) {
 }
 
 void GLEInitShapeFillColor(GLEPropertyStore* prop) {
-	rgb01 rgb;
-	colortyp color;
-	g_get_fill((int*)&color);
-	GLEColor* gcolor = new GLEColor();
-	if (color.l == (int)GLE_FILL_CLEAR) {
-		gcolor->setTransparent(true);
-	} else {
-		g_colortyp_to_rgb01(&color, &rgb);
-		gcolor->setRGB(rgb.red, rgb.green, rgb.blue);
-	}
-	prop->setColorProperty(GLEDOPropertyFillColor, gcolor);
+	GLERC<GLEColor> gcolor(g_get_fill());
+	prop->setColorProperty(GLEDOPropertyFillColor, gcolor->clone());
 }

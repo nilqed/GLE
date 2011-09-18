@@ -1616,8 +1616,7 @@ void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (Pars
 
 	/* Draw graph background */
 	if (!g_graph_background->isTransparent()) {
-		int old_fill;
-		g_get_fill(&old_fill);
+		GLERC<GLEColor> old_fill(g_get_fill());
 		g_set_fill(g_graph_background);
 		g_box_fill(graph_x1, graph_y1, graph_x2, graph_y2);
 		g_set_fill(old_fill);

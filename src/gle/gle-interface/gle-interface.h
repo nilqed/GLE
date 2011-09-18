@@ -378,6 +378,7 @@ public:
 	GLEFillBase();
 	virtual ~GLEFillBase();
 	virtual GLEFillType getFillType() = 0;
+	virtual GLEFillBase* clone() = 0;
 };
 
 class GLEPatternFill : public GLEFillBase {
@@ -385,6 +386,7 @@ public:
 	GLEPatternFill(int fillDescr);
 	virtual ~GLEPatternFill();
 	virtual GLEFillType getFillType();
+	virtual GLEFillBase* clone();
 
 	inline void setFillDescription(int fillDescription) { m_fillDescription = fillDescription; }
 	inline int getFillDescription() const { return m_fillDescription; }
@@ -410,6 +412,7 @@ public:
 	~GLEColor();
 	virtual int getType();
 	virtual bool equals(GLEDataObject* obj);
+	bool equalsApprox(GLEColor* other);
 	DLLFCT void setRGB(double r, double g, double b);
 	DLLFCT void setRGBA(double r, double g, double b, double a);
 	DLLFCT void setRGB255(int r, int g, int b);
@@ -420,6 +423,7 @@ public:
 	void setHexValue(unsigned int v);
 	void setDoubleEncoding(double v);
 	double getDoubleEncoding();
+	void setHexValueGLE(unsigned int hexValue);
 	unsigned int getHexValueGLE();
 	GLEColor* clone();
 	inline double getRed() { return m_Red; }
@@ -443,9 +447,13 @@ public:
 	inline std::string* getNameS() { return m_Name; }
 };
 
+GLERC<GLEColor> color_from_double_encoding(double encoding);
+GLERC<GLEColor> color_or_fill_from_int(int hexValue);
 void update_color_foreground(GLEColor* updateMe, GLEColor* color);
 void update_color_fill_pattern(GLEColor* updateMe, GLEPatternFill* fill);
 void update_color_fill_background(GLEColor* updateMe, GLEColor* color);
+GLERC<GLEColor> get_fill_background(GLEColor* fill);
+GLERC<GLEColor> get_fill_foreground(GLEColor* fill);
 
 // Each drawable object has a reference to a property store
 // To, e.g., get the line width of a given object, call:

@@ -182,17 +182,18 @@ int char_plen(char *s)
 abort:
 	return s-savelen;
 }
+
 int draw_char_pcode(char *s)
 {
 	static double cx,cy,ox,oy,x1,y1,x2,y2;
 	char *savelen;
 	double old_lwidth;
 	int old_path,old_join;
-	int old_color,old_fill;
+	int old_color;
 
 	g_get_path(&old_path);
 	g_get_color(&old_color);
-	g_get_fill(&old_fill);
+	GLERC<GLEColor> old_fill(g_get_fill());
 	g_set_fill(old_color);
 	g_get_line_width(&old_lwidth);
 	g_set_line_width(font_lwidth);
@@ -256,6 +257,7 @@ abort:	if (!old_path) g_set_path(old_path);
 	g_set_fill(old_fill);
 	return s-savelen;
 }
+
 double frx(char **s)
 {
 	static union {char a[2];short b;} both;

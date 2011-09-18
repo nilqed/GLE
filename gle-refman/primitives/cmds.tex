@@ -889,7 +889,7 @@ The graph axis title font size is set to `\texttt{atitlescale}' times `\texttt{h
 
 \item[{\sf set background {it c}}]
 
-Set the background color for a pattern fill to $c$. (See `set fill'.)
+Set the background color for a pattern fill to $c$. (See `set fill'.) Note that ``set background'' must come after ``set fill'' because ``set fill'' resets the background color to the specified color.
 
 \item[{\sf set cap {\sf butt | round | square}}]
 \index{round (cap)}
@@ -945,12 +945,12 @@ This may be needed when scaling a drawing by a large factor.
 
 \item[{\sf set fill {\it fill color/pattern}}]
 \index{fill}
-Sets the color or pattern for filling shapes. This command works in combination with shapes such as circles, ellipses, and boxes. If the argument is a color, then shapes are filled with the given color (see ``set color´´). If it is a pattern, then the shapes are painted with the given pattern in black ink. Fig.~\ref{filpat:fig} lists a number of pre-defined patterns. To paint a shape in a color different from black, first set the color, then the pattern. That is,
+Sets the color or pattern for filling shapes. This command works in combination with shapes such as circles, ellipses, and boxes. If the argument is a color, then shapes are filled with the given color (see ``set color''). If it is a pattern, then the shapes are painted with the given pattern in black ink. Fig.~\ref{filpat:fig} lists a number of pre-defined patterns. To paint a shape in a color different from black, first set the color, then the pattern. That is,
 
 \begin{Verbatim}
-set background yellow
 set fill red
 set pattern shade
+set background yellow
 box 2 2
 \end{Verbatim}
 
@@ -1077,8 +1077,7 @@ a thinner line than an lwidth of 0.
 
 \item[{\sf set pattern {\it fill pattern}}]
 \index{pattern}
-Specifies the filling pattern. A number of pre-defined patterns is listed in Fig.~\ref{filpat:fig}. See the description of ``set fill'' for more information.
-
+Specifies the filling pattern. A number of pre-defined patterns is listed in Fig.~\ref{filpat:fig}. See the description of ``set fill'' for more information. Note that ``set pattern'' must come after ``set fill'' because ``set fill'' resets the pattern to solid.
 
 \item[{\sf set texscale {\it scale} $|$ {\it fixed} $|$ {\it none}}]
 \index{texscale}

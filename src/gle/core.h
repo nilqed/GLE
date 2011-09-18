@@ -92,7 +92,8 @@ public:
 struct gmodel {
 	double image[3][3];
 	double fontn,fontsz;	/* up to here for font caching */
-	colortyp color,fill;
+	colortyp color;
+	GLERC<GLEColor> fill;
 	double lwidth,lstyled,curx,cury;
 	double endx,endy;
 	double miterlimit;
@@ -344,7 +345,6 @@ void g_arc(double r, double t1, double t2, double cx, double cy, int arrow);
 void g_narc(double r, double t1, double t2, double cx, double cy, int arrow);
 
 void g_get_colortyp(colortyp *color);
-void g_get_fill_colortyp(colortyp *color);
 void g_colortyp_to_rgb01(colortyp* c1, rgb01 *c2);
 int g_is_black(colortyp *color);
 
@@ -415,7 +415,6 @@ void g_undev(GLERectangle* rect, gmodel* g);
 void g_set_arrow_style(const char* shape) throw (ParserError);
 void g_set_arrow_tip(const char* tip) throw (ParserError);
 
-void g_set_pattern_color(int color);
 void g_bitmap(GLEBitmap*, double wx, double wy, int type) throw(ParserError);
 
 void g_set_tex_scale(const char* ss);
@@ -433,9 +432,10 @@ void g_clear_matrix();
 void g_set_color(GLEColor* color);
 void g_set_color(const GLERC<GLEColor>& color);
 void g_set_fill(GLEColor* color);
-void g_set_fill(const GLERC<GLEColor>& color);
+void g_set_fill(int fill);
+void g_set_fill(const GLERC<GLEColor>& fill);
 bool g_is_filled(void);
-void g_set_fill_pattern(int l);
+void g_set_fill_pattern(const GLERC<GLEColor>& pattern);
 void g_set_partial_state(gmodel* s);
 
 unsigned char float_to_color_comp(double value);
@@ -483,7 +483,7 @@ GLERC<GLEColor> g_get_fill_clear();
 GLERC<GLEColor> g_get_color_hex(int hexValue);
 void g_get_devsize(dbl *x,dbl *y);
 void g_get_end(dbl *x,dbl *y);
-void g_get_fill(int *f);
+GLERC<GLEColor> g_get_fill();
 void g_get_just(int *j);
 void g_get_line_cap(int *jj);
 void g_get_line_join(int *jj);
@@ -522,10 +522,9 @@ void g_rundev(double x, double y,double *xd,double *yd);
 void g_scale(double sx,double sy);
 void g_update_bounds(double x,double y);
 void g_set_color(int l);
-void g_set_background(int b);
+void g_set_background(const GLERC<GLEColor>& color);
 void g_set_end(dbl x,dbl y);
 void g_set_hei(double h);
-void g_set_fill(int f);
 void g_set_fill_method(const char* meth);
 void g_set_font(int j);
 void g_set_font_width(double v);

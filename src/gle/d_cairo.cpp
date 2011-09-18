@@ -263,10 +263,10 @@ void GLECairoDevice::elliptical_narc(double rx,double ry,double t1,double t2,dou
 void GLECairoDevice::endclip(void)  {
 	g_flush();
 	cairo_restore(cr);
-	gmodel* state = (gmodel*) myallocz(SIZEOFSTATE);
+	gmodel* state = new gmodel();
 	g_get_state(state);
 	g_set_state(state);
-	myfree(state);
+	delete state;
 }
 
 void GLECairoDevice::fill(void) {
@@ -276,8 +276,11 @@ void GLECairoDevice::fill(void) {
 }
 
 void GLECairoDevice::ddfill(GLERectangle* bounds) {
-	if (g_cur_fill.b[B_F] == 255) return; /* clear fill, do nothing */
-	if (g_cur_fill.b[B_F] == 2) {
+	colortyp cur_fill;
+	cur_fill.l = m_currentFill->getHexValueGLE();
+	if (cur_fill.b[B_F] == 255) {
+		return; /* clear fill, do nothing */
+	} else if (cur_fill.b[B_F] == 2) {
 		shade(bounds);
 		return;
 	}
@@ -288,8 +291,10 @@ void GLECairoDevice::ddfill(GLERectangle* bounds) {
 }
 
 void GLECairoDevice::shadePattern(void) {
-	int step1 = g_cur_fill.b[B_B];
-	int step2 = g_cur_fill.b[B_G];
+	colortyp cur_fill;
+	cur_fill.l = m_currentFill->getHexValueGLE();
+	int step1 = cur_fill.b[B_B];
+	int step2 = cur_fill.b[B_G];
 	int xstep = max(step1, step2);
 	int ystep = max(step1, step2);
 	cairo_save(cr);
@@ -297,23 +302,25 @@ void GLECairoDevice::shadePattern(void) {
 	cairo_get_matrix(cr, &matrix);
 	cairo_surface_t *isurface = cairo_surface_create_similar(surface, CAIRO_CONTENT_COLOR_ALPHA, xstep, ystep);
 	cairo_t *icr = cairo_create(isurface);
-	if (m_Background != (int)GLE_FILL_CLEAR) {
-		if (m_Background == (int)GLE_COLOR_WHITE) {
+	GLERC<GLEColor> background(get_fill_background(m_currentFill.get()));
+	if (!background->isTransparent()) {
+		if (background->getHexValueGLE() == (unsigned int)GLE_COLOR_WHITE) {
 			cairo_set_source_rgb(icr, 1.0, 1.0, 1.0);
 		} else {
 			colortyp col;
-			col.l = m_Background;
+			col.l = background->getHexValueGLE();
 			cairo_set_source_rgb(icr, col.b[B_R]/255.0, col.b[B_G]/255.0, col.b[B_B]/255.0);
 		}
 		cairo_rectangle(icr, -1, -1, (xstep+1), (ystep+1));
 		cairo_fill(icr);
 	}
-	if (g_cur_fill_color.l == GLE_COLOR_BLACK) {
+	GLERC<GLEColor> foreground(get_fill_foreground(m_currentFill.get()));
+	if (foreground->getHexValueGLE() == GLE_COLOR_BLACK) {
 		cairo_set_source_rgb(icr, 0, 0, 0);
 	} else {
-		cairo_set_source_rgb(icr, g_cur_fill_color.b[B_R]/255.0, g_cur_fill_color.b[B_G]/255.0, g_cur_fill_color.b[B_B]/255.0);
+		cairo_set_source_rgb(icr, foreground->getRed(), foreground->getGreen(), foreground->getBlue());
 	}
-	cairo_set_line_width(icr, (int)g_cur_fill.b[B_R]);
+	cairo_set_line_width(icr, cur_fill.b[B_R]);
 	if (step1 > 0) {
 		cairo_move_to(icr, 0, 0);
 		cairo_line_to(icr, xstep, ystep);
@@ -354,8 +361,10 @@ void GLECairoDevice::shadePattern(void) {
 }
 
 void GLECairoDevice::shadeGLE() {
-	double step1 = g_cur_fill.b[B_B]/160.0;
-	double step2 = g_cur_fill.b[B_G]/160.0;
+	colortyp cur_fill;
+	cur_fill.l = m_currentFill->getHexValueGLE();
+	double step1 = cur_fill.b[B_B]/160.0;
+	double step2 = cur_fill.b[B_G]/160.0;
 	if (step1 > 0) {
 		for (double x = -40.0; x < 40.0; x += step1) {
 			cairo_move_to(cr, x, 0.0);
@@ -397,8 +406,10 @@ void GLECairoDevice::shadeBoundedIfThenElse2(GLERectangle* bounds, double p, dou
 }
 
 void GLECairoDevice::shadeBounded(GLERectangle* bounds) {
-	double step1 = g_cur_fill.b[B_B]/160.0;
-	double step2 = g_cur_fill.b[B_G]/160.0;
+	colortyp cur_fill;
+	cur_fill.l = m_currentFill->getHexValueGLE();
+	double step1 = cur_fill.b[B_B]/160.0;
+	double step2 = cur_fill.b[B_G]/160.0;
 	cairo_set_line_cap(cr, CAIRO_LINE_CAP_SQUARE);
 	if (step1 > 0) {
 		int p0 = (int)ceil((bounds->getYMax()-bounds->getXMin())/step1-1e-6);
@@ -442,12 +453,13 @@ void GLECairoDevice::shade(GLERectangle* bounds) {
 	if (m_FillMethod == GLE_FILL_METHOD_GLE ||
 	   (m_FillMethod == GLE_FILL_METHOD_DEFAULT && bounds != NULL)) {
 		cairo_save(cr);
-		if (m_Background != (int)GLE_FILL_CLEAR) {
-			if (m_Background == (int)GLE_COLOR_WHITE) {
+		GLERC<GLEColor> background(get_fill_background(m_currentFill.get()));
+		if (!background->isTransparent()) {
+			if (background->getHexValueGLE() == (int)GLE_COLOR_WHITE) {
 				cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
 			} else {
 				colortyp col;
-				col.l = m_Background;
+				col.l = background->getHexValueGLE();
 				set_color(col);
 			}
 			cairo_fill_preserve(cr);
@@ -455,12 +467,15 @@ void GLECairoDevice::shade(GLERectangle* bounds) {
 		// Implemented by using path as clip and then painting strokes over the clip
 		cairo_clip(cr);
 		cairo_new_path(cr);
-		if (g_cur_fill_color.l == GLE_COLOR_BLACK) {
-			cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+		GLERC<GLEColor> foreground(get_fill_foreground(m_currentFill.get()));
+		if (foreground->getHexValueGLE() == GLE_COLOR_BLACK) {
+			cairo_set_source_rgb(cr, 0, 0, 0);
 		} else {
-			set_color(g_cur_fill_color);
+			cairo_set_source_rgb(cr, foreground->getRed(), foreground->getGreen(), foreground->getBlue());
 		}
-		cairo_set_line_width(cr, (double)(g_cur_fill.b[B_R]/160.0));
+		colortyp cur_fill;
+		cur_fill.l = m_currentFill->getHexValueGLE();
+		cairo_set_line_width(cr, (double)(cur_fill.b[B_R]/160.0));
 		if (m_FillMethod == GLE_FILL_METHOD_DEFAULT && bounds != NULL) {
 			shadeBounded(bounds);
 		} else {
@@ -554,20 +569,12 @@ void GLECairoDevice::set_color(int f) {
 	set_color();
 }
 
-void GLECairoDevice::set_fill(int f) {
-	g_cur_fill.l = f;
-}
-
-void GLECairoDevice::set_background(int b) {
-	m_Background = b;
+void GLECairoDevice::set_fill(const GLERC<GLEColor>& fill) {
+	m_currentFill = fill;
 }
 
 void GLECairoDevice::set_fill_method(int m) {
 	m_FillMethod = m;
-}
-
-void GLECairoDevice::set_pattern_color(int c) {
-	g_cur_fill_color.l = c;
 }
 
 void GLECairoDevice::set_line_cap(int i) {
@@ -640,7 +647,9 @@ void GLECairoDevice::stroke(void) {
 }
 
 void GLECairoDevice::set_fill(void) {
-	set_color(g_cur_fill);
+	colortyp cur_fill;
+	cur_fill.l = m_currentFill->getHexValueGLE();
+	set_color(cur_fill);
 }
 
 void GLECairoDevice::xdbox(double x1, double y1, double x2, double y2) {

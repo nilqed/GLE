@@ -753,7 +753,7 @@ GLEDynamicSub::GLEDynamicSub(GLESub* sub) {
 
 GLEDynamicSub::~GLEDynamicSub() {
 	if (m_VarValues != NULL) delete m_VarValues;
-	if (m_State != NULL) free(m_State);
+	if (m_State != NULL) delete m_State;
 }
 
 int GLEDynamicSub::getType() {

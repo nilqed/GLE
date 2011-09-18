@@ -581,14 +581,14 @@ void do_draw_key_v35(double ox, double oy, KeyInfo* info){
 
 void measure_key(KeyInfo* info) {
 	GLEPoint orig;
-	int old_color, old_fill;
+	int old_color;
 	double save_hei;
 	GLERectangle save_bounds;
 	/* Initialize */
 	info->initPosition();
 	g_get_xy(&orig);
 	g_get_color(&old_color);
-	g_get_fill(&old_fill);
+	GLERC<GLEColor> old_fill(g_get_fill());
 	g_get_hei(&save_hei);
 	g_get_bounds(&save_bounds);
 	if (!info->hasHei()) {
@@ -717,11 +717,11 @@ void draw_key_after_measure(KeyInfo* info) {
 	if (info->getNbEntries() == 0 || info->isDisabled()) {
 		return;
 	}
-	int old_color, old_fill;
+	int old_color;
 	double save_hei;
 	g_get_hei(&save_hei);
 	g_get_color(&old_color);
-	g_get_fill(&old_fill);
+	GLERC<GLEColor> old_fill(g_get_fill());
 	double ox = info->getRect()->getXMin();
 	double oy = info->getRect()->getYMin();
 	if (!info->getNoBox() && !info->getBackgroundColor()->isTransparent()) {

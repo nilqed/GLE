@@ -95,19 +95,19 @@ protected:
 	double m_Add;
 	bool m_IsRound;
 	double m_Round;
-	int m_Fill;
+	GLERC<GLEColor> m_Fill;
 public:
 	GLEBox();
 	GLEBox(const GLEBox& box);
-	void setFill(int fill);
+	void setFill(const GLERC<GLEColor>& fill);
 	void setRound(double round);
 	void draw(GLERun* run, double x1, double y1, double x2, double y2);
 	inline void setStroke(bool stroke) { m_HasStroke = stroke; }
 	inline bool hasStroke() const { return m_HasStroke; }
 	inline void setReverse(bool reverse) { m_HasReverse = reverse; }
 	inline bool hasReverse() const { return m_HasReverse; }
-	inline bool isFilled() const { return m_Fill != (int)GLE_FILL_CLEAR; }
-	inline int getFill() const { return m_Fill; }
+	inline bool isFilled() const { return !m_Fill->isTransparent(); }
+	inline GLERC<GLEColor> getFill() const { return m_Fill; }
 	inline bool isRound() const { return m_IsRound; }
 	inline double getRound() const { return m_Round; }
 	inline void setNamePtr(const char* name) { m_Name = name; }
@@ -165,7 +165,8 @@ bool box_end(void) throw(ParserError);
 extern int this_line;
 extern int trace_on;
 static int path_clip[4],path_stroke[4];
-static int path_fill[4],path_fill_backup[4];
+static GLERC<GLEColor> path_fill[4];
+static GLERC<GLEColor> path_fill_backup[4];
 static double path_x[4],path_y[4];
 static int npath;
 #define true (!false)
@@ -539,6 +540,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 	static char ss[255],ss2[80],ss1[90];
 	static bool jump_back = false;
 	GLEPoint orig;
+	GLERC<GLEColor> colorBackup;
 	*pend = 0;
 	this_line = *srclin;
 	while (cp < plen) {
@@ -662,15 +664,16 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					g_get_xy(&path_x[npath],&path_y[npath]);
 					path_stroke[npath] = *(pcode + cp);
 					ptr = *(pcode + ++cp);
-					path_fill[npath] = GLE_FILL_CLEAR;
-					g_get_fill(&path_fill_backup[npath]);
+					path_fill_backup[npath] = g_get_fill();
 					path_clip[npath] = *(pcode + cp + 1);
 					if (!path_clip[npath]) {
-						g_get_fill(&path_fill[npath]);
+						path_fill[npath] = g_get_fill();
+					} else {
+						path_fill[npath] = g_get_fill_clear();
 					}
 					if (ptr) {
 						readvalp(z,pcode+cp+ptr);
-						memcpy(&path_fill[npath],&z,4);
+						path_fill[npath] = color_from_double_encoding(z);
 					}
 					cp++;
 					g_set_path(true);
@@ -687,8 +690,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 						ptr = *(pcode + ++cp);
 						if (ptr) {
 							readvalp(z,pcode+cp+ptr);
-							memcpy(&both.d,&z,sizeof(z));
-							box->setFill(both.l);
+							box->setFill(color_from_double_encoding(z));
 						}
 						if (*(pcode + ++cp)) {
 							box->setStroke(false);
@@ -840,14 +842,12 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				mask_just = *(pcode + cp);
 				g_dojust(&ox,&oy,&x,&y,mask_just);
 				if (g_is_filled()) {
-					g_get_fill(&jj);
-					box.setFill(jj);
+					box.setFill(g_get_fill());
 				}
 				ptr = *(pcode + ++cp);
 				if (ptr) {
 					readvalp(z,pcode+cp+ptr);
-					memcpy(&both.d,&z,sizeof(z));
-					box.setFill(both.l);
+					box.setFill(color_from_double_encoding(z));
 				}
 				if (*(pcode + ++cp)) {
 					box.setStroke(false);
@@ -882,12 +882,11 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			g_dojust(&ox,&oy,&x,&y,mask_just);
 			g_move(ox,oy);
 			mask_nostroke = *(pcode + cp++);
-			g_get_fill(&jj);
+			colorBackup = g_get_fill();
 			ptr_fill = *(pcode + cp);
 			if (ptr_fill) {
 				readvalp(z,pcode + cp + ptr_fill);
-				memcpy(&both.l,&z,4);
-				g_set_fill(both.l);
+				g_set_fill(color_from_double_encoding(z));
 			}
 			if (mkdrobjs) {
 				GLEEllipseDO drawobj(ox, oy, r);
@@ -896,7 +895,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				if (g_is_filled()) g_circle_fill(r);
 				if (!mask_nostroke) g_circle_stroke(r);
 			}
-			g_set_fill(jj);
+			g_set_fill(colorBackup);
 			g_move(orig);
 			break;
 		case 70:  /* ELLIPSE */
@@ -910,13 +909,12 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			y = oy + ry;
 			g_dojust(&ox,&oy,&x,&y,mask_just);
 			g_move(ox,oy);
-			g_get_fill(&jj);
+			colorBackup = g_get_fill();
 			mask_nostroke = *(pcode + cp++);
 			ptr_fill = *(pcode + cp);
 			if (ptr_fill) {
 				readvalp(z,pcode + cp + ptr_fill);
-				memcpy(&both.l,&z,4);
-				g_set_fill(both.l);
+				g_set_fill(color_from_double_encoding(z));
 			}
 			if (mkdrobjs) {
 				GLEEllipseDO drawobj(ox, oy, rx, ry);
@@ -925,7 +923,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				if (g_is_filled()) g_ellipse_fill(rx,ry);
 				if (!mask_nostroke) g_ellipse_stroke(rx,ry);
 			}
-			g_set_fill(jj);
+			g_set_fill(colorBackup);
 			g_move(orig);
 			break;
 		case 71: /* ELLIPTICAL_ARC  */
@@ -988,7 +986,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			readlong(jj);
 			switch (jj) {
 			  case 1: /* end path  (stroke,fill,clip) */
-				if (path_fill[npath] != (int)GLE_FILL_CLEAR) {
+				if (!path_fill[npath]->isTransparent()) {
 					g_set_fill(path_fill[npath]);
 					g_fill();
 				}
@@ -1447,23 +1445,19 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					break;
 				  case 4: /* color */
 					readval(x);
-					memcpy(&both.l,&x,4);
-					g_set_color(both.l);
+					g_set_color(color_from_double_encoding(x));
 					break;
 				  case OP_SET_BACKGROUND: /* background */
 					readval(x);
-					memcpy(&both.l,&x,4);
-					g_set_background(both.l);
+					g_set_background(color_from_double_encoding(x));
 					break;
 				  case OP_SET_FILL: /* fill */
 					readval(x);
-					memcpy(&both.l,&x,4);
-					g_set_fill(both.l);
+					g_set_fill(color_from_double_encoding(x));
 					break;
 				  case OP_SET_FILL_PATTERN: /* fill pattern */
 					readval(x);
-					memcpy(&both.l,&x,4);
-					g_set_fill_pattern(both.l);
+					g_set_fill_pattern(color_from_double_encoding(x));
 					break;
 				  case 5: /* dashlen */
 					readval(x);
@@ -1680,25 +1674,28 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 	}
 }
 
-GLEBox::GLEBox() {
-	m_Name = NULL;
-	m_HasStroke = true;
-	m_HasReverse = false;
-	m_Add = 0.0;
-	m_IsRound = false;
-	m_Fill = GLE_FILL_CLEAR;
+GLEBox::GLEBox():
+	m_Name(NULL),
+	m_HasStroke(true),
+	m_HasReverse(false),
+	m_Add(0.0),
+	m_IsRound(false),
+	m_Fill(g_get_fill_clear())
+{
 }
 
-GLEBox::GLEBox(const GLEBox& box) {
-	m_Name = box.getName();
-	m_HasStroke = box.hasStroke();
-	m_HasReverse = box.hasReverse();
-	m_Add = box.getAdd();
-	m_IsRound = box.isRound(); m_Round = box.getRound();
-	m_Fill = box.getFill();
+GLEBox::GLEBox(const GLEBox& box):
+	m_Name(box.getName()),
+	m_HasStroke(box.hasStroke()),
+	m_HasReverse(box.hasReverse()),
+	m_Add(box.getAdd()),
+	m_IsRound(box.isRound()),
+	m_Round(box.getRound()),
+	m_Fill(box.getFill())
+{
 }
 
-void GLEBox::setFill(int fill) {
+void GLEBox::setFill(const GLERC<GLEColor>& fill) {
 	m_Fill = fill;
 }
 
@@ -1718,13 +1715,12 @@ void do_arcto(double x1, double y1, double x2, double y2, double r) {
 }
 
 void GLEBox::draw(GLERun* run, double x1, double y1, double x2, double y2) {
-	int cur_fill;
 	double ox, oy;
 	GLERectangle rect(x1, y1, x2, y2);
 	rect.normalize();
 	rect.grow(getAdd());
 	g_get_xy(&ox, &oy);
-	g_get_fill(&cur_fill);
+	GLERC<GLEColor> cur_fill(g_get_fill());
 	if (isRound()) {
 		int oldjoin;
 		g_get_line_join(&oldjoin);
@@ -2300,7 +2296,7 @@ void GLERun::begin_object(const char* name, GLESub* sub) throw (ParserError) {
 	}
 	/* store graphics state */
 	g_move(0.0, 0.0);
-	gmodel* state = (gmodel*) myallocz(SIZEOFSTATE);
+	gmodel* state = new gmodel();
 	g_get_state(state);
 	dynsub->setState(state);
 	/* Do not actually draw */

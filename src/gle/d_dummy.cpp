@@ -160,10 +160,7 @@ void GLEDummyDevice::reverse(void)    /* reverse the order of stuff in the curre
 void GLEDummyDevice::set_color(int f) {
 }
 
-void GLEDummyDevice::set_fill(int f) {
-}
-
-void GLEDummyDevice::set_pattern_color(int c) {
+void GLEDummyDevice::set_fill(const GLERC<GLEColor>& fill) {
 }
 
 void GLEDummyDevice::set_line_cap(int i) {

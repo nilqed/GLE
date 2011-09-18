@@ -940,8 +940,10 @@ void X11GLEDevice::set_color(int f)			/* colors slightly changed a.r. */
      }
      setcolor(i);
 }
-void X11GLEDevice::set_fill(int f)			/* colors slightly changed a.r. */
+
+void X11GLEDevice::set_fill(const GLERC<GLEColor>& fill)			/* colors slightly changed a.r. */
 {
+	int f = fill->getHexValueGLE();
 	int i, j;
 	colortyp  cc;
 	cc.l = f;
@@ -1036,9 +1038,6 @@ void X11GLEDevice::set_fill(int f)			/* colors slightly changed a.r. */
             XSetFillStyle(dpy, gcf, FillSolid);
             setfillcolor(d_fillcolor);
         }
-}
-
-void X11GLEDevice::set_pattern_color(int c) {
 }
 
 /*---------------------------------------------------------------------------*/

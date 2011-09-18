@@ -159,8 +159,6 @@ GLEDevice* g_select_device(int device) {
 			g.dev = new PSGLEDevice(false); break;
 		case GLE_DEVICE_EPS:
 			g.dev = new PSGLEDevice(true); break;
-		case GLE_DEVICE_SVG:
-			g.dev = new SVGGLEDevice(); break;
 		case GLE_DEVICE_DUMMY:
 			g.dev = new GLEDummyDevice(false); break;
 #ifdef HAVE_CAIRO
@@ -1155,7 +1153,7 @@ void g_clear() {
 	g.fontn = 0.0;
 	g.fontsz = 0.0;		   /* up to here for font caching */
 	g_color_set_black(g.color);
-	g.fill.l = GLE_FILL_CLEAR;
+	g.fill = g_get_fill_clear();
 	g.lwidth = 0.0;
 	g.lstyled = 0.0;
 	g.curx = 0.0;
@@ -1570,22 +1568,36 @@ int g_hash_string_to_color(const string& str, colortyp* c) {
 	return err;
 }
 
-void g_set_fill(GLEColor* color) {
-	if (color == NULL || color->isTransparent()) {
-		g.fill.l = GLE_FILL_CLEAR;
-	} else if (color->isFill() && color->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
-		g.fill.l = static_cast<GLEPatternFill*>(color->getFill())->getFillDescription();
-	} else {
-		g.fill.b[B_B] = float_to_color_comp(color->getBlue());
-		g.fill.b[B_G] = float_to_color_comp(color->getGreen());
-		g.fill.b[B_R] = float_to_color_comp(color->getRed());
-		g.fill.b[B_F] = 1;
-	}
-	g.dev->set_fill(g.fill.l);
+void g_set_fill(int fill) {
+	g_set_fill(color_or_fill_from_int(fill));
 }
 
-void g_set_fill(const GLERC<GLEColor>& color) {
-	g_set_fill(color.get());
+void g_set_fill(GLEColor* fill) {
+	// Note: g_set_fill resets "pattern", so "set pattern" should come after "set fill"
+	if (fill == 0) {
+		g.fill = g_get_fill_clear();
+	} else {
+		g.fill = fill->clone();
+	}
+	g.dev->set_fill(g.fill);
+}
+
+void g_set_fill(const GLERC<GLEColor>& fill) {
+	g_set_fill(fill.get());
+}
+
+void g_set_background(const GLERC<GLEColor>& color) {
+	update_color_fill_background(g.fill.get(), color.get());
+	g.dev->set_fill(g.fill);
+}
+
+void g_set_fill_pattern(const GLERC<GLEColor>& pattern) {
+	if (pattern->isFill() && pattern->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
+		update_color_fill_pattern(g.fill.get(), static_cast<GLEPatternFill*>(pattern->getFill()));
+		g.dev->set_fill(g.fill);
+	} else {
+		g_throw_parser_error("expected fill pattern");
+	}
 }
 
 void g_set_color(GLEColor* color) {
@@ -1622,10 +1634,6 @@ void g_get_colortyp(colortyp *color) {
 	*color = g.color;
 }
 
-void g_get_fill_colortyp(colortyp *color) {
-	*color = g.fill;
-}
-
 void g_colortyp_to_rgb01(colortyp* c1, rgb01 *c2) {
 	c2->red = (double)c1->b[B_R]/255;
 	c2->green = (double)c1->b[B_G]/255;
@@ -1636,52 +1644,27 @@ int g_is_black(colortyp* color) {
 	return color->b[B_R] == 0 && color->b[B_G] == 0 && color->b[B_B] == 0;
 }
 
-void g_set_background(int b) {
-	g.dev->set_background(b);
-}
-
 void g_set_fill_method(const char* meth) {
 	if (str_i_equals(meth, "DEFAULT")) g.dev->set_fill_method(GLE_FILL_METHOD_DEFAULT);
 	else if (str_i_equals(meth, "GLE")) g.dev->set_fill_method(GLE_FILL_METHOD_GLE);
 	else g.dev->set_fill_method(GLE_FILL_METHOD_POSTSCRIPT);
 }
 
-void g_set_fill(int l) {
-	g.fill.l = l;
-	g.dev->set_fill(g.fill.l);
-}
-
-void g_set_fill_pattern(int l) {
-	if (g.fill.b[B_F] == 2) {
-		/* previous fill was pattern */
-		g_set_fill(l);
-	} else {
-		if (g_is_filled()) {
-			g_set_pattern_color(g.fill.l);
-			g_set_fill(l);
-		} else {
-			g_set_pattern_color(GLE_COLOR_BLACK);
-			g_set_fill(l);
-		}
-	}
-}
-
 bool g_is_filled(void) {
-	return g.fill.l != (int)GLE_FILL_CLEAR;
+	return !g.fill->isTransparent();
 }
 
-void g_get_fill(int *l) {
-	*l = g.fill.l;
-}
-
-void g_set_pattern_color(int color) {
-	g.dev->set_pattern_color(color);
+GLERC<GLEColor> g_get_fill() {
+	return g.fill->clone();
 }
 
 void g_beginclip() {
-	g.dev->beginclip(); }
+	g.dev->beginclip();
+}
+
 void g_endclip() {
-	g.dev->endclip(); }
+	g.dev->endclip();
+}
 
 void g_gsave() {
 	ngsave++;
@@ -1689,7 +1672,7 @@ void g_gsave() {
 		gprint("Over 99 GSAVE's, probably a loop in your code\n");
 		return;
 	}
-	gsave[ngsave] = (gmodel*)myallocz(SIZEOFSTATE+10);
+	gsave[ngsave] = new gmodel();
 	g_get_state(gsave[ngsave]);
 	g_init_bounds();
 }
@@ -1703,19 +1686,20 @@ void g_grestore() {
 		return;
 	}
 	g_set_state(gsave[ngsave]);
-	myfree(gsave[ngsave]);
+	delete gsave[ngsave];
 	ngsave--;
 }
 
 void g_get_state(gmodel *s) {
-	memcpy(s,&g,SIZEOFSTATE);
+	*s = g;
+	s->fill = g.fill->clone();
 }
 
 void g_set_state(gmodel* s) {
 	g_set_matrix(s->image, &g, s);
-	memcpy(&g, s, SIZEOFSTATE);
+	g = *s;
 	g.dev->set_color(g.color.l);
-	g.dev->set_fill(g.fill.l);
+	g.dev->set_fill(g.fill);
 	g.dev->set_line_width(g.lwidth);
 	g.dev->set_line_style(g.lstyle);
 	g.dev->set_line_styled(g.lstyled);
@@ -1724,7 +1708,7 @@ void g_set_state(gmodel* s) {
 
 void g_set_partial_state(gmodel* s) {
 	g_set_color(s->color.l);
-	g_set_fill(s->fill.l);
+	g_set_fill(s->fill);
 	g_set_line_width(s->lwidth);
 	g_set_line_style(s->lstyle);
 	g_set_line_styled(s->lstyled);
@@ -2455,14 +2439,14 @@ void g_arrow(double dx, double dy, int can_fillpath) throw(ParserError) {
 		g_line(pts.xt, pts.yt);
 		g_line(pts.xb, pts.yb);
 		if (g.arrowstyle != GLE_ARRSTY_SIMPLE) {
-			int cur_color, cur_fill;
+			int cur_color;
 			g_closepath();
 			g_get_color(&cur_color);
-			g_get_fill(&cur_fill);
+			GLERC<GLEColor> curr_fill(g_get_fill());
 			if (g.arrowstyle == GLE_ARRSTY_EMPTY) g_set_fill(GLE_COLOR_WHITE);
 			else g_set_fill(cur_color);
 			g_fill();
-			g_set_fill(cur_fill);
+			g_set_fill(curr_fill);
 		}
 		if (g.arrowstyle != GLE_ARRSTY_OLD35) {
 			g_stroke();
@@ -2516,9 +2500,9 @@ void g_psarrow(double x1, double y1, double x2, double y2, int flag) {
 		if (g.arrowstyle != GLE_ARRSTY_SIMPLE) g_closepath();
 	}
 	if (g.arrowstyle != GLE_ARRSTY_SIMPLE) {
-		int cur_color, cur_fill;
+		int cur_color;
 		g_get_color(&cur_color);
-		g_get_fill(&cur_fill);
+		GLERC<GLEColor> cur_fill(g_get_fill());
 		if (g.arrowstyle == GLE_ARRSTY_EMPTY) g_set_fill(GLE_COLOR_WHITE);
 		else g_set_fill(cur_color);
 		g_fill();
@@ -2666,9 +2650,6 @@ void GLEDevice::writeRecordedOutputFile(const string& fname, string* buffer) thr
 
 void GLEDevice::getRecordedBytes(string* output) {
 	*output = "";
-}
-
-void GLEDevice::set_background(int b) {
 }
 
 void GLEDevice::set_fill_method(int m) {
@@ -3756,7 +3737,7 @@ void GLECurvedArrowHead::computeArrowHead() {
 
 void GLECurvedArrowHead::draw() {
 	char old_lstyle[15];
-	int old_join, cur_color, cur_fill;
+	int old_join, cur_color;
 	double x, y;
 	g_get_xy(&x, &y);
 	g_get_line_style(old_lstyle);
@@ -3774,11 +3755,11 @@ void GLECurvedArrowHead::draw() {
 	if (getStyle() != GLE_ARRSTY_SIMPLE) {
 		g_closepath();
 		g_get_color(&cur_color);
-		g_get_fill(&cur_fill);
+		GLERC<GLEColor> cur_full(g_get_fill());
 		if (getStyle() == GLE_ARRSTY_EMPTY) g_set_fill(GLE_COLOR_WHITE);
 		else g_set_fill(cur_color);
 		g_fill();
-		g_set_fill(cur_fill);
+		g_set_fill(cur_full);
 	}
 	if (!isSharp()) {
 		g_stroke();
@@ -3852,7 +3833,7 @@ GLESaveRestore::~GLESaveRestore() {
 }
 
 void GLESaveRestore::save() {
-	if (model == NULL) model = (gmodel*)malloc(sizeof(gmodel));
+	if (model == NULL) model = new gmodel();
 	g_get_state(model);
 }
 

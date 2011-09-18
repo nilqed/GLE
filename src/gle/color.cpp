@@ -390,6 +390,17 @@ void GLEColorList::defineOldGLEColors() {
 	defineOldColor("YELLOW_GREEN", 0x99CC32);
 }
 
+GLERC<GLEColor> color_or_fill_from_int(int hexValue) {
+	GLERC<GLEColor> result(new GLEColor());
+	result->setHexValueGLE(hexValue);
+	return result;
+}
+
+GLERC<GLEColor> color_from_double_encoding(double encoding) {
+	GLERC<GLEColor> result(new GLEColor());
+	result->setDoubleEncoding(encoding);
+	return result;
+}
 
 void update_color_foreground(GLEColor* updateMe, GLEColor* color) {
 	updateMe->setRGBA(color->getRed(), color->getGreen(), color->getBlue(), color->getAlpha());
@@ -419,17 +430,17 @@ void update_color_fill_background(GLEColor* updateMe, GLEColor* color) {
 	updateMe->setTransparent(false);
 }
 
+GLERC<GLEColor> get_fill_background(GLEColor* fill) {
+	if (fill->isFill() && fill->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
+		GLEPatternFill* myFill = static_cast<GLEPatternFill*>(fill->getFill());
+		return myFill->getBackground();
+	} else {
+		return color_or_fill_from_int(GLE_COLOR_WHITE);
+	}
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+GLERC<GLEColor> get_fill_foreground(GLEColor* fill) {
+	GLERC<GLEColor> result(new GLEColor());
+	update_color_foreground(result.get(), fill);
+	return result;
+}

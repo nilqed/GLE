@@ -86,8 +86,7 @@ public:
 	virtual void pscomment(char* ss) = 0;
 	virtual void reverse(void)    /* reverse the order of stuff in the current path */ = 0;
 	virtual void set_color(int f) = 0;
-	virtual void set_fill(int f) = 0;
-	virtual void set_pattern_color(int c) = 0;
+	virtual void set_fill(const GLERC<GLEColor>& fill) = 0;
 	virtual void set_line_cap(int i) = 0;
 	virtual void set_line_join(int i) = 0;
 	virtual void set_line_miterlimit(double d) = 0;
@@ -100,7 +99,6 @@ public:
 	virtual void stroke(void) = 0;
 	virtual void set_color(void) = 0;
 	virtual void set_fill(void) = 0;
-	virtual void set_background(int b);
 	virtual void set_fill_method(int m);
 	virtual void xdbox(double x1, double y1, double x2, double y2) = 0;
 	virtual void devcmd(const char *s) = 0;
@@ -129,8 +127,8 @@ protected:
 	FILE *psfile;
 	int i,l,j;
 	int m_FillMethod;
-	int m_Background;
-	colortyp g_cur_fill, g_cur_color, g_cur_fill_color;
+	colortyp g_cur_color;
+	GLERC<GLEColor> m_currentFill;
 	GLEPoint m_BBox;
 public:
 	PSGLEDevice(bool eps);
@@ -170,8 +168,7 @@ public:
 	virtual void pscomment(char* ss);
 	virtual void reverse(void)    /* reverse the order of stuff in the current path */;
 	virtual void set_color(int f);
-	virtual void set_fill(int f);
-	virtual void set_pattern_color(int c);
+	virtual void set_fill(const GLERC<GLEColor>& fill);
 	virtual void set_line_cap(int i);
 	virtual void set_line_join(int i);
 	virtual void set_line_miterlimit(double d);
@@ -184,7 +181,6 @@ public:
 	virtual void stroke(void);
 	virtual void set_color(void);
 	virtual void set_fill(void);
-	virtual void set_background(int b);
 	virtual void set_fill_method(int m);
 	virtual void xdbox(double x1, double y1, double x2, double y2);
 	virtual void devcmd(const char *s);
@@ -215,85 +211,6 @@ public:
 	void initialPS();
 };
 
-class SVGGLEDevice : public GLEDevice {
-protected:
-	GLEFileLocation m_OutputName;
-	int ps_nvec;
-	vector<string> comments;
-	double linewidth;
-	string linecap;
-	string linejoin;
-	string miterlimit;
-	double Width;
-	double Height;
-	FILE *SVGFile;
-	int i,l,j;
-	colortyp g_cur_fill, g_cur_color;
-public:
-	SVGGLEDevice();
-	virtual ~SVGGLEDevice();
-	virtual void arc(dbl r,dbl t1,dbl t2,dbl cx,dbl cy);
-	virtual void arcto(dbl x1,dbl y1,dbl x2,dbl y2,dbl rrr);
-	virtual void beginclip(void) ;
-	virtual void bezier(dbl x1,dbl y1,dbl x2,dbl y2,dbl x3,dbl y3);
-	virtual void box_fill(dbl x1, dbl y1, dbl x2, dbl y2);
-	virtual void box_stroke(dbl x1, dbl y1, dbl x2, dbl y2, bool reverse);
-	virtual void dochar(int font, int cc);
-	virtual void resetfont();
-	virtual void circle_fill(double zr);
-	virtual void circle_stroke(double zr);
-	virtual void clear(void);
-	virtual void clip(void);
-	virtual void closedev(void);
-	virtual void closepath(void);
-	virtual void dfont(char *c);
-	virtual void ellipse_fill(double rx, double ry);
-	virtual void ellipse_stroke(double rx, double ry);
-	virtual void elliptical_arc(double rx,double ry,double t1,double t2,double cx,double cy);
-	virtual void elliptical_narc(double rx,double ry,double t1,double t2,double cx,double cy);
-	virtual void endclip(void) ;
-	virtual void fill(void);
-	virtual void fill_ary(int nwk,double *wkx,double *wky);
-	virtual void flush(void);
-	// virtual void get_line_cap(int *i);
-	virtual void get_type(char *t);
-	virtual void line(double zx,double zy);
-	virtual void line_ary(int nwk,double *wkx,double *wky);
-	virtual void message(char *s);
-	virtual void move(double zx,double zy);
-	virtual void narc(dbl r,dbl t1,dbl t2,dbl cx,dbl cy);
-	virtual void newpath(void);
-	virtual void opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError);
-	virtual void pscomment(char* ss);
-	virtual void reverse(void)    /* reverse the order of stuff in the current path */;
-	virtual void set_color(int f);
-	virtual void set_fill(int f);
-	virtual void set_pattern_color(int c);
-	virtual void set_line_cap(int i);
-	virtual void set_line_join(int i);
-	virtual void set_line_miterlimit(double d);
-	virtual void set_line_style(const char *s);
-	virtual void set_line_styled(double dd);
-	virtual void set_line_width(double w);
-	virtual void set_matrix(double newmat[3][3]);
-	virtual void set_path(int onoff);
-	virtual void source(const char *s);
-	virtual void stroke(void);
-	virtual void set_color(void);
-	virtual void set_fill(void);
-	virtual void xdbox(double x1, double y1, double x2, double y2);
-	virtual void devcmd(const char *s);
-	virtual FILE* get_file_pointer(void);
-	virtual int getDeviceType();
-protected:
-	void ddfill(void);
-	void shade(void);
-	void test_SVGFile();
-	void reapsfont(void);
-	string GetColor();
-	inline double AY(double y) { return Height-y; }
-};
-
 #ifdef HAVE_CAIRO
 
 #include <cairo.h>
@@ -307,8 +224,8 @@ protected:
 	cairo_surface_t *surface;
 	cairo_t *cr;
 	int m_FillMethod;
-	int m_Background;
-	colortyp g_cur_fill, g_cur_color, g_cur_fill_color;
+	colortyp g_cur_color;
+	GLERC<GLEColor> m_currentFill;
 public:
 	GLECairoDevice(bool showerror);
 	virtual ~GLECairoDevice();
@@ -346,10 +263,8 @@ public:
 	virtual void pscomment(char* ss);
 	virtual void reverse(void)    /* reverse the order of stuff in the current path */;
 	virtual void set_color(int f);
-	virtual void set_fill(int f);
-	virtual void set_background(int b);
+	virtual void set_fill(const GLERC<GLEColor>& fill);
 	virtual void set_fill_method(int m);
-	virtual void set_pattern_color(int c);
 	virtual void set_line_cap(int i);
 	virtual void set_line_join(int i);
 	virtual void set_line_miterlimit(double d);
@@ -457,8 +372,7 @@ public:
 	virtual void pscomment(char* ss);
 	virtual void reverse(void)    /* reverse the order of stuff in the current path */;
 	virtual void set_color(int f);
-	virtual void set_fill(int f);
-	virtual void set_pattern_color(int c);
+	virtual void set_fill(const GLERC<GLEColor>& fill);
 	virtual void set_line_cap(int i);
 	virtual void set_line_join(int i);
 	virtual void set_line_miterlimit(double d);
@@ -559,8 +473,7 @@ public:
 	virtual void pscomment(char* ss);
 	virtual void reverse(void)    /* reverse the order of stuff in the current path */;
 	virtual void set_color(int f);
-	virtual void set_fill(int f);
-	virtual void set_pattern_color(int c);
+	virtual void set_fill(const GLERC<GLEColor>& fill);
 	virtual void set_line_cap(int i);
 	virtual void set_line_join(int i);
 	virtual void set_line_miterlimit(double d);

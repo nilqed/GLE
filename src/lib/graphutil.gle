@@ -362,7 +362,7 @@ sub draw_box_plot ds0
 end sub
 
 sub energylevel ds$ factor color$
-   default ds$ "d1"
+   default ds "d1"
    default factor 1.0
    default color "black"
    local hist_prev_x = 0
