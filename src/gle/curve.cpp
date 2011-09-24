@@ -67,15 +67,19 @@ void g_curve(int *pcode) {
 		dcvecy[i] = (cvecy[i+1] - cvecy[i-1]) * .25;
 	}
 	for (int i = 1; i < ncvec-1; i++) {
-		rbezier(dcvecx[i],dcvecy[i],dcvecx[i+1],dcvecy[i+1]
-			,cvecx[i+1],cvecy[i+1]);
+		rbezier(dcvecx[i],
+				dcvecy[i],
+				dcvecx[i+1],
+				dcvecy[i+1],
+				cvecx[i+1],
+				cvecy[i+1]);
 	}
 }
 
 void rbezier(double x1, double y1, double x2, double y2, double x3, double y3) {
 	double cx,cy;
-	g_get_xy(&cx,&cy);
-	g_bezier(x1+cx,y1+cy,x3-x2,y3-y2,x3,y3);
+	g_get_xy(&cx, &cy);
+	g_bezier(x1+cx, y1+cy, x3-x2, y3-y2, x3, y3);
 }
 
 void cvec_list(int *pcode) {

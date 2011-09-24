@@ -163,6 +163,7 @@ struct op_key op_begin[] = {
 		{ "contour",     typ_switch,     1, 28 },
 		{ "tex",         typ_switch,     1, 29 },
 		{ "object",      typ_switch,     1, OP_BEGIN_OBJECT },
+		{ "length",      typ_switch,     1, OP_BEGIN_LENGTH },
 		{ "END", 	typ_end, 	1, 1} };
 
 struct op_key op_set[] = {
@@ -360,3 +361,4 @@ struct op_key op_colormap[] = {
 		{ "COLOR", 	typ_switch, 	1, 1 },
 		{ "PALETTE",	typ_str,        2, 0 },
 		{ "END", 	typ_end, 	0, 0 } };
+

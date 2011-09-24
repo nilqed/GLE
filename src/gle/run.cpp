@@ -822,6 +822,10 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 						*srclin = j;	/* skip past the subroutine */
 					}
 					break;
+				case OP_BEGIN_LENGTH:
+					readlong(jj);
+					begin_length(jj);
+					break;
 				default: /* error  */
 					g_throw_parser_error("illegal begin option code: ", i);
 					break;
@@ -1045,6 +1049,9 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			  case GLE_OPBEGIN_SURF:
 				getBlockTypes()->getBlock(jj)->endExecuteBlock();
 				break;
+			  case OP_BEGIN_LENGTH:
+				end_length();
+			    break;
 			  default :
 				get_global_parser()->get_block_type(jj, temp_str);
 				g_throw_parser_error("invalid end of block type '", temp_str.c_str(), "'");
@@ -2337,6 +2344,31 @@ void GLERun::end_object() throw (ParserError) {
 	g_move(box->getOrigin());
 	/* Remove box from stack */
 	stack->removeBox();
+}
+
+void GLERun::begin_length(int var)
+{
+	GLELengthBlock previous;
+	GLECore* core = g_get_core();
+	previous.varIndex = var;
+	previous.wasEnabled = core->isComputingLength();
+	previous.previousValue = core->getTotalLength();
+	m_lengthBlocks.push_back(previous);
+	core->setComputingLength(true);
+	core->setTotalLength(0.0);
+}
+
+void GLERun::end_length()
+{
+	GLECore* core = g_get_core();
+	CUtilsAssert(m_lengthBlocks.size() > 0);
+	CUtilsAssert(core->isComputingLength());
+	GLELengthBlock block(m_lengthBlocks.back());
+	m_lengthBlocks.pop_back();
+	double length = core->getTotalLength();
+	core->setComputingLength(block.wasEnabled);
+	core->setTotalLength(block.previousValue + length);
+	getVars()->setDouble(block.varIndex, length);
 }
 
 GLESubMap* GLERun::getSubroutines() {

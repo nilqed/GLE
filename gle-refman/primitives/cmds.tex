@@ -62,6 +62,7 @@ can be set with various GLE commands.
 {\sf arcto {\it x1 y1 x2 y2 rad}}  \\
 {\sf begin box [fill {\it pattern}] [add {\it gap}] [nobox] [name {\it xyz}] [round {\it val}]}  \\
 {\sf begin clip }  \\
+{\sf begin length {\it var}} \\
 {\sf begin name {\it name}}  \\
 {\sf begin object {\it name}}  \\
 {\sf begin origin}  \\
@@ -257,6 +258,18 @@ which defines the area on which drawing can occur.
 This is used to undo the
 effect of a clipping region defined with the begin path command.
 See the example CLIP.GLE in appendix B at the end of the manual.
+
+\item[{\sf begin length {\it var}}]
+\index{length}
+\index{begin!length}
+
+This block computes the total length of all the elements that are included in it and saves the result in the variable ``{\it var}''. See Fig.~\ref{beginlen:fig} for an example.
+
+\begin{figure}[tb]
+\centering
+\mbox{\input{primitives/fig/curve_length.inc}}
+\caption{\label{beginlen:fig}Compute the total length of a shape.}
+\end{figure}
 
 \item[{\sf begin name {\it name}}]
 \index{begin!name}\label{cmd:beginname}

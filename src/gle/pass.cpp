@@ -1450,6 +1450,9 @@ void GLEParser::passt(GLESourceLine &SLine, GLEPcode& pcode) throw(ParserError) 
 						pcode.addInt(m_CrSub->getIndex());
 					}
 					break;
+				  case OP_BEGIN_LENGTH:
+					get_var(pcode);
+					break;
 				}
 				/* here should copy source line across for "begin width 3 */
 				if (cur_mode>0)	pcode.addInt(0);

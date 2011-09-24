@@ -57,6 +57,13 @@ class GLESub;
 class GLESubMap;
 class GLEBlocks;
 
+// or replace by GLEObject sub class on global stack?
+struct GLELengthBlock {
+	int varIndex;
+	bool wasEnabled;
+	double previousValue;
+};
+
 class GLERun {
 protected:
 	GLEScript* m_Script;
@@ -64,6 +71,7 @@ protected:
 	GLEVars* m_Vars;
 	GLEBlocks* m_blockTypes;
 	GLERC<GLEObjectRepresention> m_CrObj;
+	vector<GLELengthBlock> m_lengthBlocks;
 	bool m_AllowBeforeSize[GLE_KW_NB];
 public:
 	GLERun(GLEScript* script, GLEFileLocation* outfile);
@@ -89,6 +97,8 @@ public:
 	void name_to_size(const char *name, double *wd, double *hi) throw(ParserError);
 	void name_join(const char *n1, const char *n2, int marrow, double a1, double a2, double d1, double d2)  throw(ParserError);
 	bool box_end() throw (ParserError);
+	void begin_length(int var);
+	void end_length();
 	GLESubMap* getSubroutines();
 	inline GLEObjectRepresention* getCRObjectRep() { return m_CrObj.get(); };
 	inline void setCRObjectRep(GLEObjectRepresention* obj) { m_CrObj.set(obj); }

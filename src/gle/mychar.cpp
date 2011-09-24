@@ -76,7 +76,8 @@ extern double font_lwidth;
 void my_char(int ff, int cc)
 {
 	char *pp;
-	get_char_pcode(ff,cc,&pp);
+	GLEWithoutUpdates noUpdates;
+	get_char_pcode(ff, cc, &pp);
 	draw_char_pcode(pp);
 }
 

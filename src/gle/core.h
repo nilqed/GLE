@@ -286,6 +286,32 @@ public:
 	inline void set(int i, double v) { m_Coefs[i] = v; }
 };
 
+class GLECore {
+public:
+	GLECore();
+	~GLECore();
+
+	bool isComputingLength() const;
+	void setComputingLength(bool computingLength);
+	double getTotalLength() const;
+	void setTotalLength(double length);
+	void addToLength(double value);
+
+private:
+	bool m_isComputingLength;
+	double m_totalLength;
+};
+
+class GLEWithoutUpdates {
+public:
+	GLEWithoutUpdates();
+	~GLEWithoutUpdates();
+
+private:
+	GLECore* m_core;
+	bool m_isComputingLength;
+};
+
 unsigned int coreleft();
 unsigned int farcoreleft();
 
@@ -319,6 +345,7 @@ bool g_has_console_output();
 void g_set_console_output(bool set);
 void g_get_usersize(double *x,double *y);
 void g_get_userbox_undev(GLERectangle* rect);
+GLECore* g_get_core();
 
 //
 // -- no need to ifdef these
@@ -422,6 +449,7 @@ void g_restore_defaults();
 int g_arrow_style();
 int g_arrow_tip();
 
+GLEPoint g_get_xy();
 void g_get_xy(GLEPoint* pt);
 void g_move(const GLEPoint& pt);
 void g_clear_matrix();

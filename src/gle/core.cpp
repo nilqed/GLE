@@ -81,6 +81,7 @@ void clean_surface();
 int gunit=false;
 
 GLERectangle g_UserBoxDev;
+GLECore g_core;
 
 unsigned int coreleft() {
 	return 4000000;
@@ -88,6 +89,49 @@ unsigned int coreleft() {
 
 unsigned int farcoreleft() {
 	return 1200000;
+}
+
+GLECore::GLECore():
+	m_isComputingLength(false),
+	m_totalLength(0.0)
+{
+}
+
+GLECore::~GLECore() {
+}
+
+bool GLECore::isComputingLength() const {
+	return m_isComputingLength;
+}
+
+void GLECore::setComputingLength(bool computingLength) {
+	m_isComputingLength = computingLength;
+}
+
+double GLECore::getTotalLength() const {
+	return m_totalLength;
+}
+
+void GLECore::setTotalLength(double length) {
+	m_totalLength = length;
+}
+
+void GLECore::addToLength(double value) {
+	m_totalLength += value;
+}
+
+GLEWithoutUpdates::GLEWithoutUpdates() {
+	m_core = g_get_core();
+	m_isComputingLength = m_core->isComputingLength();
+	m_core->setComputingLength(false);
+}
+
+GLEWithoutUpdates::~GLEWithoutUpdates() {
+	m_core->setComputingLength(m_isComputingLength);
+}
+
+GLECore* g_get_core() {
+	return &g_core;
 }
 
 // Called only once g_clear is called for each script.
@@ -1041,15 +1085,22 @@ void g_line(const GLEPoint& p) {
 	g_line(p.getX(), p.getY());
 }
 
-void g_line(double zx,double zy) {
+void g_line(double zx, double zy) {
+	GLEPoint origin;
+	g_get_xy(&origin);
 	g.dev->line(zx,zy);
-	if (g.xinline==false) {
+	if (g.xinline == false) {
 		g.xinline = true;
-		g_update_bounds(g.curx,g.cury);
+		g_update_bounds(g.curx, g.cury);
 	}
 	g.curx = zx;
 	g.cury = zy;
-	g_update_bounds(zx,zy);
+	g_update_bounds(zx, zy);
+	GLECore* core = g_get_core();
+	if (core->isComputingLength()) {
+		GLEPoint endPoint(zx, zy);
+		core->addToLength(origin.distance(endPoint));
+	}
 }
 
 void g_update_bounds(double x, double y) {
@@ -1277,6 +1328,12 @@ void g_get_xy(double *x,double *y) {
 	*y = g.cury;
 }
 
+GLEPoint g_get_xy() {
+	GLEPoint result;
+	g_get_xy(&result);
+	return result;
+}
+
 void g_get_xy(GLEPoint* pt) {
 	pt->setX(g.curx);
 	pt->setY(g.cury);
@@ -1356,9 +1413,15 @@ void g_box_fill(dbl x1, dbl y1, dbl x2, dbl y2) {
 enum arrow_direction{CW,CCW};
 
 void g_circle_stroke(dbl zr) {
+	GLEPoint orig(g_get_xy());
 	g.dev->circle_stroke(zr);
 	g_update_bounds(g.curx-zr,g.cury-zr);
 	g_update_bounds(g.curx+zr,g.cury+zr);
+	GLECore* core = g_get_core();
+	if (core->isComputingLength()) {
+		GLECircleArc curve(orig, zr, 0.0, 2.0 * GLE_PI);
+		core->addToLength(curve.getDist(curve.getT0(), curve.getT1()));
+	}
 }
 
 void g_circle_fill(dbl zr) {
@@ -1369,8 +1432,14 @@ void g_circle_fill(dbl zr) {
 
 void g_arc(double r, double t1, double t2, double cx, double cy, int arrow) {
 	g_flush();
+	GLEPoint orig(cx, cy);
+	GLECore* core = g_get_core();
+	if (core->isComputingLength()) {
+		GLECircleArc circle(orig, r, t1*GLE_PI/180, t2*GLE_PI/180);
+		core->addToLength(fabs(circle.getDist(circle.getT0(), circle.getT1())));
+	}
+	GLEWithoutUpdates noUpdates;
 	if (arrow != 0) {
-		GLEPoint orig(cx, cy);
 		GLECircleArc circle(orig, r, t1*GLE_PI/180, t2*GLE_PI/180);
 		GLECurvedArrowHead head_start(&circle);
 		GLECurvedArrowHead head_end(&circle);
@@ -1391,8 +1460,14 @@ void g_arc(double r, double t1, double t2, double cx, double cy, int arrow) {
 
 void g_narc(double r, double t1, double t2, double cx, double cy, int arrow) {
 	g_flush();
+	GLEPoint orig(cx, cy);
+	GLECore* core = g_get_core();
+	if (core->isComputingLength()) {
+		GLECircleArc circle(orig, r, t1*GLE_PI/180, t2*GLE_PI/180);
+		core->addToLength(fabs(circle.getDist(circle.getT0(), circle.getT1())));
+	}
+	GLEWithoutUpdates noUpdates;
 	if (arrow != 0) {
-		GLEPoint orig(cx, cy);
 		GLECircleArc circle(orig, r, t2*GLE_PI/180, t1*GLE_PI/180);
 		GLECurvedArrowHead head_start(&circle);
 		GLECurvedArrowHead head_end(&circle);
@@ -1412,9 +1487,15 @@ void g_narc(double r, double t1, double t2, double cx, double cy, int arrow) {
 }
 
 void g_ellipse_stroke(dbl rx, dbl ry) {
+	GLEPoint orig(g_get_xy());
 	g.dev->ellipse_stroke(rx,ry);
 	g_update_bounds(g.curx-rx,g.cury-ry);
 	g_update_bounds(g.curx+rx,g.cury+ry);
+	GLECore* core = g_get_core();
+	if (core->isComputingLength()) {
+		GLEEllipseArc curve(orig, rx, ry, 0.0, 2.0 * GLE_PI);
+		core->addToLength(curve.getDist(curve.getT0(), curve.getT1()));
+	}
 }
 
 void g_ellipse_fill(dbl rx, dbl ry) {
@@ -1425,8 +1506,14 @@ void g_ellipse_fill(dbl rx, dbl ry) {
 
 void g_elliptical_arc(double rx, double ry, double t1, double t2, double cx, double cy, int arrow) {
 	g_flush();
+	GLEPoint orig(cx, cy);
+	GLECore* core = g_get_core();
+	if (core->isComputingLength()) {
+		GLEEllipseArc arc(orig, rx, ry, t1*GLE_PI/180, t2*GLE_PI/180);
+		core->addToLength(fabs(arc.getDist(arc.getT0(), arc.getT1())));
+	}
+	GLEWithoutUpdates noUpdates;
 	if (arrow != 0) {
-		GLEPoint orig(cx, cy);
 		GLEEllipseArc ellipse(orig, rx, ry, t1*GLE_PI/180, t2*GLE_PI/180);
 		GLECurvedArrowHead head_start(&ellipse);
 		GLECurvedArrowHead head_end(&ellipse);
@@ -1447,8 +1534,14 @@ void g_elliptical_arc(double rx, double ry, double t1, double t2, double cx, dou
 
 void g_elliptical_narc(double rx, double ry, double t1, double t2, double cx, double cy, int arrow) {
 	g_flush();
+	GLEPoint orig(cx, cy);
+	GLECore* core = g_get_core();
+	if (core->isComputingLength()) {
+		GLEEllipseArc arc(orig, rx, ry, t1*GLE_PI/180, t2*GLE_PI/180);
+		core->addToLength(fabs(arc.getDist(arc.getT0(), arc.getT1())));
+	}
+	GLEWithoutUpdates noUpdates;
 	if (arrow != 0) {
-		GLEPoint orig(cx, cy);
 		GLEEllipseArc ellipse(orig, rx, ry, t2*GLE_PI/180, t1*GLE_PI/180);
 		GLECurvedArrowHead head_start(&ellipse);
 		GLECurvedArrowHead head_end(&ellipse);
@@ -1476,8 +1569,13 @@ void g_arrowcurve(double x, double y, int arrow, double a1, double a2, double d1
 	polar_xy(d1, a1, &x1, &y1);
 	polar_xy(d2, a2, &x2, &y2);
 	g_get_xy(&cx, &cy);
+	GLEBezier bezier(cx, cy, cx+x1, cy+y1, x+x2, y+y2, x, y);
+	GLECore* core = g_get_core();
+	if (core->isComputingLength()) {
+		core->addToLength(bezier.getDist(0.0, 1.0));
+	}
+	GLEWithoutUpdates noUpdates;
 	if (arrow != 0) {
-		GLEBezier bezier(cx, cy, cx+x1, cy+y1, x+x2, y+y2, x, y);
 		GLECurvedArrowHead head_start(&bezier);
 		GLECurvedArrowHead head_end(&bezier);
 		if (arrow == 1 || arrow == 3) g_init_arrow_head(&head_start, true);
@@ -1497,19 +1595,26 @@ void g_arrowcurve(double x, double y, int arrow, double a1, double a2, double d1
 		head_start.computeAndDraw();
 		head_end.computeAndDraw();
 	} else {
-		g_bezier(cx+x1, cy+y1, x+x2, y+y2, x, y);
+		bezier.draw();
 	}
 }
 
-void g_bezier(dbl x1,dbl y1,dbl x2,dbl y2,dbl x3,dbl y3) {
-	g.dev->bezier(x1,y1,x2,y2,x3,y3);
-	if (g.xinline==false) {
+void g_bezier(dbl x1, dbl y1, dbl x2, dbl y2, dbl x3, dbl y3) {
+	GLEPoint origin;
+	g_get_xy(&origin);
+	g.dev->bezier(x1, y1, x2, y2, x3, y3);
+	if (g.xinline == false) {
 		g.xinline = true;
-		g_update_bounds(g.curx,g.cury);
+		g_update_bounds(g.curx, g.cury);
 	}
 	g.curx = x3;
 	g.cury = y3;
 	g_update_bounds(x3,y3);
+	GLECore* core = g_get_core();
+	if (core->isComputingLength()) {
+		GLEBezier bezierCurve(origin.getX(), origin.getY(), x1, y1, x2, y2, x3, y3);
+		core->addToLength(bezierCurve.getDist(0.0, 1.0));
+	}
 }
 
 void g_bezier(const GLEPoint& p1, const GLEPoint& p2, const GLEPoint& p3) {
@@ -2179,6 +2284,11 @@ void g_arrowpoints(double cx, double cy, double dx, double dy, GLEArrowPoints* p
 
 void g_arrowline(double x2, double y2, int flag, int can_fillpath) throw(ParserError) {
 	double x1,y1;
+	GLECore* core = g_get_core();
+	if (core->isComputingLength()) {
+		core->addToLength(g_get_xy().distance(GLEPoint(x2, y2)));
+	}
+	GLEWithoutUpdates noUpdates;
 	if ((flag & 3) == 0) {
 		g_line(x2,y2);
 		return;
@@ -3795,7 +3905,9 @@ GLESaveRestore::GLESaveRestore() {
 }
 
 GLESaveRestore::~GLESaveRestore() {
-	if (model != NULL) free(model);
+	if (model != NULL) {
+		delete model;
+	}
 }
 
 void GLESaveRestore::save() {

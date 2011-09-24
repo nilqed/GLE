@@ -39,7 +39,8 @@
 EPSS = gc_arc.pdf gc_arcto.pdf gc_beginbox.pdf gc_bezier.pdf gc_cap.pdf gc_color.pdf \
        gc_curve.pdf gc_fontlwidth.pdf gc_for.pdf gc_justify.pdf gc_ljoin.pdf gc_lstyle.pdf \
        gc_marker.inc gc_nonzero.pdf gc_rot1.pdf gc_rot2.pdf gc_table.pdf gc_text.pdf \
-       gc_write.pdf gc_xend.pdf grids.inc setcolor.inc curve.inc fullpage.inc gc_arrstyle.pdf
+       gc_write.pdf gc_xend.pdf grids.inc setcolor.inc curve.inc fullpage.inc gc_arrstyle.pdf \
+       curve_length.inc
 
 ifeq ($(RUNBUILD),1)
 	GLE = ../../../build/bin/gle

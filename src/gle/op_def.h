@@ -75,6 +75,7 @@ struct op_key {
 #define OP_SET_FILL_METHOD   27
 
 #define OP_BEGIN_OBJECT      30
+#define OP_BEGIN_LENGTH      31
 
 extern struct op_key op_box[];
 extern struct op_key op_circle[];
