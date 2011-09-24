@@ -1935,6 +1935,10 @@ void GLEColor::setRGB255(int r, int g, int b) {
 	setRGB(((double)r) / 255.0, ((double)g) / 255.0, ((double)b) / 255.0);
 }
 
+void GLEColor::setRGB255(double r, double g, double b) {
+	setRGB(r / 255.0, g / 255.0, b / 255.0);
+}
+
 void GLEColor::setGray(double gray) {
 	setRGB(gray, gray, gray);
 }

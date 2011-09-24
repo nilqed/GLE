@@ -416,6 +416,7 @@ public:
 	DLLFCT void setRGB(double r, double g, double b);
 	DLLFCT void setRGBA(double r, double g, double b, double a);
 	DLLFCT void setRGB255(int r, int g, int b);
+   DLLFCT void setRGB255(double r, double g, double b);
 	void setGray(double gray);
 	DLLFCT const char* getName();
 	void setName(const string& name);
