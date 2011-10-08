@@ -1660,7 +1660,7 @@ void g_graph_init() {
 void graph_free() {
 	for (int i = 0; i < MAX_NB_FILL; i++) {
 		if (fd[i] != NULL) {
-			myfree(fd[i]);
+			delete fd[i];
 			fd[i] = NULL;
 		}
 	}
