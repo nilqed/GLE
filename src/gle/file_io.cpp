@@ -93,6 +93,11 @@
 	#endif
 #endif
 
+/* PATH_MAX is not defined on gnu-hurd */
+#ifndef PATH_MAX
+       #define PATH_MAX 8192
+#endif
+
 using namespace std;
 
 #include "tokens/stokenizer.h"
@@ -1368,24 +1373,24 @@ bool GetExeName(const char* appname, char **argv, string& exe_name) {
 	}
 	/* try to read location from the /proc/self/maps file */
 	ifstream maps("/proc/self/maps");
-	if (!maps.is_open()) {
-		return false;
-	}
-	string f1 = DIR_SEP + appname;
-	string f2 = f1 + ".exe";
-	while (!maps.eof()) {
-		string line;
-		ReadFileLine(maps, line);
-		char_separator separator(" ", "");
-		tokenizer<char_separator> tokens(line, separator);
-		while (tokens.has_more()) {
-			exe_name = tokens.next_token();
-			if (str_i_ends_with(exe_name, f1.c_str()) || str_i_ends_with(exe_name, f2.c_str())) {
-				return true;
+	if (maps.is_open()) {
+		string f1 = DIR_SEP + appname;
+		string f2 = f1 + ".exe";
+		while (!maps.eof()) {
+			string line;
+			ReadFileLine(maps, line);
+			char_separator separator(" ", "");
+			tokenizer<char_separator> tokens(line, separator);
+			while (tokens.has_more()) {
+				exe_name = tokens.next_token();
+				if (str_i_ends_with(exe_name, f1.c_str())
+				    || str_i_ends_with(exe_name, f2.c_str())) {
+					return true;
+				}
 			}
 		}
+		maps.close();
 	}
-	maps.close();
 #endif
 	string arg0 = argv[0];
 	if (IsAbsPath(arg0)) {
