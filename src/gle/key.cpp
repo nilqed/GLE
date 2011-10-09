@@ -581,13 +581,12 @@ void do_draw_key_v35(double ox, double oy, KeyInfo* info){
 
 void measure_key(KeyInfo* info) {
 	GLEPoint orig;
-	int old_color;
 	double save_hei;
 	GLERectangle save_bounds;
 	/* Initialize */
 	info->initPosition();
 	g_get_xy(&orig);
-	g_get_color(&old_color);
+	GLERC<GLEColor> old_color(g_get_color());
 	GLERC<GLEColor> old_fill(g_get_fill());
 	g_get_hei(&save_hei);
 	g_get_bounds(&save_bounds);
@@ -717,10 +716,9 @@ void draw_key_after_measure(KeyInfo* info) {
 	if (info->getNbEntries() == 0 || info->isDisabled()) {
 		return;
 	}
-	int old_color;
 	double save_hei;
 	g_get_hei(&save_hei);
-	g_get_color(&old_color);
+	GLERC<GLEColor> old_color(g_get_color());
 	GLERC<GLEColor> old_fill(g_get_fill());
 	double ox = info->getRect()->getXMin();
 	double oy = info->getRect()->getYMin();
@@ -813,11 +811,10 @@ void do_draw_key(double ox, double oy, bool notxt, KeyInfo* info) {
 		}
 		if (col_info->hasFill()) {
 			if (entry->hasFill()) {
-				int save_color;
 				g_set_fill(entry->fill);
 				g_get_xy(&cx,&cy);
 				g_box_fill(cx,cy,cx+rowhi*KEY_FILL_HEI_FX, cy+rowhi*KEY_FILL_HEI_FY);
-				g_get_color(&save_color);
+				GLERC<GLEColor> save_color(g_get_color());
 				if (info->hasBoxColor()) {
 					GLERC<GLEColor> boxcolor = info->getBoxColor();
 					if (!boxcolor->isTransparent()) {

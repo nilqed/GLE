@@ -497,7 +497,6 @@ void g_fill(void);
 void g_fill_ary(int nwk,double *wkx,double *wky);
 void g_flush(void);
 void g_get_bounds(dbl *x1,dbl *y1,dbl *x2,dbl *y2);
-void g_get_color(int *l);
 GLERC<GLEColor> g_get_color();
 GLERC<GLEColor> g_get_fill_clear();
 GLERC<GLEColor> g_get_color_hex(int hexValue);

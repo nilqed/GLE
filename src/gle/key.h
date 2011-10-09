@@ -86,7 +86,8 @@ public:
 
 class KeyInfo {
 protected:
-	int m_MaxRow, m_Color;
+	int m_MaxRow;
+	GLERC<GLEColor> m_Color;
 	GLERC<GLEColor> m_BoxColor;
 	GLERC<GLEColor> m_BackgroundColor;
 	vector<KeyRCInfo> m_ColInfo;
@@ -132,8 +133,8 @@ public:
 	inline int getNbCols() { return m_ColInfo.size(); }
 	inline KeyRCInfo* getRow(int i) { return &m_RowInfo[i]; }
 	inline int getNbRows() { return m_RowInfo.size(); }
-	inline int getDefaultColor() { return m_Color; }
-	inline void setDefaultColor(int col) { m_Color = col; }
+	inline GLERC<GLEColor> getDefaultColor() { return m_Color; }
+	inline void setDefaultColor(const GLERC<GLEColor>& col) { m_Color = col; }
 	inline double getHei() { return m_Hei; }
 	inline bool hasHei() { return m_Hei != 0.0; }
 	inline void setHei(double hei) { m_Hei = hei; }

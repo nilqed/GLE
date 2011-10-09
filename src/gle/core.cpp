@@ -1706,10 +1706,6 @@ void g_set_color(int l) {
 	g.dev->set_color(g.color);
 }
 
-void g_get_color(int *l) {
-	*l = g.color->getHexValueGLE();
-}
-
 GLERC<GLEColor> g_get_color() {
 	return g.color->clone();
 }
@@ -2515,12 +2511,11 @@ void g_arrow(double dx, double dy, int can_fillpath) throw(ParserError) {
 		g_line(pts.xt, pts.yt);
 		g_line(pts.xb, pts.yb);
 		if (g.arrowstyle != GLE_ARRSTY_SIMPLE) {
-			int cur_color;
 			g_closepath();
-			g_get_color(&cur_color);
+			GLERC<GLEColor> curr_color(g_get_color());
 			GLERC<GLEColor> curr_fill(g_get_fill());
 			if (g.arrowstyle == GLE_ARRSTY_EMPTY) g_set_fill(GLE_COLOR_WHITE);
-			else g_set_fill(cur_color);
+			else g_set_fill(curr_color);
 			g_fill();
 			g_set_fill(curr_fill);
 		}
@@ -2576,8 +2571,7 @@ void g_psarrow(double x1, double y1, double x2, double y2, int flag) {
 		if (g.arrowstyle != GLE_ARRSTY_SIMPLE) g_closepath();
 	}
 	if (g.arrowstyle != GLE_ARRSTY_SIMPLE) {
-		int cur_color;
-		g_get_color(&cur_color);
+		GLERC<GLEColor> cur_color(g_get_color());
 		GLERC<GLEColor> cur_fill(g_get_fill());
 		if (g.arrowstyle == GLE_ARRSTY_EMPTY) g_set_fill(GLE_COLOR_WHITE);
 		else g_set_fill(cur_color);
@@ -3813,7 +3807,7 @@ void GLECurvedArrowHead::computeArrowHead() {
 
 void GLECurvedArrowHead::draw() {
 	char old_lstyle[15];
-	int old_join, cur_color;
+	int old_join;
 	double x, y;
 	g_get_xy(&x, &y);
 	g_get_line_style(old_lstyle);
@@ -3830,7 +3824,7 @@ void GLECurvedArrowHead::draw() {
 	m_Side2.draw();
 	if (getStyle() != GLE_ARRSTY_SIMPLE) {
 		g_closepath();
-		g_get_color(&cur_color);
+		GLERC<GLEColor> cur_color(g_get_color());
 		GLERC<GLEColor> cur_full(g_get_fill());
 		if (getStyle() == GLE_ARRSTY_EMPTY) g_set_fill(GLE_COLOR_WHITE);
 		else g_set_fill(cur_color);

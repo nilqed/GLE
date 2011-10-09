@@ -189,11 +189,10 @@ int draw_char_pcode(char *s)
 	static double cx,cy,ox,oy,x1,y1,x2,y2;
 	char *savelen;
 	double old_lwidth;
-	int old_path,old_join;
-	int old_color;
+	int old_path, old_join;
 
 	g_get_path(&old_path);
-	g_get_color(&old_color);
+	GLERC<GLEColor> old_color(g_get_color());
 	GLERC<GLEColor> old_fill(g_get_fill());
 	g_set_fill(old_color);
 	g_get_line_width(&old_lwidth);

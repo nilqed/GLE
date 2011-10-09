@@ -86,7 +86,6 @@ int g_fill(void);
 int g_fill_ary(int nwk,double **wkx,double **wky);
 int g_flush(void);
 int g_get_bounds(dbl *x1,dbl *y1,dbl *x2,dbl *y2);
-int g_get_color(int32 *l);
 int g_get_devsize(dbl *x,dbl *y);
 int g_get_end(dbl *x,dbl *y);
 int g_get_fill(int32 *f);
