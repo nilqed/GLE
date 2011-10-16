@@ -45,6 +45,8 @@
 #undef __CYGWIN__
 #undef __MACOS__
 #undef __FREEBSD__
+#undef __GNU_HURD__
+#undef __LINUX__
 
 #undef __VN__
 #undef __BN__

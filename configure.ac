@@ -51,6 +51,8 @@ AH_TEMPLATE(__UNIX__,  [On Unix])
 AH_TEMPLATE(__CYGWIN__,[On Cygwin])
 AH_TEMPLATE(__MACOS__, [On Mac])
 AH_TEMPLATE(__FREEBSD__, [On FreeBSD])
+AH_TEMPLATE(__GNU_HURD__, [On GNU Hurd])
+AH_TEMPLATE(__LINUX__, [On Linux])
 
 HAVE_SOCKETS=1
 HAVE_LIBTIFF=0
@@ -68,6 +70,8 @@ HAVE_LIBGLE_CPPFLAGS=0
 HAVE_LIBGLE_STATIC=0
 HAVE_MAC=0
 HAVE_FREEBSD=0
+HAVE_GNU_HURD=0
+HAVE_LINUX=0
 HAVE_WIN32=0
 HAVE_NOCYGWIN=0
 HAVE_CYGWIN=0
@@ -246,14 +250,27 @@ SIMPLE_LDFLAGS=$LDFLAGS
 SIMPLE_LIBS=$LIBS
 
 dnl ********************************************************************************
-dnl is Mac OX/X?
+dnl OS Selection
 dnl ********************************************************************************
 
 case $host in
-    *apple-*)
+    *-apple*)
         HAVE_MAC=1
     ;;
+    *-freebsd*)
+        HAVE_FREEBSD=1
+    ;;
+    *-linux*)
+        HAVE_LINUX=1
+    ;;
+    *-gnu*)
+        HAVE_GNU_HURD=1
+    ;;
 esac
+
+dnl ********************************************************************************
+dnl is Mac OX/X?
+dnl ********************************************************************************
 
 if test "x$HAVE_MAC" = "x1"; then
     AC_DEFINE(__MACOS__)
@@ -264,14 +281,24 @@ dnl ****************************************************************************
 dnl is Free BSD?
 dnl ********************************************************************************
 
-case $host in
-    *-freebsd*)
-        HAVE_FREEBSD=1
-    ;;
-esac
-
 if test "x$HAVE_FREEBSD" = "x1"; then
     AC_DEFINE(__FREEBSD__)
+fi
+
+dnl ********************************************************************************
+dnl is Linux?
+dnl ********************************************************************************
+
+if test "x$HAVE_LINUX" = "x1"; then
+    AC_DEFINE(__LINUX__)
+fi
+
+dnl ********************************************************************************
+dnl is GNU / Hurd
+dnl ********************************************************************************
+
+if test "x$HAVE_GNU_HURD" = "x1"; then
+    AC_DEFINE(__GNU_HURD__)
 fi
 
 dnl ********************************************************************************
@@ -289,7 +316,13 @@ if test "$with_scripts" != yes; then
      fi
      if test "x$HAVE_FREEBSD" = "x1"; then
         HAVE_NOSCRIPTS=1
-     fi	 
+     fi
+     if test "x$HAVE_LINUX" = "x1"; then
+        HAVE_NOSCRIPTS=1
+     fi
+     if test "x$HAVE_GNU_HURD" = "x1"; then
+        HAVE_NOSCRIPTS=1
+     fi
 fi
 
 dnl ********************************************************************************
