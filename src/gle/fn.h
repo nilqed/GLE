@@ -57,3 +57,5 @@
 #define FN_XG3D     98
 #define FN_YG3D     99
 #define FN_JUSTIFY  100
+#define FN_RGBA     101
+#define FN_RGBA255  102

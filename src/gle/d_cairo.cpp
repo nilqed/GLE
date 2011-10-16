@@ -544,7 +544,11 @@ void GLECairoDevice::reverse(void)    /* reverse the order of stuff in the curre
 }
 
 void GLECairoDevice::set_color_impl(const GLERC<GLEColor>& color) {
-	cairo_set_source_rgb(cr, color->getRed(), color->getGreen(), color->getBlue());
+	if (color->hasAlpha()) {
+		cairo_set_source_rgba(cr, color->getRed(), color->getGreen(), color->getBlue(), color->getAlpha());
+	} else {
+		cairo_set_source_rgb(cr, color->getRed(), color->getGreen(), color->getBlue());
+	}
 }
 
 void GLECairoDevice::set_color() {

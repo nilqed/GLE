@@ -795,6 +795,21 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 				stk[nstk] = color->getDoubleEncoding();
 			}
 			break;
+		case 60+FN_RGBA:
+			{
+				GLERC<GLEColor> color(new GLEColor(stk[nstk-3], stk[nstk-2], stk[nstk-1], stk[nstk]));
+				nstk -= 3;
+				stk[nstk] = color->getDoubleEncoding();
+			}
+			break;
+		case 60+FN_RGBA255:
+			{
+				GLERC<GLEColor> color(new GLEColor());
+				color->setRGBA255(stk[nstk-3], stk[nstk-2], stk[nstk-1], stk[nstk]);
+				nstk -= 3;
+				stk[nstk] = color->getDoubleEncoding();
+			}
+			break;
 		case 60+FN_NDATA: /* Number of datapoints in a dateset */
 			*otyp = 1;
 			i = atoi(stk_str[nstk]+1);

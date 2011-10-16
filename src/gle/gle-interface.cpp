@@ -1939,6 +1939,10 @@ void GLEColor::setRGB255(double r, double g, double b) {
 	setRGB(r / 255.0, g / 255.0, b / 255.0);
 }
 
+void GLEColor::setRGBA255(double r, double g, double b, double a) {
+	setRGBA(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
+}
+
 void GLEColor::setGray(double gray) {
 	setRGB(gray, gray, gray);
 }
@@ -1957,6 +1961,7 @@ void GLEColor::setDoubleEncoding(double v) {
 	} both;
 	both.d = v;
 	setHexValueGLE(both.l[0]);
+	m_Alpha = double(both.l[1]) / 255.0;
 }
 
 double GLEColor::getDoubleEncoding() {
@@ -1965,7 +1970,7 @@ double GLEColor::getDoubleEncoding() {
 		int l[2];
 	} both;
 	both.l[0] = getHexValueGLE();
-	both.l[1] = 0;
+	both.l[1] = getAlphaI();
 	return both.d;
 }
 
