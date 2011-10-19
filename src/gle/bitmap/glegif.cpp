@@ -227,10 +227,10 @@ GLEGIFDecoder::GLEGIFDecoder(GLEGIF* gif, GLEByteStream* out) {
 }
 
 GLEGIFDecoder::~GLEGIFDecoder() {
-	delete m_First;
-	delete m_Last;
-	delete m_Buffer;
-	delete m_ScanLine;
+	delete[] m_First;
+	delete[] m_Last;
+	delete[] m_Buffer;
+	delete[] m_ScanLine;
 }
 
 void GLEGIFDecoder::clearTable() {

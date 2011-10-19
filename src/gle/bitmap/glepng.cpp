@@ -128,7 +128,9 @@ int GLEPNG::prepare(int mode) {
 		setComponents(3);
 	}
 	if (color_type & PNG_COLOR_MASK_ALPHA) {
-		png_set_strip_alpha(m_PNGPtr);
+		setAlpha(true);
+		setComponents(getComponents() + 1);
+		setExtraComponents(1);
 	}
 	return GLE_IMAGE_ERROR_NONE;
 }

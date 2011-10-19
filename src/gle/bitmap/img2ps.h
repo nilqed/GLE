@@ -258,6 +258,34 @@ public:
 	virtual int term();
 };
 
+class GLEPNegateByteStream : public GLEPipedByteStream {
+public:
+	GLEPNegateByteStream(GLEByteStream* pipe);
+	virtual ~GLEPNegateByteStream();
+	virtual int sendByte(GLEBYTE byte);
+};
+
+class GLEIndexedToRGBByteStream : public GLEPipedByteStream {
+protected:
+	rgb* m_palette;
+public:
+	GLEIndexedToRGBByteStream(GLEByteStream* pipe, rgb* palette);
+	virtual ~GLEIndexedToRGBByteStream();
+	virtual int sendByte(GLEBYTE byte);
+};
+
+class GLERGBATo32BitByteStream : public GLEPipedByteStream {
+protected:
+	GLEBYTE m_components[4];
+	int m_index;
+	int m_nbComponents;
+public:
+	GLERGBATo32BitByteStream(GLEByteStream* pipe, bool isAlpha);
+	virtual ~GLERGBATo32BitByteStream();
+	virtual int sendByte(GLEBYTE byte);
+	virtual int endScanLine();
+};
+
 class GLEPixelCombineByteStream : public GLEPipedByteStream {
 protected:
 	GLEBYTE m_Combined;
@@ -266,6 +294,20 @@ protected:
 public:
 	GLEPixelCombineByteStream(GLEByteStream* pipe, int bpc);
 	virtual ~GLEPixelCombineByteStream();
+	virtual int sendByte(GLEBYTE byte);
+	virtual int endScanLine();
+	virtual int term();
+private:
+	int flushBufferByte();
+};
+
+class GLEBitsTo32BitByteStream : public GLEPipedByteStream {
+protected:
+	unsigned int m_combined;
+	int m_bitsLeft;
+public:
+	GLEBitsTo32BitByteStream(GLEByteStream* pipe);
+	virtual ~GLEBitsTo32BitByteStream();
 	virtual int sendByte(GLEBYTE byte);
 	virtual int endScanLine();
 	virtual int term();

@@ -63,7 +63,9 @@ GLEBitmap::GLEBitmap() {
 
 GLEBitmap::~GLEBitmap() {
 	close();
-	if (m_Palette != NULL) delete m_Palette;
+	if (m_Palette != NULL) {
+		delete[] m_Palette;
+	}
 }
 
 int GLEBitmap::open(const string& fname) {
@@ -174,7 +176,9 @@ int GLEBitmap::prepare(int mode) {
 }
 
 rgb* GLEBitmap::allocPalette(int ncolors) {
-	if (m_Palette != NULL) delete m_Palette;
+	if (m_Palette != NULL) {
+		delete[] m_Palette;
+	}
 	m_Palette = new rgb[ncolors];
 	return m_Palette;
 }
@@ -350,6 +354,69 @@ int GLEPipedByteStream::term() {
 	return GLEByteStream::term();
 }
 
+GLEPNegateByteStream::GLEPNegateByteStream(GLEByteStream* pipe):
+	GLEPipedByteStream(pipe)
+{
+}
+
+GLEPNegateByteStream::~GLEPNegateByteStream() {
+}
+
+int GLEPNegateByteStream::sendByte(GLEBYTE byte) {
+	m_Pipe->sendByte(~byte);
+	return GLE_IMAGE_ERROR_NONE;
+}
+
+GLEIndexedToRGBByteStream::GLEIndexedToRGBByteStream(GLEByteStream* pipe, rgb* palette):
+	GLEPipedByteStream(pipe),
+	m_palette(palette)
+{
+}
+
+GLEIndexedToRGBByteStream::~GLEIndexedToRGBByteStream() {
+}
+
+int GLEIndexedToRGBByteStream::sendByte(GLEBYTE byte) {
+	rgb values(m_palette[byte]);
+	m_Pipe->sendByte(values.red);
+	m_Pipe->sendByte(values.green);
+	m_Pipe->sendByte(values.blue);
+	return GLE_IMAGE_ERROR_NONE;
+}
+
+GLERGBATo32BitByteStream::GLERGBATo32BitByteStream(GLEByteStream* pipe, bool isAlpha):
+	GLEPipedByteStream(pipe),
+	m_index(0),
+	m_nbComponents(isAlpha ? 4 : 3)
+{
+}
+
+GLERGBATo32BitByteStream::~GLERGBATo32BitByteStream() {
+}
+
+int GLERGBATo32BitByteStream::sendByte(GLEBYTE byte) {
+	m_components[m_index++] = byte;
+	if (m_index == m_nbComponents) {
+		unsigned int value = ((unsigned int)m_components[0]) << 16
+                             | ((unsigned int)m_components[1]) << 8
+                             | ((unsigned int)m_components[2]);
+		if (m_nbComponents == 4) {
+			value |= ((unsigned int)m_components[3]) << 24;
+		}
+		const char* valueAsBytes = (const char*)&value;
+		for (int i = 0; i < sizeof(unsigned int); ++i) {
+			m_Pipe->sendByte(valueAsBytes[i]);
+		}
+		m_index = 0;
+	}
+	return GLE_IMAGE_ERROR_NONE;
+}
+
+int GLERGBATo32BitByteStream::endScanLine() {
+	m_index = 0;
+	return GLEPipedByteStream::endScanLine();
+}
+
 GLEPixelCombineByteStream::GLEPixelCombineByteStream(GLEByteStream* pipe, int bpc) : GLEPipedByteStream(pipe) {
 	m_BitsPerComponent = bpc;
 	m_BitsLeft = 8;
@@ -390,6 +457,45 @@ int GLEPixelCombineByteStream::endScanLine() {
 
 int GLEPixelCombineByteStream::term() {
 	if (m_BitsLeft != 8) flushBufferByte();
+	return GLEPipedByteStream::term();
+}
+
+GLEBitsTo32BitByteStream::GLEBitsTo32BitByteStream(GLEByteStream* pipe) : GLEPipedByteStream(pipe) {
+	m_bitsLeft = 32;
+	m_combined = 0;
+}
+
+GLEBitsTo32BitByteStream::~GLEBitsTo32BitByteStream() {
+}
+
+int GLEBitsTo32BitByteStream::flushBufferByte() {
+	const char* valueAsBytes = (const char*)&m_combined;
+	for (int i = 0; i < sizeof(unsigned int); ++i) {
+		m_Pipe->sendByte(valueAsBytes[i]);
+	}
+	m_bitsLeft = 32;
+	m_combined = 0;
+	return GLE_IMAGE_ERROR_NONE;
+}
+
+int GLEBitsTo32BitByteStream::sendByte(GLEBYTE byte) {
+	if (m_bitsLeft > 0) {
+		m_combined |= ((unsigned int)byte) << (32 - m_bitsLeft);
+		m_bitsLeft--;
+	}
+	if (m_bitsLeft == 0) {
+		flushBufferByte();
+	}
+	return GLE_IMAGE_ERROR_NONE;
+}
+
+int GLEBitsTo32BitByteStream::endScanLine() {
+	if (m_bitsLeft != 32) flushBufferByte();
+	return GLEPipedByteStream::endScanLine();
+}
+
+int GLEBitsTo32BitByteStream::term() {
+	if (m_bitsLeft != 32) flushBufferByte();
 	return GLEPipedByteStream::term();
 }
 

@@ -672,53 +672,26 @@ void delete_gle_recorded_byte_stream(void* todelete) {
 
 class GLECairoImageByteStream: public GLEByteStream {
 public:
-	GLECairoImageByteStream(GLEBitmap* bitmap, cairo_surface_t *image)
-	{
-		m_bitmap = bitmap;
+	GLECairoImageByteStream(cairo_surface_t *image) {
 		m_buffer = cairo_image_surface_get_data(image);
 		m_stride = cairo_image_surface_get_stride(image);
 		m_pos = 0;
 		m_scanLine = 0;
-		m_colorIndex = 0;
 	}
 
 	virtual int sendByte(GLEBYTE byte) {
-		if (m_bitmap->isIndexed()) {
-			rgb* pal = m_bitmap->getPalette();
-			rgb entry = pal[byte];
-			unsigned int* value = (unsigned int*)&m_buffer[m_pos];
-			*value = ((unsigned int)entry.red << 16)
-					 | ((unsigned int)entry.green << 8)
-					 | (unsigned int)entry.blue;
-			m_pos += 4;
-		} else if (m_bitmap->isGrayScale()) {
-			m_buffer[m_pos++] = ~byte;
-		} else {
-			m_color[m_colorIndex++] = byte;
-			if (m_colorIndex == 3) {
-				unsigned int* value = (unsigned int*)&m_buffer[m_pos];
-				*value = ((unsigned int)m_color[0] << 16)
-						 | ((unsigned int)m_color[1] << 8)
-						 | (unsigned int)m_color[2];
-				m_pos += 4;
-				m_colorIndex = 0;
-			}
-		}
+		m_buffer[m_pos++] = byte;
 		return GLE_IMAGE_ERROR_NONE;
 	}
 
 	virtual int endScanLine() {
 		m_scanLine++;
 		m_pos = m_scanLine * m_stride;
-		m_colorIndex = 0;
 		return GLE_IMAGE_ERROR_NONE;
 	}
 
 protected:
-	GLEBitmap* m_bitmap;
-	unsigned char m_color[3];
 	unsigned char* m_buffer;
-	int m_colorIndex;
 	int m_stride;
 	int m_pos;
 	int m_scanLine;
@@ -734,9 +707,14 @@ void GLECairoDevice::bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, i
 	bitmap->setCompress(0.0);
 	bitmap->setASCII85(1);
 	/* Get current position	*/
-	g_rotate(180);
 	g_scale(scale->getX() / bitmap->getWidth(), scale->getY() / bitmap->getHeight());
-	g_translate(-bitmap->getWidth(), -bitmap->getHeight());
+	g_translate(pos->getX(), pos->getY());
+	/* Flip image so that it is not upside down */
+	cairo_matrix_t mirror, current, result;
+	cairo_matrix_init(&mirror, 1, 0, 0, -1, 0, bitmap->getHeight());
+	cairo_get_matrix(m_cr, &current);
+	cairo_matrix_multiply(&result, &mirror, &current);
+	cairo_set_matrix(m_cr, &result);
 	/* Convert bitmap to postscript */
 	bitmap->prepare(GLE_BITMAP_PREPARE_SCANLINE);
 	cairo_format_t imageFormat = CAIRO_FORMAT_RGB24;
@@ -750,8 +728,12 @@ void GLECairoDevice::bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, i
 		}
 	}
 	cairo_surface_t* image = cairo_image_surface_create(imageFormat, bitmap->getWidth(), bitmap->getHeight());
-	GLECairoImageByteStream stream(bitmap, image);
+	GLECairoImageByteStream stream(image);
 	GLEByteStream* toDecode = &stream;
+	GLERGBATo32BitByteStream rgbTo32Bit(toDecode, bitmap->isAlpha());
+	if (bitmap->isIndexed() || bitmap->getColorComponents() >= 3) {
+		toDecode = &rgbTo32Bit;
+	}
 	int extra = bitmap->getExtraComponents();
 	int color_alpha = bitmap->getColorComponents();
 	if (bitmap->isAlpha()) {
@@ -763,12 +745,15 @@ void GLECairoDevice::bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, i
 	if (extra != 0) {
 		toDecode = &crem;
 	}
-	GLEAlphaRemovalByteStream alpha(toDecode, color_alpha);
-	if (bitmap->isAlpha()) {
-		std::cout << "remove alpha" << std::endl;
-		toDecode = &alpha;
+	GLEPNegateByteStream negated(&stream);
+	if (bitmap->isGrayScale()) {
+		toDecode = &negated;
 	}
-	GLEPixelCombineByteStream combine(toDecode, bitmap->getBitsPerComponent());
+	GLEIndexedToRGBByteStream indexedToRGB(toDecode, bitmap->getPalette());
+	if (bitmap->isIndexed()) {
+		toDecode = &indexedToRGB;
+	}
+	GLEBitsTo32BitByteStream combine(toDecode);
 	if (bitmap->isGrayScale() && bitmap->getBitsPerComponent() == 1) {
 		toDecode = &combine;
 	}
