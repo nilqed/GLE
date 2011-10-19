@@ -175,8 +175,13 @@ int GLEJPEG::readHeader() {
 
 int GLEJPEG::coded(GLEByteStream* output) {
 	fseek(m_In, 0, SEEK_SET);
-	while (!feof(m_In)) {
-		output->sendByte(fgetc(m_In));
+	while (true) {
+		int nextByte = fgetc(m_In);
+		if (nextByte == EOF) {
+			break;
+		} else {
+			output->sendByte((GLEBYTE)nextByte);
+		}
 	}
 	return GLE_IMAGE_ERROR_NONE;
 }

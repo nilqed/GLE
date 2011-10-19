@@ -237,6 +237,17 @@ public:
 	inline int isTerminated() { return m_Terminated; }
 };
 
+class GLERecordedByteStream : public GLEByteStream {
+protected:
+	std::vector<GLEBYTE> m_bytes;
+public:
+	GLERecordedByteStream();
+	virtual ~GLERecordedByteStream();
+	virtual int sendByte(GLEBYTE byte);
+	unsigned long getNbBytes() const;
+	GLEBYTE* getBytes();
+};
+
 class GLEPipedByteStream : public GLEByteStream {
 protected:
 	GLEByteStream* m_Pipe;

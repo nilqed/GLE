@@ -310,6 +310,29 @@ int GLEByteStream::endScanLine() {
 	return GLE_IMAGE_ERROR_NONE;
 }
 
+GLERecordedByteStream::GLERecordedByteStream() {
+}
+
+GLERecordedByteStream::~GLERecordedByteStream() {
+}
+
+int GLERecordedByteStream::sendByte(GLEBYTE byte) {
+	m_bytes.push_back(byte);
+	return GLE_IMAGE_ERROR_NONE;
+}
+
+unsigned long GLERecordedByteStream::getNbBytes() const {
+	return (unsigned long)m_bytes.size();
+}
+
+GLEBYTE* GLERecordedByteStream::getBytes() {
+	if (m_bytes.empty()) {
+		return 0;
+	} else {
+		return &m_bytes[0];
+	}
+}
+
 GLEPipedByteStream::GLEPipedByteStream(GLEByteStream* pipe): GLEByteStream() {
 	m_Pipe = pipe;
 }

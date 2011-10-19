@@ -42,6 +42,7 @@
 #include "texinterface.h"
 #include "cutils.h"
 #include "gprint.h"
+#include "bitmap/img2ps.h"
 
 #ifdef HAVE_CAIRO
 
@@ -71,32 +72,32 @@ void GLECairoDevice::arc(dbl r,dbl t1,dbl t2,dbl cx,dbl cy) {
 	g_get_xy(&x,&y);
 	//polar_xy(r,t1,&dx,&dy);
 	if (!g.inpath) {
-		if (!g.xinline) cairo_new_path(cr);
+		if (!g.xinline) cairo_new_path(m_cr);
 	}
-	cairo_arc(cr, cx, cy, r, t1*GLE_PI/180.0, t2*GLE_PI/180.0);
+	cairo_arc(m_cr, cx, cy, r, t1*GLE_PI/180.0, t2*GLE_PI/180.0);
 	g.xinline = true;
 	if (!g.inpath) g_move(x,y);
 }
 
 void GLECairoDevice::arcto(dbl x1,dbl y1,dbl x2,dbl y2,dbl rrr) {
 	if (g.xinline==false) move(g.curx,g.cury);
-	cairo_curve_to(cr, x1, y1, x2, y2, x2, y2);
+	cairo_curve_to(m_cr, x1, y1, x2, y2, x2, y2);
 	g.xinline = true;
 }
 
 void GLECairoDevice::beginclip(void)  {
-	cairo_save(cr);
+	cairo_save(m_cr);
 }
 
 void GLECairoDevice::bezier(dbl x1,dbl y1,dbl x2,dbl y2,dbl x3,dbl y3) {
 	double x=g.curx,y=g.cury;
 	if (g.inpath) {
 		if (g.xinline==false) move(g.curx,g.cury);
-		cairo_curve_to(cr, x1, y1, x2, y2, x3, y3);
+		cairo_curve_to(m_cr, x1, y1, x2, y2, x3, y3);
 	} else {
 		g_flush();
-		if (!g.xinline) cairo_move_to(cr, x, y);
-		cairo_curve_to(cr, x1, y1, x2, y2, x3, y3);
+		if (!g.xinline) cairo_move_to(m_cr, x, y);
+		cairo_curve_to(m_cr, x1, y1, x2, y2, x3, y3);
 	}
 	g.xinline = true;
 }
@@ -106,30 +107,30 @@ void GLECairoDevice::box_fill(dbl x1, dbl y1, dbl x2, dbl y2) {
 		xdbox(x1,y1,x2,y2);
 	} else {
 		g_flush();
-		cairo_new_path(cr);
+		cairo_new_path(m_cr);
 		GLERectangle rect(x1, y1, x2, y2);
 		xdbox(x1,y1,x2,y2);
 		ddfill(&rect);
-		cairo_new_path(cr);
+		cairo_new_path(m_cr);
 	}
 }
 
 void GLECairoDevice::box_stroke(dbl x1, dbl y1, dbl x2, dbl y2, bool reverse) {
 	if (g.inpath) {
 		if (reverse) {
-			cairo_move_to(cr, x1, y1);
-			cairo_line_to(cr, x1, y2);
-			cairo_line_to(cr, x2, y2);
-			cairo_line_to(cr, x2, y1);
-			cairo_close_path(cr);
+			cairo_move_to(m_cr, x1, y1);
+			cairo_line_to(m_cr, x1, y2);
+			cairo_line_to(m_cr, x2, y2);
+			cairo_line_to(m_cr, x2, y1);
+			cairo_close_path(m_cr);
 		} else {
 			xdbox(x1,y1,x2,y2);
 		}
 	} else {
 		g_flush();
-		cairo_new_path(cr);
+		cairo_new_path(m_cr);
 		xdbox(x1,y1,x2,y2);
-		cairo_stroke(cr);
+		cairo_stroke(m_cr);
 		//ps_nvec = 0;
 	}
 }
@@ -148,14 +149,14 @@ void GLECairoDevice::resetfont() {
 void GLECairoDevice::circle_fill(double zr) {
 	double x=g.curx,y=g.cury;
 	if (g.inpath) {
-		cairo_arc(cr, x, y, zr, 0, 2*GLE_PI);
+		cairo_arc(m_cr, x, y, zr, 0, 2*GLE_PI);
 	} else {
 		g_flush();
-		cairo_new_path(cr);
-		cairo_arc(cr, x, y, zr, 0, 2*GLE_PI);
+		cairo_new_path(m_cr);
+		cairo_arc(m_cr, x, y, zr, 0, 2*GLE_PI);
 		GLERectangle rect(x-zr, y-zr, x+zr, y+zr);
 		ddfill(&rect);
-		cairo_new_path(cr);
+		cairo_new_path(m_cr);
 	}
 }
 
@@ -163,13 +164,13 @@ void GLECairoDevice::circle_stroke(double zr) {
 	double x,y;
 	g_get_xy(&x,&y);
 	if (g.inpath) {
-		cairo_arc(cr, x, y, zr, 0, 2*GLE_PI);
+		cairo_arc(m_cr, x, y, zr, 0, 2*GLE_PI);
 	} else {
 		g_flush();
-		cairo_new_path(cr);
-		cairo_arc(cr, x, y, zr, 0, 2*GLE_PI);
-		cairo_close_path(cr);
-		cairo_stroke(cr);
+		cairo_new_path(m_cr);
+		cairo_arc(m_cr, x, y, zr, 0, 2*GLE_PI);
+		cairo_close_path(m_cr);
+		cairo_stroke(m_cr);
 	}
 }
 
@@ -177,17 +178,17 @@ void GLECairoDevice::clear(void) {
 }
 
 void GLECairoDevice::clip(void) {
-	cairo_clip(cr);
+	cairo_clip(m_cr);
 }
 
 void GLECairoDevice::closedev(void) {
-    cairo_destroy(cr);
-    cairo_surface_destroy(surface);
+    cairo_destroy(m_cr);
+    cairo_surface_destroy(m_surface);
     printf("%s]\n", m_OutputName.getName().c_str());
 }
 
 void GLECairoDevice::closepath(void) {
-	cairo_close_path(cr);
+	cairo_close_path(m_cr);
 }
 
 void GLECairoDevice::dfont(char *c) {
@@ -196,22 +197,22 @@ void GLECairoDevice::dfont(char *c) {
 void GLECairoDevice::ellipse_fill(double rx, double ry) {
 	double x=g.curx,y=g.cury;
 	if (g.inpath) {
-		cairo_save (cr);
-		cairo_translate (cr, x, y);
-		cairo_scale (cr, rx, ry);
-		cairo_arc (cr, 0, 0, 1, 0, 2*GLE_PI);
-		cairo_restore (cr);
+		cairo_save (m_cr);
+		cairo_translate (m_cr, x, y);
+		cairo_scale (m_cr, rx, ry);
+		cairo_arc (m_cr, 0, 0, 1, 0, 2*GLE_PI);
+		cairo_restore (m_cr);
 	} else {
 		g_flush();
-		cairo_new_path(cr);
-		cairo_save (cr);
-		cairo_translate (cr, x, y);
-		cairo_scale (cr, rx, ry);
-		cairo_arc (cr, 0, 0, 1, 0, 2*GLE_PI);
-		cairo_restore (cr);
+		cairo_new_path(m_cr);
+		cairo_save (m_cr);
+		cairo_translate (m_cr, x, y);
+		cairo_scale (m_cr, rx, ry);
+		cairo_arc (m_cr, 0, 0, 1, 0, 2*GLE_PI);
+		cairo_restore (m_cr);
 		GLERectangle rect(x-rx, y-ry, x+rx, y+ry);
 		ddfill(&rect);
-		cairo_new_path(cr);
+		cairo_new_path(m_cr);
 	}
 }
 
@@ -219,13 +220,13 @@ void GLECairoDevice::ellipse_stroke(double rx, double ry) {
 	double x,y;
 	g_get_xy(&x,&y);
 	if (!g.inpath) {
-		if (!g.xinline) cairo_new_path(cr);
+		if (!g.xinline) cairo_new_path(m_cr);
 	}
-	cairo_save (cr);
-	cairo_translate (cr, x, y);
-	cairo_scale (cr, rx, ry);
-	cairo_arc (cr, 0, 0, 1, 0, 2*GLE_PI);
-	cairo_restore (cr);
+	cairo_save (m_cr);
+	cairo_translate (m_cr, x, y);
+	cairo_scale (m_cr, rx, ry);
+	cairo_arc (m_cr, 0, 0, 1, 0, 2*GLE_PI);
+	cairo_restore (m_cr);
 	g.xinline = true;
 	if (!g.inpath) g_move(x,y);
 }
@@ -234,13 +235,13 @@ void GLECairoDevice::elliptical_arc(double rx,double ry,double t1,double t2,doub
 	double x,y;
 	g_get_xy(&x,&y);
 	if (!g.inpath) {
-		if (!g.xinline) cairo_new_path(cr);
+		if (!g.xinline) cairo_new_path(m_cr);
 	}
-	cairo_save (cr);
-	cairo_translate (cr, cx, cy);
-	cairo_scale (cr, rx, ry);
-	cairo_arc (cr, 0, 0, 1, t1*GLE_PI/180.0, t2*GLE_PI/180.0);
-	cairo_restore (cr);
+	cairo_save (m_cr);
+	cairo_translate (m_cr, cx, cy);
+	cairo_scale (m_cr, rx, ry);
+	cairo_arc (m_cr, 0, 0, 1, t1*GLE_PI/180.0, t2*GLE_PI/180.0);
+	cairo_restore (m_cr);
 	g.xinline = true;
 	if (!g.inpath) g_move(x,y);
 }
@@ -249,20 +250,20 @@ void GLECairoDevice::elliptical_narc(double rx,double ry,double t1,double t2,dou
 	double x,y;
 	g_get_xy(&x,&y);
 	if (!g.inpath) {
-		if (!g.xinline) cairo_new_path(cr);
+		if (!g.xinline) cairo_new_path(m_cr);
 	}
-	cairo_save (cr);
-	cairo_translate (cr, cx, cy);
-	cairo_scale (cr, rx, ry);
-	cairo_arc_negative (cr, 0, 0, 1, t1*GLE_PI/180.0, t2*GLE_PI/180.0);
-	cairo_restore (cr);
+	cairo_save (m_cr);
+	cairo_translate (m_cr, cx, cy);
+	cairo_scale (m_cr, rx, ry);
+	cairo_arc_negative (m_cr, 0, 0, 1, t1*GLE_PI/180.0, t2*GLE_PI/180.0);
+	cairo_restore (m_cr);
 	g.xinline = true;
 	if (!g.inpath) g_move(x,y);
 }
 
 void GLECairoDevice::endclip(void)  {
 	g_flush();
-	cairo_restore(cr);
+	cairo_restore(m_cr);
 	gmodel* state = new gmodel();
 	g_get_state(state);
 	g_set_state(state);
@@ -286,7 +287,7 @@ void GLECairoDevice::ddfill(GLERectangle* bounds) {
 	}
 	set_fill();			/*because color and fill are the same*/
 	//cairo_fill(cr);
-	cairo_fill_preserve(cr);
+	cairo_fill_preserve(m_cr);
 	set_color();
 }
 
@@ -297,10 +298,10 @@ void GLECairoDevice::shadePattern(void) {
 	int step2 = cur_fill.b[B_G];
 	int xstep = max(step1, step2);
 	int ystep = max(step1, step2);
-	cairo_save(cr);
+	cairo_save(m_cr);
 	cairo_matrix_t matrix;
-	cairo_get_matrix(cr, &matrix);
-	cairo_surface_t *isurface = cairo_surface_create_similar(surface, CAIRO_CONTENT_COLOR_ALPHA, xstep, ystep);
+	cairo_get_matrix(m_cr, &matrix);
+	cairo_surface_t *isurface = cairo_surface_create_similar(m_surface, CAIRO_CONTENT_COLOR_ALPHA, xstep, ystep);
 	cairo_t *icr = cairo_create(isurface);
 	GLERC<GLEColor> background(get_fill_background(m_currentFill.get()));
 	if (!background->isTransparent()) {
@@ -349,9 +350,9 @@ void GLECairoDevice::shadePattern(void) {
 	cairo_pattern_set_extend(pattern, CAIRO_EXTEND_REPEAT);
 	cairo_matrix_init_scale(&matrix, 160.0, 160.0);
 	cairo_pattern_set_matrix(pattern, &matrix);
-	cairo_set_source(cr, pattern);
-	cairo_fill(cr);
-	cairo_restore(cr);
+	cairo_set_source(m_cr, pattern);
+	cairo_fill(m_cr);
+	cairo_restore(m_cr);
 	cairo_pattern_destroy(pattern);
 	cairo_destroy(icr);
 	cairo_surface_destroy(isurface);
@@ -364,16 +365,16 @@ void GLECairoDevice::shadeGLE() {
 	double step2 = cur_fill.b[B_G]/160.0;
 	if (step1 > 0) {
 		for (double x = -40.0; x < 40.0; x += step1) {
-			cairo_move_to(cr, x, 0.0);
-			cairo_line_to(cr, 40.0+x, 40);
-			cairo_stroke(cr);
+			cairo_move_to(m_cr, x, 0.0);
+			cairo_line_to(m_cr, 40.0+x, 40);
+			cairo_stroke(m_cr);
 		}
 	}
 	if (step2 > 0) {
 		for (double x = 0.0; x < 80; x += step2) {
-			cairo_move_to(cr, x, 0.0);
-			cairo_line_to(cr, x-40.0, 40);
-			cairo_stroke(cr);
+			cairo_move_to(m_cr, x, 0.0);
+			cairo_line_to(m_cr, x-40.0, 40);
+			cairo_stroke(m_cr);
 		}
 	}
 }
@@ -382,24 +383,24 @@ void GLECairoDevice::shadeBoundedIfThenElse1(GLERectangle* bounds, double p, dou
 	// if x1+p*s > y1 then
 	if (bounds->getXMax()+p*step1 > bounds->getYMax()) {
 		// aline y1-p*s y1
-		cairo_line_to(cr, bounds->getYMax()-p*step1, bounds->getYMax());
+		cairo_line_to(m_cr, bounds->getYMax()-p*step1, bounds->getYMax());
 	} else {
 		// aline x1 x1+p*s
-		cairo_line_to(cr, bounds->getXMax(), bounds->getXMax()+p*step1);
+		cairo_line_to(m_cr, bounds->getXMax(), bounds->getXMax()+p*step1);
 	}
-	cairo_stroke(cr);
+	cairo_stroke(m_cr);
 }
 
 void GLECairoDevice::shadeBoundedIfThenElse2(GLERectangle* bounds, double p, double step2) {
 	// if p*s-y1 > x0 then
 	if (p*step2-bounds->getYMax() > bounds->getXMin()) {
 		// aline p*s-y1 y1
-		cairo_line_to(cr, p*step2-bounds->getYMax(), bounds->getYMax());
+		cairo_line_to(m_cr, p*step2-bounds->getYMax(), bounds->getYMax());
 	} else {
 		// aline x0 p*s-x0
-		cairo_line_to(cr, bounds->getXMin(), p*step2-bounds->getXMin());
+		cairo_line_to(m_cr, bounds->getXMin(), p*step2-bounds->getXMin());
 	}
-	cairo_stroke(cr);
+	cairo_stroke(m_cr);
 }
 
 void GLECairoDevice::shadeBounded(GLERectangle* bounds) {
@@ -407,7 +408,7 @@ void GLECairoDevice::shadeBounded(GLERectangle* bounds) {
 	cur_fill.l = m_currentFill->getHexValueGLE();
 	double step1 = cur_fill.b[B_B]/160.0;
 	double step2 = cur_fill.b[B_G]/160.0;
-	cairo_set_line_cap(cr, CAIRO_LINE_CAP_SQUARE);
+	cairo_set_line_cap(m_cr, CAIRO_LINE_CAP_SQUARE);
 	if (step1 > 0) {
 		int p0 = (int)ceil((bounds->getYMax()-bounds->getXMin())/step1-1e-6);
 		if (bounds->getXMin() + p0*step1 > bounds->getYMax()) p0--;
@@ -417,12 +418,12 @@ void GLECairoDevice::shadeBounded(GLERectangle* bounds) {
 		if (bounds->getXMax() + p2*step1 < bounds->getYMin()) p2++;
 		for (int p = p0; p > p1; p--) {
 			// amove x0 x0+p*s
-			cairo_move_to(cr, bounds->getXMin(), bounds->getXMin()+p*step1);
+			cairo_move_to(m_cr, bounds->getXMin(), bounds->getXMin()+p*step1);
 			shadeBoundedIfThenElse1(bounds, p, step1);
 		}
 		for (int p = p1; p >= p2; p--) {
 			// amove y0-p*s y0
-			cairo_move_to(cr, bounds->getYMin()-p*step1, bounds->getYMin());
+			cairo_move_to(m_cr, bounds->getYMin()-p*step1, bounds->getYMin());
 			shadeBoundedIfThenElse1(bounds, p, step1);
 		}
 	}
@@ -435,12 +436,12 @@ void GLECairoDevice::shadeBounded(GLERectangle* bounds) {
 		if (p2*step2 - bounds->getXMax() < bounds->getYMin()) p2++;
 		for (int p = p0; p > p1; p--) {
 			// amove x0 x0+p*s
-			cairo_move_to(cr, bounds->getXMax(), p*step2-bounds->getXMax());
+			cairo_move_to(m_cr, bounds->getXMax(), p*step2-bounds->getXMax());
 			shadeBoundedIfThenElse2(bounds, p, step2);
 		}
 		for (int p = p1; p >= p2; p--) {
 			// amove y0-p*s y0
-			cairo_move_to(cr, p*step2-bounds->getYMin(), bounds->getYMin());
+			cairo_move_to(m_cr, p*step2-bounds->getYMin(), bounds->getYMin());
 			shadeBoundedIfThenElse2(bounds, p, step2);
 		}
 	}
@@ -449,26 +450,26 @@ void GLECairoDevice::shadeBounded(GLERectangle* bounds) {
 void GLECairoDevice::shade(GLERectangle* bounds) {
 	if (m_FillMethod == GLE_FILL_METHOD_GLE ||
 	   (m_FillMethod == GLE_FILL_METHOD_DEFAULT && bounds != NULL)) {
-		cairo_save(cr);
+		cairo_save(m_cr);
 		GLERC<GLEColor> background(get_fill_background(m_currentFill.get()));
 		if (!background->isTransparent()) {
-			cairo_set_source_rgb(cr, background->getRed(), background->getGreen(), background->getBlue());
-			cairo_fill_preserve(cr);
+			cairo_set_source_rgb(m_cr, background->getRed(), background->getGreen(), background->getBlue());
+			cairo_fill_preserve(m_cr);
 		}
 		// Implemented by using path as clip and then painting strokes over the clip
-		cairo_clip(cr);
-		cairo_new_path(cr);
+		cairo_clip(m_cr);
+		cairo_new_path(m_cr);
 		GLERC<GLEColor> foreground(get_fill_foreground(m_currentFill.get()));
-		cairo_set_source_rgb(cr, foreground->getRed(), foreground->getGreen(), foreground->getBlue());
+		cairo_set_source_rgb(m_cr, foreground->getRed(), foreground->getGreen(), foreground->getBlue());
 		colortyp cur_fill;
 		cur_fill.l = m_currentFill->getHexValueGLE();
-		cairo_set_line_width(cr, (double)(cur_fill.b[B_R]/160.0));
+		cairo_set_line_width(m_cr, (double)(cur_fill.b[B_R]/160.0));
 		if (m_FillMethod == GLE_FILL_METHOD_DEFAULT && bounds != NULL) {
 			shadeBounded(bounds);
 		} else {
 			shadeGLE();
 		}
-		cairo_restore(cr);
+		cairo_restore(m_cr);
 	} else {
 		shadePattern();
 	}
@@ -481,7 +482,7 @@ void GLECairoDevice::fill_ary(int nwk,double *wkx,double *wky) {
 void GLECairoDevice::flush(void) {
 	if (g.inpath) return;
 	if (g.xinline) {
-		cairo_stroke(cr);
+		cairo_stroke(m_cr);
 		//ps_nvec = 0;
 	}
 }
@@ -494,7 +495,7 @@ void GLECairoDevice::line(double zx,double zy) {
 	if (g.xinline==false) {
 		move(g.curx,g.cury);
 	}
-	cairo_line_to(cr, zx, zy);
+	cairo_line_to(m_cr, zx, zy);
 }
 
 void GLECairoDevice::line_ary(int nwk,double *wkx,double *wky) {
@@ -507,11 +508,11 @@ void GLECairoDevice::message(char *s) {
 
 void GLECairoDevice::move(double zx,double zy) {
 	if (g.inpath) {
-		cairo_move_to(cr, zx, zy);
+		cairo_move_to(m_cr, zx, zy);
 	} else {
 		//ps_nvec++;
-		cairo_new_path(cr);
-		cairo_move_to(cr, zx, zy);
+		cairo_new_path(m_cr);
+		cairo_move_to(m_cr, zx, zy);
 	}
 }
 
@@ -521,15 +522,15 @@ void GLECairoDevice::narc(dbl r,dbl t1,dbl t2,dbl cx,dbl cy) {
 	g_get_xy(&x,&y);
 	//polar_xy(r,t1,&dx,&dy);
 	if (!g.inpath) {
-		if (!g.xinline) cairo_new_path(cr);
+		if (!g.xinline) cairo_new_path(m_cr);
 	}
-	cairo_arc_negative(cr, cx, cy, r, t1*GLE_PI/180.0, t2*GLE_PI/180.0);
+	cairo_arc_negative(m_cr, cx, cy, r, t1*GLE_PI/180.0, t2*GLE_PI/180.0);
 	g.xinline = true;
 	if (!g.inpath) g_move(x,y);
 }
 
 void GLECairoDevice::newpath(void) {
-	cairo_new_path(cr);
+	cairo_new_path(m_cr);
 }
 
 void GLECairoDevice::opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError) {
@@ -545,9 +546,9 @@ void GLECairoDevice::reverse(void)    /* reverse the order of stuff in the curre
 
 void GLECairoDevice::set_color_impl(const GLERC<GLEColor>& color) {
 	if (color->hasAlpha()) {
-		cairo_set_source_rgba(cr, color->getRed(), color->getGreen(), color->getBlue(), color->getAlpha());
+		cairo_set_source_rgba(m_cr, color->getRed(), color->getGreen(), color->getBlue(), color->getAlpha());
 	} else {
-		cairo_set_source_rgb(cr, color->getRed(), color->getGreen(), color->getBlue());
+		cairo_set_source_rgb(m_cr, color->getRed(), color->getGreen(), color->getBlue());
 	}
 }
 
@@ -572,18 +573,18 @@ void GLECairoDevice::set_fill_method(int m) {
 void GLECairoDevice::set_line_cap(int i) {
 	/*  lcap, 0= butt, 1=round, 2=projecting square */
 	if (!g.inpath) g_flush();
-	cairo_set_line_cap(cr, (cairo_line_cap_t)i);
+	cairo_set_line_cap(m_cr, (cairo_line_cap_t)i);
 }
 
 void GLECairoDevice::set_line_join(int i) {
 	/* 0=miter, 1=round, 2=bevel */
 	if (!g.inpath) g_flush();
-	cairo_set_line_join(cr, (cairo_line_join_t)i);
+	cairo_set_line_join(m_cr, (cairo_line_join_t)i);
 }
 
 void GLECairoDevice::set_line_miterlimit(double d) {
 	if (!g.inpath) g_flush();
-	cairo_set_miter_limit(cr, d);
+	cairo_set_miter_limit(m_cr, d);
 }
 
 void GLECairoDevice::set_line_style(const char *s) {
@@ -599,7 +600,7 @@ void GLECairoDevice::set_line_style(const char *s) {
 	for (int i = 0; i < nb_dashes; i++) {
 		dashes[i] = (s[i]-'0')*g.lstyled;
 	}
-	cairo_set_dash(cr, dashes, nb_dashes, 0);
+	cairo_set_dash(m_cr, dashes, nb_dashes, 0);
 	delete[] dashes;
 }
 
@@ -612,7 +613,7 @@ void GLECairoDevice::set_line_width(double w) {
 	if (w == 0) w = 0.02;
 	if (w < .0002) w = 0;
 	if (!g.inpath) g_flush();
-	cairo_set_line_width(cr, w);
+	cairo_set_line_width(m_cr, w);
 }
 
 void GLECairoDevice::set_matrix(double newmat[3][3]) {
@@ -623,7 +624,7 @@ void GLECairoDevice::set_matrix(double newmat[3][3]) {
 	matrix.yy = - newmat[1][1];
 	matrix.x0 = newmat[0][2];
 	matrix.y0 = m_height * 72 / CM_PER_INCH - newmat[1][2];
-	cairo_set_matrix(cr, &matrix);
+	cairo_set_matrix(m_cr, &matrix);
 }
 
 void GLECairoDevice::set_path(int onoff) {
@@ -635,7 +636,7 @@ void GLECairoDevice::source(const char *s) {
 }
 
 void GLECairoDevice::stroke(void) {
-	cairo_stroke_preserve(cr);
+	cairo_stroke_preserve(m_cr);
 }
 
 void GLECairoDevice::set_fill(void) {
@@ -645,11 +646,11 @@ void GLECairoDevice::set_fill(void) {
 void GLECairoDevice::xdbox(double x1, double y1, double x2, double y2) {
 	//cout << "xdbox" << endl;
 	//cairo_rectangle_t(cr, x1, y1, x2 - x1, y2 - y1);
-	cairo_move_to(cr, x1, y1);
-	cairo_line_to(cr, x2, y1);
-	cairo_line_to(cr, x2, y2);
-	cairo_line_to(cr, x1, y2);
-	cairo_close_path(cr);
+	cairo_move_to(m_cr, x1, y1);
+	cairo_line_to(m_cr, x2, y1);
+	cairo_line_to(m_cr, x2, y2);
+	cairo_line_to(m_cr, x1, y2);
+	cairo_close_path(m_cr);
 }
 
 void GLECairoDevice::devcmd(const char *s) {
@@ -664,6 +665,135 @@ int GLECairoDevice::getDeviceType() {
 	return GLE_DEVICE_NONE;
 }
 
+void delete_gle_recorded_byte_stream(void* todelete) {
+	GLERecordedByteStream* stream = (GLERecordedByteStream*)todelete;
+	delete stream;
+}
+
+class GLECairoImageByteStream: public GLEByteStream {
+public:
+	GLECairoImageByteStream(GLEBitmap* bitmap, cairo_surface_t *image)
+	{
+		m_bitmap = bitmap;
+		m_buffer = cairo_image_surface_get_data(image);
+		m_stride = cairo_image_surface_get_stride(image);
+		m_pos = 0;
+		m_scanLine = 0;
+		m_colorIndex = 0;
+	}
+
+	virtual int sendByte(GLEBYTE byte) {
+		if (m_bitmap->isIndexed()) {
+			rgb* pal = m_bitmap->getPalette();
+			rgb entry = pal[byte];
+			unsigned int* value = (unsigned int*)&m_buffer[m_pos];
+			*value = ((unsigned int)entry.red << 16)
+					 | ((unsigned int)entry.green << 8)
+					 | (unsigned int)entry.blue;
+			m_pos += 4;
+		} else if (m_bitmap->isGrayScale()) {
+			m_buffer[m_pos++] = ~byte;
+		} else {
+			m_color[m_colorIndex++] = byte;
+			if (m_colorIndex == 3) {
+				unsigned int* value = (unsigned int*)&m_buffer[m_pos];
+				*value = ((unsigned int)m_color[0] << 16)
+						 | ((unsigned int)m_color[1] << 8)
+						 | (unsigned int)m_color[2];
+				m_pos += 4;
+				m_colorIndex = 0;
+			}
+		}
+		return GLE_IMAGE_ERROR_NONE;
+	}
+
+	virtual int endScanLine() {
+		m_scanLine++;
+		m_pos = m_scanLine * m_stride;
+		m_colorIndex = 0;
+		return GLE_IMAGE_ERROR_NONE;
+	}
+
+protected:
+	GLEBitmap* m_bitmap;
+	unsigned char m_color[3];
+	unsigned char* m_buffer;
+	int m_colorIndex;
+	int m_stride;
+	int m_pos;
+	int m_scanLine;
+};
+
+void GLECairoDevice::bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, int type) {
+	/* Store current box */
+	GLERectangle save_box;
+	g_get_bounds(&save_box);
+	/* Generate header in postrscript output */
+	g_gsave();
+	/* Set options */
+	bitmap->setCompress(0.0);
+	bitmap->setASCII85(1);
+	/* Get current position	*/
+	g_rotate(180);
+	g_scale(scale->getX() / bitmap->getWidth(), scale->getY() / bitmap->getHeight());
+	g_translate(-bitmap->getWidth(), -bitmap->getHeight());
+	/* Convert bitmap to postscript */
+	bitmap->prepare(GLE_BITMAP_PREPARE_SCANLINE);
+	cairo_format_t imageFormat = CAIRO_FORMAT_RGB24;
+	if (bitmap->isAlpha()) {
+		imageFormat = CAIRO_FORMAT_ARGB32;
+	}
+	if (bitmap->isGrayScale()) {
+		imageFormat = CAIRO_FORMAT_A8;
+		if (bitmap->getBitsPerComponent() == 1) {
+			imageFormat = CAIRO_FORMAT_A1;
+		}
+	}
+	cairo_surface_t* image = cairo_image_surface_create(imageFormat, bitmap->getWidth(), bitmap->getHeight());
+	GLECairoImageByteStream stream(bitmap, image);
+	GLEByteStream* toDecode = &stream;
+	int extra = bitmap->getExtraComponents();
+	int color_alpha = bitmap->getColorComponents();
+	if (bitmap->isAlpha()) {
+		// Do not count alpha as extra component
+		extra--;
+		color_alpha++;
+	}
+	GLEComponentRemovalByteStream crem(toDecode, color_alpha, extra);
+	if (extra != 0) {
+		toDecode = &crem;
+	}
+	GLEAlphaRemovalByteStream alpha(toDecode, color_alpha);
+	if (bitmap->isAlpha()) {
+		std::cout << "remove alpha" << std::endl;
+		toDecode = &alpha;
+	}
+	GLEPixelCombineByteStream combine(toDecode, bitmap->getBitsPerComponent());
+	if (bitmap->isGrayScale() && bitmap->getBitsPerComponent() == 1) {
+		toDecode = &combine;
+	}
+	bitmap->decode(toDecode);
+	cairo_surface_mark_dirty(image);
+	if (bitmap->getEncoding() == GLE_BITMAP_JPEG) {
+		GLERecordedByteStream* stream = new GLERecordedByteStream();
+		bitmap->coded(stream);
+		cairo_status_t status = cairo_surface_set_mime_data(image,
+															CAIRO_MIME_TYPE_JPEG,
+															stream->getBytes(),
+															stream->getNbBytes(),
+															delete_gle_recorded_byte_stream,
+															(void*)stream);
+		CUtilsAssert(status == CAIRO_STATUS_SUCCESS);
+	}
+	bitmap->close();
+	cairo_set_source_surface(m_cr, image, 0, 0);
+	cairo_paint(m_cr);
+	cairo_surface_destroy(image);
+	/* Footer */
+	g_grestore();
+	g_set_bounds(&save_box);
+}
+
 GLECairoDeviceSVG::GLECairoDeviceSVG(bool showerror) : GLECairoDevice(showerror) {
 }
 
@@ -675,8 +805,8 @@ void GLECairoDeviceSVG::opendev(double width, double height, GLEFileLocation* ou
 	m_height = height;
 	m_OutputName.copy(outputfile);
 	m_OutputName.addExtension("svg");
-	surface = cairo_svg_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
-	cr = cairo_create(surface);
+	m_surface = cairo_svg_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
+	m_cr = cairo_create(m_surface);
 	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
 	g_translate(1.0*CM_PER_INCH/72, -1.0*CM_PER_INCH/72);
 }
@@ -696,8 +826,8 @@ void GLECairoDevicePDF::opendev(double width, double height, GLEFileLocation* ou
 	m_height = height;
 	m_OutputName.copy(outputfile);
 	m_OutputName.addExtension("pdf");
-	surface = cairo_pdf_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
-	cr = cairo_create(surface);
+	m_surface = cairo_pdf_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
+	m_cr = cairo_create(m_surface);
 	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
 	g_translate(1.0*CM_PER_INCH/72, -1.0*CM_PER_INCH/72);
 }
@@ -749,7 +879,7 @@ void GLECairoDeviceEMF::set_matrix(double newmat[3][3]) {
     matrix.yy = - newmat[1][1];
     matrix.x0 = newmat[0][2];
     matrix.y0 = m_height * m_DPI/CM_PER_INCH - newmat[1][2];
-    cairo_set_matrix(cr, &matrix);
+    cairo_set_matrix(m_cr, &matrix);
 }
 
 void GLECairoDeviceEMF::opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError) {
@@ -796,8 +926,8 @@ void GLECairoDeviceEMF::opendev(double width, double height, GLEFileLocation* ou
 	SetWindowOrgEx(m_WinInfo->hdc, 0, 0, NULL);
 	SetWindowExtEx(m_WinInfo->hdc, windowWidth, windowHeight, NULL);
 	SetViewportExtEx(m_WinInfo->hdc, viewportWidth, viewportHeight, NULL);
-	surface = cairo_win32_printing_surface_create(m_WinInfo->hdc);
-	cr = cairo_create(surface);
+	m_surface = cairo_win32_printing_surface_create(m_WinInfo->hdc);
+	m_cr = cairo_create(m_surface);
 	g_scale(m_DPI/CM_PER_INCH, m_DPI/CM_PER_INCH);
 	g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
 }

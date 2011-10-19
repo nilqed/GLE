@@ -115,7 +115,7 @@ int GLEPNG::prepare(int mode) {
 		setMode(GLE_BITMAP_INDEXED);
 		setComponents(1);
 		if (m_BitsPerComponent < 8) {
-		        png_set_packing(m_PNGPtr);
+			png_set_packing(m_PNGPtr);
 		}
 		checkGrayScalePalette();
 	} else if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {

@@ -221,8 +221,8 @@ protected:
 	bool m_ShowError;
 	double m_width;
 	double m_height;
-	cairo_surface_t *surface;
-	cairo_t *cr;
+	cairo_surface_t *m_surface;
+	cairo_t *m_cr;
 	int m_FillMethod;
 	GLERC<GLEColor> m_currentColor;
 	GLERC<GLEColor> m_currentFill;
@@ -281,6 +281,7 @@ public:
 	virtual void devcmd(const char *s);
 	virtual FILE* get_file_pointer(void);
 	virtual int getDeviceType();
+	virtual void bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, int type);
 protected:
 	void set_color_impl(const GLERC<GLEColor>& color);
 	void ddfill(GLERectangle* bounds = NULL);
