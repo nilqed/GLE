@@ -2700,24 +2700,6 @@ const char* GLEDevice::getExtension() {
 	return "";
 }
 
-void GLEDevice::writeRecordedOutputFile(const string& fname, string* buffer) throw (ParserError) {
-	string outf = fname;
-	outf.append(".");
-	outf.append(getExtension());
-	ofstream out(outf.c_str(), ios::out | ios::binary);
-	if (!out.is_open()) {
-		g_throw_parser_error("failed to create file '", outf.c_str(), "'");
-	}
-	if (buffer == 0) {
-		string bytes;
-		getRecordedBytes(&bytes);
-		out.write(bytes.data(), bytes.size());
-	} else {
-		out.write(buffer->data(), buffer->size());
-	}
-	out.close();
-}
-
 void GLEDevice::getRecordedBytes(string* output) {
 	*output = "";
 }

@@ -640,16 +640,6 @@ bool has_eps_or_pdf_based_device(CmdLineArgSet* device, CmdLineObj& cmdline) {
 	return false;
 }
 
-bool requires_tex_eps(CmdLineArgSet* device, CmdLineObj* cmdline) {
-	if (!cmdline->hasOption(GLE_OPT_CREATE_INC)) {
-		if (device->hasValue(GLE_DEVICE_EPS)) return true;
-		if (device->hasValue(GLE_DEVICE_PDF) && !has_pdflatex(cmdline)) return true;
-	}
-	if (device->hasValue(GLE_DEVICE_JPEG)) return true;
-	if (device->hasValue(GLE_DEVICE_PNG)) return true;
-	return false;
-}
-
 bool requires_tex(CmdLineArgSet* device, CmdLineObj* cmdline) {
 	if (!cmdline->hasOption(GLE_OPT_CREATE_INC)) {
 		if (device->hasValue(GLE_DEVICE_EPS)) return true;
@@ -742,6 +732,22 @@ void delete_temp_file(const string& file, const char* ext) {
 	}
 }
 
+void writeRecordedOutputFile(const string& fname, int deviceCode, string* buffer) throw (ParserError) {
+	string outf = fname;
+	outf.append(g_device_to_ext(deviceCode));
+	ofstream out(outf.c_str(), ios::out | ios::binary);
+	if (!out.is_open()) {
+		g_throw_parser_error("failed to create file '", outf.c_str(), "'");
+	}
+	out.write(buffer->data(), buffer->size());
+	out.close();
+}
+
+void writeRecordedOutputFile(const string& fname, int deviceCode, GLEScript* script) throw (ParserError) {
+	string* buffer = script->getRecordedBytesBuffer(deviceCode);
+	writeRecordedOutputFile(fname, deviceCode, buffer);
+}
+
 class GLELoadOneFileManager {
 protected:
 	GLEScript* m_Script;
@@ -753,6 +759,7 @@ protected:
 	bool m_HasIncEPS;
 	bool m_HasIncPDF;
 	bool m_HasEPSFile;
+	bool m_HasPDFFile;
 	bool m_HasTempDotDir;
 	bool m_HasTempFile;
 	bool m_CairoPDF;
@@ -760,15 +767,21 @@ public:
 	GLELoadOneFileManager(GLEScript* script, CmdLineObj* cmdline, GLEFileLocation* outname);
 	~GLELoadOneFileManager();
 	void update_bounding_box();
-	bool process_one_file_eps() throw(ParserError);
+	void delete_previous_output(int deviceCode);
+	bool process_one_file_tex() throw(ParserError);
 	void do_output_type(const char* type);
 	void cat_stdout(const char* ext);
 	void cat_stdout_and_del(const char* ext);
 	void create_latex_eps_ps_pdf() throw(ParserError);
+	void convert_eps_to_pdf_no_latex() throw(ParserError);
 	istream* get_eps_stream();
-	void write_eps() throw(ParserError);
+	bool hasFile(int deviceCode);
+	void write_recorded_data(int deviceCode) throw(ParserError);
 	void clean_tex_temp_files();
-	void delete_original_eps();
+	void delete_original_eps_pdf();
+	void delete_original_eps_pdf_impl(int device, bool hasFile);
+	bool requires_tex_eps(CmdLineArgSet* device, CmdLineObj* cmdline);
+	bool requires_tex_pdf(CmdLineArgSet* device, CmdLineObj* cmdline);
 };
 
 GLELoadOneFileManager::GLELoadOneFileManager(GLEScript* script, CmdLineObj* cmdline, GLEFileLocation* outname) {
@@ -780,6 +793,7 @@ GLELoadOneFileManager::GLELoadOneFileManager(GLEScript* script, CmdLineObj* cmdl
 	m_HasIncEPS = false;
 	m_HasIncPDF = false;
 	m_HasEPSFile = false;
+	m_HasPDFFile = false;
 	m_HasTempDotDir = false;
 	m_HasTempFile = false;
 	m_CairoPDF = false;
@@ -787,6 +801,8 @@ GLELoadOneFileManager::GLELoadOneFileManager(GLEScript* script, CmdLineObj* cmdl
 
 GLELoadOneFileManager::~GLELoadOneFileManager() {
 }
+
+
 
 void GLELoadOneFileManager::update_bounding_box() {
 	double size_x, size_y;
@@ -797,8 +813,18 @@ void GLELoadOneFileManager::update_bounding_box() {
 	m_Script->setBoundingBoxOrigin(0.0, 0.0);
 }
 
-bool GLELoadOneFileManager::process_one_file_eps() throw(ParserError) {
+void GLELoadOneFileManager::delete_previous_output(int deviceCode) {
 	CmdLineArgSet* device = (CmdLineArgSet*)m_CmdLine->getOption(GLE_OPT_DEVICE)->getArg(0);
+	if (device->hasValue(deviceCode) && !m_OutName->isStdout()) {
+		/* Delete output so that QGLE does not display previous rendering if there are errors */
+		DeleteFileWithExt(m_OutName->getFullPath(), g_device_to_ext(deviceCode));
+	}
+}
+
+bool GLELoadOneFileManager::process_one_file_tex() throw(ParserError) {
+	CmdLineArgSet* device = (CmdLineArgSet*)m_CmdLine->getOption(GLE_OPT_DEVICE)->getArg(0);
+	delete_previous_output(GLE_DEVICE_EPS);
+	delete_previous_output(GLE_DEVICE_PDF);
 	if (m_CmdLine->hasOption(GLE_OPT_CAIRO)) {
 		m_CairoPDF = true;
 		m_Device = g_select_device(GLE_DEVICE_CAIRO_PDF);
@@ -841,7 +867,11 @@ bool GLELoadOneFileManager::process_one_file_eps() throw(ParserError) {
 		iter++;
 	} while (done == 1);
 	/* get recorded PostScript code */
-	m_Device->getRecordedBytes(m_Script->getRecordedBytesBuffer(GLE_DEVICE_EPS));
+	if (m_CairoPDF) {
+		m_Device->getRecordedBytes(m_Script->getRecordedBytesBuffer(GLE_DEVICE_PDF));
+	} else {
+		m_Device->getRecordedBytes(m_Script->getRecordedBytesBuffer(GLE_DEVICE_EPS));
+	}
 	update_bounding_box();
 	/* do TeX stuff */
 	interface->checkObjectDimensions();
@@ -887,6 +917,39 @@ void GLELoadOneFileManager::cat_stdout_and_del(const char* ext) {
 	delete_temp_file(m_OutName->getFullPath(), ext);
 }
 
+void GLELoadOneFileManager::convert_eps_to_pdf_no_latex() throw(ParserError) {
+	CmdLineArgSet* device = (CmdLineArgSet*)m_CmdLine->getOption(GLE_OPT_DEVICE)->getArg(0);
+	if (device->hasValue(GLE_DEVICE_PDF) && !m_CairoPDF) {
+		m_HasPDFFile = true;
+		int dpi = m_CmdLine->getIntValue(GLE_OPT_DPI);
+		create_pdf_file_ghostscript(m_OutName, dpi, m_Script);
+		do_output_type(".pdf");
+	}
+}
+
+bool GLELoadOneFileManager::requires_tex_eps(CmdLineArgSet* device, CmdLineObj* cmdline) {
+	if (!cmdline->hasOption(GLE_OPT_CREATE_INC)) {
+		if (device->hasValue(GLE_DEVICE_EPS)) return true;
+		if (device->hasValue(GLE_DEVICE_PDF) && !has_pdflatex(cmdline)) return true;
+	}
+	if (!m_CairoPDF) {
+		if (device->hasValue(GLE_DEVICE_JPEG)) return true;
+		if (device->hasValue(GLE_DEVICE_PNG)) return true;
+	}
+	return false;
+}
+
+bool GLELoadOneFileManager::requires_tex_pdf(CmdLineArgSet* device, CmdLineObj* cmdline) {
+	if (!cmdline->hasOption(GLE_OPT_CREATE_INC)) {
+		if (device->hasValue(GLE_DEVICE_PDF)) return true;
+	}
+	if (m_CairoPDF) {
+		if (device->hasValue(GLE_DEVICE_JPEG)) return true;
+		if (device->hasValue(GLE_DEVICE_PNG)) return true;
+	}
+	return false;
+}
+
 void GLELoadOneFileManager::create_latex_eps_ps_pdf() throw(ParserError) {
 	/* m_OutName has no path and no extension */
 	m_IncName.fromAbsolutePath(m_OutName->getFullPath() + "_inc");
@@ -899,20 +962,24 @@ void GLELoadOneFileManager::create_latex_eps_ps_pdf() throw(ParserError) {
 	/* Create "_inc.eps" */
 	if (device->hasOnlyValue(GLE_DEVICE_PDF) && (has_pdftex || create_inc)) {
 		/* "_inc.eps" not required in this case */
-	} else {
+	} else if (!m_CairoPDF) {
 		m_HasIncEPS = true;
-		m_Device->writeRecordedOutputFile(m_IncName.getFullPath());
+		writeRecordedOutputFile(m_IncName.getFullPath(), GLE_DEVICE_EPS, m_Script);
 	}
 	/* Create "_inc.pdf" */
-	if (device->hasValue(GLE_DEVICE_PDF) && (has_pdftex || create_inc)) {
+	if ((device->hasValue(GLE_DEVICE_PDF) || m_CairoPDF) && (has_pdftex || create_inc)) {
 		m_HasIncPDF = true;
-		create_pdf_file_ghostscript(&m_IncName, dpi, m_Script);
-		do_output_type(".pdf");
+		if (m_CairoPDF) {
+			writeRecordedOutputFile(m_IncName.getFullPath(), GLE_DEVICE_PDF, m_Script);
+		} else {
+			create_pdf_file_ghostscript(&m_IncName, dpi, m_Script);
+			do_output_type(".pdf");
+		}
 	}
 	/* Exit if no EPS/PS/PDF required */
 	if (!requires_tex_eps(device, m_CmdLine) &&
-	    !device->hasValue(GLE_DEVICE_PS) &&
-	    !device->hasValue(GLE_DEVICE_PDF)) {
+		!requires_tex_pdf(device, m_CmdLine) &&
+	    !device->hasValue(GLE_DEVICE_PS)) {
 			return;
 	}
 	/* Create EPS/PS/PDF based on .TeX */
@@ -924,19 +991,19 @@ void GLELoadOneFileManager::create_latex_eps_ps_pdf() throw(ParserError) {
 		create_eps_file_latex_dvips(out_name_np, m_Script);
 		m_HasEPSFile = true;
 	}
-	if (device->hasValue(GLE_DEVICE_PS)) {
-		create_ps_file_latex_dvips(out_name_np);
-		if (m_OutName->isStdout()) cat_stdout_and_del(".ps");
-		do_output_type(".ps");
-	}
-	if (device->hasValue(GLE_DEVICE_PDF) && !create_inc) {
+	if ((device->hasValue(GLE_DEVICE_PDF) && !create_inc) || requires_tex_pdf(device, m_CmdLine)) {
+		m_HasPDFFile = true;
 		if (has_pdftex) {
-			create_pdf_file_pdflatex(out_name_np);
+			create_pdf_file_pdflatex(out_name_np, m_Script);
 		} else {
 			create_pdf_file_ghostscript(m_OutName, dpi, m_Script);
 			do_output_type(".pdf");
 		}
-		if (m_OutName->isStdout()) cat_stdout_and_del(".pdf");
+	}
+	if (device->hasValue(GLE_DEVICE_PS)) {
+		create_ps_file_latex_dvips(out_name_np);
+		if (m_OutName->isStdout()) cat_stdout_and_del(".ps");
+		do_output_type(".ps");
 	}
 	GLEChDir(m_Script->getLocation()->getDirectory());
 }
@@ -945,17 +1012,36 @@ istream* GLELoadOneFileManager::get_eps_stream() {
 	return NULL;
 }
 
-void GLELoadOneFileManager::write_eps() throw (ParserError) {
+bool GLELoadOneFileManager::hasFile(int deviceCode) {
+	if (deviceCode == GLE_DEVICE_EPS) {
+		return m_HasEPSFile;
+	} else if (deviceCode == GLE_DEVICE_PDF) {
+		return m_HasPDFFile;
+	} else {
+		return false;
+	}
+}
+
+void GLELoadOneFileManager::write_recorded_data(int deviceCode) throw (ParserError) {
+	CmdLineArgSet* device = (CmdLineArgSet*)m_CmdLine->getOption(GLE_OPT_DEVICE)->getArg(0);
+	if (!device->hasValue(deviceCode)) {
+		return;
+	}
 	if (m_CmdLine->hasOption(GLE_OPT_CREATE_INC) || m_CmdLine->hasOption(GLE_OPT_NOSAVE)) {
 		return;
 	}
 	if (m_OutName->isStdout()) {
-		/* Write .eps data to stdout */
-		string* buffer = m_Script->getRecordedBytesBuffer(GLE_DEVICE_EPS);
-		cout.write(buffer->data(), buffer->size());
+		/* Write to stdout */
+		if (hasFile(deviceCode)) {
+			cat_stdout(g_device_to_ext(deviceCode));
+		} else {
+			string* buffer = m_Script->getRecordedBytesBuffer(deviceCode);
+			cout.write(buffer->data(), buffer->size());
+		}
 	} else {
-		/* Write .eps data to output file */
-		m_Device->writeRecordedOutputFile(m_OutName->getFullPath(), m_Script->getRecordedBytesBuffer(GLE_DEVICE_EPS));
+		if (!hasFile(deviceCode)) {
+			writeRecordedOutputFile(m_OutName->getFullPath(), deviceCode, m_Script);
+		}
 	}
 }
 
@@ -966,6 +1052,9 @@ void GLELoadOneFileManager::clean_tex_temp_files() {
 	if (create_inc) {
 		if (m_HasIncEPS && !device->hasValue(GLE_DEVICE_EPS)) {
 			delete_temp_file(m_IncName.getFullPath(), ".eps");
+		}
+		if (m_HasIncPDF && !device->hasValue(GLE_DEVICE_PDF)) {
+			delete_temp_file(m_IncName.getFullPath(), ".pdf");
 		}
 	} else {
 		/* No create_inc, so for sure no "_inc.{eps,pdf}" required */
@@ -987,20 +1076,25 @@ void GLELoadOneFileManager::clean_tex_temp_files() {
 	}
 }
 
-void GLELoadOneFileManager::delete_original_eps() {
+void GLELoadOneFileManager::delete_original_eps_pdf_impl(int deviceCode, bool hasFile) {
 	CmdLineArgSet* device = (CmdLineArgSet*)m_CmdLine->getOption(GLE_OPT_DEVICE)->getArg(0);
-	bool should_del = m_HasEPSFile;
-	if (device->hasValue(GLE_DEVICE_EPS)) {
-		/* don't delete .eps if we wanted this as output */
+	bool should_del = hasFile;
+	if (device->hasValue(deviceCode)) {
+		/* don't delete .eps/.pdf if we wanted this as output */
 		/* and we did not wanted this printed to stout */
 		if (!m_OutName->isStdout() && !m_CmdLine->hasOption(GLE_OPT_CREATE_INC)) {
 			should_del = false;
 		}
 	}
 	if (should_del) {
-		/* delete original .eps file */
-		delete_temp_file(m_OutName->getFullPath(), ".eps");
+		/* delete original .eps/.pdf file */
+		delete_temp_file(m_OutName->getFullPath(), g_device_to_ext(deviceCode));
 	}
+}
+
+void GLELoadOneFileManager::delete_original_eps_pdf() {
+	delete_original_eps_pdf_impl(GLE_DEVICE_EPS, m_HasEPSFile);
+	delete_original_eps_pdf_impl(GLE_DEVICE_PDF, m_HasPDFFile);
 	/* has temporary output file */
 	if (m_HasTempFile) {
 		#ifdef __WIN32__
@@ -1026,15 +1120,8 @@ void load_one_file_sub(GLEScript* script, CmdLineObj& cmdline, size_t* exit_code
 	}
 	GLELoadOneFileManager manager(script, &cmdline, &out_name);
 	CmdLineArgSet* device = (CmdLineArgSet*)cmdline.getOption(GLE_OPT_DEVICE)->getArg(0);
-	if (device->hasValue(GLE_DEVICE_PDF) && cmdline.hasOption(GLE_OPT_CAIRO)) {
-		 g_select_device(GLE_DEVICE_CAIRO_PDF);
-		 DrawIt(script, &out_name, &cmdline);
-	} else if (has_eps_or_pdf_based_device(device, cmdline)) {
-		if (device->hasValue(GLE_DEVICE_EPS) && !out_name.isStdout()) {
-			/* Delete output .eps so that QGLE does not display previous rendering if there are errors */
-			DeleteFileWithExt(out_name.getFullPath(), ".eps");
-		}
-		bool has_tex = manager.process_one_file_eps();
+	if (has_eps_or_pdf_based_device(device, cmdline)) {
+		bool has_tex = manager.process_one_file_tex();
 		/* Return if there were errors */
 		if (get_nb_errors() > 0) {
 			if (g_verbosity() > 0) cerr << endl;
@@ -1047,10 +1134,7 @@ void load_one_file_sub(GLEScript* script, CmdLineObj& cmdline, size_t* exit_code
 		if (has_tex) {
 			manager.create_latex_eps_ps_pdf();
 		} else {
-			if (device->hasValue(GLE_DEVICE_PDF)) {
-				create_pdf_file_ghostscript(&out_name, dpi, script);
-				manager.do_output_type(".pdf");
-			}
+			manager.convert_eps_to_pdf_no_latex();
 		}
 		/* Create bitmap outputs */
 		bool is_bw = cmdline.hasOption(GLE_OPT_NO_COLOR);
@@ -1062,10 +1146,9 @@ void load_one_file_sub(GLEScript* script, CmdLineObj& cmdline, size_t* exit_code
 			}
 		}
 		/* Output .eps to stdout? */
-		if (device->hasValue(GLE_DEVICE_EPS)) {
-			manager.write_eps();
-		}
-		manager.delete_original_eps();
+		manager.write_recorded_data(GLE_DEVICE_EPS);
+		manager.write_recorded_data(GLE_DEVICE_PDF);
+		manager.delete_original_eps_pdf();
 		if (has_tex) manager.clean_tex_temp_files();
 		if (g_verbosity() > 0) cerr << endl;
 	}
@@ -1076,7 +1159,9 @@ void load_one_file_sub(GLEScript* script, CmdLineObj& cmdline, size_t* exit_code
 			g_message(">> To include LaTeX expressions, use \"gle -tex -d ps file.gle\"");
 		}
 		if (psdev->isRecordingEnabled()) {
-			psdev->writeRecordedOutputFile(out_name.getFullPath());
+			std::string recorded;
+			psdev->getRecordedBytes(&recorded);
+			writeRecordedOutputFile(out_name.getFullPath(), GLE_DEVICE_PS, &recorded);
 		}
 		if (out_name.isStdout()) manager.cat_stdout_and_del(".ps");
 		cerr << endl;

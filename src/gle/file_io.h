@@ -142,6 +142,7 @@ bool IsAbsPath(const string& path);
 void GLEGetFullPath(const string& dirname, const string& fname, string& fullpath);
 string GLEExpandEnvironmentVariables(const string& str);
 bool GLEReadFile(const string& name, vector<string>* lines);
+bool GLEReadFileBinary(const string& name, std::vector<char>* contents);
 
 #define GLE_SYSTEM_OK            0
 #define GLE_SYSTEM_ERROR         1

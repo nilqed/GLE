@@ -1177,7 +1177,8 @@ protected:
 	GLEGlobalSource m_File;
 	GLEPoint m_Size, m_BoundingBox, m_BoundingBoxOrigin;
 	GLERCVector<GLEDrawObject> m_NewObjs;
-	string m_PostScript;
+	string m_PostScriptCode;
+	string m_PDFCode;
 	int m_CurrObject;
 public:
 	GLEScript();

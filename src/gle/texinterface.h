@@ -275,7 +275,7 @@ protected:
 
 bool create_eps_file_latex_dvips(const string& fname, GLEScript* script);
 bool create_ps_file_latex_dvips(const string& fname);
-bool create_pdf_file_pdflatex(const string& fname);
+bool create_pdf_file_pdflatex(const string& fname, GLEScript* script);
 
 bool create_bitmap_file(GLEFileLocation* fname, int device, int dpi, bool bw, bool transp, GLEScript* script);
 bool create_pdf_file_ghostscript(GLEFileLocation* fname, int dpi, GLEScript* script);

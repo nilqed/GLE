@@ -1062,7 +1062,7 @@ void GLEScript::cleanUp() {
 	m_Parser = NULL;
 	m_Polish = NULL;
 	m_Pcode = NULL;
-	m_PostScript.resize(0);
+	m_PostScriptCode.resize(0);
 }
 
 GLEDrawObject* GLEScript::newGLEObject(GLEDrawObjectType type) {
@@ -1146,12 +1146,19 @@ void GLEScript::updateObjectDOConstructors() {
 
 const char* GLEScript::getPostScriptCode()
 {
-	return m_PostScript.c_str();
+	return m_PostScriptCode.c_str();
 }
 
-string* GLEScript::getRecordedBytesBuffer(int /* device */)
+string* GLEScript::getRecordedBytesBuffer(int device)
 {
-	return &m_PostScript;
+	if (device == GLE_DEVICE_EPS) {
+		return &m_PostScriptCode;
+	} else if (device == GLE_DEVICE_PDF) {
+		return &m_PDFCode;
+	} else {
+		CUtilsAssert(false);
+		return 0;
+	}
 }
 
 GLELineDO::GLELineDO() {

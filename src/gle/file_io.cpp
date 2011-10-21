@@ -1522,8 +1522,7 @@ string GLEExpandEnvironmentVariables(const string& str) {
 
 bool GLEReadFile(const string& name, vector<string>* lines) {
 	ifstream inFile(name.c_str());
-	if (!inFile.is_open())
-	{
+	if (!inFile.is_open()) {
 		return false;
 	}
 	while (inFile.good()) {
@@ -1535,3 +1534,16 @@ bool GLEReadFile(const string& name, vector<string>* lines) {
 	return true;
 }
 
+bool GLEReadFileBinary(const string& name, std::vector<char>* contents) {
+	ifstream inFile(name.c_str(), ios::in | ios::binary);
+	if (!inFile.is_open()) {
+		return false;
+	}
+	inFile.seekg(0, ios::end);
+	int length = inFile.tellg();
+	inFile.seekg(0, ios::beg);
+	contents->resize(length, 0);
+	inFile.read(&(*contents)[0], length);
+	inFile.close();
+	return true;
+}

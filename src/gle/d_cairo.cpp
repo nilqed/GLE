@@ -184,7 +184,13 @@ void GLECairoDevice::clip(void) {
 void GLECairoDevice::closedev(void) {
     cairo_destroy(m_cr);
     cairo_surface_destroy(m_surface);
-    printf("%s]\n", m_OutputName.getName().c_str());
+	if (g_verbosity() > 0) {
+		string mainname;
+		string extension(std::string(".") + getExtension());
+		GetMainNameExt(m_OutputName.getName(), extension.c_str(), mainname);
+		cerr << "[" << mainname << "][" << extension << "]";
+		g_set_console_output(false);
+	}
 }
 
 void GLECairoDevice::closepath(void) {
@@ -623,7 +629,11 @@ void GLECairoDevice::set_matrix(double newmat[3][3]) {
 	matrix.yx = - newmat[1][0];
 	matrix.yy = - newmat[1][1];
 	matrix.x0 = newmat[0][2];
-	matrix.y0 = m_height * 72 / CM_PER_INCH - newmat[1][2];
+	double offset = 0.0;
+	if (!g_is_fullpage()) {
+		offset = 2.0 * CM_PER_INCH / 72;
+	}
+	matrix.y0 = (m_height + offset) * 72 / CM_PER_INCH - newmat[1][2];
 	cairo_set_matrix(m_cr, &matrix);
 }
 
@@ -779,6 +789,31 @@ void GLECairoDevice::bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, i
 	g_set_bounds(&save_box);
 }
 
+void GLECairoDevice::getRecordedBytes(string* output) {
+	if (!m_recorded.empty()) {
+		*output = std::string(&m_recorded[0], m_recorded.size());
+	} else {
+		output->clear();
+	}
+}
+
+void GLECairoDevice::recordData(const unsigned char *data, unsigned int length) {
+	m_recorded.reserve(m_recorded.size() + length);
+	for (unsigned int i = 0; i < length; ++i) {
+		m_recorded.push_back((char)data[i]);
+	}
+}
+
+void GLECairoDevice::clearRecordedData() {
+	m_recorded.clear();
+}
+
+cairo_status_t gle_cairo_device_write(void* closure, const unsigned char *data, unsigned int length) {
+	GLECairoDevice* cairoDevice = (GLECairoDevice*)closure;
+	cairoDevice->recordData(data, length);
+	return CAIRO_STATUS_SUCCESS;
+}
+
 GLECairoDeviceSVG::GLECairoDeviceSVG(bool showerror) : GLECairoDevice(showerror) {
 }
 
@@ -793,7 +828,9 @@ void GLECairoDeviceSVG::opendev(double width, double height, GLEFileLocation* ou
 	m_surface = cairo_svg_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
 	m_cr = cairo_create(m_surface);
 	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
-	g_translate(1.0*CM_PER_INCH/72, -1.0*CM_PER_INCH/72);
+	if (!g_is_fullpage()) {
+		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
+	}
 }
 
 int GLECairoDeviceSVG::getDeviceType() {
@@ -807,18 +844,29 @@ GLECairoDevicePDF::~GLECairoDevicePDF() {
 }
 
 void GLECairoDevicePDF::opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError) {
+	clearRecordedData();
 	m_width = width;
 	m_height = height;
 	m_OutputName.copy(outputfile);
 	m_OutputName.addExtension("pdf");
-	m_surface = cairo_pdf_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
+	if (isRecordingEnabled()) {
+		m_surface = cairo_pdf_surface_create_for_stream (gle_cairo_device_write, (void*)this, 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
+	} else {
+		m_surface = cairo_pdf_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
+	}
 	m_cr = cairo_create(m_surface);
 	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
-	g_translate(1.0*CM_PER_INCH/72, -1.0*CM_PER_INCH/72);
+	if (!g_is_fullpage()) {
+		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
+	}
 }
 
 int GLECairoDevicePDF::getDeviceType() {
 	return GLE_DEVICE_CAIRO_PDF;
+}
+
+const char* GLECairoDevicePDF::getExtension() {
+	return "pdf";
 }
 
 #ifdef __WIN32__
@@ -863,7 +911,11 @@ void GLECairoDeviceEMF::set_matrix(double newmat[3][3]) {
     matrix.yx = - newmat[1][0];
     matrix.yy = - newmat[1][1];
     matrix.x0 = newmat[0][2];
-    matrix.y0 = m_height * m_DPI/CM_PER_INCH - newmat[1][2];
+	double offset = 0.0;
+	if (!g_is_fullpage()) {
+		offset = 2.0 * CM_PER_INCH / 72;
+	}
+    matrix.y0 = (m_height + offset) * m_DPI/CM_PER_INCH - newmat[1][2];
     cairo_set_matrix(m_cr, &matrix);
 }
 
@@ -914,7 +966,9 @@ void GLECairoDeviceEMF::opendev(double width, double height, GLEFileLocation* ou
 	m_surface = cairo_win32_printing_surface_create(m_WinInfo->hdc);
 	m_cr = cairo_create(m_surface);
 	g_scale(m_DPI/CM_PER_INCH, m_DPI/CM_PER_INCH);
-	g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
+	if (!g_is_fullpage()) {
+		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
+	}
 }
 
 BOOL PutEnhMetafileOnClipboard(HWND hWnd, HENHMETAFILE hEMF) {

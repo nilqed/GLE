@@ -107,7 +107,6 @@ public:
 	virtual void bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, int type);
 	virtual const char* getExtension();
 	virtual void getRecordedBytes(string* output);
-	void writeRecordedOutputFile(const string& fname, string* buffer = 0) throw (ParserError);
 public:
 	inline void setRecordingEnabled(bool rec) { m_Recording = rec; }
 	inline bool isRecordingEnabled() { return m_Recording; }
@@ -226,6 +225,7 @@ protected:
 	int m_FillMethod;
 	GLERC<GLEColor> m_currentColor;
 	GLERC<GLEColor> m_currentFill;
+	std::vector<char> m_recorded;
 public:
 	GLECairoDevice(bool showerror);
 	virtual ~GLECairoDevice();
@@ -282,6 +282,8 @@ public:
 	virtual FILE* get_file_pointer(void);
 	virtual int getDeviceType();
 	virtual void bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, int type);
+	virtual void getRecordedBytes(string* output);
+	void recordData(const unsigned char *data, unsigned int length);
 protected:
 	void set_color_impl(const GLERC<GLEColor>& color);
 	void ddfill(GLERectangle* bounds = NULL);
@@ -291,6 +293,7 @@ protected:
 	void shadeBoundedIfThenElse2(GLERectangle* bounds, double p, double step2);
 	void shadeBounded(GLERectangle* bounds);
 	void shade(GLERectangle* bounds);
+	void clearRecordedData();
 };
 
 class GLECairoDevicePDF : public GLECairoDevice {
@@ -299,6 +302,7 @@ public:
 	virtual ~GLECairoDevicePDF();
 	virtual void opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError);
 	virtual int getDeviceType();
+	virtual const char* getExtension();
 };
 
 class GLECairoDeviceSVG : public GLECairoDevice {

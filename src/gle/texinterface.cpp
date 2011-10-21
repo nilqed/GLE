@@ -1085,11 +1085,13 @@ bool create_bitmap_file(GLEFileLocation* fname, int device, int dpi, bool bw, bo
 	ostringstream gsargs;
 	gsargs << "-q -DNOPLATFONTS -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dBATCH -dNOPAUSE -r";
 	gsargs << dpi;
-	GLEPoint bb(script->getBoundingBox());
-	GLEPoint origin(script->getBoundingBoxOrigin());
-	int img_wd = GLEBBoxToPixels(dpi, bb.getX());
-	int img_hi = GLEBBoxToPixels(dpi, bb.getY());
-	gsargs << " -g" << img_wd << "x" << img_hi;
+	string* bytesPDF = script->getRecordedBytesBuffer(GLE_DEVICE_PDF);
+	if (bytesPDF->empty()) {
+		GLEPoint bb(script->getBoundingBox());
+		int img_wd = GLEBBoxToPixels(dpi, bb.getX());
+		int img_hi = GLEBBoxToPixels(dpi, bb.getY());
+		gsargs << " -g" << img_wd << "x" << img_hi;
+	}
 	string gs_opts = g_CmdLine.getOptionString(GLE_OPT_GSOPTIONS);
 	if (gs_opts != "") {
 		str_replace_all(gs_opts, "\\", "");
@@ -1120,11 +1122,18 @@ bool create_bitmap_file(GLEFileLocation* fname, int device, int dpi, bool bw, bo
 		gsargs << " -sOutputFile=\"" << outputfile << "\"";
 	}
 	gsargs << " -";
-	stringstream postscript;
-	string* bytes = script->getRecordedBytesBuffer(GLE_DEVICE_EPS);
-	postscript << (-origin.getX()) << " " << (-origin.getY()) << " translate" << endl;
-	postscript.write(bytes->data(), bytes->size());
-	return run_ghostscript(gsargs.str(), outputfile, !fname->isStdout(), &postscript);
+	string* bytesEPS = script->getRecordedBytesBuffer(GLE_DEVICE_EPS);
+	if (!bytesPDF->empty()) {
+		stringstream pdfCode;
+		pdfCode.write(bytesPDF->data(), bytesPDF->size());
+		return run_ghostscript(gsargs.str(), outputfile, !fname->isStdout(), &pdfCode);
+	} else {
+		stringstream postscript;
+		GLEPoint origin(script->getBoundingBoxOrigin());
+		postscript << (-origin.getX()) << " " << (-origin.getY()) << " translate" << endl;
+		postscript.write(bytesEPS->data(), bytesEPS->size());
+		return run_ghostscript(gsargs.str(), outputfile, !fname->isStdout(), &postscript);
+	}
 }
 
 bool create_pdf_file_ghostscript(GLEFileLocation* fname, int dpi, GLEScript* script) {
@@ -1258,7 +1267,7 @@ bool post_run_latex(bool result_ok, stringstream& output, const string& cmdline)
 	}
 }
 
-bool create_pdf_file_pdflatex(const string& fname) {
+bool create_pdf_file_pdflatex(const string& fname, GLEScript* script) {
 	string file, dir;
 	SplitFileName(fname, dir, file);
 	ConfigSection* tools = g_Config.getSection(GLE_CONFIG_TOOLS);
@@ -1283,6 +1292,13 @@ bool create_pdf_file_pdflatex(const string& fname) {
 	post_run_latex(result_ok, output, cmdline);
 	DeleteFileWithExt(fname, ".aux");
 	DeleteFileWithExt(fname, ".log");
+	if (result_ok) {
+		std::vector<char> pdfData;
+		if (GLEReadFileBinary(outfile, &pdfData) && !pdfData.empty()) {
+			string* buffer = script->getRecordedBytesBuffer(GLE_DEVICE_PDF);
+			*buffer = std::string(&pdfData[0], pdfData.size());
+		}
+	}
 	return result_ok;
 }
 
