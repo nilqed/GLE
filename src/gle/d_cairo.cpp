@@ -46,9 +46,9 @@
 
 #ifdef HAVE_CAIRO
 
+#include <cairo-ps.h>
 #include <cairo-pdf.h>
 #include <cairo-svg.h>
-
 
 /************************************************************************************
  * Fonts in Cairo:
@@ -186,7 +186,7 @@ void GLECairoDevice::closedev(void) {
     cairo_surface_destroy(m_surface);
 	if (g_verbosity() > 0) {
 		string mainname;
-		string extension(std::string(".") + getExtension());
+		string extension(g_device_to_ext(getDeviceType()));
 		GetMainNameExt(m_OutputName.getName(), extension.c_str(), mainname);
 		cerr << "[" << mainname << "][" << extension << "]";
 		g_set_console_output(false);
@@ -824,9 +824,10 @@ void GLECairoDeviceSVG::opendev(double width, double height, GLEFileLocation* ou
 	m_width = width;
 	m_height = height;
 	m_OutputName.copy(outputfile);
-	m_OutputName.addExtension("svg");
+	m_OutputName.addExtension(g_device_to_ext(getDeviceType()));
 	m_surface = cairo_svg_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
 	m_cr = cairo_create(m_surface);
+	computeBoundingBox(width, height);
 	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
 	if (!g_is_fullpage()) {
 		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
@@ -848,13 +849,14 @@ void GLECairoDevicePDF::opendev(double width, double height, GLEFileLocation* ou
 	m_width = width;
 	m_height = height;
 	m_OutputName.copy(outputfile);
-	m_OutputName.addExtension("pdf");
+	m_OutputName.addExtension(g_device_to_ext(getDeviceType()));
 	if (isRecordingEnabled()) {
-		m_surface = cairo_pdf_surface_create_for_stream (gle_cairo_device_write, (void*)this, 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
+		m_surface = cairo_pdf_surface_create_for_stream(gle_cairo_device_write, (void*)this, 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
 	} else {
 		m_surface = cairo_pdf_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
 	}
 	m_cr = cairo_create(m_surface);
+	computeBoundingBox(width, height);
 	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
 	if (!g_is_fullpage()) {
 		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
@@ -865,8 +867,67 @@ int GLECairoDevicePDF::getDeviceType() {
 	return GLE_DEVICE_CAIRO_PDF;
 }
 
-const char* GLECairoDevicePDF::getExtension() {
-	return "pdf";
+GLECairoDeviceEPS::GLECairoDeviceEPS(bool showerror) : GLECairoDevice(showerror) {
+}
+
+GLECairoDeviceEPS::~GLECairoDeviceEPS() {
+}
+
+void GLECairoDeviceEPS::opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError) {
+	clearRecordedData();
+	m_width = width;
+	m_height = height;
+	m_OutputName.copy(outputfile);
+	m_OutputName.addExtension(g_device_to_ext(getDeviceType()));
+	if (isRecordingEnabled()) {
+		m_surface = cairo_ps_surface_create_for_stream(gle_cairo_device_write, (void*)this, 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
+	} else {
+		m_surface = cairo_ps_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
+	}
+	cairo_ps_surface_set_eps(m_surface, true);
+	int int_bb_x = 0, int_bb_y = 0;
+	computeBoundingBox(width, height, &int_bb_x, &int_bb_y);
+	std::ostringstream bbLoRes;
+	std::ostringstream bbHiRes;
+	bbLoRes << "%%BoundingBox: 0 0 " << int_bb_x << " " << int_bb_y;
+	bbHiRes << "%%HiResBoundingBox: 0 0 " << m_BBox.getX() << " " << m_BBox.getY();
+	cairo_ps_surface_dsc_comment(m_surface, bbLoRes.str().c_str());
+	cairo_ps_surface_dsc_comment(m_surface, bbHiRes.str().c_str());
+	m_cr = cairo_create(m_surface);
+	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
+	if (!g_is_fullpage()) {
+		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
+	}
+}
+
+void GLECairoDeviceEPS::getRecordedBytes(string* output) {
+	// work-around for bug in Cairo 1.10.x
+	int int_bb_x = 0, int_bb_y = 0;
+	computeBoundingBox(m_width, m_height, &int_bb_x, &int_bb_y);
+	std::ostringstream bbLoRes;
+	std::ostringstream bbHiRes;
+	bbLoRes << "%%BoundingBox: 0 0 " << int_bb_x << " " << int_bb_y;
+	bbHiRes << "%%HiResBoundingBox: 0 0 " << m_BBox.getX() << " " << m_BBox.getY();
+	// do conversion
+	std::stringstream inp;
+	std::ostringstream outp;
+	inp.write(&m_recorded[0], m_recorded.size());
+	while (inp.good()) {
+		string line;
+		getline(inp, line);
+		if (str_starts_with(line, "%%BoundingBox:")) {
+			outp << bbLoRes.str() << std::endl;
+		} else if (str_starts_with(line, "%%HiResBoundingBox:")) {
+			outp << bbHiRes.str() << std::endl;
+		} else {
+			outp << line << std::endl;
+		}
+	}
+	*output = outp.str();
+}
+
+int GLECairoDeviceEPS::getDeviceType() {
+	return GLE_DEVICE_CAIRO_EPS;
 }
 
 #ifdef __WIN32__
@@ -965,6 +1026,7 @@ void GLECairoDeviceEMF::opendev(double width, double height, GLEFileLocation* ou
 	SetViewportExtEx(m_WinInfo->hdc, viewportWidth, viewportHeight, NULL);
 	m_surface = cairo_win32_printing_surface_create(m_WinInfo->hdc);
 	m_cr = cairo_create(m_surface);
+	computeBoundingBox(width, height);
 	g_scale(m_DPI/CM_PER_INCH, m_DPI/CM_PER_INCH);
 	if (!g_is_fullpage()) {
 		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);

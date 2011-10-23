@@ -217,7 +217,7 @@ TeXObject* TeXInterface::drawObj(TeXHashObject* hobj, TeXObjectInfo& info, GLERe
 }
 
 void TeXInterface::checkObjectDimensions() {
-	PSGLEDevice* psdev = (PSGLEDevice*)g_get_device_ptr();
+	GLEDevice* psdev = g_get_device_ptr();
 	double x0 = 0.0;
 	double y0 = 0.0;
 	double x1 = (double)psdev->getBoundingBox()->getX()/72.0*CM_PER_INCH;

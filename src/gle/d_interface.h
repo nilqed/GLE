@@ -48,6 +48,7 @@ class GLEPoint;
 class GLEDevice {
 protected:
 	bool m_Recording;
+	GLEPoint m_BBox;
 public:
 	GLEDevice();
 	virtual ~GLEDevice();
@@ -105,8 +106,10 @@ public:
 	virtual FILE* get_file_pointer(void) = 0;
 	virtual int getDeviceType() = 0;
 	virtual void bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, int type);
-	virtual const char* getExtension();
 	virtual void getRecordedBytes(string* output);
+	void computeBoundingBox(double width, double height, int* int_bb_x, int* int_bb_y);
+	void computeBoundingBox(double width, double height);
+	inline GLEPoint* getBoundingBox() { return &m_BBox; }
 public:
 	inline void setRecordingEnabled(bool rec) { m_Recording = rec; }
 	inline bool isRecordingEnabled() { return m_Recording; }
@@ -128,7 +131,6 @@ protected:
 	int m_FillMethod;
 	GLERC<GLEColor> m_currentColor;
 	GLERC<GLEColor> m_currentFill;
-	GLEPoint m_BBox;
 public:
 	PSGLEDevice(bool eps);
 	virtual ~PSGLEDevice();
@@ -186,7 +188,6 @@ public:
 	virtual FILE* get_file_pointer(void);
 	virtual int getDeviceType();
 	virtual void bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, int type);
-	virtual const char* getExtension();
 	virtual void getRecordedBytes(string* output);
 protected:
 	void set_color_impl(const GLERC<GLEColor>& color);
@@ -204,7 +205,6 @@ public:
 	inline bool isEps() { return m_IsEps; }
 	inline bool isOutputPageSize() { return m_IsPageSize; }
 	inline void setOutputPageSize(bool out) { m_IsPageSize = out; }
-	inline GLEPoint* getBoundingBox() { return &m_BBox; }
 	inline ostream& out() { return *m_Out; }
 	void startRecording();
 	void initialPS();
@@ -302,7 +302,15 @@ public:
 	virtual ~GLECairoDevicePDF();
 	virtual void opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError);
 	virtual int getDeviceType();
-	virtual const char* getExtension();
+};
+
+class GLECairoDeviceEPS : public GLECairoDevice {
+public:
+	GLECairoDeviceEPS(bool showerror);
+	virtual ~GLECairoDeviceEPS();
+	virtual void opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError);
+	virtual int getDeviceType();
+	virtual void getRecordedBytes(string* output);
 };
 
 class GLECairoDeviceSVG : public GLECairoDevice {

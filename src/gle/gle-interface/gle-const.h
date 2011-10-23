@@ -39,18 +39,20 @@
 #ifndef INCLUDE_GLECONST
 #define INCLUDE_GLECONST
 
-#define GLE_DEVICE_NONE      -1
-#define GLE_DEVICE_EPS        0
-#define GLE_DEVICE_PS         1
-#define GLE_DEVICE_PDF        2
-#define GLE_DEVICE_SVG        3
-#define GLE_DEVICE_JPEG       4
-#define GLE_DEVICE_PNG        5
-#define GLE_DEVICE_X11        6
-#define GLE_DEVICE_EMF        7
-#define GLE_DEVICE_DUMMY      8
-#define GLE_DEVICE_CAIRO_PDF  9
-#define GLE_DEVICE_CAIRO_SVG  10
+#define GLE_DEVICE_NONE        -1
+#define GLE_DEVICE_EPS          0
+#define GLE_DEVICE_PS           1
+#define GLE_DEVICE_PDF          2
+#define GLE_DEVICE_SVG          3
+#define GLE_DEVICE_JPEG         4
+#define GLE_DEVICE_PNG          5
+#define GLE_DEVICE_X11          6
+#define GLE_DEVICE_EMF          7
+#define GLE_DEVICE_DUMMY        8
+#define GLE_DEVICE_CAIRO_PDF    9
+#define GLE_DEVICE_CAIRO_EPS    10
+#define GLE_DEVICE_CAIRO_PS     11
+#define GLE_DEVICE_CAIRO_SVG    12
 
 #define BITMAP_TYPE_USER 0
 #define BITMAP_TYPE_TIFF 1

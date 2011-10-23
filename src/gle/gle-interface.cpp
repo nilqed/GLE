@@ -814,12 +814,13 @@ void GLEFileLocation::copy(const GLEFileLocation* other) {
 }
 
 void GLEFileLocation::addExtension(const char* ext) {
-	m_Ext = ext;
+	const char* myExt = ext[0] == '.' ? (ext + 1) : ext;
+	m_Ext = myExt;
 	m_FullPath += ".";
-	m_FullPath += ext;
+	m_FullPath += myExt;
 	if ((m_Flags & (GLE_FILELOCATION_IS_STDIN | GLE_FILELOCATION_IS_STDOUT | GLE_FILELOCATION_IS_ILLEGAL)) == 0) {
 		m_Name += ".";
-		m_Name += ext;
+		m_Name += myExt;
 	}
 }
 

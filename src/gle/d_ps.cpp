@@ -173,7 +173,7 @@ FILE* PSGLEDevice::get_file_pointer(void) {
 void PSGLEDevice::opendev(double width, double height, GLEFileLocation* outputfile, const string& inputfile) throw(ParserError) {
 	first_ellipse = 1;
 	m_OutputName.copy(outputfile);
-	m_OutputName.addExtension(getExtension());
+	m_OutputName.addExtension(g_device_to_ext(getDeviceType()));
 #ifdef ENABLE_GS_PREVIEW
 	setRecordingEnabled(true);
 #endif
@@ -203,22 +203,8 @@ void PSGLEDevice::opendev(double width, double height, GLEFileLocation* outputfi
 		out() << "%% " << comments[i] << endl;
 	}
 	comments.clear();
-	int int_bb_x = 0;
-	int int_bb_y = 0;
-	if (g_is_fullpage()) {
-		m_BBox.setX(72*width/CM_PER_INCH);
-		m_BBox.setY(72*height/CM_PER_INCH);
-		// Just round the bounding box to make sure papersize detection works in GhostView
-		int_bb_x = (int)floor(m_BBox.getX()+0.5);
-		int_bb_y = (int)floor(m_BBox.getY()+0.5);
-	} else {
-		// Make bounding box a little larger (bounding box tweak)
-		m_BBox.setX(72*width/CM_PER_INCH+2);
-		m_BBox.setY(72*height/CM_PER_INCH+2);
-		// Make sure approximate bounding box is large enough for ImageMagick and GhostView
-		int_bb_x = (int)ceil(m_BBox.getX()+1e-6);
-		int_bb_y = (int)ceil(m_BBox.getY()+1e-6);
-	}
+	int int_bb_x = 0, int_bb_y = 0;
+	computeBoundingBox(width, height, &int_bb_x, &int_bb_y);
 	out() << "%%BoundingBox: 0 0 " << int_bb_x << " " << int_bb_y << endl;
 	out() << "%%HiResBoundingBox: 0 0 " << m_BBox.getX() << " " << m_BBox.getY() << endl;
 	out() << "%%EndComments" << endl;
@@ -815,6 +801,9 @@ void PSGLEDevice::set_color_impl(const GLERC<GLEColor>& color) {
 			out() << color->getRed() << " " << color->getGreen() << " " << color->getBlue() << " setrgbcolor" << endl;
 		}
 	}
+	if (color->hasAlpha()) {
+		g_throw_parser_error("semi-transparency only supported with command line option '-cairo'");
+	}
 }
 
 void PSGLEDevice::set_color() {
@@ -1097,10 +1086,6 @@ void PSGLEDevice::bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, int 
 		psFileASCIILine("%%", str.length()-3, '=', true);
 	}
 	g_set_bounds(&save_box);
-}
-
-const char* PSGLEDevice::getExtension() {
-	return isEps() ? "eps" : "ps";
 }
 
 void PSGLEDevice::startRecording() {

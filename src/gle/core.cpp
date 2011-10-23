@@ -174,8 +174,10 @@ string g_get_version_nosnapshot() {
 const char* g_device_to_ext(int device) {
 	switch (device) {
 		case GLE_DEVICE_EPS:
+		case GLE_DEVICE_CAIRO_EPS:
 			return ".eps";
 		case GLE_DEVICE_PS:
+		case GLE_DEVICE_CAIRO_PS:
 			return ".ps";
 		case GLE_DEVICE_PDF:
 		case GLE_DEVICE_CAIRO_PDF:
@@ -200,24 +202,34 @@ GLEDevice* g_select_device(int device) {
 	}
 	switch (device) {
 		case GLE_DEVICE_PS:
-			g.dev = new PSGLEDevice(false); break;
+			g.dev = new PSGLEDevice(false);
+			break;
 		case GLE_DEVICE_EPS:
-			g.dev = new PSGLEDevice(true); break;
+			g.dev = new PSGLEDevice(true);
+			break;
 		case GLE_DEVICE_DUMMY:
-			g.dev = new GLEDummyDevice(false); break;
+			g.dev = new GLEDummyDevice(false);
+			break;
 #ifdef HAVE_CAIRO
         case GLE_DEVICE_CAIRO_PDF:
-            g.dev = new GLECairoDevicePDF(false); break;
+            g.dev = new GLECairoDevicePDF(false);
+            break;
+        case GLE_DEVICE_CAIRO_EPS:
+            g.dev = new GLECairoDeviceEPS(false);
+            break;
         case GLE_DEVICE_CAIRO_SVG:
-            g.dev = new GLECairoDeviceSVG(false); break;
+            g.dev = new GLECairoDeviceSVG(false);
+            break;
 #ifdef __WIN32__
         case GLE_DEVICE_EMF:
-            g.dev = new GLECairoDeviceEMF(false); break;
+            g.dev = new GLECairoDeviceEMF(false);
+            break;
 #endif
 #endif
 #ifdef HAVE_X11
 		case GLE_DEVICE_X11:
-			g.dev = new X11GLEDevice(); break;
+			g.dev = new X11GLEDevice();
+			break;
 #endif
 	}
 	return g.dev;
@@ -2696,15 +2708,35 @@ GLEDevice::~GLEDevice() {
 void GLEDevice::bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, int type) {
 }
 
-const char* GLEDevice::getExtension() {
-	return "";
-}
-
 void GLEDevice::getRecordedBytes(string* output) {
 	*output = "";
 }
 
 void GLEDevice::set_fill_method(int m) {
+}
+
+void GLEDevice::computeBoundingBox(double width, double height) {
+	if (g_is_fullpage()) {
+		m_BBox.setX(72*width/CM_PER_INCH);
+		m_BBox.setY(72*height/CM_PER_INCH);
+	} else {
+		// Make bounding box a little larger (bounding box tweak)
+		m_BBox.setX(72*width/CM_PER_INCH+2);
+		m_BBox.setY(72*height/CM_PER_INCH+2);
+	}
+}
+
+void GLEDevice::computeBoundingBox(double width, double height, int* int_bb_x, int* int_bb_y) {
+	computeBoundingBox(width, height);
+	if (g_is_fullpage()) {
+		// Just round the bounding box to make sure papersize detection works in GhostView
+		*int_bb_x = (int)floor(m_BBox.getX()+0.5);
+		*int_bb_y = (int)floor(m_BBox.getY()+0.5);
+	} else {
+		// Make sure approximate bounding box is large enough for ImageMagick and GhostView
+		*int_bb_x = (int)ceil(m_BBox.getX()+1e-6);
+		*int_bb_y = (int)ceil(m_BBox.getY()+1e-6);
+	}
 }
 
 GLEMeasureBox::GLEMeasureBox() : GLERectangle() {
