@@ -175,6 +175,11 @@ public:
 	//! Should open exported figure in previewer
 	inline bool isOpenExportedFigure() { return openExportedFigure; }
 	inline void setOpenExportedFigure(bool value) { openExportedFigure = value; }
+
+	//! Should render using Cairo backend
+	inline bool isRenderUsingCairo() { return renderUsingCairo; }
+	inline void setRenderUsingCairo(bool value) { renderUsingCairo = value; }
+
 signals:
 	void gridChanged(QPointF grid);
 	void portChanged(int newPort);
@@ -206,6 +211,7 @@ private:
 	int exportPageSize;
 	int previewPageSize;
 	bool openExportedFigure;
+	bool renderUsingCairo;
 
 	bool startOSNAP;
 	bool startORTHOSNAP;

@@ -118,6 +118,7 @@ void SettingsDialogue::initToolTab()
 	toolTab->setToolGLE(mainWin->getGLEVersion(), mainWin->getGLEBuildDate(), mainWin->getGLETop());
 	toolTab->setToolGsLib(mainWin->settings->getLibGSLocation(), mainWin->getGsLibVersion());
 	toolTab->setToolEditor(mainWin->settings->editorLocation());
+	toolTab->setRenderUsingCairo(mainWin->settings->isRenderUsingCairo());
 }
 
 void SettingsDialogue::okClicked()
@@ -157,6 +158,7 @@ void SettingsDialogue::okClicked()
 
 	mainWin->settings->setLibGSLocation(toolTab->getToolGsLib());
 	mainWin->settings->setEditorLocation(toolTab->getToolEditor());
+	mainWin->settings->setRenderUsingCairo(toolTab->isRenderUsingCairo());
 
 	// Close
 	accept();
@@ -598,6 +600,10 @@ ToolTab::ToolTab(QWidget *parent, GLEMainWindow *main) : QWidget(parent)
 	GLEBuildDate = new QLabel();
 	GLETop = new QLineEdit();
 	GsLibVersion = new QLabel();
+	renderUsingCairo = new QCheckBox(tr("Render with the Cairo graphics library"));
+#ifndef HAVE_CAIRO
+	renderUsingCairo->setEnabled(false);
+#endif
 
 	QGridLayout *gle = new QGridLayout();
 	gle->addWidget(GLETop,0,0);
@@ -630,6 +636,7 @@ ToolTab::ToolTab(QWidget *parent, GLEMainWindow *main) : QWidget(parent)
 	layout->addLayout(gs);
 	layout->addWidget(new QLabel(tr("Text editor")));
 	layout->addLayout(editor);
+	layout->addWidget(renderUsingCairo);
 	layout->addStretch(1);
 
 	QHBoxLayout *configLayo = new QHBoxLayout();
@@ -726,4 +733,14 @@ void ToolTab::editUserConfig()
 {
 	QString name = QString::fromUtf8(mainWin->getGLEInterface()->getUserConfigLocation().c_str());
 	mainWin->openInTextEditor(name);
+}
+
+bool ToolTab::isRenderUsingCairo()
+{
+	return renderUsingCairo->checkState() == Qt::Checked;
+}
+
+void ToolTab::setRenderUsingCairo(bool value)
+{
+	renderUsingCairo->setCheckState(value ? Qt::Checked : Qt::Unchecked);
 }

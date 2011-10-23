@@ -47,8 +47,9 @@ class GLEPoint;
 
 class GLEDevice {
 protected:
-	bool m_Recording;
-	GLEPoint m_BBox;
+	bool m_recording;
+	GLEPoint m_boundingBox;
+	double m_resolution;
 public:
 	GLEDevice();
 	virtual ~GLEDevice();
@@ -109,10 +110,11 @@ public:
 	virtual void getRecordedBytes(string* output);
 	void computeBoundingBox(double width, double height, int* int_bb_x, int* int_bb_y);
 	void computeBoundingBox(double width, double height);
-	inline GLEPoint* getBoundingBox() { return &m_BBox; }
+	inline GLEPoint* getBoundingBox() { return &m_boundingBox; }
+	void setResolution(double resolution) { m_resolution = resolution; }
 public:
-	inline void setRecordingEnabled(bool rec) { m_Recording = rec; }
-	inline bool isRecordingEnabled() { return m_Recording; }
+	inline void setRecordingEnabled(bool rec) { m_recording = rec; }
+	inline bool isRecordingEnabled() { return m_recording; }
 };
 
 class PSGLEDevice : public GLEDevice {

@@ -2699,7 +2699,10 @@ double g_get_fconst(int i) {
 	return g.floatconst[i];
 }
 
-GLEDevice::GLEDevice() {
+GLEDevice::GLEDevice():
+	m_recording(false),
+	m_resolution(300.0)
+{
 }
 
 GLEDevice::~GLEDevice() {
@@ -2717,12 +2720,12 @@ void GLEDevice::set_fill_method(int m) {
 
 void GLEDevice::computeBoundingBox(double width, double height) {
 	if (g_is_fullpage()) {
-		m_BBox.setX(72*width/CM_PER_INCH);
-		m_BBox.setY(72*height/CM_PER_INCH);
+		m_boundingBox.setX(72*width/CM_PER_INCH);
+		m_boundingBox.setY(72*height/CM_PER_INCH);
 	} else {
 		// Make bounding box a little larger (bounding box tweak)
-		m_BBox.setX(72*width/CM_PER_INCH+2);
-		m_BBox.setY(72*height/CM_PER_INCH+2);
+		m_boundingBox.setX(72*width/CM_PER_INCH+2);
+		m_boundingBox.setY(72*height/CM_PER_INCH+2);
 	}
 }
 
@@ -2730,12 +2733,12 @@ void GLEDevice::computeBoundingBox(double width, double height, int* int_bb_x, i
 	computeBoundingBox(width, height);
 	if (g_is_fullpage()) {
 		// Just round the bounding box to make sure papersize detection works in GhostView
-		*int_bb_x = (int)floor(m_BBox.getX()+0.5);
-		*int_bb_y = (int)floor(m_BBox.getY()+0.5);
+		*int_bb_x = (int)floor(m_boundingBox.getX()+0.5);
+		*int_bb_y = (int)floor(m_boundingBox.getY()+0.5);
 	} else {
 		// Make sure approximate bounding box is large enough for ImageMagick and GhostView
-		*int_bb_x = (int)ceil(m_BBox.getX()+1e-6);
-		*int_bb_y = (int)ceil(m_BBox.getY()+1e-6);
+		*int_bb_x = (int)ceil(m_boundingBox.getX()+1e-6);
+		*int_bb_y = (int)ceil(m_boundingBox.getY()+1e-6);
 	}
 }
 

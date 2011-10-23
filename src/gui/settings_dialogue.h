@@ -25,6 +25,7 @@
 #include <QDialog>
 #include <QTabWidget>
 #include "mainwindow.h"
+#include "../config.h"
 
 //! Tab used to configure application settings
 class ApplicationTab : public QWidget
@@ -85,7 +86,6 @@ private:
 	QCheckBox *monitorOpenFileBox;
 	QCheckBox *monitorAutoReloadBox;
 	QCheckBox *askAboutObjectsBox;
-
 };
 
 
@@ -194,6 +194,10 @@ public:
 	inline QString getToolGsLib() { return ToolGsLib->text(); }
 	inline QString getToolEditor() { return ToolEditor->text(); }
 
+	//! Render using Cairo library
+	bool isRenderUsingCairo();
+	void setRenderUsingCairo(bool value);
+
 private slots:
 	void exploreGLETop();
 	void browseToolGsLib();
@@ -211,6 +215,7 @@ private slots:
 	QLabel* GLEBuildDate;
 	QLabel* GsLibVersion;
 	GLEMainWindow *mainWin;
+	QCheckBox *renderUsingCairo;
 };
 
 //! Dialogue box used to configure settings

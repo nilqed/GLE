@@ -120,7 +120,7 @@ ExportDialogue::ExportDialogue(GLEMainWindow *parent) {
 	resolution = new QSpinBox();
 	resolution->setMinimum(1);
 	resolution->setMaximum(2000);
-	resolution->setValue(96);
+	resolution->setValue(150);
 	connect(resolution, SIGNAL(valueChanged(int)), this, SLOT(resolutionChanged(int)));
 	p2->addWidget(resolution);
 	sizeLabel = new QLabel();
@@ -167,7 +167,10 @@ int ExportDialogue::entryIDtoDevice(int id) {
 }
 
 void ExportDialogue::resolutionChanged(int) {
-	updateResolution();
+	bool isBitmap = device == GLE_DEVICE_PNG || device == GLE_DEVICE_JPEG;
+	if (isBitmap) {
+		updateResolution();
+	}
 }
 
 void ExportDialogue::exportAsClicked() {
@@ -190,11 +193,8 @@ void ExportDialogue::performExport(const QString& file) {
 	mainWin->clearConsoleWindow();
 	iface->clearAllCmdLine();
 	iface->setMakeDrawObjects(false);
-	bool isBitmap = device == GLE_DEVICE_PNG || device == GLE_DEVICE_JPEG;
-	if (isBitmap) {
-		QString dpi = QString("%1").arg(resolution->value());
-		iface->setCmdLineOptionString("resolution", dpi.toLatin1().constData());
-	}
+	QString dpi = QString("%1").arg(resolution->value());
+	iface->setCmdLineOptionString("resolution", dpi.toLatin1().constData());
 	if (device == GLE_DEVICE_PNG && transp->isChecked()) {
 		iface->setCmdLineOption("transparent");
 	}
@@ -203,6 +203,9 @@ void ExportDialogue::performExport(const QString& file) {
 	}
 	if (format->currentIndex() == 2) {
 		iface->setCmdLineOption("landscape");
+	}
+	if (mainWin->settings->isRenderUsingCairo()) {
+		iface->setCmdLineOption("cairo");
 	}
 	iface->setCompatibilityMode(mainWin->getCompatibility().toLatin1().constData());
 	mainWin->settings->setExportPageSize(format->currentIndex());
@@ -227,8 +230,6 @@ void ExportDialogue::exportFormatChanged(int idx) {
 	device = entryIDtoDevice(idx);
 	transp->setEnabled(device == GLE_DEVICE_PNG);
 	bool isBitmap = device == GLE_DEVICE_PNG || device == GLE_DEVICE_JPEG;
-	resolution->setEnabled(isBitmap);
-	resolutionLabel->setEnabled(isBitmap);
 	if (device == GLE_DEVICE_PS && format->currentIndex() == 0) {
 		// "Figure" output not compatible with PS
 		format->setCurrentIndex(1);

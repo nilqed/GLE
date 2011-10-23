@@ -98,7 +98,7 @@ public:
 	};
 
 	//! Render GLE script
-	void renderGLEToImage(GLEScript* script, const QString& epsFile, double dpi, const QSize& area);
+	void renderGLEToImage(GLEScript* script, const QString& outFile, double dpi, const QSize& area);
 
 	//! Convert an EPS file to an image (dpi == 0 -> autoscale)
 	void renderEPSFromMemoryToImage(GLEScript* script, const QString& epsFile, double dpi, const QSize& area);
@@ -143,9 +143,9 @@ protected:
 	//! What should I do?
 	int todo;
 	//! Render EPS arguments
-	QString epsFileName;
-	double epsDPI;
-	QSize epsArea;
+	QString outFileName;
+	double outFileDPI;
+	QSize outFileArea;
 	//! Render GLE arguments
 	GLEScript* gleScript;
 	//! Streams from GhostScript

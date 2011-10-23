@@ -206,7 +206,7 @@ void PSGLEDevice::opendev(double width, double height, GLEFileLocation* outputfi
 	int int_bb_x = 0, int_bb_y = 0;
 	computeBoundingBox(width, height, &int_bb_x, &int_bb_y);
 	out() << "%%BoundingBox: 0 0 " << int_bb_x << " " << int_bb_y << endl;
-	out() << "%%HiResBoundingBox: 0 0 " << m_BBox.getX() << " " << m_BBox.getY() << endl;
+	out() << "%%HiResBoundingBox: 0 0 " << m_boundingBox.getX() << " " << m_boundingBox.getY() << endl;
 	out() << "%%EndComments" << endl;
 	out() << "%%EndProlog" << endl;
 	if (isOutputPageSize()) {

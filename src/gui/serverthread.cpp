@@ -31,6 +31,8 @@
 #include "mainwindow.h"
 #include "qgle_statics.h"
 
+#include <sstream>
+
 GLEServerThread::GLEServerThread(QObject *parent, quint16 port) : QThread(parent)
 {
 	// Just save the requested port
@@ -209,14 +211,14 @@ GLERenderThread::~GLERenderThread()
 }
 
 //! Render GLE script
-void GLERenderThread::renderGLEToImage(GLEScript* script, const QString& epsFile, double dpi, const QSize& area)
+void GLERenderThread::renderGLEToImage(GLEScript* script, const QString& outFile, double dpi, const QSize& area)
 {
 	QMutexLocker locker(&mutex);
 	todo = ToDoRenderGLE;
 	gleScript = script;
-	epsFileName = epsFile;
-	epsDPI = dpi;
-	epsArea = area;
+	outFileName = outFile;
+	outFileDPI = dpi;
+	outFileArea = area;
 	if (!isRunning()) {
 		start();
 	} else {
@@ -230,9 +232,9 @@ void GLERenderThread::renderEPSFromMemoryToImage(GLEScript* script, const QStrin
 	QMutexLocker locker(&mutex);
 	todo = ToDoRenderEPSFromMemory;
 	gleScript = script;
-	epsFileName = epsFile;
-	epsDPI = dpi;
-	epsArea = area;
+	outFileName = epsFile;
+	outFileDPI = dpi;
+	outFileArea = area;
 	if (!isRunning()) {
 		start();
 	} else {
@@ -246,9 +248,9 @@ void GLERenderThread::renderEPSFromFileToImage(const QString& fname, double dpi,
 {
 	QMutexLocker locker(&mutex);
 	todo = ToDoRenderEPSFromFile;
-	epsFileName = fname;
-	epsDPI = dpi;
-	epsArea = area;
+	outFileName = fname;
+	outFileDPI = dpi;
+	outFileArea = area;
 	if (!isRunning()) {
 		start();
 	} else {
@@ -269,9 +271,9 @@ void GLERenderThread::run()
 			return;
 		}
 		int myToDo = todo;
-		QString myEpsFileName = epsFileName;
-		double myEpsDPI = epsDPI;
-		QSize myEpsArea = epsArea;
+		QString myOutFileName = outFileName;
+		double myOutFileDPI = outFileDPI;
+		QSize myOutFileArea = outFileArea;
 		GLERC<GLEScript> myGLEScript;
 		if (myToDo == ToDoRenderGLE || myToDo == ToDoRenderEPSFromMemory) {
 			// script is NULL if render EPS
@@ -284,7 +286,12 @@ void GLERenderThread::run()
 		{
 			emit serverMessage(tr("Rendering GLE file"));
 			GLEInterface* iface = myGLEScript->getGLEInterface();
-			iface->renderGLE(myGLEScript.get(), myEpsFileName.toLatin1().constData(), GLE_DEVICE_EPS, true);
+			if (myOutFileDPI != 0.0) {
+				std::ostringstream resolutionString;
+				resolutionString << myOutFileDPI;
+				iface->setCmdLineOptionString("resolution", resolutionString.str().c_str());
+			}
+			iface->renderGLE(myGLEScript.get(), myOutFileName.toLatin1().constData(), GLE_DEVICE_EPS, true);
 			if (iface->getOutput()->getExitCode() == 0)
 			{
 				// Successful run, now render EPS
@@ -298,11 +305,11 @@ void GLERenderThread::run()
 		}
 		if (myToDo == ToDoRenderEPSFromMemory)
 		{
-			renderEPSToImageInternalFromMemory(myGLEScript.get(), myEpsDPI, myEpsArea);
+			renderEPSToImageInternalFromMemory(myGLEScript.get(), myOutFileDPI, myOutFileArea);
 		}
 		if (myToDo == ToDoRenderEPSFromFile)
 		{
-			renderEPSToImageInternalFromFile(myEpsFileName, myEpsDPI, myEpsArea);
+			renderEPSToImageInternalFromFile(myOutFileName, myOutFileDPI, myOutFileArea);
 		}
 		mutex.lock();
 		if (!restart)

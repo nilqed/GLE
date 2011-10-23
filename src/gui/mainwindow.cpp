@@ -1700,6 +1700,9 @@ void GLEMainWindow::renderGLE(double dpi, const QSize& area)
 	} else {
 		gleInterface->setCompatibilityMode("4.2");
 	}
+	if (settings->isRenderUsingCairo()) {
+		gleInterface->setCmdLineOption("cairo");
+	}
 	updateEnableActions(false);
 	todoList.append(ToDoAfterRenderGLE);
 	renderThread->renderGLEToImage(getGLEScript(), getCurrentFile()->epsFile(), dpi, area);

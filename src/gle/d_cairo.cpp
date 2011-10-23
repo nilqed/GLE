@@ -826,6 +826,7 @@ void GLECairoDeviceSVG::opendev(double width, double height, GLEFileLocation* ou
 	m_OutputName.copy(outputfile);
 	m_OutputName.addExtension(g_device_to_ext(getDeviceType()));
 	m_surface = cairo_svg_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
+	cairo_surface_set_fallback_resolution(m_surface, m_resolution, m_resolution);
 	m_cr = cairo_create(m_surface);
 	computeBoundingBox(width, height);
 	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
@@ -855,6 +856,7 @@ void GLECairoDevicePDF::opendev(double width, double height, GLEFileLocation* ou
 	} else {
 		m_surface = cairo_pdf_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
 	}
+	cairo_surface_set_fallback_resolution(m_surface, m_resolution, m_resolution);
 	m_cr = cairo_create(m_surface);
 	computeBoundingBox(width, height);
 	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
@@ -884,13 +886,14 @@ void GLECairoDeviceEPS::opendev(double width, double height, GLEFileLocation* ou
 	} else {
 		m_surface = cairo_ps_surface_create(m_OutputName.getFullPath().c_str(), 72*width/CM_PER_INCH+2, 72*height/CM_PER_INCH+2);
 	}
+	cairo_surface_set_fallback_resolution(m_surface, m_resolution, m_resolution);
 	cairo_ps_surface_set_eps(m_surface, true);
 	int int_bb_x = 0, int_bb_y = 0;
 	computeBoundingBox(width, height, &int_bb_x, &int_bb_y);
 	std::ostringstream bbLoRes;
 	std::ostringstream bbHiRes;
 	bbLoRes << "%%BoundingBox: 0 0 " << int_bb_x << " " << int_bb_y;
-	bbHiRes << "%%HiResBoundingBox: 0 0 " << m_BBox.getX() << " " << m_BBox.getY();
+	bbHiRes << "%%HiResBoundingBox: 0 0 " << m_boundingBox.getX() << " " << m_boundingBox.getY();
 	cairo_ps_surface_dsc_comment(m_surface, bbLoRes.str().c_str());
 	cairo_ps_surface_dsc_comment(m_surface, bbHiRes.str().c_str());
 	m_cr = cairo_create(m_surface);
@@ -907,7 +910,7 @@ void GLECairoDeviceEPS::getRecordedBytes(string* output) {
 	std::ostringstream bbLoRes;
 	std::ostringstream bbHiRes;
 	bbLoRes << "%%BoundingBox: 0 0 " << int_bb_x << " " << int_bb_y;
-	bbHiRes << "%%HiResBoundingBox: 0 0 " << m_BBox.getX() << " " << m_BBox.getY();
+	bbHiRes << "%%HiResBoundingBox: 0 0 " << m_boundingBox.getX() << " " << m_boundingBox.getY();
 	// do conversion
 	std::stringstream inp;
 	std::ostringstream outp;
@@ -1025,6 +1028,7 @@ void GLECairoDeviceEMF::opendev(double width, double height, GLEFileLocation* ou
 	SetWindowExtEx(m_WinInfo->hdc, windowWidth, windowHeight, NULL);
 	SetViewportExtEx(m_WinInfo->hdc, viewportWidth, viewportHeight, NULL);
 	m_surface = cairo_win32_printing_surface_create(m_WinInfo->hdc);
+	cairo_surface_set_fallback_resolution(m_surface, m_resolution, m_resolution);
 	m_cr = cairo_create(m_surface);
 	computeBoundingBox(width, height);
 	g_scale(m_DPI/CM_PER_INCH, m_DPI/CM_PER_INCH);

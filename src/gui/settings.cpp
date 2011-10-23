@@ -52,6 +52,7 @@ void GLESettings::readAll()
 	setExportPageSize(settingStore->value("application/exportPageSize", 0).toInt());
 	setPreviewPageSize(settingStore->value("application/previewPageSize", 0).toInt());
 	setOpenExportedFigure(settingStore->value("application/openExportedFigure", true).toBool());
+	setRenderUsingCairo(settingStore->value("application/renderUsingCairo", false).toBool());
 
 	if (storeDirectory())
 		setPwd(settingStore->value("application/workingDirectory", "").toString());
@@ -97,6 +98,7 @@ void GLESettings::writeAll()
 	settingStore->setValue("application/exportPageSize", getExportPageSize());
 	settingStore->setValue("application/previewPageSize", getPreviewPageSize());
 	settingStore->setValue("application/openExportedFigure", isOpenExportedFigure());
+	settingStore->setValue("application/renderUsingCairo", isRenderUsingCairo());
 
 	if (storeDirectory())
 		settingStore->setValue("application/workingDirectory", pwd());

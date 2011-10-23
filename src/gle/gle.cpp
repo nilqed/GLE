@@ -779,7 +779,7 @@ public:
 	bool hasGenerated(int deviceCode);
 	bool hasFile(int deviceCode);
 	bool hasIncFile(int deviceCode);
-	bool setHasGenerated(int deviceCode, bool value);
+	void setHasGenerated(int deviceCode, bool value);
 	void setHasFile(int deviceCode, bool value);
 	void setHasIncFile(int deviceCode, bool value);
 	void write_recorded_data(int deviceCode) throw(ParserError);
@@ -853,6 +853,9 @@ bool GLELoadOneFileManager::process_one_file_tex() throw(ParserError) {
 	} else {
 		setHasGenerated(GLE_DEVICE_EPS, true);
 		m_Device = g_select_device(GLE_DEVICE_EPS);
+	}
+	if (m_CmdLine->hasOption(GLE_OPT_DPI)) {
+		m_Device->setResolution(((CmdLineArgInt*)m_CmdLine->getOption(GLE_OPT_DPI)->getArg(0))->getValue());
 	}
 	m_Device->setRecordingEnabled(true);
 	/* In some cases two passes are required to measure size of TeX objects */
@@ -1056,7 +1059,7 @@ bool GLELoadOneFileManager::hasIncFile(int deviceCode) {
 	return m_hasIncFile.find(deviceCode) != m_hasIncFile.end();
 }
 
-bool GLELoadOneFileManager::setHasGenerated(int deviceCode, bool value) {
+void GLELoadOneFileManager::setHasGenerated(int deviceCode, bool value) {
 	if (value) {
 		m_hasGenerated.insert(deviceCode);
 	} else {
