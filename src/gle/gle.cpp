@@ -1158,6 +1158,12 @@ void GLELoadOneFileManager::delete_original_eps_pdf() {
 	}
 }
 
+void complain_latex_not_supported(int device) {
+	if (TeXInterface::getInstance()->hasObjects()) {
+		g_throw_parser_error(">> LaTeX expressions not suppored in '", g_device_to_ext(device), "' output");
+	}
+}
+
 void load_one_file_sub(GLEScript* script, CmdLineObj& cmdline, size_t* exit_code) throw(ParserError) {
 	GLEFileLocation out_name; /* out_name has no extension */
 	GLEGetInterfacePointer()->getConfig()->setAllowConfigBlocks(false);
@@ -1216,13 +1222,19 @@ void load_one_file_sub(GLEScript* script, CmdLineObj& cmdline, size_t* exit_code
 			psdev->getRecordedBytes(&recorded);
 			writeRecordedOutputFile(out_name.getFullPath(), GLE_DEVICE_PS, &recorded);
 		}
-		if (out_name.isStdout()) manager.cat_stdout_and_del(".ps");
+		if (out_name.isStdout()) {
+			manager.cat_stdout_and_del(".ps");
+		}
 		cerr << endl;
 	}
 	if (device->hasValue(GLE_DEVICE_SVG)) {
 		g_select_device(GLE_DEVICE_CAIRO_SVG);
 		DrawIt(script, &out_name, &cmdline);
-		if (out_name.isStdout()) manager.cat_stdout_and_del(".svg");
+		complain_latex_not_supported(GLE_DEVICE_SVG);
+		if (out_name.isStdout()) {
+			manager.cat_stdout_and_del(".svg");
+		}
+		cerr << endl;
 	}
 	if (device->hasValue(GLE_DEVICE_X11)) {
 		g_select_device(GLE_DEVICE_X11);
@@ -1241,6 +1253,8 @@ void load_one_file_sub(GLEScript* script, CmdLineObj& cmdline, size_t* exit_code
 			dev->setDPI(2000);
 		}
 		DrawIt(script, &out_name, &cmdline);
+		complain_latex_not_supported(GLE_DEVICE_EMF);
+		cerr << endl;
 	}
 #endif
 }
