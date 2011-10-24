@@ -49,6 +49,7 @@
 #include "config.h"
 #include "drawit.h"
 #include "gle-interface/gle-interface.h"
+#include "gle-poppler.h"
 
 #ifdef __WIN32__
 	#include <io.h>
@@ -120,6 +121,7 @@ int main(int argc, char **argv) {
 #endif
 	try {
 		g_init();
+		gle_glib_init(argc, argv);
 
 		/* Init and process command line arguments */
 		init_config(&g_Config);
@@ -1204,6 +1206,12 @@ void load_one_file_sub(GLEScript* script, CmdLineObj& cmdline, size_t* exit_code
 				manager.do_output_type(g_device_to_ext(i));
 			}
 		}
+
+		/*
+		string* myBuffer = script->getRecordedBytesBuffer(GLE_DEVICE_PDF);
+		gle_convert_pdf_to_image((char*)myBuffer->c_str(), myBuffer->size(), 5.0, GLE_DEVICE_PNG, 0, 0);
+		*/
+
 		/* Output .eps to stdout? */
 		manager.write_recorded_data(GLE_DEVICE_EPS);
 		manager.write_recorded_data(GLE_DEVICE_PDF);

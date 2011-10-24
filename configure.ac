@@ -60,6 +60,7 @@ HAVE_LIBPNG=0
 HAVE_LIBJPEG=0
 HAVE_X11=0
 HAVE_CAIRO=0
+HAVE_POPPLER=0
 HAVE_NCURSES_H=0
 HAVE_CURSES_H=0
 HAVE_NOSCRIPTS=0
@@ -104,7 +105,8 @@ AC_ARG_WITH(jpeg,         [  --with-jpeg[=DIR]         where to find the jpeg li
 AC_ARG_WITH(png,          [  --with-png[=DIR]          where to find the png library (or yes/no)],,with_png=yes)
 AC_ARG_WITH(tiff,         [  --with-tiff[=DIR]         where to find the tiff library (or yes/no)],,with_tiff=yes)
 AC_ARG_WITH(z,            [  --with-z[=DIR]            where to find the z library (or yes/no)],,with_z=yes)
-AC_ARG_WITH(cairo,        [  --with-cairo            use the cairo graphics library (yes/no)],,with_cairo=yes)
+AC_ARG_WITH(cairo,        [  --with-cairo            use the Cairo graphics library (yes/no)],,with_cairo=yes)
+AC_ARG_WITH(poppler,      [  --with-poppler          use the Poppler PDF library (yes/no)],,with_poppler=yes)
 AC_ARG_WITH(manip,        [  --with-manip            build manip utility (yes/no)],,with_manip=yes)
 AC_ARG_WITH(debug,        [  --with-debug            compile in debug information (yes/no)],,with_debug=no)
 AC_ARG_WITH(warn,         [  --with-warn             compile with all warnings enabled (yes/no)],,with_warn=no)
@@ -535,7 +537,8 @@ dnl ****************************************************************************
 
 if test "x$with_cairo" != "xno"; then
 	PKG_CHECK_MODULES([cairo], [cairo >= 1.2.0],
-	   [HAVE_CAIRO=1
+	   [
+		HAVE_CAIRO=1
 		AC_MSG_RESULT([   cairo CFLAGS: $cairo_CFLAGS])
 		AC_MSG_RESULT([   cairo LIBS: $cairo_LIBS])
 		if test "x$with_staticlink" = "xyes"; then
@@ -559,6 +562,32 @@ if test "x$HAVE_CAIRO" = "x1"; then
          EXTRA_LIBS="$EXTRA_LIBS -lmsimg32"
       fi
    fi
+fi
+
+dnl ********************************************************************************
+dnl check Poppler
+dnl ********************************************************************************
+
+if test "x$HAVE_CAIRO" = "x1"; then
+	if test "x$with_poppler" != "xno"; then
+		PKG_CHECK_MODULES(POPPLER, [poppler-glib >= 0.10.0],
+		   [
+			HAVE_POPPLER=1
+			AC_MSG_RESULT([   poppler CFLAGS: $POPPLER_CFLAGS])
+			AC_MSG_RESULT([   poppler LIBS: $POPPLER_LIBS])
+			if test "x$with_staticlink" = "xyes"; then
+			   LIBS="-Wl,-Bstatic $POPPLER_LIBS -Wl,-Bdynamic $LIBS"
+			else
+			   LIBS="$POPPLER_LIBS $LIBS"
+			fi
+			CPPFLAGS="$POPPLER_CFLAGS $CPPFLAGS"
+			LDFLAGS="$POPPLER_LDFLAGS $LDFLAGS"
+		   ],
+		   [
+			HAVE_POPPLER=0
+		   ]
+		)
+	fi
 fi
 
 dnl ********************************************************************************
@@ -781,6 +810,9 @@ fi
 if test "x$HAVE_CAIRO" != "x0"; then
    AC_DEFINE(HAVE_CAIRO)
 fi
+if test "x$HAVE_POPPLER" != "x0"; then
+   AC_DEFINE(HAVE_POPPLER)
+fi
 
 AC_SUBST(HAVE_SOCKETS)
 AC_SUBST(HAVE_LIBTIFF)
@@ -894,6 +926,12 @@ if test "$HAVE_CAIRO" = 1; then
   AC_MSG_RESULT([   ** Cairo graphics support: yes])
 else
   AC_MSG_RESULT([   ** Cairo graphics support: no])
+fi
+
+if test "$HAVE_POPPLER" = 1; then
+  AC_MSG_RESULT([   ** Poppler PDF support: yes])
+else
+  AC_MSG_RESULT([   ** Poppler PDF support: no])
 fi
 
 if test "$HAVE_SOCKETS" = 1; then

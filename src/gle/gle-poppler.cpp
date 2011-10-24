@@ -36,50 +36,63 @@
  *                                                                      *
  ************************************************************************/
 
-// Operating system
+#include "all.h"
+#include "gle-poppler.h"
+#include "cutils.h"
 
-#undef __UNIX__
-#undef __WIN32__
-#undef __OS2__
-#undef __NOCYGWIN__
-#undef __CYGWIN__
-#undef __MACOS__
-#undef __FREEBSD__
-#undef __GNU_HURD__
-#undef __LINUX__
 
-#undef __VN__
-#undef __BN__
+#ifdef HAVE_POPPLER
 
-#undef HAVE_SOCKETS
+#include <glib.h>
+#include <cairo.h>
+#include <poppler.h>
 
-#undef HAVE_LIBPNG
-#undef HAVE_LIBJPEG
-#undef HAVE_LIBTIFF
+void gle_glib_init(int /* argc */, char** /* argv */) {
+	g_type_init();
+}
 
-#undef HAVE_X11
-#undef HAVE_CAIRO
-#undef HAVE_POPPLER
+void gle_convert_pdf_to_image(char* pdfData,
+		                      int pdfLength,
+		                      double resolution,
+		                      int device,
+		                      char** imageData,
+		                      int* imageLength)
+{
+	GError* err = 0;
+	PopplerDocument* doc = poppler_document_new_from_data(pdfData, pdfLength, 0, &err);
+	if (doc == 0) {
+		std::ostringstream errMsg;
+		errMsg << ">> error opening PDF: " << err->message;
+		g_object_unref(err);
+		g_throw_parser_error(errMsg.str());
+	}
+	PopplerPage* page = poppler_document_get_page(doc, 0);
+    if (page == 0) {
+    	g_object_unref(doc);
+    	g_throw_parser_error(">> error opening PDF: can't read first page");
+    }
+    double width, height;
+    poppler_page_get_size(page, &width, &height);
+    int i_width = gle_round_int(resolution * width);
+    int i_height = gle_round_int(resolution * height);
+    cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, i_width, i_height);
+    cairo_t* cr = cairo_create(surface);
+    cairo_scale(cr, resolution, resolution);
+    poppler_page_render(page, cr);
+    cairo_surface_write_to_png(surface, "/home/jan/bla.png");
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+    g_object_unref(page);
+    g_object_unref(doc);
+}
 
-#undef WORDS_BIGENDIAN
+#else
 
-#undef HAVE_SYS_TYPES_H
-#undef HAVE_SYS_STAT_H
-#undef STDC_HEADERS
-#undef HAVE_STDLIB_H
-#undef HAVE_STRING_H
-#undef STDC_HEADERS
-#undef HAVE_MEMORY_H
-#undef HAVE_STRINGS_H
-#undef HAVE_UNISTD_H
-#undef HAVE_STDINT_H
-#undef HAVE_INTTYPES_H
-#undef HAVE_SYS_PARAM_H
+// stubs
 
-#undef HAVE_NCURSES_H
-#undef HAVE_CURSES_H
+void gle_glib_init(int /* argc */, char** /* argv */) {
+}
 
-#undef HAVE_LIBGLE
-#undef HAVE_LIBGLE_STATIC
+#endif
 
-#undef GLE_SNAPSHOT
+

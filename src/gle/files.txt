@@ -66,6 +66,7 @@ glearray.h \
 gle-block.h \
 numberformat.h \
 builtin-double.h \
+gle-poppler.h \
 gle-interface$(PATH_SEP)gle-base.h \
 gle-interface$(PATH_SEP)gle-datatype.h
 
@@ -119,6 +120,7 @@ gle-sourcefile.$(OBJ_SUFF) \
 gle-interface.$(OBJ_SUFF) \
 gle-base.$(OBJ_SUFF) \
 gle-datatype.$(OBJ_SUFF) \
+gle-poppler.$(OBJ_SUFF) \
 builtin-double.$(OBJ_SUFF)
 
 LINKOBJS = \

@@ -36,50 +36,16 @@
  *                                                                      *
  ************************************************************************/
 
-// Operating system
+#ifndef INCLUDE_GLE_POPPLER_H
+#define INCLUDE_GLE_POPPLER_H
 
-#undef __UNIX__
-#undef __WIN32__
-#undef __OS2__
-#undef __NOCYGWIN__
-#undef __CYGWIN__
-#undef __MACOS__
-#undef __FREEBSD__
-#undef __GNU_HURD__
-#undef __LINUX__
+void gle_glib_init(int argc, char** argv);
 
-#undef __VN__
-#undef __BN__
+void gle_convert_pdf_to_image(char* pdfData,
+		                      int pdfLength,
+		                      double resolution,
+		                      int device,
+		                      char** imageData,
+		                      int* imageLength);
 
-#undef HAVE_SOCKETS
-
-#undef HAVE_LIBPNG
-#undef HAVE_LIBJPEG
-#undef HAVE_LIBTIFF
-
-#undef HAVE_X11
-#undef HAVE_CAIRO
-#undef HAVE_POPPLER
-
-#undef WORDS_BIGENDIAN
-
-#undef HAVE_SYS_TYPES_H
-#undef HAVE_SYS_STAT_H
-#undef STDC_HEADERS
-#undef HAVE_STDLIB_H
-#undef HAVE_STRING_H
-#undef STDC_HEADERS
-#undef HAVE_MEMORY_H
-#undef HAVE_STRINGS_H
-#undef HAVE_UNISTD_H
-#undef HAVE_STDINT_H
-#undef HAVE_INTTYPES_H
-#undef HAVE_SYS_PARAM_H
-
-#undef HAVE_NCURSES_H
-#undef HAVE_CURSES_H
-
-#undef HAVE_LIBGLE
-#undef HAVE_LIBGLE_STATIC
-
-#undef GLE_SNAPSHOT
+#endif
