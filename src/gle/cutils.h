@@ -168,6 +168,9 @@ bool bool_vector_is(vector<bool>* v, unsigned int i);
 
 void CUtilsAssertImpl(const char* expr, const char* file, int line, const char* function);
 
+#define CUtilsAssertMessage(msg) \
+   CUtilsAssertImpl(msg, __FILE__, __LINE__, __FUNCTION__)
+
 #define CUtilsAssert(exp) \
    if (!(exp)) CUtilsAssertImpl(#exp, __FILE__, __LINE__, __FUNCTION__)
 

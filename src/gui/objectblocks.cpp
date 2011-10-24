@@ -314,7 +314,7 @@ double GLEObjectBlock::distanceToPoint(const QPointF& p, QPointF *nearestPoint)
 	box.copy(objrep->getRectangle());
 	GLEPoint orig(box.getXMin(), box.getYMin());
 	box.translate(1.0-orig.getX(), 1.0-orig.getY());
-	box.scale(dpi/72.0);
+	box.scale(dpi/PS_POINTS_PER_INCH);
 	box.subtractYFrom(image.height());
 	box.translate(drawPoint.x(), drawPoint.y());
 	box.normalize();
@@ -331,7 +331,7 @@ void GLEObjectBlock::distanceToPointRec(GLEObjectRepresention* obj, const GLEPoi
 	GLERectangle box;
 	box.copy(obj->getRectangle());
 	box.translate(1.0-orig.getX(), 1.0-orig.getY());
-	box.scale(dpi/72.0);
+	box.scale(dpi/PS_POINTS_PER_INCH);
 	box.subtractYFrom(image.height());
 	box.translate(drawPoint.x(), drawPoint.y());
 	distanceToPointUpdate(box.getXMin(), box.getYMin(), p, minDist, nearestPoint);
@@ -363,7 +363,7 @@ bool GLEObjectBlock::setReferencePoint(const QPointF& pt)
 	box.copy(objrep->getRectangle());
 	GLEPoint orig(box.getXMin(), box.getYMin());
 	box.translate(1.0-orig.getX(), 1.0-orig.getY());
-	box.scale(dpi/72.0);
+	box.scale(dpi/PS_POINTS_PER_INCH);
 	box.subtractYFrom(image.height());
 	box.translate(drawPoint.x(), drawPoint.y());
 	box.normalize();
@@ -397,7 +397,7 @@ bool GLEObjectBlock::setReferencePointRec(const QString& ref, GLEObjectRepresent
 	GLERectangle box;
 	box.copy(obj->getRectangle());
 	box.translate(1.0-orig.getX(), 1.0-orig.getY());
-	box.scale(dpi/72.0);
+	box.scale(dpi/PS_POINTS_PER_INCH);
 	box.subtractYFrom(image.height());
 	box.translate(drawPoint.x(), drawPoint.y());
 	bool mod = false;

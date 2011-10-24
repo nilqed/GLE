@@ -55,6 +55,7 @@
 #include "var.h"
 #include "keyword.h"
 #include "run.h"
+#include "gle-poppler.h"
 
 #define BEGINDEF extern
 #include "begin.h"
@@ -203,7 +204,7 @@ TeXObject* TeXInterface::drawObj(TeXHashObject* hobj, TeXObjectInfo& info, GLERe
 		/* Apply input transformation */
 		double devx, devy;
 		g_dev(xp, yp, &devx, &devy);
-		obj->setDeviceXY(devx/72.0*CM_PER_INCH, devy/72.0*CM_PER_INCH);
+		obj->setDeviceXY(devx/PS_POINTS_PER_INCH*CM_PER_INCH, devy/PS_POINTS_PER_INCH*CM_PER_INCH);
 		/* Find out if text should be rotated */
 		double angle = g_get_angle_deg();
 		if (fabs(angle) > 1e-6) {
@@ -220,8 +221,8 @@ void TeXInterface::checkObjectDimensions() {
 	GLEDevice* psdev = g_get_device_ptr();
 	double x0 = 0.0;
 	double y0 = 0.0;
-	double x1 = (double)psdev->getBoundingBox()->getX()/72.0*CM_PER_INCH;
-	double y1 = (double)psdev->getBoundingBox()->getY()/72.0*CM_PER_INCH;
+	double x1 = (double)psdev->getBoundingBox()->getX()/PS_POINTS_PER_INCH*CM_PER_INCH;
+	double y1 = (double)psdev->getBoundingBox()->getY()/PS_POINTS_PER_INCH*CM_PER_INCH;
 	for (vector<TeXObject*>::size_type i = 0; i < m_TeXObjects.size(); i++) {
 		TeXObject* obj = m_TeXObjects[i];
 		TeXHashObject* hobj = obj->getObject();
@@ -1081,7 +1082,7 @@ bool read_eps_and_adjust_bounding_box(const string& name, GLEScript* script) {
 	return true;
 }
 
-bool create_bitmap_file(GLEFileLocation* fname, int device, int dpi, bool bw, bool transp, GLEScript* script) {
+bool create_bitmap_file_ghostscript(GLEFileLocation* fname, int device, int dpi, int options, GLEScript* script) {
 	ostringstream gsargs;
 	gsargs << "-q -DNOPLATFONTS -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dBATCH -dNOPAUSE -r";
 	gsargs << dpi;
@@ -1097,6 +1098,8 @@ bool create_bitmap_file(GLEFileLocation* fname, int device, int dpi, bool bw, bo
 		str_replace_all(gs_opts, "\\", "");
 		gsargs << " " << gs_opts;
 	}
+	bool bw = (options & GLE_OUTPUT_OPTION_GRAYSCALE) != 0;
+	bool transp = (options & GLE_OUTPUT_OPTION_TRANSPARENT) != 0;
 	gsargs << " -sDEVICE=";
 	switch (device) {
 		case GLE_DEVICE_PNG:
@@ -1134,6 +1137,22 @@ bool create_bitmap_file(GLEFileLocation* fname, int device, int dpi, bool bw, bo
 		postscript.write(bytesEPS->data(), bytesEPS->size());
 		return run_ghostscript(gsargs.str(), outputfile, !fname->isStdout(), &postscript);
 	}
+}
+
+bool create_bitmap_file(GLEFileLocation* fname, int device, int dpi, int options, GLEScript* script) {
+#ifdef HAVE_POPPLER
+	string* bytesPDF = script->getRecordedBytesBuffer(GLE_DEVICE_PDF);
+	if (!bytesPDF->empty()) {
+		std::string myFName = fname->getFullPath();
+		myFName += g_device_to_ext(device);
+		if (g_verbosity() >= 5) {
+			g_message(std::string("[Poppler PDF conversion: ") + myFName + "]");
+		}
+		gle_convert_pdf_to_image_file((char*)bytesPDF->c_str(), (int)bytesPDF->size(), dpi, device, options, myFName.c_str());
+		return true;
+	}
+#endif // HAVE_POPPLER
+	return create_bitmap_file_ghostscript(fname, device, dpi, options, script);
 }
 
 bool create_pdf_file_ghostscript(GLEFileLocation* fname, int dpi, GLEScript* script) {

@@ -488,7 +488,7 @@ void GLEInterface::renderText(GLETextDO* text, GLEPropertyStore* prop) {
 	saved_state.save();
 	g_clear();
 	g_resetfont();
-	g_scale(72.0/CM_PER_INCH,72.0/CM_PER_INCH);
+	g_scale(PS_POINTS_PER_INCH/CM_PER_INCH, PS_POINTS_PER_INCH/CM_PER_INCH);
 	g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
 	dev->startRecording();
 	// Select the right color
@@ -930,10 +930,10 @@ void GLEDrawObject::applyTransformationPt(GLEPoint* pt, bool dir) {
 	if (dir) {
 		double devx, devy;
 		g_dev(pt->getX(), pt->getY(), &devx, &devy);
-		pt->setXY((devx-1.0)/72.0*CM_PER_INCH, (devy-1.0)/72.0*CM_PER_INCH);
+		pt->setXY((devx-1.0)/PS_POINTS_PER_INCH*CM_PER_INCH, (devy-1.0)/PS_POINTS_PER_INCH*CM_PER_INCH);
 	} else {
 		double xp, yp;
-		g_undev(pt->getX()*72.0/CM_PER_INCH+1.0, pt->getY()*72.0/CM_PER_INCH+1.0, &xp, &yp);
+		g_undev(pt->getX()*PS_POINTS_PER_INCH/CM_PER_INCH+1.0, pt->getY()*PS_POINTS_PER_INCH/CM_PER_INCH+1.0, &xp, &yp);
 		pt->setXY(xp, yp);
 	}
 }
@@ -1550,7 +1550,7 @@ void GLEObjectDO::getPSBoundingBox(GLERectangle* box) {
 	box->copy(m_ObjRep->getRectangle());
 	// Convert from points to cm
 	box->translate(-1.0, -1.0);
-	box->scale(CM_PER_INCH/72.0);
+	box->scale(CM_PER_INCH/PS_POINTS_PER_INCH);
 }
 
 bool GLEObjectDO::needsAMove(GLEPoint& pt) {
@@ -1631,7 +1631,7 @@ void GLEObjectDO::render() {
 		saved_state.save();
 		g_clear();
 		g_resetfont();
-		g_scale(72.0/CM_PER_INCH,72.0/CM_PER_INCH);
+		g_scale(PS_POINTS_PER_INCH/CM_PER_INCH, PS_POINTS_PER_INCH/CM_PER_INCH);
 		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
 		dev->startRecording();
 		GLEPropertyStore* prop = getProperties();

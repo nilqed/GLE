@@ -1198,20 +1198,19 @@ void load_one_file_sub(GLEScript* script, CmdLineObj& cmdline, size_t* exit_code
 			manager.convert_eps_to_pdf_no_latex();
 		}
 		/* Create bitmap outputs */
-		bool is_bw = cmdline.hasOption(GLE_OPT_NO_COLOR);
-		bool is_transp = cmdline.hasOption(GLE_OPT_TRANSPARENT);
+		int output_options = 0;
+		if (cmdline.hasOption(GLE_OPT_NO_COLOR)) {
+			output_options |= GLE_OUTPUT_OPTION_GRAYSCALE;
+		}
+		if (cmdline.hasOption(GLE_OPT_TRANSPARENT)) {
+			output_options |= GLE_OUTPUT_OPTION_TRANSPARENT;
+		}
 		for (int i = 0; i < device->getNbValues(); i++) {
 			if (is_bitmap_device(i) && device->hasValue(i)) {
-				create_bitmap_file(&out_name, i, dpi, is_bw, is_transp, script);
+				create_bitmap_file(&out_name, i, dpi, output_options, script);
 				manager.do_output_type(g_device_to_ext(i));
 			}
 		}
-
-		/*
-		string* myBuffer = script->getRecordedBytesBuffer(GLE_DEVICE_PDF);
-		gle_convert_pdf_to_image((char*)myBuffer->c_str(), myBuffer->size(), 5.0, GLE_DEVICE_PNG, 0, 0);
-		*/
-
 		/* Output .eps to stdout? */
 		manager.write_recorded_data(GLE_DEVICE_EPS);
 		manager.write_recorded_data(GLE_DEVICE_PDF);

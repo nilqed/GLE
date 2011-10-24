@@ -221,8 +221,8 @@ void ExportDialogue::performExport(const QString& file) {
 void ExportDialogue::updateResolution() {
 	double dpi = (double)resolution->value();
 	const GLEPoint& bb = mainWin->getGLEScript()->getBoundingBox();
-	int img_wd = (int)floor((double)dpi/72.0*bb.getX()+1);
-	int img_hi = (int)floor((double)dpi/72.0*bb.getY()+1);
+	int img_wd = (int)floor((double)dpi/PS_POINTS_PER_INCH*bb.getX()+1);
+	int img_hi = (int)floor((double)dpi/PS_POINTS_PER_INCH*bb.getY()+1);
 	sizeLabel->setText(QString("(%1 x %2 pixels)").arg(img_wd).arg(img_hi));
 }
 

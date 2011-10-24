@@ -226,7 +226,7 @@ void PSGLEDevice::initialPS() {
 	out() << "matrix currentmatrix /originmat exch def" << endl;
 	out() << "/umatrix {originmat matrix concatmatrix setmatrix} def" << endl;
 	// Measure distance in cm
-	g_scale(72.0/CM_PER_INCH,72.0/CM_PER_INCH);
+	g_scale(PS_POINTS_PER_INCH/CM_PER_INCH, PS_POINTS_PER_INCH/CM_PER_INCH);
 	if (!g_is_fullpage()) {
 		// Bounding box tweak
 		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);

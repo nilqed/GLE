@@ -352,7 +352,7 @@ double QGLE::min(double a, double b) {
 
 //! Static member comverting from centimeters to PostScript points
 double QGLE::cmToPt(double cm) {
-	return cm*72.0/CM_PER_INCH;
+	return cm*PS_POINTS_PER_INCH/CM_PER_INCH;
 }
 
 //! Static member used to compute the DPI value based on the display and image size (in cm)
@@ -363,11 +363,11 @@ int QGLE::computeAutoScaleDPIFromCm(const QSize& bitmapSize, int inset, double i
 
 //! Static member used to compute the DPI value based on the display and image size (in pt)
 int QGLE::computeAutoScaleDPIFromPts(const QSize& bitmapSize, int inset, double bbWd, double bbHi) {
-	// GLE: BitmapWd = (int)floor((double)dpi/72.0*BoundingBoxWD+1)
-	//      BitmapWd + 0.1 = dpi/72.0*BoundingBoxWD+1
+	// GLE: BitmapWd = (int)floor((double)dpi/PS_POINTS_PER_INCH*BoundingBoxWD+1)
+	//      BitmapWd + 0.1 = dpi/PS_POINTS_PER_INCH*BoundingBoxWD+1
 	// -> Solve for dpi
-	double dpi_wd = 72.0 * ((double)bitmapSize.width()-inset-0.9) / bbWd;
-	double dpi_hi = 72.0 * ((double)bitmapSize.height()-inset-0.9) / bbHi;
+	double dpi_wd = PS_POINTS_PER_INCH * ((double)bitmapSize.width()-inset-0.9) / bbWd;
+	double dpi_hi = PS_POINTS_PER_INCH * ((double)bitmapSize.height()-inset-0.9) / bbHi;
 	return (int)floor(min(dpi_wd, dpi_hi));
 }
 

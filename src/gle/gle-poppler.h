@@ -39,13 +39,29 @@
 #ifndef INCLUDE_GLE_POPPLER_H
 #define INCLUDE_GLE_POPPLER_H
 
+#define GLE_OUTPUT_OPTION_TRANSPARENT 1
+#define GLE_OUTPUT_OPTION_GRAYSCALE   2
+
+typedef void (*gle_write_func)(void* closure, char* data, int length);
+
 void gle_glib_init(int argc, char** argv);
+
+#ifdef HAVE_POPPLER
 
 void gle_convert_pdf_to_image(char* pdfData,
 		                      int pdfLength,
 		                      double resolution,
 		                      int device,
-		                      char** imageData,
-		                      int* imageLength);
+		                      int options,
+		                      gle_write_func writeFunc,
+		                      void* closure);
 
-#endif
+void gle_convert_pdf_to_image_file(char* pdfData,
+		                           int pdfLength,
+		                           double resolution,
+		                           int device,
+		                           int options,
+		                           const char* fname);
+
+#endif // HAVE_POPPLER
+#endif // INCLUDE_GLE_POPPLER_H

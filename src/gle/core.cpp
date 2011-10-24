@@ -741,8 +741,8 @@ void g_get_scale(double* sx, double* sy) {
 	double x0, y0, x1, y1;
 	g_dev(0.0, 0.0, &x0, &y0);
 	g_dev(1.0, 1.0, &x1, &y1);
-	*sx = (x1-x0)/72.0*CM_PER_INCH;
-	*sy = (y1-y0)/72.0*CM_PER_INCH;
+	*sx = (x1-x0)/PS_POINTS_PER_INCH*CM_PER_INCH;
+	*sy = (y1-y0)/PS_POINTS_PER_INCH*CM_PER_INCH;
 }
 
 double g_get_avg_scale() {
@@ -2006,8 +2006,8 @@ void g_postscript(char *fname, double wx, double wy) throw(ParserError) {
 	if (fabs(wy) < 1e-18) {
 		if (fabs(wx) < 1e-18) {
 			// if with and hight is zero, then use default size
-			wx = bx2/72.0*CM_PER_INCH;
-			wy = by2/72.0*CM_PER_INCH;
+			wx = bx2/PS_POINTS_PER_INCH*CM_PER_INCH;
+			wy = by2/PS_POINTS_PER_INCH*CM_PER_INCH;
 		} else {
 			wy = wx*by2/bx2;
 		}
@@ -3908,7 +3908,7 @@ void g_init_arrow_head(GLECurvedArrowHead* head, bool startend) {
 
 int GLEBBoxToPixels(double dpi, double bbox) {
 	// this has been tested with bbox.gle in gle-testsuite/plain
-	return (int)floor((double)dpi/72.0*bbox+1);
+	return (int)floor((double)dpi/PS_POINTS_PER_INCH*bbox+1);
 }
 
 GLESaveRestore::GLESaveRestore() {

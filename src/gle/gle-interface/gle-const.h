@@ -62,5 +62,6 @@
 #define BITMAP_TYPE_UNK  5
 
 #define CM_PER_INCH 2.54
+#define PS_POINTS_PER_INCH 72.0
 
 #endif

@@ -2652,7 +2652,7 @@ void GLEMainWindow::renderPostscript(const char* ps, const GLERectangle& rect, d
 {
 	// qDebug() << "Rendering: " << rect.getWidth() << " x " << rect.getHeight();
 	renderThread->startRender(rect, dpi);
-	QString translate = QString("%1 %2 translate\n").arg(-rect.getXMin()*72.0/CM_PER_INCH).arg(-rect.getYMin()*72.0/CM_PER_INCH);
+	QString translate = QString("%1 %2 translate\n").arg(-rect.getXMin()*PS_POINTS_PER_INCH/CM_PER_INCH).arg(-rect.getYMin()*PS_POINTS_PER_INCH/CM_PER_INCH);
 	renderThread->nextRender(translate.toLatin1().constData());
 	renderThread->nextRender(gleInterface->getInitialPostScript());
 	renderThread->nextRender(ps);

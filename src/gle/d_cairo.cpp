@@ -835,7 +835,7 @@ void GLECairoDeviceSVG::opendev(double width, double height, GLEFileLocation* ou
 	cairo_surface_set_fallback_resolution(m_surface, m_resolution, m_resolution);
 	m_cr = cairo_create(m_surface);
 	computeBoundingBox(width, height);
-	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
+	g_scale(PS_POINTS_PER_INCH/CM_PER_INCH, PS_POINTS_PER_INCH/CM_PER_INCH);
 	if (!g_is_fullpage()) {
 		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
 	}
@@ -865,7 +865,7 @@ void GLECairoDevicePDF::opendev(double width, double height, GLEFileLocation* ou
 	cairo_surface_set_fallback_resolution(m_surface, m_resolution, m_resolution);
 	m_cr = cairo_create(m_surface);
 	computeBoundingBox(width, height);
-	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
+	g_scale(PS_POINTS_PER_INCH/CM_PER_INCH, PS_POINTS_PER_INCH/CM_PER_INCH);
 	if (!g_is_fullpage()) {
 		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
 	}
@@ -903,7 +903,7 @@ void GLECairoDeviceEPS::opendev(double width, double height, GLEFileLocation* ou
 	cairo_ps_surface_dsc_comment(m_surface, bbLoRes.str().c_str());
 	cairo_ps_surface_dsc_comment(m_surface, bbHiRes.str().c_str());
 	m_cr = cairo_create(m_surface);
-	g_scale(72.0/CM_PER_INCH, 72.0/CM_PER_INCH);
+	g_scale(PS_POINTS_PER_INCH/CM_PER_INCH, PS_POINTS_PER_INCH/CM_PER_INCH);
 	if (!g_is_fullpage()) {
 		g_translate(1.0*CM_PER_INCH/72, 1.0*CM_PER_INCH/72);
 	}
@@ -994,8 +994,8 @@ void GLECairoDeviceEMF::opendev(double width, double height, GLEFileLocation* ou
 	m_height = height;
 	m_OutputName.copy(outputfile);
 	m_OutputName.addExtension("emf");
-	double myWidth = width + 2.0/72.0*CM_PER_INCH;
-	double myHeight = height + 2.0/72.0*CM_PER_INCH;
+	double myWidth = width + 2.0/PS_POINTS_PER_INCH*CM_PER_INCH;
+	double myHeight = height + 2.0/PS_POINTS_PER_INCH*CM_PER_INCH;
 	HDC hdcRef = GetDC(NULL);
 	int iWidthMM = GetDeviceCaps(hdcRef, HORZSIZE);    // iWidthMM is the display width in millimeters.
 	int iHeightMM = GetDeviceCaps(hdcRef, VERTSIZE);   // iHeightMM is the display height in millimeters.
