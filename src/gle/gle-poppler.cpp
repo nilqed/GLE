@@ -367,7 +367,11 @@ void gle_convert_pdf_to_image_file(char* pdfData,
 	file.close();
 }
 
-#else // HAVE_POPPLER
+#endif // HAVE_POPPLER
+
+#endif // HAVE_CAIRO
+
+#ifndef HAVE_POPPLER
 
 // stubs
 
@@ -384,8 +388,4 @@ void gle_convert_pdf_to_image(char* /* pdfData */,
 {
 }
 
-#endif // HAVE_POPPLER
-
-#endif // HAVE_CAIRO
-
-
+#endif // !HAVE_POPPLER
