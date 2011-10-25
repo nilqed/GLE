@@ -228,10 +228,24 @@ void GLERenderThread::renderGLEToImage(GLEScript* script, const QString& outFile
 	}
 }
 
-void GLERenderThread::renderEPSFromMemoryToImage(GLEScript* script, const QString& epsFile, double dpi, const QSize& area)
+void GLERenderThread::renderOutputFromMemoryToImage(GLEScript* script, const QString& epsFile, double dpi, const QSize& area)
 {
 	QMutexLocker locker(&mutex);
+#ifdef HAVE_POPPLER
+	string* bytesPDF = script->getRecordedBytesBuffer(GLE_DEVICE_PDF);
+	string* bytesEPS = script->getRecordedBytesBuffer(GLE_DEVICE_EPS);
+	if (!bytesPDF->empty()) {
+		todo = ToDoRenderPDFFromMemory;
+	} else if (!bytesEPS->empty()) {
+		todo = ToDoRenderEPSFromMemory;
+	} else {
+		QImage emptyImage;
+		emit renderComplete(emptyImage);
+		return;
+	}
+#else
 	todo = ToDoRenderEPSFromMemory;
+#endif
 	gleScript = script;
 	outFileName = epsFile;
 	outFileDPI = dpi;
@@ -276,7 +290,7 @@ void GLERenderThread::run()
 		double myOutFileDPI = outFileDPI;
 		QSize myOutFileArea = outFileArea;
 		GLERC<GLEScript> myGLEScript;
-		if (myToDo == ToDoRenderGLE || myToDo == ToDoRenderEPSFromMemory) {
+		if (myToDo == ToDoRenderGLE || myToDo == ToDoRenderEPSFromMemory || myToDo == ToDoRenderPDFFromMemory) {
 			// script is NULL if render EPS
 			myGLEScript = gleScript;
 		}
@@ -288,7 +302,7 @@ void GLERenderThread::run()
 			GLEInterface* iface = myGLEScript->getGLEInterface();
 			if (myOutFileDPI != 0.0) {
 				std::ostringstream resolutionString;
-				resolutionString << myOutFileDPI;
+				resolutionString << (int)floor(myOutFileDPI + 0.5);
 				iface->setCmdLineOptionString("resolution", resolutionString.str().c_str());
 			}
 			bool renderPoppler = false;

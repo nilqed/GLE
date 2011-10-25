@@ -74,8 +74,8 @@ GLEMainWindow::GLEMainWindow(int argc, char *argv[])
 
 	// Initialise temp file names
 	// Should be unique names - otherwise can't run multiple QGLE instances
-	tempFiles[PreviewModeEPS] = createTempFile(tr(".eps"));
-	tempFiles[EditModeEPS] = createTempFile(tr(".eps"));
+	tempFiles[PreviewModeOutput] = createTempFile(tr(".out"));
+	tempFiles[EditModeOutput] = createTempFile(tr(".out"));
 	tempFiles[NewGLE] = createTempFile(tr(".gle"));
 
 	// Create the drawing area in a scroll widget.  For high resolutions,
@@ -1318,8 +1318,8 @@ GLEFileInfo* GLEMainWindow::getNonCurrentModeFileInfo()
 //! Set temp files correctly for GLE file
 void GLEMainWindow::initTempFilesGLE()
 {
-	currentFile[GLESettings::PreviewMode].setEpsFile(tempFiles[PreviewModeEPS]);
-	currentFile[GLESettings::EditMode].setEpsFile(tempFiles[EditModeEPS]);
+	currentFile[GLESettings::PreviewMode].setEpsFile(tempFiles[PreviewModeOutput]);
+	currentFile[GLESettings::EditMode].setEpsFile(tempFiles[EditModeOutput]);
 }
 
 //! Update currentFile on change PreviewMode <-> EditMode
@@ -1551,27 +1551,28 @@ void GLEMainWindow::renderEPS(double dpi)
 }
 
 // Render an EPS file from a given QString
-void GLEMainWindow::renderEPS(QString epsFile, double dpi, const QSize& area)
+void GLEMainWindow::renderEPS(QString outputFile, double dpi, const QSize& area)
 {
-	qDebug() << "About to render " << epsFile;
+	qDebug() << "About to render " << outputFile;
 	if (getCurrentFile()->isGLE())
 	{
 		GLEScript* script = getGLEScript();
-		if (!script->getRecordedBytesBuffer(GLE_DEVICE_EPS)->empty())
+		if (!script->getRecordedBytesBuffer(GLE_DEVICE_EPS)->empty()
+			|| !script->getRecordedBytesBuffer(GLE_DEVICE_PDF)->empty())
 		{
 			updateEnableActions(false);
-			renderThread->renderEPSFromMemoryToImage(script, epsFile, dpi, area);
+			renderThread->renderOutputFromMemoryToImage(script, outputFile, dpi, area);
 			return;
 		}
 	}
 	else
 	{
-		QFileInfo fi(epsFile);
+		QFileInfo fi(outputFile);
 		// If the file is readable, re-render it in the new scale
 		if (fi.isReadable())
 		{
 			updateEnableActions(false);
-			renderThread->renderEPSFromFileToImage(epsFile, dpi, area);
+			renderThread->renderEPSFromFileToImage(outputFile, dpi, area);
 			return;
 		}
 	}

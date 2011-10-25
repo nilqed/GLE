@@ -456,8 +456,8 @@ private:
 	//! Enumeration for a hash of temporary files
 	enum
 	{
-		EditModeEPS,
-		PreviewModeEPS,
+		EditModeOutput,
+		PreviewModeOutput,
 		NewGLE
 	};
 	//! Hash of temporary files

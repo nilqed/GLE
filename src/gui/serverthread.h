@@ -102,7 +102,7 @@ public:
 	void renderGLEToImage(GLEScript* script, const QString& outFile, double dpi, const QSize& area);
 
 	//! Convert an EPS file to an image (dpi == 0 -> autoscale)
-	void renderEPSFromMemoryToImage(GLEScript* script, const QString& epsFile, double dpi, const QSize& area);
+	void renderOutputFromMemoryToImage(GLEScript* script, const QString& epsFile, double dpi, const QSize& area);
 	void renderEPSFromFileToImage(const QString& fname, double dpi, const QSize& area);
 
 	//! Return GhostScript's output stream
