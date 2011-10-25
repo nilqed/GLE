@@ -64,6 +64,7 @@ private:
 	GLEMainWindow *mainWin;
 	QListWidget* list;
 	QCheckBox* transp;
+	QCheckBox* grayScale;
 	QCheckBox* openResult;
 	QLineEdit* fname;
 	QSpinBox* resolution;

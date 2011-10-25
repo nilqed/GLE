@@ -129,6 +129,8 @@ ExportDialogue::ExportDialogue(GLEMainWindow *parent) {
 	layout->addLayout(p2);
 	transp = new QCheckBox(tr("Transparent"));
 	layout->addWidget(transp);
+	grayScale = new QCheckBox(tr("Grayscale"));
+	layout->addWidget(grayScale);
 	openResult = new QCheckBox(tr("View resulting file"));
 	openResult->setChecked(mainWin->settings->isOpenExportedFigure());
 	layout->addWidget(openResult);
@@ -197,6 +199,9 @@ void ExportDialogue::performExport(const QString& file) {
 	iface->setCmdLineOptionString("resolution", dpi.toLatin1().constData());
 	if (device == GLE_DEVICE_PNG && transp->isChecked()) {
 		iface->setCmdLineOption("transparent");
+	}
+	if (grayScale->isChecked()) {
+		iface->setCmdLineOption("nocolor");
 	}
 	if (format->currentIndex() != 0) {
 		iface->setCmdLineOption("fullpage");

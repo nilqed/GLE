@@ -96,9 +96,13 @@ void gle_write_cairo_surface_png(cairo_surface_t* surface,
 		color_type = PNG_COLOR_TYPE_RGBA;
 		channels = 4;
 	}
+	bool grayScale = false;
 	if ((options & GLE_OUTPUT_OPTION_GRAYSCALE) != 0) {
-		color_type = PNG_COLOR_TYPE_GRAY;
-		channels = 1;
+		grayScale = true;
+		if (color_type != PNG_COLOR_TYPE_RGBA) {
+			color_type = PNG_COLOR_TYPE_GRAY;
+			channels = 1;
+		}
 	}
 	png_set_IHDR(png_ptr, info_ptr, width, height,
 				 8, color_type, PNG_INTERLACE_NONE,
@@ -118,7 +122,7 @@ void gle_write_cairo_surface_png(cairo_surface_t* surface,
 		for (int x = 0; x < width; x++) {
 			png_byte* ptr = &(row[x * channels]);
 			unsigned int value = *(unsigned int*)(&imageData[x*4  + y*stride]);
-			if (channels == 1) {
+			if (grayScale == 1) {
 				int blue = value & 0xFF; /* blue */
 				value >>= 8;
 				int green = value & 0xFF; /* green */
@@ -126,7 +130,15 @@ void gle_write_cairo_surface_png(cairo_surface_t* surface,
 				int red = value & 0xFF; /* red */
 				double gray = (3.0 * red / 255.0 + 2.0 * green / 255.0 + 1.0 * blue / 255.0) / 6.0 * 255.0;
 				int gray_i = std::min<int>(gle_round_int(gray), 0xFF);
-				*ptr = (png_byte)gray_i;
+				if (channels == 1) {
+					*ptr = (png_byte)gray_i;
+				} else {
+					ptr[2] = (png_byte)gray_i;
+					ptr[1] = (png_byte)gray_i;
+					ptr[0] = (png_byte)gray_i;
+					value >>= 8;
+					ptr[3] = value & 0xFF; /* alpha */
+				}
 			} else {
 				ptr[2] = value & 0xFF; /* blue */
 				value >>= 8;
