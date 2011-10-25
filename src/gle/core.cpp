@@ -2123,6 +2123,17 @@ void g_bitmap_type_to_string(int type, string &typestr) {
 	}
 }
 
+int g_device_to_bitmap_type(int device) {
+	switch (device) {
+		case GLE_DEVICE_PNG:
+			return BITMAP_TYPE_PNG;
+		case GLE_DEVICE_JPEG:
+			return BITMAP_TYPE_JPEG;
+		default:
+			return BITMAP_TYPE_UNK;
+	}
+}
+
 bool g_bitmap_supports_type(int type) {
 	switch (type) {
 		case BITMAP_TYPE_TIFF:
@@ -2140,7 +2151,11 @@ bool g_bitmap_supports_type(int type) {
 				return false;
 			#endif
 		case BITMAP_TYPE_JPEG:
-			return true;
+			#ifdef HAVE_LIBJPEG
+				return true;
+			#else
+				return false;
+			#endif
 		default:
 			return false;
 	}

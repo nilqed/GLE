@@ -1141,8 +1141,9 @@ bool create_bitmap_file_ghostscript(GLEFileLocation* fname, int device, int dpi,
 
 bool create_bitmap_file(GLEFileLocation* fname, int device, int dpi, int options, GLEScript* script) {
 #ifdef HAVE_POPPLER
+	bool supportsBitmapType = g_bitmap_supports_type(g_device_to_bitmap_type(device));
 	string* bytesPDF = script->getRecordedBytesBuffer(GLE_DEVICE_PDF);
-	if (!bytesPDF->empty()) {
+	if (supportsBitmapType && !bytesPDF->empty()) {
 		std::string myFName = fname->getFullPath();
 		myFName += g_device_to_ext(device);
 		if (g_verbosity() >= 5) {

@@ -40,17 +40,7 @@
 #include "gle-poppler.h"
 #include "cutils.h"
 #include "gle-interface/gle-const.h"
-
-
-#ifdef HAVE_POPPLER
-
-#include <glib.h>
-#include <cairo.h>
-#include <poppler.h>
-
-void gle_glib_init(int /* argc */, char** /* argv */) {
-	g_type_init();
-}
+#include "core.h"
 
 void gle_write_ostream(void* closure, char* data, int length) {
 	std::ostream* file = (std::ostream*)closure;
@@ -61,6 +51,8 @@ struct GLEWriteFuncAndClosure {
 	gle_write_func writeFunc;
 	void* closure;
 };
+
+#ifdef HAVE_CAIRO
 
 #ifdef HAVE_LIBPNG
 
@@ -165,13 +157,31 @@ void gle_write_cairo_surface_png(cairo_surface_t* surface,
 
 #include <jpeglib.h>
 
-#define GLE_JPEG_BUFFER_SIZE 10000
+#define GLE_JPEG_BUFFER_SIZE 50000
 
 struct gle_jpeg_destination_mgr {
 	struct jpeg_destination_mgr pub;
 	JOCTET* buffer;
 	GLEWriteFuncAndClosure writeCallback;
 };
+
+void gle_jpeg_init_destination(j_compress_ptr cinfo) {
+	gle_jpeg_destination_mgr* dest = (gle_jpeg_destination_mgr*)cinfo->dest;
+	dest->pub.next_output_byte = dest->buffer;
+	dest->pub.free_in_buffer = GLE_JPEG_BUFFER_SIZE;
+}
+
+void gle_jpeg_term_destination(j_compress_ptr cinfo) {
+	gle_jpeg_destination_mgr* dest = (gle_jpeg_destination_mgr*)cinfo->dest;
+	int size = GLE_JPEG_BUFFER_SIZE - dest->pub.free_in_buffer;
+    dest->writeCallback.writeFunc(dest->writeCallback.closure, (char*)dest->buffer, size);
+}
+
+boolean gle_jpeg_empty_output_buffer(j_compress_ptr cinfo) {
+	gle_jpeg_term_destination(cinfo);
+	gle_jpeg_init_destination(cinfo);
+	return true;
+}
 
 void gle_jpeg_memory_dest(j_compress_ptr cinfo, JOCTET* buffer, GLEWriteFuncAndClosure writeCallback) {
 	if (cinfo->dest == 0) {
@@ -182,9 +192,9 @@ void gle_jpeg_memory_dest(j_compress_ptr cinfo, JOCTET* buffer, GLEWriteFuncAndC
 	gle_jpeg_destination_mgr* dest = (gle_jpeg_destination_mgr*)cinfo->dest;
 	dest->buffer = buffer;
 	dest->writeCallback = writeCallback;
-/*	dest->pub.init_destination = gle_jpeg_init_destination;
+	dest->pub.init_destination = gle_jpeg_init_destination;
 	dest->pub.empty_output_buffer = gle_jpeg_empty_output_buffer;
-	dest->pub.term_destination = gle_jpeg_term_destination;  */
+	dest->pub.term_destination = gle_jpeg_term_destination;
 }
 
 void gle_write_cairo_surface_jpeg(cairo_surface_t* surface,
@@ -196,10 +206,89 @@ void gle_write_cairo_surface_jpeg(cairo_surface_t* surface,
 	struct jpeg_error_mgr jerr;
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_compress(&cinfo);
-
+	GLEWriteFuncAndClosure writeCallback;
+	writeCallback.writeFunc = writeFunc;
+	writeCallback.closure = closure;
+	JOCTET buffer[GLE_JPEG_BUFFER_SIZE];
+	gle_jpeg_memory_dest(&cinfo, buffer, writeCallback);
+	int width = cairo_image_surface_get_width(surface);
+	int height = cairo_image_surface_get_height(surface);
+    cinfo.image_width = width;
+    cinfo.image_height = height;
+    if ((options & GLE_OUTPUT_OPTION_GRAYSCALE) != 0) {
+    	cinfo.input_components = 1;
+    	cinfo.in_color_space = JCS_GRAYSCALE;
+    } else {
+    	cinfo.input_components = 3;
+    	cinfo.in_color_space = JCS_RGB;
+    }
+    jpeg_set_defaults(&cinfo);
+    jpeg_start_compress(&cinfo, true);
+    JSAMPROW row = new JSAMPLE[cinfo.input_components * width];
+    JSAMPROW row_pointer[1];
+    row_pointer[0] = row;
+	unsigned char* imageData = cairo_image_surface_get_data(surface);
+	int stride = cairo_image_surface_get_stride(surface);
+	CUtilsAssert(imageData != 0);
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			JSAMPLE* ptr = &(row[x * cinfo.input_components]);
+			unsigned int value = *(unsigned int*)(&imageData[x*4  + y*stride]);
+			if (cinfo.input_components == 1) {
+				int blue = value & 0xFF; /* blue */
+				value >>= 8;
+				int green = value & 0xFF; /* green */
+				value >>= 8;
+				int red = value & 0xFF; /* red */
+				double gray = (3.0 * red / 255.0 + 2.0 * green / 255.0 + 1.0 * blue / 255.0) / 6.0 * 255.0;
+				int gray_i = std::min<int>(gle_round_int(gray), 0xFF);
+				*ptr = (JSAMPLE)gray_i;
+			} else {
+				ptr[2] = value & 0xFF; /* blue */
+				value >>= 8;
+				ptr[1] = value & 0xFF; /* green */
+				value >>= 8;
+				ptr[0] = value & 0xFF; /* red */
+			}
+		}
+		jpeg_write_scanlines(&cinfo, row_pointer, 1);
+	}
+    delete[] row;
+    jpeg_finish_compress(&cinfo);
+    jpeg_destroy_compress(&cinfo);
 }
 
 #endif // HAVE_LIBJPEG
+
+void gle_write_cairo_surface_bitmap(cairo_surface_t* surface,
+		                            int device,
+		                            int options,
+		                            gle_write_func writeFunc,
+		                            void* closure)
+{
+#ifdef HAVE_LIBPNG
+    if (device == GLE_DEVICE_PNG) {
+    	gle_write_cairo_surface_png(surface, options, writeFunc, closure);
+    	return;
+    }
+#endif // HAVE_LIBPNG
+#ifdef HAVE_LIBJPEG
+    if (device == GLE_DEVICE_JPEG) {
+    	gle_write_cairo_surface_jpeg(surface, options, writeFunc, closure);
+    	return;
+    }
+#endif // HAVE_LIBJPEG
+    g_throw_parser_error(">> unsupported bitmap output type '", g_device_to_ext(device), "'");
+}
+
+#ifdef HAVE_POPPLER
+
+#include <glib.h>
+#include <poppler.h>
+
+void gle_glib_init(int /* argc */, char** /* argv */) {
+	g_type_init();
+}
 
 void gle_convert_pdf_to_image(char* pdfData,
 		                      int pdfLength,
@@ -238,16 +327,7 @@ void gle_convert_pdf_to_image(char* pdfData,
     }
     cairo_scale(cr, resolution / PS_POINTS_PER_INCH, resolution / PS_POINTS_PER_INCH);
     poppler_page_render(page, cr);
-#ifdef HAVE_LIBPNG
-    if (device == GLE_DEVICE_PNG) {
-    	gle_write_cairo_surface_png(surface, options, writeFunc, closure);
-    }
-#endif // HAVE_LIBPNG
-#ifdef HAVE_LIBJPEG
-    if (device == GLE_DEVICE_JPEG) {
-    	gle_write_cairo_surface_jpeg(surface, options, writeFunc, closure);
-    }
-#endif // HAVE_LIBJPEG
+    gle_write_cairo_surface_bitmap(surface, device, options, writeFunc, closure);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
     g_object_unref(page);
@@ -283,4 +363,7 @@ void gle_glib_init(int /* argc */, char** /* argv */) {
 }
 
 #endif // HAVE_POPPLER
+
+#endif // HAVE_CAIRO
+
 

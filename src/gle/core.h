@@ -562,5 +562,7 @@ void g_text(const string& s);
 void g_translate(double ztx,double zty);
 void g_undev(double ux,double uy, double *x,double *y);
 void my_char(int ff, int cc);
+int g_device_to_bitmap_type(int device);
+bool g_bitmap_supports_type(int type);
 
 #endif
