@@ -30,6 +30,7 @@
 #define DIR_SEP "/"
 #include "mainwindow.h"
 #include "qgle_statics.h"
+#include "../config.h"
 
 #include <sstream>
 
@@ -282,8 +283,7 @@ void GLERenderThread::run()
 		mutex.unlock();
 
 		// do processing
-		if (myToDo == ToDoRenderGLE)
-		{
+		if (myToDo == ToDoRenderGLE) {
 			emit serverMessage(tr("Rendering GLE file"));
 			GLEInterface* iface = myGLEScript->getGLEInterface();
 			if (myOutFileDPI != 0.0) {
@@ -291,24 +291,33 @@ void GLERenderThread::run()
 				resolutionString << myOutFileDPI;
 				iface->setCmdLineOptionString("resolution", resolutionString.str().c_str());
 			}
-			iface->renderGLE(myGLEScript.get(), myOutFileName.toLatin1().constData(), GLE_DEVICE_EPS, true);
-			if (iface->getOutput()->getExitCode() == 0)
-			{
-				// Successful run, now render EPS
-				myToDo = ToDoRenderEPSFromMemory;
-			}
-			else
-			{
+			bool renderPoppler = false;
+			int device = GLE_DEVICE_EPS;
+			#ifdef HAVE_POPPLER
+				if (iface->hasCmdLineOptionString("cairo")) {
+					renderPoppler = true;
+					device = GLE_DEVICE_PDF;
+				}
+			#endif
+			iface->renderGLE(myGLEScript.get(), myOutFileName.toLatin1().constData(), device, true);
+			if (iface->getOutput()->getExitCode() == 0) {
+				if (renderPoppler) {
+					myToDo = ToDoRenderPDFFromMemory;
+				} else {
+					myToDo = ToDoRenderEPSFromMemory;
+				}
+			} else {
 				QImage emptyImage;
 				emit renderComplete(emptyImage);
 			}
 		}
-		if (myToDo == ToDoRenderEPSFromMemory)
-		{
+		if (myToDo == ToDoRenderEPSFromMemory) {
 			renderEPSToImageInternalFromMemory(myGLEScript.get(), myOutFileDPI, myOutFileArea);
 		}
-		if (myToDo == ToDoRenderEPSFromFile)
-		{
+		if (myToDo == ToDoRenderPDFFromMemory) {
+			renderPDFToImageInternalFromMemory(myGLEScript.get(), myOutFileDPI, myOutFileArea);
+		}
+		if (myToDo == ToDoRenderEPSFromFile) {
 			renderEPSToImageInternalFromFile(myOutFileName, myOutFileDPI, myOutFileArea);
 		}
 		mutex.lock();
@@ -361,16 +370,13 @@ void GLERenderThread::renderEPSDone(GSInterpreterLib* interpreter, double dpi, b
 	// Delete interpreter should go before different signals
 	// otherwise recursive calls to this function may cause multiple instantiations of
 	// libgs, which is not allowed and results in crashes
-	if (gsError != "")
-	{
+	if (gsError != "") {
 		emit serverError(gsError);
 	}
-	if (newDPI)
-	{
+	if (newDPI) {
 		emit dpiChanged(dpi);
 	}
 	emit renderComplete(image);
-
 }
 
 //! Convert an EPS file to an image (dpi == 0 -> autoscale)
@@ -453,6 +459,45 @@ void GLERenderThread::renderEPSToImageInternalFromMemory(GLEScript* script, doub
 	interpreter->run(bytes);
 	renderEPSDone(interpreter, dpi, newDPI);
 }
+
+void gle_write_data_vector(void* closure, char* data, int length) {
+	std::vector<unsigned char>* vec = (std::vector<unsigned char>*)closure;
+	vec->reserve(vec->size() + length);
+	for (int i = 0; i < length; ++i) {
+		vec->push_back((unsigned char)data[i]);
+	}
+}
+
+#ifdef HAVE_POPPLER
+void GLERenderThread::renderPDFToImageInternalFromMemory(GLEScript* script, double dpi, const QSize& area) {
+	// Auto scale new files to size of drawing area
+	bool newDPI = false;
+	if (dpi == 0.0) {
+		GLEPoint bb(script->getBoundingBox());
+		dpi = QGLE::computeAutoScaleDPIFromPts(area, 5, bb.getX(), bb.getY());
+		newDPI = true;
+	}
+	string* bytes = script->getRecordedBytesBuffer(GLE_DEVICE_PDF);
+	std::vector<unsigned char> imageData;
+	GLEInterface* iface = script->getGLEInterface();
+	iface->convertPDFToImage((char*)bytes->c_str(),
+			                 bytes->size(),
+			                 dpi,
+			                 GLE_DEVICE_PNG,
+			                 0,
+			                 gle_write_data_vector,
+			                 &imageData);
+	QImage image;
+	image.loadFromData(&imageData[0], imageData.size(), "PNG");
+	if (newDPI) {
+		emit dpiChanged(dpi);
+	}
+	emit renderComplete(image);
+}
+#else
+void GLERenderThread::renderPDFToImageInternalFromMemory(GLEScript* /* script */, double /* dpi */, const QSize& /* area */) {
+}
+#endif
 
 void GLERenderThread::startRender(const GLERectangle& rect, double dpi)
 {

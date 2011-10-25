@@ -233,6 +233,7 @@ public:
 	void setDefaultValues();
 	bool allDefaults();
 	void clearAll();
+	bool hasOption(const string& name);
 	bool hasOption(int id);
 	void setHasOption(const string& name);
 	void setOptionString(const string& name, const string& value, int arg = 0);

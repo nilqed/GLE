@@ -46,6 +46,14 @@ typedef void (*gle_write_func)(void* closure, char* data, int length);
 
 void gle_glib_init(int argc, char** argv);
 
+void gle_convert_pdf_to_image(char* pdfData,
+		                      int pdfLength,
+		                      double resolution,
+		                      int device,
+		                      int options,
+		                      gle_write_func writeFunc,
+		                      void* closure);
+
 #ifdef HAVE_CAIRO
 
 #include <cairo.h>
@@ -57,14 +65,6 @@ void gle_write_cairo_surface_bitmap(cairo_surface_t* surface,
 		                            void* closure);
 
 #ifdef HAVE_POPPLER
-
-void gle_convert_pdf_to_image(char* pdfData,
-		                      int pdfLength,
-		                      double resolution,
-		                      int device,
-		                      int options,
-		                      gle_write_func writeFunc,
-		                      void* closure);
 
 void gle_convert_pdf_to_image_file(char* pdfData,
 		                           int pdfLength,

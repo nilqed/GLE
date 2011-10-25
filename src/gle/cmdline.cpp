@@ -583,6 +583,11 @@ void CmdLineOptionList::showHelp(int helpid) {
 	if (!expert) cerr << endl << "Show expert options: " << getOptionPrefix() << "help expert" << endl;
 }
 
+bool CmdLineOptionList::hasOption(const string& name) {
+	CmdLineOption* option = getOption(name);
+	return option != 0 && option->hasOption();
+}
+
 bool CmdLineOptionList::hasOption(int id) {
 	if (id >= (int)m_Options.size()) return false;
 	if (m_Options[id] == NULL) return false;

@@ -362,6 +362,16 @@ void gle_convert_pdf_to_image_file(char* pdfData,
 void gle_glib_init(int /* argc */, char** /* argv */) {
 }
 
+void gle_convert_pdf_to_image(char* /* pdfData */,
+		                      int /* pdfLength */,
+		                      double /* resolution */,
+		                      int /* device */,
+		                      int /* options */,
+		                      gle_write_func /* writeFunc */,
+		                      void* /* closure */)
+{
+}
+
 #endif // HAVE_POPPLER
 
 #endif // HAVE_CAIRO

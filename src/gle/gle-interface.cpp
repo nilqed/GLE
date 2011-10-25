@@ -60,6 +60,7 @@
 #include "pass.h"
 #include "keyword.h"
 #include "run.h"
+#include "gle-poppler.h"
 
 // TODO make these available through the interface
 extern CmdLineObj g_CmdLine;
@@ -594,6 +595,10 @@ void GLEInterface::setCmdLineOptionString(const char* name, const char* value, i
 	getCmdLine()->setOptionString(string(name), string(value), arg);
 }
 
+bool GLEInterface::hasCmdLineOptionString(const char* name) {
+	return getCmdLine()->hasOption(string(name));
+}
+
 string GLEInterface::getGhostScriptLocation() {
 	ConfigSection* tools = g_Config.getSection(GLE_CONFIG_TOOLS);
 #ifdef __WIN32__
@@ -729,6 +734,23 @@ string GLEInterface::getTempFile() {
 
 int GLEInterface::copyFile(const string& from, const string& to, string* err) {
 	return GLECopyFile(from, to, err);
+}
+
+void GLEInterface::convertPDFToImage(char* pdfData,
+                                     int pdfLength,
+                                     double resolution,
+                                     int device,
+                                     int options,
+                                     gle_write_func writeFunc,
+                                     void* closure)
+{
+	gle_convert_pdf_to_image(pdfData,
+			                 pdfLength,
+			                 resolution,
+			                 device,
+			                 options,
+			                 writeFunc,
+			                 closure);
 }
 
 GLEFileLocation::GLEFileLocation() {

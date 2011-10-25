@@ -94,6 +94,7 @@ public:
 	enum {
 		ToDoRenderEPSFromFile,
 		ToDoRenderEPSFromMemory,
+		ToDoRenderPDFFromMemory,
 		ToDoRenderGLE
 	};
 
@@ -130,6 +131,8 @@ protected:
 	void renderEPSToImageInternalFromFile(const QString& fname, double dpi, const QSize& area);
 
 	void renderEPSToImageInternalFromMemory(GLEScript* script, double dpi, const QSize& area);
+
+	void renderPDFToImageInternalFromMemory(GLEScript* script, double dpi, const QSize& area);
 
 	GSInterpreterLib* setupInterpreter(const QSize& area, double b1, double b2, double width, double height, double& dpi, bool& newDPI);
 	void renderEPSDone(GSInterpreterLib* interpreter, double dpi, bool newDPI);

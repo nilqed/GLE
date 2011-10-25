@@ -88,6 +88,8 @@ using namespace std;
 #define GDO_FLAG_DELETED  1
 #define GDO_FLAG_MODIFIED 2
 
+typedef void (*gle_write_func)(void* closure, char* data, int length);
+
 class GLEInterface;
 class GLEScript;
 class GLEFont;
@@ -838,6 +840,7 @@ public:
 	DLLFCT void clearAllCmdLine();
 	DLLFCT void setCmdLineOption(const char* name);
 	DLLFCT void setCmdLineOptionString(const char* name, const char* value, int arg = 0);
+	DLLFCT bool hasCmdLineOptionString(const char* name);
 
 	DLLFCT string getGhostScriptLocation();
 	DLLFCT string getToolLocation(const char* name);
@@ -862,6 +865,15 @@ public:
 
 	// Get information about 3D surface plots
 	DLLFCT surface_struct* getSurface();
+
+	DLLFCT void convertPDFToImage(char* pdfData,
+                                  int pdfLength,
+                                  double resolution,
+                                  int device,
+                                  int options,
+                                  gle_write_func writeFunc,
+                                  void* closure);
+
 public:
 	inline void setCommitMode(bool commit) { m_CommitMode = commit; }
 	inline bool isCommitMode() { return m_CommitMode; }
