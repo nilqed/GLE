@@ -37,11 +37,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{\LaTeX\ Macros and Symbols}
+\section{\LaTeX\ Macros}
 \label{ltxsym:sec}
-
-\index{symbols}
 \index{\LaTeX!macros}
+
 \index{\LaTeX} There are several \LaTeX\ like commands 
 which can be used within text, they are:
 
@@ -53,9 +52,10 @@ which can be used within text, they are:
 \verb+_{}+                  & Subscript \\
 \verb+\\+                   & Forced newline \\
 \verb+\_+                   & Underscore character \\
-\verb+\,+                   & .5em (em = width of the letter `m') \\
+\verb+\,+                   & 0.5em (em = width of the letter `m') \\
 \verb+\:+                   & 1em space \\
 \verb+\;+                   & 2em space \\
+\verb+\!+                   & -0.5em space \\
 \verb+\tex{expression}+     & Any LaTeX expression \\
 \verb+\char{22}+            & Any character in current font \\
 \verb+\chardef{a}{hello}+   & Define a character as a macro \\
@@ -79,127 +79,11 @@ which can be used within text, they are:
 \verb+\tt+                  & Switches to typewriter (fixed space) font \\
 \end{tabular}
 
-\vspace{0.5cm}
+\newpage
+\section{\LaTeX\ Symbols}
+\index{symbols}
+
 The following symbols are implemented:
-\vspace{0.5cm}
 
-%%\batchmode %% sm
-\def\bb{\hfill$\backslash$}
+\includegraphics{appendix/fig/symbols.pdf}
 
-{\small
-\begin{supertabular}{lllll} 
-$\lbrack$ \bb lbrack & 
-$\ss$ \hspace{1.1pt}\bb ss  & 
-$\geq$ \bb geq & 
-$\dag$ \bb dag & 
-$\ddag$ \bb ddag \\
-$\S$ \bb S & 
-$\P$ \bb P & 
-$\copyright$ \bb copyright &
-$\alpha$ \bb alpha & 
-$\beta$ \bb beta \\
-$\gamma$ \bb gamma & 
-$\delta$ \bb delta &
-$\epsilon$ \bb epsilon & 
-$\zeta$ \bb zeta & 
-$\eta$ \bb eta \\
-$\theta$ \bb theta &
-$\iota$ \bb iota & 
-$\kappa$ \bb kappa & 
-$\lambda$ \bb lambda & 
-$\mu$ \bb mu \\
-$\nu$ \bb nu & 
-$\xi$ \bb xi & 
-$\pi$ \bb pi & 
-$\rho$ \bb rho &
-$\sigma$ \bb sigma \\
-$\tau$ \bb tau & 
-$\upsilon$ \bb upsilon & 
-$\phi$ \bb phi &
-$\chi$ \bb chi & 
-$\psi$ \bb psi \\ 
-$\omega$ \bb omega & 
-$\varepsilon$ \bb varepsilon &
-$\vartheta$ \bb vartheta & 
-$\varpi$ \bb varpi & 
-$\varrho$ \bb varrho \\
-$\varsigma$ \bb varsigma &
-$\varphi$ \bb varphi &
-$\aleph$ \bb aleph & 
-$\imath$ \bb imath & 
-$\jmath$ \bb jmath \\
-$\ell$ \hspace{2pt}\bb ell & 
-$\wp$ \bb wp & 
-$\Re$ \bb Re &
-$\Im$ \bb Im & 
-$\partial$ \bb partial \\
-$\infty$ \bb infty &
-$\prime$ \bb prime & 
-$\emptyset$ \bb emptyset & 
-$\nabla$ \bb nabla &
-$\top$ \bb top \\
-$\bot$ \bb bot & 
-$\triangle$ \bb triangle &
-$\forall$ \bb forall & 
-$\exists$ \bb exists & 
-$\neg$ \bb neg \\
-$\flat$ \bb flat & 
-$\natural$ \bb natural & 
-$\sharp$ \bb sharp &
-$\clubsuit$ \bb clubsuit & 
-$\diamondsuit$ \bb diamondsuit \\
-$\heartsuit$ \bb heartsuit &
-$\spadesuit$ \bb spadesuit & 
-$\coprod$ \bb coprod & 
-$\bigvee$ \bb bigvee &
-$\bigwedge$ \bb bigwedge \\
-$\biguplus$ \bb biguplus & 
-$\bigcap$ \bb bigcap &
-$\bigcup$ \bb bigcup & 
-$\prod$ \bb prod & 
-$\sum$ \bb sum \\
-$\bigotimes$ \bb bigotimes & 
-$\bigoplus$ \bb bigoplus & 
-$\bigodot$ \bb bigodot &
-$\bigsqcup$ \bb bigsqcup & 
-$\smallint$ \bb smallint \\
-$\intop$ \bb intop &
-$\ointop$ \bb ointop & 
-$\triangleleft$ \bb triangleleft & 
-$\triangleright$ \bb triangleright &
-$\bigtriangleup$ \bb bigtriangleup \\ 
-$\bigtriangledown$ \bb bigtriangledown & 
-$\wedge$ \bb wedge &
-$\land$ \bb land & 
-$\vee$ \bb vee & 
-$\lor$ \bb lor \\
-$\cap$ \bb cap & 
-$\cup$ \bb cup & 
-$\ddagger$ \bb ddagger &
-$\dagger$ \bb dagger & 
-$\sqcap$ \bb sqcap \\
-$\sqcup$ \bb sqcup &
-$\uplus$ \bb uplus & 
-$\amalg$ \bb amalg & 
-$\diamond$ \bb diamond &
-$\bullet$ \bb bullet \\
-$\wr$ \bb wr & 
-$\div$ \bb div &
-$\odot$ \bb odot & 
-$\oslash$ \bb oslash & 
-$\otimes$ \bb otimes \\
-$\ominus$ \bb ominus & 
-$\oplus$ \bb oplus & 
-$\mp$ \bb mp &
-$\pm$ \bb pm & 
-$\circ$ \bb circ \\
-$\bigcirc$ \bb bigcirc &
-$\setminus$ \bb setminus & 
-$\cdot$ \bb cdot & 
-$\ast$ \bb ast &
-$\times$ \bb times \\
-$\star$ \bb star & 
-\AA \bb AA & \\
-
-\end{supertabular}
-}

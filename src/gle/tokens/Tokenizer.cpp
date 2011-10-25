@@ -735,11 +735,11 @@ void Tokenizer::get_token_2() throw(ParserError) {
 	}
 	// String with \" or \' marks
 	if ((token_ch  == '\"' || token_ch == '\'') && m_language->getParseStrings()) {
-      char string_delim = token_ch;
+		char string_delim = token_ch;
 		m_token = token_ch;
 		do {
 			token_ch = token_read_char_no_comment();
-         m_token += token_ch;
+			m_token += token_ch;
 			if (token_ch == string_delim) {
 				token_ch = token_read_char_no_comment();
 				if (token_ch != string_delim) {

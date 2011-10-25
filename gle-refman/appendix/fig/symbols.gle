@@ -1,0 +1,32 @@
+
+size 16 14
+
+symwd = 0.5
+wd = 4
+hi = 0.5
+
+set font texcmr
+
+dx = 0.25
+dy = 0.5
+
+x = 0
+y = 0
+ncols = 4
+
+fopen "symbols.csv" f1 read
+until feof(f1)
+	freadln f1 sym$
+	amove x*wd+dx pageheight()-y*hi-dy
+	towrite$ = chr$(92)+sym$
+	!print towrite$
+	write towrite$
+	amove x*wd+dx+symwd pageheight()-y*hi-dy
+	write "\backslash{}"+sym$
+	x = x + 1
+	if x = ncols then
+		x = 0
+		y = y + 1
+	end if
+next
+fclose f1
