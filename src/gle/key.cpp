@@ -538,7 +538,7 @@ void do_draw_key_v35(double ox, double oy, KeyInfo* info){
 	g_set_hei(info->getHei());
 	for (int i = info->getNbEntries() - 1; i >= 0; i--) {
 		KeyEntry* entry = info->getEntry(i);
-		g_move(ox+0.6*cr, oy+0.6*cr+cr*(info->getNbEntries()-i));
+		g_move(ox+0.6*cr, oy+0.6*cr+cr*(info->getNbEntries()-i-1));
 		if (!entry->color.isNull()) {
 			g_set_color(entry->color);
 		}
