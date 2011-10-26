@@ -294,30 +294,35 @@ void do_show_info() {
 	string version, bdate;
 	g_get_version(&version);
 	g_get_build_date(&bdate);
-	cout << "GLE version:   " << version << endl;
+	cout << "GLE version:             " << version << endl;
 	if (!bdate.empty()) {
-		cout << "Build date:    " << bdate << endl;
+		cout << "Build date:              " << bdate << endl;
 	}
-	cout << "GLE_TOP:       " << GLE_TOP_DIR << endl;
-	cout << "GLE_BIN:       " << GLE_BIN_DIR << endl;
+	cout << "GLE_TOP:                 " << GLE_TOP_DIR << endl;
+	cout << "GLE_BIN:                 " << GLE_BIN_DIR << endl;
 	/* Location of GhostScript */
 	string gs_dir;
 	ConfigSection* tools = g_Config.getSection(GLE_CONFIG_TOOLS);
 	const string& gs_cmd = ((CmdLineArgString*)tools->getOptionValue(GLE_TOOL_GHOSTSCRIPT_CMD))->getValue();
 	if (gs_cmd != "") {
-		cout << "GhostScript:   " << gs_cmd << endl;
+		cout << "GhostScript:             " << gs_cmd << endl;
 	}
 	CmdLineArgString* gslib = (CmdLineArgString*)tools->getOptionValue(GLE_TOOL_GHOSTSCRIPT_LIB);
 	if (!gslib->isDefault()) {
-		cout << "GS library:    " << gslib->getValue() << endl;
+		cout << "GS library:              " << gslib->getValue() << endl;
 	}
 	/* Bitmap import */
-	cout << "Bitmap import: " << g_bitmap_supported_types() << endl;
+	cout << "Bitmap import:           " << g_bitmap_supported_types() << endl;
 	/* Cairo support */
 #ifdef HAVE_CAIRO
-	cout << "Cairo support: Yes" << endl;
+	cout << "Cairo rendering support: Yes" << endl;
 #else
-	cout << "Cairo support: No" << endl;
+	cout << "Cairo rendering support: No" << endl;
+#endif
+#ifdef HAVE_POPPLER
+	cout << "Poppler PDF support:     Yes" << endl;
+#else
+	cout << "Poppler PDF support:     No" << endl;
 #endif
 	do_wait_for_enter_exit(0);
 }
