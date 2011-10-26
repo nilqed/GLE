@@ -18,7 +18,7 @@ fopen "symbols.csv" f1 read
 until feof(f1)
 	freadln f1 sym$
 	amove x*wd+dx pageheight()-y*hi-dy
-	towrite$ = chr$(92)+sym$
+	towrite$ = "\"+sym$
 	!print towrite$
 	write towrite$
 	amove x*wd+dx+symwd pageheight()-y*hi-dy

@@ -746,7 +746,7 @@ void Tokenizer::get_token_2() throw(ParserError) {
 					token_pushback_ch(token_ch);
 					return;
 				}
-         }
+			}
 		} while (m_token_at_end == 0);
 		throw error("unterminated string constant");
 	}
@@ -795,16 +795,18 @@ void Tokenizer::get_token_2() throw(ParserError) {
 	}
 }
 
-void Tokenizer::copy_string(char endch) throw(ParserError) {
-	int prev_backslash = 0;
+void Tokenizer::copy_string(char string_delim) throw(ParserError) {
 	TokenizerPos pos = token_stream_pos();
 	while (m_token_at_end == 0) {
 		char token_ch = token_read_char_no_comment();
 		m_token += token_ch;
-		// Return if at '"' and not preceded by odd number of backslashes
-		if (token_ch == endch && (prev_backslash % 2 == 0)) return;
-		if (token_ch == '\\') prev_backslash++;
-		else prev_backslash = 0;
+		if (token_ch == string_delim) {
+			token_ch = token_read_char_no_comment();
+			if (token_ch != string_delim) {
+				token_pushback_ch(token_ch);
+				return;
+			}
+		}
 	}
 	throw error(pos, "unterminated string constant");
 }
