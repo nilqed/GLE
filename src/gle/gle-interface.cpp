@@ -428,10 +428,15 @@ GLEColor* GLEInterface::getColor(int i) {
 }
 
 void GLEInterface::addFont(GLEFont* font) {
-	m_FontHash->add_item(font->getName(), m_Fonts.size());
-	m_FontIndexHash->add_item(font->getIndex(), m_Fonts.size());
 	font->setNumber(m_Fonts.size());
 	m_Fonts.add(font);
+	addSubFont(font);
+}
+
+void GLEInterface::addSubFont(GLEFont* font) {
+	m_FontHash->add_item(font->getName(), m_AllFonts.size());
+	m_FontIndexHash->add_item(font->getIndex(), m_AllFonts.size());
+	m_AllFonts.add(font);
 }
 
 // Return the number of available fonts
@@ -449,15 +454,20 @@ GLEFont* GLEInterface::getFont(int i) {
 GLEFont* GLEInterface::getFont(const string& name) {
 	int idx = m_FontHash->try_get(name);
 	if (idx == -1) return NULL;
-	else return m_Fonts.get(idx);
+	else return m_AllFonts.get(idx);
 }
 
 GLEFont* GLEInterface::getFont(const char* name) {
 	return getFont(string(name));
 }
 
-int GLEInterface::getFontIndex(int font) {
-	return m_FontIndexHash->try_get(font);
+GLEFont* GLEInterface::getFontIndex(int font) {
+	int index = m_FontIndexHash->try_get(font);
+	if (index == -1) {
+		return 0;
+	} else {
+		return m_AllFonts.get(index);
+	}
 }
 
 const char* GLEInterface::getInitialPostScript() {
@@ -696,9 +706,11 @@ void GLEInterface::initTextProperties(GLEPropertyStore* prop) {
 	prop->setRealProperty(GLEDOPropertyFontSize, fontsize);
 	g_get_font(&font);
 	// this lookup should be removed if "core.cpp" keeps pointer to GLEFont
-	font = getFontIndex(font);
-	if (font == -1) font = 0;
-	prop->setFontProperty(GLEDOPropertyFont, getFont(font));
+	GLEFont* fontObj = getFontIndex(font);
+	if (fontObj != 0 && fontObj->getParent() != 0) {
+		fontObj = fontObj->getParent();
+	}
+	prop->setFontProperty(GLEDOPropertyFont, fontObj);
 }
 
 extern GLEGlobalSource* g_Source;
@@ -1781,6 +1793,7 @@ void GLEComposedObject::removeDeletedObjects() {
 GLEFont::GLEFont() {
 	m_Bold = m_Italic = m_BoldItalic = NULL;
 	m_Index = m_Number = 0;
+	m_Parent = 0;
 }
 
 GLEFont::~GLEFont() {

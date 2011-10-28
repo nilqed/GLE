@@ -350,6 +350,7 @@ protected:
 	GLERC<GLEFont> m_Bold;
 	GLERC<GLEFont> m_Italic;
 	GLERC<GLEFont> m_BoldItalic;
+	GLEFont* m_Parent;
 	int m_Index;
 	int m_Number;
 public:
@@ -369,6 +370,8 @@ public:
 	inline void setIndex(int value) { m_Index = value; }
 	inline int getNumber() { return m_Number; }
 	inline void setNumber(int value) { m_Number = value; }
+	inline GLEFont* getParent() { return m_Parent; }
+	inline void setParent(GLEFont* parent) { m_Parent = parent; }
 };
 
 enum GLEFillType {
@@ -732,6 +735,7 @@ protected:
 	bool m_MakeDrawObjs;
 	bool m_CommitMode;
 	GLERCVector<GLEFont> m_Fonts;
+	GLERCVector<GLEFont> m_AllFonts;
 	StringIntHash* m_FontHash;
 	IntIntHash* m_FontIndexHash;
 
@@ -811,7 +815,7 @@ public:
 	// Return the font matching a given name
 	GLEFont* getFont(const char* name);
 
-	int getFontIndex(int font);
+	GLEFont* getFontIndex(int font);
 
 	// Return the property store model for a text string
 	inline GLEPropertyStoreModel* getTextPropertyStoreModel() { return m_TextModel.get(); }
@@ -883,6 +887,7 @@ public:
 public:
 	// For GLE internal use only
 	void addFont(GLEFont* font);
+	void addSubFont(GLEFont* font);
 };
 
 class DLLCLASS GLEErrorMessage {

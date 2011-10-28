@@ -194,6 +194,8 @@ void font_load(void) throw(ParserError) {
 				if (pfont == NULL) {
 					g_throw_parser_error("parent font '", parent.c_str(), "' not found");
 				} else {
+					iface->addSubFont(font);
+					font->setParent(pfont);
 					if (type == "B") pfont->setStyle(GLEFontStyleBold, font);
 					else if (type == "I") pfont->setStyle(GLEFontStyleItalic, font);
 					else if (type == "BI") pfont->setStyle(GLEFontStyleBoldItalic, font);
