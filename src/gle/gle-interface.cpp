@@ -706,10 +706,13 @@ void GLEInterface::initTextProperties(GLEPropertyStore* prop) {
 	prop->setRealProperty(GLEDOPropertyFontSize, fontsize);
 	g_get_font(&font);
 	// this lookup should be removed if "core.cpp" keeps pointer to GLEFont
+	GLEFontStyle style = GLEFontStyleRoman;
 	GLEFont* fontObj = getFontIndex(font);
 	if (fontObj != 0 && fontObj->getParent() != 0) {
+		style = fontObj->getParent()->checkStyle(fontObj);
 		fontObj = fontObj->getParent();
 	}
+	prop->setIntProperty(GLEDOPropertyFontStyle, style);
 	prop->setFontProperty(GLEDOPropertyFont, fontObj);
 }
 
@@ -1797,6 +1800,18 @@ GLEFont::GLEFont() {
 }
 
 GLEFont::~GLEFont() {
+}
+
+GLEFontStyle GLEFont::checkStyle(GLEFont* child) {
+	if (m_Bold.get() == child) {
+		return GLEFontStyleBold;
+	} else if (m_Italic.get() == child) {
+		return GLEFontStyleItalic;
+	} else if (m_BoldItalic.get() == child) {
+		return GLEFontStyleBoldItalic;
+	} else {
+		return GLEFontStyleRoman;
+	}
 }
 
 GLEFont* GLEFont::getStyle(GLEFontStyle style) {

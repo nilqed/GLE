@@ -364,6 +364,7 @@ public:
 	inline void setName(const string& name) { m_Name = name; }
 	inline void setFullName(const string& name) { m_FullName = name; }
 	inline bool hasStyle(GLEFontStyle style) { return getStyle(style) != NULL; }
+	GLEFontStyle checkStyle(GLEFont* child);
 	DLLFCT GLEFont* getStyle(GLEFontStyle style);
 	void setStyle(GLEFontStyle style, GLEFont* font);
 	inline int getIndex() { return m_Index; }

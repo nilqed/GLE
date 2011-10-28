@@ -89,7 +89,7 @@ void GLEText::updateFromPropertyNoDirty(int property)
 			GLEColor* gle_color = text_settings->getColorProperty(GLEDOPropertyColor);
 			gle_color->setRGB255(color.red(), color.green(), color.blue());
 			text_settings->setFontProperty(GLEDOPropertyFont, iface->getFont(font));
-			text_settings->setIntProperty(GLEDOPropertyFontStyle, GLEFontStyleRoman);
+			//text_settings->setIntProperty(GLEDOPropertyFontStyle, GLEFontStyleRoman);
 			text_settings->setRealProperty(GLEDOPropertyFontSize, getProperty(FontSize).toDouble());
 			text->setText(getProperty(Text).toString().toUtf8());
 			text->render(iface);

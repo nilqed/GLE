@@ -193,7 +193,7 @@ void GLEObjectBlock::updateFromPropertyNoDirty(int property)
 		int font = getProperty(FontName).toInt();
 		GLEInterface* iface = obj->getConstructor()->getScript()->getGLEInterface();
 		obj_prop->setFontProperty(GLEDOPropertyFont, iface->getFont(font));
-		obj_prop->setIntProperty(GLEDOPropertyFontStyle, GLEFontStyleRoman);
+		//obj_prop->setIntProperty(GLEDOPropertyFontStyle, GLEFontStyleRoman);
 		obj_prop->setRealProperty(GLEDOPropertyFontSize, getProperty(FontSize).toDouble());
 		// Copy properties to lengths
 		if (obj_prop->getModel()->isSupportScale()) {
