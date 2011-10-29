@@ -105,12 +105,14 @@ GLEObjectBlock::GLEObjectBlock(double resolution, QSize imageSize, GLEDrawingAre
 		<< LineWidth
 		<< RefPointName
 		<< FontName
+		<< FontStyle
 		<< FontSize;
 	properties[FillColour] = propertyDescriptions[FillColour].defaultValue;
 	properties[LineColour] = propertyDescriptions[LineColour].defaultValue;
 	properties[LineWidth] = propertyDescriptions[LineWidth].defaultValue;
 	properties[RefPointName] = propertyDescriptions[RefPointName].defaultValue;
 	properties[FontName] = propertyDescriptions[FontName].defaultValue;
+	properties[FontStyle] = propertyDescriptions[FontStyle].defaultValue;
 	properties[FontSize] = propertyDescriptions[FontSize].defaultValue;
 	scaleOffs = QPointF(1.0, 1.0);
 }
@@ -174,7 +176,7 @@ void GLEObjectBlock::updateFromPropertyNoDirty(int property)
 	}
 
 	if (property == LineWidth || property == LineColour || property == FillColour || property == FontName ||
-		property == FontSize || property >= PropertyUser)
+		property == FontStyle || property == FontSize || property >= PropertyUser)
 	{
 		obj_prop->setRealProperty(GLEDOPropertyLineWidth, getProperty(LineWidth).toDouble());
 		QColor color = getProperty(LineColour).value<QColor>();
@@ -190,10 +192,10 @@ void GLEObjectBlock::updateFromPropertyNoDirty(int property)
 		// Font is
 		// fontList[properties[FontName].value<QString>]
 		// (default "rm")
-		int font = getProperty(FontName).toInt();
 		GLEInterface* iface = obj->getConstructor()->getScript()->getGLEInterface();
-		obj_prop->setFontProperty(GLEDOPropertyFont, iface->getFont(font));
-		//obj_prop->setIntProperty(GLEDOPropertyFontStyle, GLEFontStyleRoman);
+		GLEFont* font = iface->getFont(getProperty(FontName).toInt());
+		font = font->getStyle((GLEFontStyle)getProperty(FontStyle).toInt());
+		obj_prop->setFontProperty(GLEDOPropertyFont, font);
 		obj_prop->setRealProperty(GLEDOPropertyFontSize, getProperty(FontSize).toDouble());
 		// Copy properties to lengths
 		if (obj_prop->getModel()->isSupportScale()) {

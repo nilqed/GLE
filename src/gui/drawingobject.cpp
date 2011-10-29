@@ -87,6 +87,12 @@ void GLEDrawingObject::initialiseProperties()
 	propertyDescriptions[FontName].defaultValue = 0;
 	propertyDescriptions[FontName].validValues = getFontList();
 
+	// The font used for a given text string
+	propertyDescriptions[FontStyle].description = tr("Font Style");
+	propertyDescriptions[FontStyle].type = QVariant::Int;
+	propertyDescriptions[FontStyle].defaultValue = 0;
+	propertyDescriptions[FontStyle].validValues = getFontStyles();
+
 	// The font size
 	propertyDescriptions[FontSize].description = tr("Font Size");
 	propertyDescriptions[FontSize].type = QVariant::Double;
@@ -210,8 +216,10 @@ void GLEDrawingObject::setTextProperties() {
 	GLEDrawObject* obj = getGLEObject();
 	double fontsize = obj->getProperties()->getRealProperty(GLEDOPropertyFontSize);
 	setPropertyNoUpdate(FontSize, fontsize);
-	int number = obj->getProperties()->getFontProperty(GLEDOPropertyFont)->getNumber();
-	setPropertyNoUpdate(FontName, number);
+	GLEFont* font = obj->getProperties()->getFontProperty(GLEDOPropertyFont);
+	GLEFont* base = font->getBaseFont();
+	setPropertyNoUpdate(FontName, base->getNumber());
+	setPropertyNoUpdate(FontStyle, base->checkStyle(font));
 }
 
 void GLEDrawingObject::setColorProperty() {
@@ -293,7 +301,6 @@ void GLEDrawingObject::setPenProperties(QPen& pen) {
 QList<QVariant> GLEDrawingObject::getFontList()
 {
 	QList<QVariant> flv;
-
 	GLEInterface* iface = getGLEInterface();
 	int nbfonts = iface->getNumberOfFonts();
 	for (int i = 0; i < nbfonts; i++) {
@@ -301,8 +308,17 @@ QList<QVariant> GLEDrawingObject::getFontList()
 		flv.push_back(QString::fromUtf8(font->getFullNameC()));
 		// cout << "FONT: " << font->getFullNameC() << " -> " << i << endl;
 	}
-
 	return(flv);
+}
+
+QList<QVariant> GLEDrawingObject::getFontStyles()
+{
+	QList<QVariant> flv;
+	flv.push_back(tr("Roman"));
+	flv.push_back(tr("Bold"));
+	flv.push_back(tr("Italic"));
+	flv.push_back(tr("Bold Italic"));
+	return flv;
 }
 
 void GLEDrawingObject::imageRendered(QImage)

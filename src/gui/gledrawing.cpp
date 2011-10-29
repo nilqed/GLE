@@ -287,8 +287,10 @@ void GLEDrawingArea::createNewObjectFromScript(GLEObjectDO* obj) {
 	GLEPropertyStore* props = obj->getProperties();
 	double fontsize = props->getRealProperty(GLEDOPropertyFontSize);
 	newObj->setPropertyNoUpdate(GLEObjectBlock::FontSize, fontsize);
-	int number = props->getFontProperty(GLEDOPropertyFont)->getNumber();
-	newObj->setPropertyNoUpdate(GLEObjectBlock::FontName, number);
+	GLEFont* font = props->getFontProperty(GLEDOPropertyFont);
+	GLEFont* base = font->getBaseFont();
+	newObj->setPropertyNoUpdate(GLEObjectBlock::FontName, base->getNumber());
+	newObj->setPropertyNoUpdate(GLEObjectBlock::FontStyle, base->checkStyle(font));
 	if (props->getModel()->isSupportScale()) {
 		GLEArrayImpl* arr = props->getArray();
 		newObj->setLength(GLEObjectBlock::ObjectWidth, arr->getDouble(0), false);

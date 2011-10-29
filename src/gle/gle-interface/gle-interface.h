@@ -364,14 +364,14 @@ public:
 	inline void setName(const string& name) { m_Name = name; }
 	inline void setFullName(const string& name) { m_FullName = name; }
 	inline bool hasStyle(GLEFontStyle style) { return getStyle(style) != NULL; }
-	GLEFontStyle checkStyle(GLEFont* child);
+	DLLFCT GLEFontStyle checkStyle(GLEFont* child);
 	DLLFCT GLEFont* getStyle(GLEFontStyle style);
 	void setStyle(GLEFontStyle style, GLEFont* font);
 	inline int getIndex() { return m_Index; }
 	inline void setIndex(int value) { m_Index = value; }
 	inline int getNumber() { return m_Number; }
 	inline void setNumber(int value) { m_Number = value; }
-	inline GLEFont* getParent() { return m_Parent; }
+	inline GLEFont* getBaseFont() { return m_Parent != 0 ? m_Parent : this; }
 	inline void setParent(GLEFont* parent) { m_Parent = parent; }
 };
 
@@ -492,8 +492,8 @@ enum GLEPropertyType {
 enum GLEPropertyID {
 	GLEDOPropertyColor, GLEDOPropertyFillColor, GLEDOPropertyJustify,
 	GLEDOPropertyLineWidth, GLEDOPropertyLineStyle, GLEDOPropertyLineCap,
-	GLEDOPropertyFont, GLEDOPropertyFontStyle, GLEDOPropertyFontSize,
-	GLEDOPropertyArrowSize, GLEDOPropertyArrowAngle, GLEDOPropertyArrowStyle, GLEDOPropertyArrowTip,
+	GLEDOPropertyFont, GLEDOPropertyFontSize, GLEDOPropertyArrowSize,
+	GLEDOPropertyArrowAngle, GLEDOPropertyArrowStyle, GLEDOPropertyArrowTip,
 	GLEDOPropertyUserArg
 };
 

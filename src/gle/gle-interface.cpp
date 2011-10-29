@@ -142,12 +142,6 @@ GLEInterface::GLEInterface() {
 	// Initialize text property store model
 	m_TextModel = new GLEPropertyStoreModel();
 	m_TextModel->add(new GLEPropertyFont("Font"));
-	GLEPropertyNominal* fontstyle = new GLEPropertyNominal("Font style", GLEPropertyTypeInt, GLEDOPropertyFontStyle);
-	fontstyle->addValue("roman", GLEFontStyleRoman);
-	fontstyle->addValue("bold", GLEFontStyleBold);
-	fontstyle->addValue("italic", GLEFontStyleItalic);
-	fontstyle->addValue("bold+italic", GLEFontStyleBoldItalic);
-	m_TextModel->add(fontstyle);
 	m_TextModel->add(new GLEPropertyHei("Font size"));
 	m_TextModel->add(new GLEPropertyColor("Text color"));
 	m_TextModel->add(new GLEPropertyJustify("Text justify"));
@@ -513,12 +507,10 @@ void GLEInterface::renderText(GLETextDO* text, GLEPropertyStore* prop) {
 	g_set_line_width(0.02);
 	// Select the font
 	GLEFont* font = prop->getFontProperty(GLEDOPropertyFont);
-	if (font == NULL) font = getFont("rm");
-	if (font != NULL) {
-		GLEFontStyle style = (GLEFontStyle)prop->getIntProperty(GLEDOPropertyFontStyle);
-		if (font->hasStyle(style)) font = font->getStyle(style);
-		g_set_font(font->getIndex());
+	if (font == NULL) {
+		font = getFont("rm");
 	}
+	g_set_font(font->getIndex());
 	char* str = (char*)text->getTextC();
 	// Calculate the text's size
 	double x1, x2, y1, y2;
@@ -705,15 +697,7 @@ void GLEInterface::initTextProperties(GLEPropertyStore* prop) {
 	g_get_hei(&fontsize);
 	prop->setRealProperty(GLEDOPropertyFontSize, fontsize);
 	g_get_font(&font);
-	// this lookup should be removed if "core.cpp" keeps pointer to GLEFont
-	GLEFontStyle style = GLEFontStyleRoman;
-	GLEFont* fontObj = getFontIndex(font);
-	if (fontObj != 0 && fontObj->getParent() != 0) {
-		style = fontObj->getParent()->checkStyle(fontObj);
-		fontObj = fontObj->getParent();
-	}
-	prop->setIntProperty(GLEDOPropertyFontStyle, style);
-	prop->setFontProperty(GLEDOPropertyFont, fontObj);
+	prop->setFontProperty(GLEDOPropertyFont, getFontIndex(font));
 }
 
 extern GLEGlobalSource* g_Source;
@@ -1029,12 +1013,6 @@ GLEObjectDOConstructor::GLEObjectDOConstructor(GLESub* sub) {
 	linecap->addValue("square", GLELineCapSquare);
 	add(linecap);
 	add(new GLEPropertyFont("Font"));
-	GLEPropertyNominal* fontstyle = new GLEPropertyNominal("Font style", GLEPropertyTypeInt, GLEDOPropertyFontStyle);
-	fontstyle->addValue("roman", GLEFontStyleRoman);
-	fontstyle->addValue("bold", GLEFontStyleBold);
-	fontstyle->addValue("italic", GLEFontStyleItalic);
-	fontstyle->addValue("bold+italic", GLEFontStyleBoldItalic);
-	add(fontstyle);
 	add(new GLEPropertyHei("Font size"));
 }
 
@@ -1686,12 +1664,10 @@ void GLEObjectDO::render() {
 		g_set_line_width(prop->getRealProperty(GLEDOPropertyLineWidth));
 		// Select the font
 		GLEFont* font = prop->getFontProperty(GLEDOPropertyFont);
-		if (font == NULL) font = iface->getFont("rm");
-		if (font != NULL) {
-			GLEFontStyle style = (GLEFontStyle)prop->getIntProperty(GLEDOPropertyFontStyle);
-			if (font->hasStyle(style)) font = font->getStyle(style);
-			g_set_font(font->getIndex());
+		if (font == NULL) {
+			font = iface->getFont("rm");
 		}
+		g_set_font(font->getIndex());
 		newobj->enableChildObjects();
 		GLERun* run = script->getRun();
 		run->setDeviceIsOpen(true);

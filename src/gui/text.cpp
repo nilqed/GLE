@@ -43,11 +43,13 @@ GLEText::GLEText(double resolution, QSize imageSize, GLEDrawingArea *area) :
 	validProperties
 		<< Text
 		<< FontName
+		<< FontStyle
 		<< FontSize
 		<< Alignment
 		<< LineColour;
 	properties[Text] = propertyDescriptions[Text].defaultValue;
 	properties[FontName] = propertyDescriptions[FontName].defaultValue;
+	properties[FontStyle] = propertyDescriptions[FontStyle].defaultValue;
 	properties[FontSize] = propertyDescriptions[FontSize].defaultValue;
 	properties[Alignment] = propertyDescriptions[Alignment].defaultValue;
 	properties[LineColour] = propertyDescriptions[LineColour].defaultValue;
@@ -79,17 +81,18 @@ void GLEText::updateFromPropertyNoDirty(int property)
 		case Text:
 		case LineColour:
 		case FontName:
+		case FontStyle:
 		case FontSize: {
 			// Font is
 			// fontList[properties[FontName].value<QString>]
 			// (default "rm")
 			GLEInterface* iface = getGLEInterface();
-			int font = getProperty(FontName).toInt();
 			QColor color = getProperty(LineColour).value<QColor>();
 			GLEColor* gle_color = text_settings->getColorProperty(GLEDOPropertyColor);
 			gle_color->setRGB255(color.red(), color.green(), color.blue());
-			text_settings->setFontProperty(GLEDOPropertyFont, iface->getFont(font));
-			//text_settings->setIntProperty(GLEDOPropertyFontStyle, GLEFontStyleRoman);
+			GLEFont* font = iface->getFont(getProperty(FontName).toInt());
+			font = font->getStyle((GLEFontStyle)getProperty(FontStyle).toInt());
+			text_settings->setFontProperty(GLEDOPropertyFont, font);
 			text_settings->setRealProperty(GLEDOPropertyFontSize, getProperty(FontSize).toDouble());
 			text->setText(getProperty(Text).toString().toUtf8());
 			text->render(iface);

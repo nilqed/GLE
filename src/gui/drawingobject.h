@@ -74,6 +74,7 @@ public:
 		// For text objects
 		Text,
 		FontName,
+		FontStyle,
 		FontSize,
 		Alignment,
 		RefPointName,
@@ -237,6 +238,7 @@ protected:
 
 	QHash<QString, QString> fontList;
 	QList<QVariant> getFontList();
+	QList<QVariant> getFontStyles();
 
 	GLEDrawingArea* drawingArea;
 };
