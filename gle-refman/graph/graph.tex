@@ -75,6 +75,7 @@ commands are not explicitly mentioned in the following descriptions.
 {\sf dn xmin {\it x-low} xmax {\it x-high} ymin {\it y-low} ymax {\it y-high}}  \\
 {\sf dn [x2axis] [y2axis]} \\
 {\sf dn file ``all.dat,xc,yc'' [marker {\sf mname}] [line]} \\
+{\sf draw call} \\
 {\sf fullsize } \\
 {\sf hscale h} \\
 {\sf key pos {\it tl} nobox hei {\it exp} offset {\it xexp yexp} }  \\
@@ -90,7 +91,6 @@ commands are not explicitly mentioned in the following descriptions.
 {\sf scale auto} \\
 {\sf size {\it x y }}\\
 {\sf title {\it "title"}  [hei {\it ch-hei}] [color {\it col}] [font {\it font}] [dist {\it cm}]  }   \\
-{\sf under call} \\
 {\sf vscale v} \\
 {\sf x2labels on} \\
 {\sf xaxis | yaxis | x2axis | y2axis}\\
@@ -464,6 +464,11 @@ The file option also accepts variables in place of the file name, e.g.:
 % color and lwidth.}  You cannot use commands like {\sf let} or {\sf bar}
 % with the {\sf bigfile} command.
 
+\item[{\sf draw call}]
+\index{draw}
+
+Executes subroutine `call' while drawing the graph. The call is drawn in the current layer (See ``begin layer''). The output is clipped to the graph window and the subroutine can use the functions `xg()', 'yg()', and variables `xgmin', `ygmin', etc. This is useful for drawing a custom graph background or for defining a custom graph type.
+
 \item[{\sf fullsize } ]
 \index{fullsize}
 This is equivalent to {\sf scale 1 1, noborder}. It makes the graph {\sf size} command specify the size and position of the axes instead of the size of the outside border. See Fig.~\ref{grscale:fig} (right) for an example.
@@ -754,11 +759,6 @@ This command gives the graph a centered title.  The list of optional keywords sp
 \item[{\sf vscale v}]
 \index{vscale}
 Sets the length of the yaxis to $v$ times the size of the graph box (default is 0.7). $v$ can also be set to `{\sf auto}'. See {\sf scale} for more details.
-
-\item[{\sf under call}]
-\index{under}
-
-Executes subroutine `call' before drawing the graph. The output is clipped to the graph window and the subroutine can use the functions `xg()', 'yg()', and variables `xgmin', `ygmin', etc. This is useful for drawing a custom graph background. It is also possible to include subroutine calls in the graph block without the `under' keyword. In that case, they are executed after the graph is drawn and can be used to draw on top of the graph.
 
 \item[{\sf x2labels on}]
 \index{x2labels!on}

@@ -259,6 +259,16 @@ end graph
 
 \noindent{}Fig.~\ref{grkey:fig} shows the result.
 
+It is also possible to put a ``key separator'' line in between the ``dn'' lines create a key with multiple columns. For example:
+
+\preglecode{}
+\begin{Verbatim}
+   d1 line color red key "Sine"
+   key separator
+   d2 line color blue key "Cosine"
+\end{Verbatim}
+\postglecode{}
+
 If you plot data from a data file, and the first row of the file contains column labels, then these labels will be used automatically to construct the key. However, if you prefer to construct the key manually instead by defining a key block, then you can override this behavior by making GLE ignore the row with the labels using the ``ignore'' option of the ``data'' command. E.g., \verb+data "myfile.csv" ignore 1+ (see p.~\pageref{opt:ignore}). Alternatively, you can accomplish the same by adding the command ``key off'' to the graph block to disable the automatically generated key.
 
 

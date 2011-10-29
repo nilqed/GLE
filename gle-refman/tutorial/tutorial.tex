@@ -229,28 +229,36 @@ The following command line options are supported by GLE:
 \preglecode{}
 \begin{Verbatim}
  -help           Shows help about command line options
- -info           Outputs software version, build date, GLE_TOP, GLE_BIN, etc.
+ -info           Outputs software version, build date, GLE\_TOP, GLE\_BIN, etc.
  -verbosity      Sets the verbosity level of GLE console output
  -device         Selects output device(s)
+ -cairo          Use cairo output device
  -resolution     Sets the resolution for bitmap and PDF output
  -fullpage       Selects full page output
+ -landscape      Selects full page landscape output
  -output         Specifies the name of the output file
+ -nosave         Don't write output file to disk (dry-run)
  -preview        Previews the output with QGLE
  -gs             Previews the output with GhostScript
  -version        Selects a GLE version to run
  -compatibility  Selects a GLE compatibility mode
  -calc           Runs GLE in "calculator" mode
+ -catcsv         Pretty print a CSV file to standard output
  -tex            Indicates that the script includes LaTeX expressions
  -inc            Creates an .inc file with LaTeX code
  -texincprefix   Adds the given subdirectory to the path in the .inc file
  -mkinittex      Creates "inittex.ini" from "init.tex"
+ -finddeps       Automatically finds dependencies
  -nocolor        Forces grayscale output
  -transparent    Creates transparent output (with -d png)
  -noctrl-d       Excludes CTRL-D from the PostScript output
  -nomaxpath      Disables the upper-bound on the drawing path complexity
+ -noligatures    Disable the use of ligatures for 'fl' and 'fi'
+ -gsoptions      Specify additional options for GhostScript
  -safemode       Disables reading/writing to the file system
  -allowread      Allows reading from the given path
  -allowwrite     Allows writing to the given path
+ -keep           Don't delete temporary files
 \end{Verbatim}
 \postglecode{}
 
