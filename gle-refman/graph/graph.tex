@@ -1158,6 +1158,7 @@ end graph
 \end{commanddescription}
 
 \section{Bar Graphs}
+\label{cmd:bar}
 \index{bar graphs}
 Drawing a bar graph is a subcommand of the normal graph module. This allows
 bar and line graphs to be mixed.
@@ -1329,6 +1330,7 @@ end graph
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Filling Between Lines}
+\label{cmd:fill}
 \begin{commanddescription}
 \index{fill!color} \index{fill!xmin} \index{fill!xmax}
 \index{fill!ymin} \index{fill!ymax}
@@ -1457,6 +1459,49 @@ the x and x2 axes, put the x2 settings after the x settings.
      end graph
 \end{Verbatim}
 \postglecode{}
+
+\subsection{Layers}
+
+GLE draws a graph as a sequence of layers. The following are the default layers.
+
+\begin{itemize}
+\item[200] A grid (e.g., ``yaxis grid'')
+\item[350] Fill type graphs (p.~\pageref{cmd:fill})
+\item[350] Bar type graphs (p.~\pageref{cmd:bar})
+\item[500] Graph axis
+\item[700] Line type graphs
+\item[700] Error bars
+\item[700] Marker type graphs
+\item[700] Draw commands (p.~\pageref{cmd:draw})
+\end{itemize}
+
+There are only 4 default layers. Each layer has a unique number (200, 350, 500, and 700). Layers are drawn from small to large. Within a layer, the elements are drawn in the order indicated above. For example, error bars are drawn after line type graphs.
+
+It is possible to define new layers with the ``begin layer / end layer'' block. This is illustrated by the following example.
+
+\preglecode{}
+\begin{Verbatim}
+  begin graph
+     data "file.csv"
+     ...
+     begin layer 400
+        d1 line color red
+     end layer
+  end graph
+\end{Verbatim}
+\postglecode{}
+
+This example defines a custom layer with the unique number 400 and one line type graph. The result will be that d1 is drawn after any defined bar type graphs and before the graph x/y axis.
+
+More examples of layers can be found in the following figures:
+
+\begin{itemize}
+\item Fig.~\ref{fig:shadow} shows how a layer can be used to draw a custom graph background.
+
+\item Fig.~\ref{fig:semitrans} shows how layers can be used to combine fill type and line graphs.
+
+\item Fig.~\ref{fig:polar} shows how layers can be used to draw a custom grid.
+\end{itemize}
 
 \subsection{Line Width}
 \index{line width (graphs)}

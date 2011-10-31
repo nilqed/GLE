@@ -40,11 +40,10 @@ size 7 4
 
 include "../../script/manual.gle"
 
-amove 0 0.3
 manual_graph_mode
 begin graph
-   size 7 3.75
-   title "Shading areas of the graph" dist 0.15
+   scale auto
+   title "Shading Areas of the Graph"
    xtitle "Height of stalk"
    ytitle "Year measured"
    xaxis min 86 max 90 dticks 1

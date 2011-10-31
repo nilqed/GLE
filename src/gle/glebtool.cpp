@@ -178,6 +178,14 @@ int do_latexdef(char** argv) {
 	return 0;
 }
 
+int do_latex_gle_version(char** argv) {
+	string fname = argv[0];
+	ofstream ofile(fname.c_str(), ios::app);
+	ofile << "\\newcommand{\\gleversion}{" << GLEVN << "}" << std::endl;
+	ofile.close();
+	return 0;
+}
+
 int main(int argc, char** argv) {
 	string option = argv[1];
 	if (option == "-setrelpath") {
@@ -188,6 +196,8 @@ int main(int argc, char** argv) {
 #endif
 	} else if (option == "-latexdef") {
 		return do_latexdef(argv + 2);
+	} else if (option == "-latexversion") {
+		return do_latex_gle_version(argv + 2);
 	}
 	return -1;
 }

@@ -54,7 +54,7 @@ set dashlen 0.017
 
 amove offs ytop
 begin graph
-   title "(a) No subticks"
+   title "(a) No Subticks"
    size wd hi
    hscale fac
    yticks off
@@ -71,7 +71,7 @@ end key
 
 amove offs+wd ytop
 begin graph
-   title "(b) Subticks grid lines"
+   title "(b) Subticks Grid Lines"
    size wd hi
    hscale fac
    yticks off
@@ -91,7 +91,7 @@ end key
 
 amove offs+2*wd ytop
 begin graph
-   title "(c) Normal subticks"
+   title "(c) Normal Subticks"
    size wd hi
    hscale fac
    yticks off
@@ -111,7 +111,7 @@ end key
 
 amove offs ybot
 begin graph
-   title "(d) Various settings"
+   title "(d) Various Settings"
    size wd hi
    hscale fac
    xaxis min 0 max 5 dticks 1
@@ -137,7 +137,7 @@ end key
 
 amove offs+2*wd ybot
 begin graph
-   title "(e) Various settings"
+   title "(e) Various Settings"
    size wd hi
    hscale fac
    xaxis min 0 max 3 dticks 1

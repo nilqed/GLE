@@ -44,7 +44,7 @@ amove 0 0.2
 manual_graph_mode
 begin graph
    vscale 0.675
-   title  "Bean stalk data" dist 0.15
+   title  "Bean Stalk Data" dist 0.15
    xtitle "Year measured"
    ytitle "Height of stalk"
    xaxis dticks 1

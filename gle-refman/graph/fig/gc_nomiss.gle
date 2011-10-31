@@ -43,8 +43,8 @@ include "../../script/manual.gle"
 amove 0 0.1
 manual_graph_mode
 begin graph
-   vscale 0.65
-   title "Ignore missing values (nomiss)" dist 0.15
+   scale auto
+   title "Ignore Missing Values (nomiss)" dist 0.15
    xtitle "Time"
    ytitle "Output"
    data "../../tutorial/fig/tut3.dat"

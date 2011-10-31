@@ -44,7 +44,7 @@ amove 0 0.3
 manual_graph_mode
 begin graph
    size 7 3.75
-   title  "Bean stalk data" dist 0.15
+   title  "Bean Stalk Data" dist 0.15
    xtitle "Year measured"
    ytitle "Height of stalk"
    yaxis min 0 max 5 dticks 1

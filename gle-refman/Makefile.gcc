@@ -36,7 +36,7 @@
 #                                                                      #
 ########################################################################
 
-all: fig fonts pdf cairo.tex
+all: fig fonts pdf defs.tex
 
 fig:
 	$(MAKE) -C title -f Makefile.gcc
@@ -49,7 +49,7 @@ fig:
 	$(MAKE) -C appendix/fig -f Makefile.gcc
 	$(MAKE) -C prog/fig -f Makefile.gcc
 
-pdf: cairo.tex
+pdf: defs.tex
 	pdflatex gle-manual.tex
 
 dvi:
@@ -81,5 +81,6 @@ clean:
 # %.pdf: %.eps
 # 	epstopdf $<
 
-cairo.tex:
-	../build/bin/glebtool -latexdef cairo.tex hascairo $(HAVE_CAIRO)
+defs.tex:
+	../build/bin/glebtool -latexdef defs.tex hascairo $(HAVE_CAIRO)
+	../build/bin/glebtool -latexversion defs.tex

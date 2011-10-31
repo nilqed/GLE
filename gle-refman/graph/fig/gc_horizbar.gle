@@ -44,14 +44,14 @@ manual_graph_mode
 
 begin graph 
    scale auto
-   title "Planet sizes" dist 0.15
+   title "Planet Sizes" dist 0.15
    xtitle "Size relative to Earth"
    xaxis min 0 dticks 1
    yaxis min -1 max 7 angle 30
    ylabels dist 0.05
    data "gc_horizbar.csv"
    ynames from d1 hei 0.3633
-   bar d2 horiz fill red pattern shade2
+   bar d2 horiz fill red pattern shade2 background yellow
 end graph
 
 set color blue lstyle 2

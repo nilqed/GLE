@@ -43,7 +43,7 @@ include "../../script/manual.gle"
 manual_graph_mode
 begin graph
    scale auto
-   title  "1000 samples of $N(\mu=0, \sigma=1)$"
+   title  "1000 Samples of $N(\mu=0, \sigma=1)$"
    ytitle "Frequency"
    xtitle "Value"
    data   "normal.csv"

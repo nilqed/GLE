@@ -47,7 +47,7 @@ set atitlescale 1
 amove 0 1.1
 begin graph
 	size 7 4.5
-   title "Linear fit" dist 0.15
+   title "Linear Fit" dist 0.15
    xaxis min 0 max 10 dticks 2
    yaxis min 0 max 11 dticks 2
    xtitle "$x$"
