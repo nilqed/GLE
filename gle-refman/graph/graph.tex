@@ -75,6 +75,7 @@ commands are not explicitly mentioned in the following descriptions.
 {\sf dn xmin {\it x-low} xmax {\it x-high} ymin {\it y-low} ymax {\it y-high}}  \\
 {\sf dn [x2axis] [y2axis]} \\
 {\sf dn file ``all.dat,xc,yc'' [marker {\sf mname}] [line]} \\
+{\sf d$\left[i\right]$ $\ldots$} \\
 {\sf draw call} \\
 {\sf fullsize } \\
 {\sf hscale h} \\
@@ -464,10 +465,69 @@ The file option also accepts variables in place of the file name, e.g.:
 % color and lwidth.}  You cannot use commands like {\sf let} or {\sf bar}
 % with the {\sf bigfile} command.
 
+\item[{\sf d$\left[i\right]$ $\ldots$}]
+\index{for-next}
+
+A data set identifier ``d$i$'' can also be written using the array notation ``d$\left[i\right]$''. Any valid expression that results in an integer can be used inside d$\left[\ldots\right]$. This is useful if you want to select a data set based on the result of an expression.
+
+If-then-else, for-next loops, and other control constructs can be used insdide a graph block. These can be combined with the d$\left[i\right]$ notation to draw many similar functions. See Fig.~\ref{fig:sqroot} for an example that draws the functions $y = \sqrt{\alpha x}$ with $\alpha$ an integer constant.
+
+\begin{figure}[tb]
+\begin{minipage}[c]{9.2cm}
+\begin{Verbatim}
+begin graph
+   ...
+   for alpha = 1 to 10 step 2
+      let d[alpha] = sqrt(alpha*x) from 0 to 10
+      d[alpha] line color rgb(alpha/10,0,0)
+   next alpha
+end graph
+...
+for alpha = 1 to 10 step 2
+   amove xg(xgmax)+0.1 yg(sqrt(alpha*xgmax))
+   write "$\alpha = "+num$(alpha)+"$"
+next alpha
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/sqroot.inc}}
+\end{minipage}
+\caption{\label{fig:sqroot}For-next loops in graph blocks and the use of ``d[i]''.}
+\end{figure}
+
 \item[{\sf draw call}]
 \index{draw}
+\label{cmd:draw}
 
-Executes subroutine `call' while drawing the graph. The call is drawn in the current layer (See ``begin layer''). The output is clipped to the graph window and the subroutine can use the functions `xg()', 'yg()', and variables `xgmin', `ygmin', etc. This is useful for drawing a custom graph background or for defining a custom graph type.
+Executes subroutine `call' while drawing the graph. The call is drawn in the current layer (See ``begin layer''). The output is clipped to the graph window and the subroutine can use the functions `xg()', 'yg()', and variables `xgmin', `ygmin', etc. This is useful for drawing a custom graph background (Fig.~\ref{fig:shadow}) or for defining a custom graph type (Section~\ref{sec:polar}).
+
+\begin{figure}[tb]
+\begin{minipage}[c]{9.2cm}
+\begin{Verbatim}
+sub background
+   amove xg(xgmin) yg(ygmin)
+   local wd = xg(xgmax)-xg(xgmin)
+   local hi = yg(ygmax)-yg(ygmin)
+   colormap y 0 0 0.8 1 1 200 wd hi
+end sub
+
+begin graph
+   ...
+   d1 line marker wdiamond color steelblue
+   d2 line marker wcircle color green
+   begin layer 150
+      draw background
+   end layer
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\mbox{\input{graph/fig/shadow.inc}}
+\end{minipage}
+\caption{\label{fig:shadow}Using the ``draw'' command to draw a graph background.}
+\end{figure}
 
 \item[{\sf fullsize } ]
 \index{fullsize}
@@ -1310,6 +1370,60 @@ end graph
 \end{minipage}
 
 \end{commanddescription}
+
+To create semi-transparent fills, use the function ``rgba255'' to specify the fill color. This function allows one to define a semi-transparent color with red, green, blue, and alpha components. The alpha component defines the transparency. Fig.~\ref{fig:semitrans} shows an example. To create output with semi-transparent colors, GLE's command line option ``-cairo'' must be used.
+
+\begin{figure}[tb]
+\begin{minipage}[c]{7.5cm}
+\begin{Verbatim}
+begin graph
+   ...
+   begin layer 300
+      fill x1,d1 color rgba255(255,0,0,80)
+      d1 line color red key "$1.5\sin(x)+1.5$"
+   end layer
+   begin layer 301
+      fill x1,d2 color rgba255(0,128,0,80)
+      d2 line color green key "$1/x$"
+   end layer
+   ...
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{7cm}
+\hascairo{
+\mbox{\input{graph/fig/semitrans.inc}}
+}
+\end{minipage}
+\caption{\label{fig:semitrans}A graph with semi-transparent fills.}
+\end{figure}
+
+\subsection{Polar Plots}
+\label{sec:polar}
+
+GLE supports polar plots by means of the ``polar'' and ``polar\_grid'' functions from the library file ``polarplot.gle''. See Fig~\ref{fig:polar} for an example. This example also illustrates the use of the ``draw'' function (p.~\pageref{cmd:draw}) and the ``layer'' block (p.~\pageref{cmd:layer}). The ``layer'' block is used here to make sure that the polar grid is drawn before the axis are drawn.
+
+\begin{figure}[tb]
+\begin{minipage}[c]{10.5cm}
+\begin{Verbatim}
+begin graph
+   title "$r = \cos(2\theta)$"
+   xaxis min -1.1 max 1.1
+   yaxis min -1.1 max 1.1
+   begin layer 0
+      draw polar_grid radius 2 rings 5 sectors 12
+      draw polar "cos(2*t)" from 0 to 2*pi fill wheat
+   end layer
+end graph
+\end{Verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{5cm}
+\mbox{\input{graph/fig/cos2t.inc}}
+\end{minipage}
+\caption{\label{fig:polar}Polar plots using the ``draw'' command and the ``polar'' function from ``polarplot.gle''.}
+\end{figure}
 
 \section{Notes on Drawing Graphs}
 

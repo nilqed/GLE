@@ -46,7 +46,7 @@ amove 0 -0.2
 begin graph
    size 7 5.5
    scale 0.8 0.7
-   title "Scale graph to x2/y2 axis"
+   title "Scale Graph to x2/y2 Axis"
    let d1 = x^2 from -2 to 2
    let d2 = sin(x) from 0 to 4*pi
    d1 line color red key "$x^2$"

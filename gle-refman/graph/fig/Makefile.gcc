@@ -36,10 +36,18 @@
 #                                                                      #
 ########################################################################
 
+OPTS =
+
 EPSS = gc_axes.inc gc_axisall.inc gc_bargraph1.inc gc_bargraph2.inc gc_bargraph_3d.inc \
        gc_err.inc gc_fillgraph.inc gc_let.inc gc_names.inc gc_nomiss.inc gc_fit.inc gc_fitfct.inc \
        linemode.inc gc_loglabels.inc gc_graphscale.inc gc_horizbar.inc gc_mathmode.inc gc_logsubticks.inc \
-       noisysine.inc age.inc normal.inc gridmode.inc y2axis-scale.inc discontinuity.inc
+       noisysine.inc age.inc normal.inc gridmode.inc y2axis-scale.inc discontinuity.inc \
+       sqroot.inc cos2t.inc shadow.inc
+
+ifeq ($(HAVE_CAIRO),1)
+	EPSS := $(EPSS) semitrans.inc
+	OPTS := $(OPTS) -cairo
+endif
 
 ifeq ($(RUNBUILD),1)
 	GLE = ../../../build/bin/gle
@@ -50,7 +58,7 @@ endif
 all: $(EPSS)
 
 %.inc: %.gle
-	$(GLE) -texincprefix graph/fig/ -inc -d pdf $<
+	$(GLE) $(OPTS) -texincprefix graph/fig/ -inc -d pdf $<
 
 clean:
 	rm -rf *.eps *.pdf *.inc .gle

@@ -36,54 +36,34 @@
 !                                                                      !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-size 15 6
+size 6.5 5.5
 
 include "../../script/manual.gle"
 manual_graph_mode
 
-sub noisy_sin x
-   if (x = -2*pi) or (x = 2*pi) then return 0
-   else return sin(x)+0.3*rnd(1)
-end sub
+begin graph
+   scale auto
+   title  "Semi-Transparent Fills"
+   xtitle "Time"
+   ytitle "Output"
+   xaxis min 0 max 9
+   yaxis min 0 max 6 dticks 1
+   let d1 = sin(x)*1.5+1.5 from 0 to 10
+   let d2 = 1/x from 0.01 to 10
+   let d3 = 10*(1/sqrt(2*pi))*exp(-2*(sqr(x-4)/sqr(2))) from 0 to 10
+   key background gray5 hei 0.27
+   begin layer 300
+      fill x1,d1 color rgba255(255,0,0,80)
+      d1 line color red key "$1.5\sin(x)+1.5$"
+   end layer
+   begin layer 301
+      fill x1,d2 color rgba255(0,128,0,80)
+      d2 line color green key "$1/x$"
+   end layer
+   begin layer 302
+      fill x1,d3 color rgba255(0,0,255,80)
+      d3 line color blue key "$\frac{10}{\sqrt{2\pi}}\exp\left(\frac{-2(x-4)^2}{2^2}\right)$"
+   end layer
+end graph
 
-dy = 0
-dy2 = -0.1
-gw = pagewidth()/3
-gh = pageheight()/2
-
-labelsize = 0.30
-
-sub do_graph t$ m$
-   begin graph
-      size gw gh
-      scale 0.8 0.68
-      title t$ dist 0.22 hei labelsize
-      yaxis dticks 0.5 hei labelsize
-      xaxis format "pi" min -2*pi max 2*pi dticks pi hei labelsize
-      let d1 = noisy_sin(x) step pi/50
-      d1 \expr{m$} line color red
-   end graph
-end sub
-
-sub do_graph2 m$
-   do_graph m$ m$
-end sub
-
-amove 0.1 gh+dy
-do_graph "Noisy Sine" ""
-
-amove gw+0.1 gh+dy
-do_graph "svg\_smooth 1" "svg_smooth 1"
-
-amove 2*gw+0.1 gh+dy
-do_graph "svg\_smooth 5" "svg_smooth 5"
-
-amove 0.1 dy2
-do_graph2 "deresolve 10"
-
-amove gw+0.1 dy2
-do_graph2 "deresolve 10 average"
-
-amove 2*gw+0.1 dy2
-do_graph2 "deresolve 10 average smooth"
 

@@ -36,54 +36,26 @@
 !                                                                      !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-size 15 6
+size 7 4.5
 
 include "../../script/manual.gle"
 manual_graph_mode
 
-sub noisy_sin x
-   if (x = -2*pi) or (x = 2*pi) then return 0
-   else return sin(x)+0.3*rnd(1)
-end sub
+amove 0 0.1
+begin graph
+   yaxis dticks 2
+   title "Square Root Function"
+   xtitle "$x$"
+   ytitle "$y = \sqrt{\alpha x}$"
+      for alpha = 1 to 10 step 2
+      let d[alpha] = sqrt(alpha*x) from 0 to 10
+      d[alpha] line color rgb(alpha/10,0,0)
+   next alpha
+end graph
 
-dy = 0
-dy2 = -0.1
-gw = pagewidth()/3
-gh = pageheight()/2
-
-labelsize = 0.30
-
-sub do_graph t$ m$
-   begin graph
-      size gw gh
-      scale 0.8 0.68
-      title t$ dist 0.22 hei labelsize
-      yaxis dticks 0.5 hei labelsize
-      xaxis format "pi" min -2*pi max 2*pi dticks pi hei labelsize
-      let d1 = noisy_sin(x) step pi/50
-      d1 \expr{m$} line color red
-   end graph
-end sub
-
-sub do_graph2 m$
-   do_graph m$ m$
-end sub
-
-amove 0.1 gh+dy
-do_graph "Noisy Sine" ""
-
-amove gw+0.1 gh+dy
-do_graph "svg\_smooth 1" "svg_smooth 1"
-
-amove 2*gw+0.1 gh+dy
-do_graph "svg\_smooth 5" "svg_smooth 5"
-
-amove 0.1 dy2
-do_graph2 "deresolve 10"
-
-amove gw+0.1 dy2
-do_graph2 "deresolve 10 average"
-
-amove 2*gw+0.1 dy2
-do_graph2 "deresolve 10 average smooth"
+set just lc hei 0.27
+for alpha = 1 to 10 step 2
+   amove xg(xgmax)+0.1 yg(sqrt(alpha*xgmax))
+   write "$\alpha = "+num$(alpha)+"$"
+next alpha
 
