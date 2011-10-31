@@ -396,3 +396,13 @@ sub energylevel ds$ factor color$
       hist_prev_x = dataxvalue(ds$, i)
    next i
 end sub
+
+sub graph_shaded_background from to pixels
+   default from 0.7
+   default to 1.0
+   default pixels 200
+   amove xg(xgmin) yg(ygmin)
+   local wd = xg(xgmax)-xg(xgmin)
+   local hi = yg(ygmax)-yg(ygmin)
+   colormap y 0 0 from to 1 pixels wd hi
+end sub
