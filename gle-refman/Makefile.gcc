@@ -65,7 +65,7 @@ cfonts:
 	$(MAKE) -C fonttest -f Makefile.gcc clean
 
 clean:
-	rm -rf *.pdf *.idx *.aux *.dvi *.log *.out *.ilg *.ind *.toc cairo.tex
+	rm -rf *.pdf *.idx *.aux *.dvi *.log *.out *.ilg *.ind *.toc defs.tex
 	$(MAKE) -C title -f Makefile.gcc clean
 	$(MAKE) -C tutorial/fig -f Makefile.gcc clean
 	$(MAKE) -C primitives/fig -f Makefile.gcc clean
