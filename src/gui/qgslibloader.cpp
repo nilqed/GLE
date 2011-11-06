@@ -249,13 +249,21 @@ int GSLibFunctions::loadLibrary(const QString& location, QString& last_error) {
 		#ifdef __x86_64__
 		// try 64 bit libraries on 64 bit system
 		tryLocation("/usr/lib64/libgs.so");
+		tryLocation("/usr/lib64/libgs.so.10");
+		tryLocation("/usr/lib64/libgs.so.9");
 		tryLocation("/usr/lib64/libgs.so.8");
 		tryLocation("/usr/local/lib64/libgs.so");
+		tryLocation("/usr/local/lib64/libgs.so.10");
+		tryLocation("/usr/local/lib64/libgs.so.9");
 		tryLocation("/usr/local/lib64/libgs.so.8");
 		#else
 		tryLocation("/usr/lib/libgs.so");
+		tryLocation("/usr/lib/libgs.so.10");
+		tryLocation("/usr/lib/libgs.so.9");
 		tryLocation("/usr/lib/libgs.so.8");
 		tryLocation("/usr/local/lib/libgs.so");
+		tryLocation("/usr/local/lib/libgs.so.10");
+		tryLocation("/usr/local/lib/libgs.so.9");
 		tryLocation("/usr/local/lib/libgs.so.8");
 		#endif  // __x86_64__
 		#endif
