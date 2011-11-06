@@ -189,7 +189,7 @@ LONG WINAPI MyUnhandledExceptionFilter(EXCEPTION_POINTERS *info) {
 	// Get temporary file name
 	TCHAR szTempName[MAX_PATH+1];
 	UINT uRetVal = GetTempFileName(lpPathBuffer, TEXT("gle"), 0, szTempName);
-	if (uRetVal = 0) {
+	if (uRetVal == 0) {
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
 	// Create crash log file

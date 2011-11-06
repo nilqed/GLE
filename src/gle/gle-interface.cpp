@@ -752,6 +752,12 @@ void GLEInterface::convertPDFToImage(char* pdfData,
 			                 closure);
 }
 
+bool GLEReadFileOrGZIPTxt(const std::string& name, std::string* result);
+
+bool GLEInterface::readFileOrGZIPTxt(const char* name, std::string* result) {
+   return GLEReadFileOrGZIPTxt(std::string(name), result);
+}
+
 GLEFileLocation::GLEFileLocation() {
 	m_Flags = 0;
 }

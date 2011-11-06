@@ -726,6 +726,33 @@ bool bool_vector_is(vector<bool>* v, unsigned int i) {
 	else return (*v)[i];
 }
 
+void split_into_lines(const std::vector<char>* input, std::vector<std::string>* output) {
+   char prevCh = 0;
+   bool done = false;
+   unsigned int pos = 0;
+   while (!done) {
+      std::ostringstream crLine;
+      bool lineDone = false;
+      while (!lineDone) {
+         if (pos >= input->size()) {
+            done = true;
+            lineDone = true;
+         } else {
+            char ch = input->at(pos++);
+            if (ch == '\n' || ch == '\r') {
+               if (pos < input->size() && input->at(pos) != ch && (input->at(pos) == '\n' || input->at(pos) == '\r')) {
+                  pos++;
+               }
+               lineDone = true;
+            } else {
+               crLine << ch;
+            }
+         }
+      }
+      output->push_back(crLine.str());
+   }
+}
+
 void CUtilsAssertImpl(const char* expr, const char* file, int line, const char* function) {
 	cerr << "Internal error: '" << expr << "' in file '" << file << "' function: '" << function << "' line: " << line << endl;
 	exit(1);

@@ -50,6 +50,10 @@
 #include "tokens/RefCount.h"
 #include "glearray.h"
 
+#ifdef HAVE_LIBZ
+   #include <zlib.h>
+#endif
+
 RefCountObject::RefCountObject() {
 	owner_count = 0;
 }
@@ -249,6 +253,64 @@ void GLEZData::read(const string& fname) throw(ParserError) {
 			m_Data[x + y * m_NX] = v;
 		}
 	}
+}
+
+bool GLEReadFileBinaryGZIP(const string& name, std::vector<char>* contents) {
+#ifdef HAVE_LIBZ
+   gzFile file = gzopen(name.c_str(), "rb");
+   if (file == 0) {
+      return false;
+   }
+   bool returnCode = true;
+   const int GLE_READ_GZIP_BUFFER_SIZE = 100000;
+   char* buffer = new char[GLE_READ_GZIP_BUFFER_SIZE];
+   bool done = false;
+   while (!done) {
+      int result = gzread(file, (voidp)buffer, GLE_READ_GZIP_BUFFER_SIZE);
+      if (result == -1) {
+         done = true;
+         returnCode = false;
+      } else if (result == 0) {
+         done = true;
+      } else {
+         contents->reserve(contents->size() + result);
+         for (int i = 0; i < result; ++i) {
+            contents->push_back(buffer[i]);
+         }
+      }
+   }
+   delete[] buffer;
+   gzclose(file);
+   return returnCode;
+#else
+   return false;
+#endif
+}
+
+bool GLEReadFileOrGZIP(const std::string& name, vector<string>* lines) {
+   bool res = GLEReadFile(name, lines);
+   if (!res) {
+      std::vector<char> contents;
+      res = GLEReadFileBinaryGZIP(name + ".gz", &contents);
+      if (res) {
+         split_into_lines(&contents, lines);
+      }
+   }
+   return res;
+}
+
+bool GLEReadFileOrGZIPTxt(const std::string& name, std::string* result) {
+   vector<string> lines;
+   bool res = GLEReadFileOrGZIP(name, &lines);
+   result->clear();
+   if (res) {
+      std::ostringstream strm;
+      for (int i = 0; i < lines.size(); ++i) {
+         strm << lines[i] << std::endl;
+      }
+      *result = strm.str();
+   }
+   return res;
 }
 
 GLECSVError::GLECSVError() {

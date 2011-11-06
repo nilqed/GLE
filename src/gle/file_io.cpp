@@ -1535,11 +1535,10 @@ bool GLEReadFile(const string& name, vector<string>* lines) {
 }
 
 bool GLEReadFileBinary(const string& name, std::vector<char>* contents) {
-	ifstream inFile(name.c_str(), ios::in | ios::binary);
+	ifstream inFile(name.c_str(), ios::in | ios::binary | ios::ate);
 	if (!inFile.is_open()) {
 		return false;
 	}
-	inFile.seekg(0, ios::end);
 	int length = inFile.tellg();
 	inFile.seekg(0, ios::beg);
 	contents->resize(length, 0);

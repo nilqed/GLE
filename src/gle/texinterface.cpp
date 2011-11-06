@@ -60,6 +60,8 @@
 #define BEGINDEF extern
 #include "begin.h"
 
+#include <time.h>
+
 void decode_utf8_basic(string& sc);
 
 extern ConfigCollection g_Config;

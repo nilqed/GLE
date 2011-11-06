@@ -111,6 +111,8 @@ public:
 	inline double* getData() { return m_Data; }
 };
 
+bool GLEReadFileOrGZIPTxt(const std::string& name, std::string* result);
+
 typedef unsigned char GLEBYTE;
 
 enum GLECSVDataStatus {

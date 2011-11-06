@@ -147,11 +147,10 @@ QWidget* AboutBox::createLicensePanel()
 	fileName.resize(fileName.lastIndexOf(QDir::separator()));
 	fileName += QDir::separator();
 	fileName += tr("LICENSE.txt");
-	QFile file(fileName);
-	// Open the file as a read only text file
-	if (file.open(QIODevice::ReadOnly | QIODevice::Text))
-	{
-
+   GLEInterface* iface = GLEGetInterfacePointer();
+   std::string licenseFileTxt;
+   bool res = iface->readFileOrGZIPTxt(fileName.toUtf8().constData(), &licenseFileTxt);
+   if (res) {
 		QFont font;
 		// Set the font to be fixed pitch
 		font.setFixedPitch(true);
@@ -161,12 +160,10 @@ QWidget* AboutBox::createLicensePanel()
 		label->setFont(font);
 		label->setTextColor(Qt::black);
 		// Get the text and put it in the label
-		label->setPlainText(file.readAll().constData());
+		label->setPlainText(licenseFileTxt.c_str());
 		QFontMetrics fm(font);
 		m_minWidth = fm.width("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-	}
-	else
-	{
+	} else {
 		label->setPlainText(tr("File not found: '%1'").arg(fileName));
 	}
 	return label;

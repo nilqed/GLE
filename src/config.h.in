@@ -53,6 +53,7 @@
 
 #undef HAVE_SOCKETS
 
+#undef HAVE_LIBZ
 #undef HAVE_LIBPNG
 #undef HAVE_LIBJPEG
 #undef HAVE_LIBTIFF

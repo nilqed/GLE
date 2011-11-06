@@ -878,6 +878,8 @@ public:
                                   int options,
                                   gle_write_func writeFunc,
                                   void* closure);
+                                  
+   DLLFCT bool readFileOrGZIPTxt(const char* name, std::string* result);
 
 public:
 	inline void setCommitMode(bool commit) { m_CommitMode = commit; }

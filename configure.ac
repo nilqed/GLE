@@ -184,7 +184,8 @@ case $host in
         HAVE_CYGWIN=1
     ;;
     *-*-mingw*)
-        HAVE_WIN32=1
+        AC_DEFINE(__CYGWIN__)
+        HAVE_CYGWIN=1
         HAVE_MINGW=1
     ;;
 	x86_64-apple-*)
@@ -375,6 +376,7 @@ if test "$with_z" != no; then
       [])
 
     if test "x$HAVE_LIBZ" = "x1"; then
+        AC_DEFINE(HAVE_LIBZ)
         if test "x$HAVE_STATIC_LIBZ" = "x1"; then
             LIBS="-Wl,-Bstatic -lz -Wl,-Bdynamic $LIBS"
         else
@@ -747,6 +749,8 @@ dnl ****************************************************************************
 if test "x$with_warn" != "xno"; then
    CPPFLAGS="-Wall $CPPFLAGS"
 fi
+
+CPPFLAGS="-Wno-write-strings $CPPFLAGS"
 
 CPPFLAGS="-DHAVE_CONFIG_H \$(VERSION_INFO) $CPPFLAGS"
 LDFLAGS="$LDFLAGS $EXTRA_LDFLAGS"
