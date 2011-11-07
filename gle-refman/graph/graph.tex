@@ -106,7 +106,7 @@ commands are not explicitly mentioned in the following descriptions.
 {\sf xaxis nofirst nolast}  \\
 {\sf xaxis nticks {\it number} dticks {\it distance} dsubticks {\it distance}} \\
 {\sf xaxis ftick {\it x0} dticks {\it distance}} \\
-{\sf xaxis off}  \\
+{\sf xaxis {\sf off}}  \\
 {\sf xaxis shift {\it cm-exp}}  \\
 {\sf xaxis symticks} \\
 {\sf xlabels font {\it font-name} hei {\it char-hei} color {\it col} }\\
@@ -115,7 +115,7 @@ commands are not explicitly mentioned in the following descriptions.
 {\sf xnoticks {\it pos1 pos2 pos3 ...}}  \\
 {\sf xplaces {\it pos1 pos2 pos3 ...}}  \\
 {\sf xside color {\it col} lwidth {\it line-width} off  } \\
-{\sf xsubticks {\it {\sf lstyle} num  {\sf lwidth} exp {\sf length} exp  {\sf off}}} \\
+{\sf xsubticks {\it {\sf lstyle} num  {\sf lwidth} exp {\sf length} exp {\sf on} {\sf off}}} \\
 {\sf xticks {\it {\sf lstyle} num {\sf lwidth} exp {\sf length} exp {\sf off}}} \\
 {\sf xtitle {\it "title"} [hei {\it ch-hei}] [color {\it col}] [font {\it font}] [dist {\it cm}] [adist {\it cm}]}   \\
 {\sf y2title {\it "text-string"}  [rotate]  }  \\
@@ -1080,13 +1080,16 @@ use an extra {\sf xplaces} command.
 This command controls the appearance of the axis line, i.e. the line
 to which the ticks are attached.
 
-\item[{\sf xsubticks {\it {\sf lstyle} num  {\sf lwidth} exp {\sf length} exp  {\sf off}}} ]
+\item[{\sf xsubticks {\it {\sf lstyle} num  {\sf lwidth} exp {\sf length} exp  {\sf on} {\sf off}}} ]
 \index{xsubticks}
 \index{xsubticks!lstyle}
 \index{xsubticks!lwidth}
 \index{xsubticks!length}
+\index{xsubticks!on}
 \index{xsubticks!off}
 This command gives fine control of the appearance of the axis subticks.
+
+GLE uses an algorithm that decides based on the distance between the main ticks if it should draw subticks or not. However, you can override the decision of this algorithm and explicitly turn the subticks on or off by means of the commands ``xsubticks on'' or ``xsubticks off''.
 
 \item[{\sf xticks {\it {\sf lstyle} num {\sf lwidth} exp {\sf length} exp {\sf off}}} ]
 \index{xticks}
