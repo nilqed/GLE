@@ -255,7 +255,7 @@ void GLEZData::read(const string& fname) throw(ParserError) {
 	}
 }
 
-bool GLEReadFileBinaryGZIP(const string& name, std::vector<char>* contents) {
+bool GLEReadFileBinaryGZIP(const string& name, std::vector<GLEBYTE>* contents) {
 #ifdef HAVE_LIBZ
    gzFile file = gzopen(name.c_str(), "rb");
    if (file == 0) {
@@ -290,7 +290,7 @@ bool GLEReadFileBinaryGZIP(const string& name, std::vector<char>* contents) {
 bool GLEReadFileOrGZIP(const std::string& name, vector<string>* lines) {
    bool res = GLEReadFile(name, lines);
    if (!res) {
-      std::vector<char> contents;
+      std::vector<GLEBYTE> contents;
       res = GLEReadFileBinaryGZIP(name + ".gz", &contents);
       if (res) {
          split_into_lines(&contents, lines);
@@ -352,21 +352,33 @@ void GLECSVData::readBuffer(const char* buffer) {
 
 bool GLECSVData::readBlock(const std::string& fileName) {
 	m_fileName = fileName;
-	ifstream file(fileName.c_str(), ios::in | ios::binary | ios::ate);
-	if (file.is_open()) {
-		unsigned int size = file.tellg();
-		m_buffer.resize(size + 1);
-		file.seekg(0, ios::beg);
-		file.read((char*)&m_buffer[0], size);
-		file.close();
-		return true;
+	if (str_i_ends_with(fileName, ".gz")) {
+		if (GLEReadFileBinaryGZIP(fileName, &m_buffer)) {
+			return true;
+		} else {
+			m_error.errorCode = GLECSVErrorFileNotFound;
+			ostringstream errStr;
+			errStr << "can't open: '" << fileName << "'";
+			m_error.errorString = errStr.str();
+			return false;
+		}
 	} else {
-		m_error.errorCode = GLECSVErrorFileNotFound;
-		ostringstream errStr;
-		errStr << "can't open: '" << fileName << "': ";
-		str_get_system_error(errStr);
-		m_error.errorString = errStr.str();
-		return false;
+		ifstream file(fileName.c_str(), ios::in | ios::binary | ios::ate);
+		if (file.is_open()) {
+			unsigned int size = file.tellg();
+			m_buffer.resize(size + 1);
+			file.seekg(0, ios::beg);
+			file.read((char*)&m_buffer[0], size);
+			file.close();
+			return true;
+		} else {
+			m_error.errorCode = GLECSVErrorFileNotFound;
+			ostringstream errStr;
+			errStr << "can't open: '" << fileName << "': ";
+			str_get_system_error(errStr);
+			m_error.errorString = errStr.str();
+			return false;
+		}
 	}
 }
 

@@ -404,7 +404,7 @@ int GLERGBATo32BitByteStream::sendByte(GLEBYTE byte) {
 			value |= ((unsigned int)m_components[3]) << 24;
 		}
 		const char* valueAsBytes = (const char*)&value;
-		for (int i = 0; i < sizeof(unsigned int); ++i) {
+		for (unsigned int i = 0; i < sizeof(unsigned int); ++i) {
 			m_Pipe->sendByte(valueAsBytes[i]);
 		}
 		m_index = 0;
@@ -470,7 +470,7 @@ GLEBitsTo32BitByteStream::~GLEBitsTo32BitByteStream() {
 
 int GLEBitsTo32BitByteStream::flushBufferByte() {
 	const char* valueAsBytes = (const char*)&m_combined;
-	for (int i = 0; i < sizeof(unsigned int); ++i) {
+	for (unsigned int i = 0; i < sizeof(unsigned int); ++i) {
 		m_Pipe->sendByte(valueAsBytes[i]);
 	}
 	m_bitsLeft = 32;

@@ -252,7 +252,7 @@ void GSLibFunctions::tryLocationLoop(const char* prefix) {
       toTry << soName << "." << version;
       tryLocation(toTry.str().c_str());
    }
-   tryLocation(soName);
+   tryLocation(soName.c_str());
 }
 
 int GSLibFunctions::loadLibrary(const QString& location, QString& last_error) {

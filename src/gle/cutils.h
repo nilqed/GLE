@@ -166,7 +166,7 @@ void bool_vector_set_expand(vector<bool>* v, unsigned int i, bool value);
 
 bool bool_vector_is(vector<bool>* v, unsigned int i);
 
-void split_into_lines(const std::vector<char>* input, std::vector<std::string>* output);
+void split_into_lines(const std::vector<unsigned char>* input, std::vector<std::string>* output);
 
 void CUtilsAssertImpl(const char* expr, const char* file, int line, const char* function);
 
