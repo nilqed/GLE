@@ -192,7 +192,22 @@ bool inAxisRange(double value, GLEAxis* ax) {
 	return false;
 }
 
-void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
+std::vector<double> getLogSubPlaces(double pos, double gmin, double gmax, int lgset) {
+   std::vector<double> result;
+   if (lgset == GLE_AXIS_LOG_1 || lgset == GLE_AXIS_LOG_25 || lgset == GLE_AXIS_LOG_25B) {
+      for (int i = 2; i <= 9; i++) {
+         if (lgset == GLE_AXIS_LOG_1 || i == 2 || i == 5) {
+            double pos_sub = pos * i;
+            if (pos_sub >= gmin && pos_sub <= gmax) {
+               result.push_back(pos_sub);
+            }
+         }
+      }
+   }
+   return result;
+}
+
+void draw_axis(GLEAxis *ax, GLERectangle* box, DrawAxisPart drawPart) {
 	double x,y,gmin,gmax,dticks,tick1,tickn;
 	int savecap;
 	double h,dist;
@@ -205,22 +220,32 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 	if (ax->off) return;
 	g_get_xy(&ox,&oy);
 
+   bool drawsubticks = true;
 	bool drawticks = true;
 	bool drawrest = true;
 
 	if (ax->hasGrid()) {
-		if (drawgrid) drawrest = false;
-		else drawticks = false;
+      if (drawPart == DRAW_AXIS_GRID_SUBTICKS) {
+         drawticks = false;
+         drawrest = false;
+      } else if (drawPart == DRAW_AXIS_GRID_TICKS) {
+         drawsubticks = false;
+         drawrest = false;
+      } else {
+         CUtilsAssert(drawPart == DRAW_AXIS_ALL);
+         drawsubticks = false;
+         drawticks = false;
+      }
 	} else {
-		if (drawgrid) return;
+		if (drawPart != DRAW_AXIS_ALL) return;
 	}
 	
 /*----------------------------- Generate the places for labels to go */
 	gmin = ax->getMin();
 	gmax = ax->getMax();
 	int lgset = ax->lgset;
-	
-	vector<bool> subplaces;
+
+   vector<double> subplaces;	
 	int lgset_def = GLE_AXIS_LOG_OFF;
 	if (ax->log) {
 		h = ax->label_hei;
@@ -287,19 +312,18 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 					}
 				}
 				/* also label subticks? */
-				if (lgset == GLE_AXIS_LOG_1 || lgset == GLE_AXIS_LOG_25 || lgset == GLE_AXIS_LOG_25B) {
-					for (int i = 2; i <= 9; i++) {
-						if (lgset == GLE_AXIS_LOG_1 || i == 2 || i == 5) {
-							double pos_sub = pos * i;
-							if (pos_sub >= gmin && pos_sub <= gmax) {
-								bool_vector_set_expand(&subplaces, ax->getNbPlaces(), true);
-								ax->addPlace(pos_sub);
-							}
-						}
-					}
-				}
+            std::vector<double> crSubPlaces(getLogSubPlaces(pos, gmin, gmax, lgset));
+            for (std::vector<double>::iterator i(crSubPlaces.begin()); i != crSubPlaces.end(); ++i) {
+               ax->addPlace(*i);
+            }
 			}
 		}
+		for (double pw10 = tick1; pw10 <= tickn; pw10 += dticks) {
+         std::vector<double> crSubPlaces(getLogSubPlaces(pow(10.0, pw10), gmin, gmax, lgset));
+         for (std::vector<double>::iterator i(crSubPlaces.begin()); i != crSubPlaces.end(); ++i) {
+            subplaces.push_back(*i);
+         }
+      }
 	} else {
 		dticks = 0;
 		GLERangeSet* range = ax->getRange();
@@ -351,7 +375,7 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 
 	// draw subticks
 	if (ax->log) {
-		if (!ax->subticks_off && drawticks) {
+		if (!ax->subticks_off && drawsubticks) {
 			g_gsave();
 			g_set_color(ax->subticks_color);
 			g_set_line_width(ax->subticks_lwidth);
@@ -393,7 +417,7 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 		if (ax->dsubticks != 0) dsubticks = ax->dsubticks;
 		if (dsubticks == 0) dsubticks = dticks / 2.0;
 		ax->dsubticks = dsubticks;
-		if (!ax->subticks_off && drawticks) {
+		if (!ax->subticks_off && drawsubticks) {
 			double firstSubtick = start_subtick(dsubticks, dticks, ax);
 			double subtickLimit = ax->getMax() + dsubticks/100.0;
 			int place_cnt = 0;
@@ -421,11 +445,12 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 		g_set_line_style(ax->ticks_lstyle);
 		int tick1_cnt = 0;
 		int tick2_cnt = 0;
+      int subplace_cnt = 0;
 		if (ax->log) {
 			/* Draw log ticks */
 			for (int i = 0; i < ax->getNbPlaces(); i++) {
 				double fi = ax->places[i];
-				if (!bool_vector_is(&subplaces, i)) {
+				if (!axis_is_pos_perc(fi, &subplace_cnt, 1e-6, subplaces)) {
 					/* only draw major ticks */
 					axis_draw_tick_log(ax, fi, &tick1_cnt, &tick2_cnt, ox, oy, tlen);
 				}
@@ -472,10 +497,11 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid) {
 		char cbuff[100];
 		GLENumberFormat* format = ax->format == "" ? NULL : new GLENumberFormat(ax->format);
 		if (ax->log) {
+         int subplace_cnt = 0;
 			for (int i = 0; i < ax->getNbPlaces(); i++) {
 				double fi = ax->places[i];
 				int n = (int) floor(.0001 + fi/pow(10.0,floor(log10(fi))));
-				if (!bool_vector_is(&subplaces, i)) {
+            if (!axis_is_pos_perc(fi, &subplace_cnt, 1e-6, subplaces)) {
 					n = (int) floor(log10(fi)+0.5);
 					if (format != NULL) {
 						format->format(pow(10.0, n), ax->getNamePtr(i));

@@ -36,6 +36,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef GLE_HAS_AXIS_H
+#define GLE_HAS_AXIS_H
+ 
 #define GLE_AXIS_NONE -1
 #define GLE_AXIS_MAX 7
 #define GLE_AXIS_X   1
@@ -207,4 +210,13 @@ public:
 };
 
 void init_measure_by_axis(GLEAxis* ax, double ox, double oy, double llen);
-void draw_axis(GLEAxis *ax, GLERectangle* box, bool drawgrid); /* Draws the axis */
+
+enum DrawAxisPart {
+   DRAW_AXIS_GRID_SUBTICKS,
+   DRAW_AXIS_GRID_TICKS,
+   DRAW_AXIS_ALL
+};
+
+void draw_axis(GLEAxis *ax, GLERectangle* box, DrawAxisPart drawPart); /* Draws the axis */
+
+#endif // GLE_HAS_AXIS_H

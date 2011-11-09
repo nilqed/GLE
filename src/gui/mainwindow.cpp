@@ -91,7 +91,7 @@ GLEMainWindow::GLEMainWindow(int argc, char *argv[])
 	splitWindow->setStretchFactor(0, 1);
 	splitWindow->setStretchFactor(1, 0);
 	gleInterface->setOutputStream(consoleWindow->getOutput());
-	gleInterface->initializeGLE("qgle", argv);
+	gleInterface->initializeGLE("qgle", argc, argv);
 
 	QList<int> splitSizes;
 	splitSizes.append(50);

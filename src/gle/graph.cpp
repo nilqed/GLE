@@ -1419,14 +1419,14 @@ void axis_add_noticks() {
 #endif
 }
 
-void draw_axis_pos(int axis, double xpos, double ypos, bool xy, bool grid, GLERectangle* box) {
+void draw_axis_pos(int axis, double xpos, double ypos, bool xy, DrawAxisPart axisPart, GLERectangle* box) {
 	if (xx[axis].has_offset) {
 		if (xy) g_move(graph_xgraph(xx[axis].offset), ypos);
 		else g_move(xpos, graph_ygraph(xx[axis].offset));
 	} else {
 		g_move(xpos,ypos);
 	}
-	draw_axis(&xx[axis], box, grid);
+	draw_axis(&xx[axis], box, axisPart);
 }
 
 GLEGraphPartGrid::GLEGraphPartGrid() {
@@ -1441,15 +1441,20 @@ std::set<int> GLEGraphPartGrid::getLayers() {
 	return result;
 }
 
-void GLEGraphPartGrid::drawLayer(int layer) {
+void GLEGraphPartGrid::drawLayerPart(DrawAxisPart axisPart) {
 	GLERectangle box;
 	box.initRange();
-	draw_axis_pos(GLE_AXIS_Y0, xbl, ybl, true, true, &box);
-	draw_axis_pos(GLE_AXIS_Y, xbl, ybl, true, true, &box);
-	draw_axis_pos(GLE_AXIS_Y2, xbl+xlength, ybl, true, true, &box);
-	draw_axis_pos(GLE_AXIS_X, xbl, ybl, false, true, &box);
-	draw_axis_pos(GLE_AXIS_X0, xbl, ybl, false, true, &box);
-	draw_axis_pos(GLE_AXIS_X2, xbl, ybl+ylength, false, true, &box);
+	draw_axis_pos(GLE_AXIS_Y0, xbl, ybl, true, axisPart, &box);
+	draw_axis_pos(GLE_AXIS_Y, xbl, ybl, true, axisPart, &box);
+	draw_axis_pos(GLE_AXIS_Y2, xbl+xlength, ybl, true, axisPart, &box);
+	draw_axis_pos(GLE_AXIS_X, xbl, ybl, false, axisPart, &box);
+	draw_axis_pos(GLE_AXIS_X0, xbl, ybl, false, axisPart, &box);
+	draw_axis_pos(GLE_AXIS_X2, xbl, ybl+ylength, false, axisPart, &box);
+}
+
+void GLEGraphPartGrid::drawLayer(int layer) {
+   drawLayerPart(DRAW_AXIS_GRID_SUBTICKS);
+   drawLayerPart(DRAW_AXIS_GRID_TICKS);
 }
 
 GLEGraphPartAxis::GLEGraphPartAxis():
@@ -1469,17 +1474,17 @@ std::set<int> GLEGraphPartAxis::getLayers() {
 void GLEGraphPartAxis::drawLayer(int layer) {
 	g_init_bounds();
 	// y-axis should *not* influence position of title!
-	draw_axis_pos(GLE_AXIS_Y0, xbl, ybl, true, false, m_box);
-	draw_axis_pos(GLE_AXIS_Y, xbl, ybl, true, false, m_box);
-	draw_axis_pos(GLE_AXIS_Y2, xbl+xlength, ybl, true, false, m_box);
+	draw_axis_pos(GLE_AXIS_Y0, xbl, ybl, true, DRAW_AXIS_ALL, m_box);
+	draw_axis_pos(GLE_AXIS_Y, xbl, ybl, true, DRAW_AXIS_ALL, m_box);
+	draw_axis_pos(GLE_AXIS_Y2, xbl+xlength, ybl, true, DRAW_AXIS_ALL, m_box);
 	GLEMeasureBox measure;
 	measure.measureStart();
-	draw_axis_pos(GLE_AXIS_X, xbl, ybl, false, false, m_box);
-	draw_axis_pos(GLE_AXIS_X0, xbl, ybl, false, false, m_box);
-	draw_axis_pos(GLE_AXIS_X2, xbl, ybl+ylength, false, false, m_box);
+	draw_axis_pos(GLE_AXIS_X, xbl, ybl, false, DRAW_AXIS_ALL, m_box);
+	draw_axis_pos(GLE_AXIS_X0, xbl, ybl, false, DRAW_AXIS_ALL, m_box);
+	draw_axis_pos(GLE_AXIS_X2, xbl, ybl+ylength, false, DRAW_AXIS_ALL, m_box);
 	g_update_bounds(xbl+xlength/2, ybl+ylength);
 	measure.measureEnd();
-	draw_axis_pos(GLE_AXIS_T, xbl, measure.getYMax(), true, false, m_box);
+	draw_axis_pos(GLE_AXIS_T, xbl, measure.getYMax(), true, DRAW_AXIS_ALL, m_box);
 	// otherwise it does not work if all axis are disabled!
 	g_update_bounds_box(m_box);
 }

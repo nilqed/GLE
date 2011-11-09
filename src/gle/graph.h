@@ -37,6 +37,7 @@
  ************************************************************************/
 
 #include "gle-block.h"
+#include "axis.h"
 
 class GLEGraphBlockBase;
 class GLEGraphDrawCommand;
@@ -119,6 +120,7 @@ public:
 
 	virtual std::set<int> getLayers();
 	virtual void drawLayer(int layer);
+   void drawLayerPart(DrawAxisPart axisPart);
 };
 
 class GLEGraphPartFills : public GLEGraphPart

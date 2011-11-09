@@ -120,8 +120,8 @@ int GLEMain(int argc, char **argv) {
 int main(int argc, char **argv) {
 #endif
 	try {
+      gle_glib_init(argc, argv);
 		g_init();
-		gle_glib_init(argc, argv);
 
 		/* Init and process command line arguments */
 		init_config(&g_Config);

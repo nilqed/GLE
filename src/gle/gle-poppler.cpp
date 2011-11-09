@@ -167,7 +167,9 @@ void gle_write_cairo_surface_png(cairo_surface_t* surface,
 
 #ifdef HAVE_LIBJPEG
 
-#include <jpeglib.h>
+extern "C" {
+   #include <jpeglib.h>
+}
 
 #define GLE_JPEG_BUFFER_SIZE 50000
 

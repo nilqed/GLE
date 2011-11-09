@@ -498,7 +498,7 @@ next alpha
 
 \item[{\sf draw call}]
 \index{draw}
-\label{cmd:draw}
+\label{cmd:gdraw}
 
 Executes subroutine `call' while drawing the graph. The call is drawn in the current layer (See ``begin layer''). The output is clipped to the graph window and the subroutine can use the functions `xg()', 'yg()', and variables `xgmin', `ygmin', etc. This is useful for drawing a custom graph background (Fig.~\ref{fig:shadow}) or for defining a custom graph type (Section~\ref{sec:polar}).
 
@@ -1407,7 +1407,7 @@ end graph
 \subsection{Polar Plots}
 \label{sec:polar}
 
-GLE supports polar plots by means of the ``polar'' and ``polar\_grid'' functions from the library file ``polarplot.gle''. See Fig~\ref{fig:polar} for an example. This example also illustrates the use of the ``draw'' function (p.~\pageref{cmd:draw}) and the ``layer'' block (p.~\pageref{cmd:layer}). The ``layer'' block is used here to make sure that the polar grid is drawn before the axis are drawn.
+GLE supports polar plots by means of the ``polar'' and ``polar\_grid'' functions from the library file ``polarplot.gle''. See Fig~\ref{fig:polar} for an example. This example also illustrates the use of the ``draw'' function (p.~\pageref{cmd:gdraw}) and the ``layer'' block (p.~\pageref{cmd:layer}). The ``layer'' block is used here to make sure that the polar grid is drawn before the axis are drawn.
 
 \begin{figure}[tb]
 \begin{minipage}[c]{10.5cm}
@@ -1464,6 +1464,7 @@ the x and x2 axes, put the x2 settings after the x settings.
 \postglecode{}
 
 \subsection{Layers}
+\label{cmd:layer}
 
 GLE draws a graph as a sequence of layers. The following are the default layers.
 
@@ -1475,7 +1476,7 @@ GLE draws a graph as a sequence of layers. The following are the default layers.
 \item[700] Line type graphs
 \item[700] Error bars
 \item[700] Marker type graphs
-\item[700] Draw commands (p.~\pageref{cmd:draw})
+\item[700] Draw commands (p.~\pageref{cmd:gdraw})
 \end{itemize}
 
 There are only 4 default layers. Each layer has a unique number (200, 350, 500, and 700). Layers are drawn from small to large. Within a layer, the elements are drawn in the order indicated above. For example, error bars are drawn after line type graphs.

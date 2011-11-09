@@ -186,8 +186,9 @@ GLEInterface::~GLEInterface() {
 	if (m_FileInfoMap != NULL) delete m_FileInfoMap;
 }
 
-bool GLEInterface::initializeGLE(const char* appname, char **argv) {
+bool GLEInterface::initializeGLE(const char* appname, int argc, char **argv) {
 	try {
+      gle_glib_init(argc, argv);
 		// Initialize code in core.cpp
 		g_init();
 		// Load configuration file

@@ -30,6 +30,9 @@
 	#include <windows.h>
 #endif
 
+#include <string>
+#include <sstream>
+
 GSLibFunctions* g_GSLibInstance = NULL;
 
 GSLibFunctions* GSLibFunctions::getInstance() {
@@ -241,6 +244,17 @@ void GSLibFunctions::tryLocation(const char* str) {
 	}
 }
 
+void GSLibFunctions::tryLocationLoop(const char* prefix) {
+   std::string soName(prefix);
+   soName += "/libgs.so";
+   for (int version = 12; version >= 6; version--) {
+      std::ostringstream toTry;
+      toTry << soName << "." << version;
+      tryLocation(toTry.str().c_str());
+   }
+   tryLocation(soName);
+}
+
 int GSLibFunctions::loadLibrary(const QString& location, QString& last_error) {
 	gsapi_revision_t rv;
 	/* Try to load the library */
@@ -248,25 +262,12 @@ int GSLibFunctions::loadLibrary(const QString& location, QString& last_error) {
 		#ifdef Q_WS_X11
 		#ifdef __x86_64__
 		// try 64 bit libraries on 64 bit system
-		tryLocation("/usr/lib64/libgs.so");
-		tryLocation("/usr/lib64/libgs.so.10");
-		tryLocation("/usr/lib64/libgs.so.9");
-		tryLocation("/usr/lib64/libgs.so.8");
-		tryLocation("/usr/local/lib64/libgs.so");
-		tryLocation("/usr/local/lib64/libgs.so.10");
-		tryLocation("/usr/local/lib64/libgs.so.9");
-		tryLocation("/usr/local/lib64/libgs.so.8");
-		#else
-		tryLocation("/usr/lib/libgs.so");
-		tryLocation("/usr/lib/libgs.so.10");
-		tryLocation("/usr/lib/libgs.so.9");
-		tryLocation("/usr/lib/libgs.so.8");
-		tryLocation("/usr/local/lib/libgs.so");
-		tryLocation("/usr/local/lib/libgs.so.10");
-		tryLocation("/usr/local/lib/libgs.so.9");
-		tryLocation("/usr/local/lib/libgs.so.8");
-		#endif  // __x86_64__
-		#endif
+      tryLocationLoop("/usr/lib64");
+		tryLocationLoop("/usr/local/lib64");
+		#endif // __x86_64__
+      tryLocationLoop("/usr/lib");
+		tryLocationLoop("/usr/local/lib");
+		#endif // Q_WS_X11
 		#ifdef Q_WS_MAC
 		tryLocation("/usr/lib/libgs.dylib");
 		tryLocation("/usr/local/lib/libgs.dylib");

@@ -58,9 +58,7 @@ ifeq (@HAVE_QT@,1)
 	ifeq (@HAVE_AUTOPACKAGE@,1)
 		TOMAKE:=$(TOMAKE) repmake
 	endif
-	ifeq (@HAVE_WIN32@,0)
-		TOMAKE:=$(TOMAKE) domake
-	endif
+   TOMAKE:=$(TOMAKE) domake
 	TOCLEAN=doclean
 	ifeq (@HAVE_MAC@,1)
 		QMAKE_OPTS:=-spec macx-g++

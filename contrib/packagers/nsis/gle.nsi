@@ -114,7 +114,9 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\bin"
   SetOverwrite try
   File "..\..\..\build\bin\*.*"
-  File /nonfatal "C:\cygwin\mingw\bin\mingwm10.dll"
+  File "C:\cygwin\mingw\bin\mingwm10.dll"
+  File "C:\cygwin\mingw\bin\libgcc_s_dw2-1.dll"
+  File "C:\cygwin\mingw\bin\libstdc++-6.dll"
   File "C:\Program Files\Debugging Tools for Windows (x86)\dbghelp.dll"
   SetOutPath "$INSTDIR\font"
   File /r "..\..\..\build\font\*.*"

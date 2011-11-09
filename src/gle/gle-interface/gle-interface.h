@@ -751,7 +751,7 @@ public:
 	~GLEInterface();
 
 	// Initialize GLE - call once before calling any of the other functions
-	DLLFCT bool initializeGLE(const char* appname, char **argv);
+	DLLFCT bool initializeGLE(const char* appname, int argc, char **argv);
 
 	// Returns the version of GLE
 	DLLFCT string getGLEVersion();

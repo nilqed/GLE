@@ -109,6 +109,7 @@ public:
 	void resetFunctions();
 	bool isLoaded();
 	void tryLocation(const char* str);
+   void tryLocationLoop(const char* prefix);
 	QString getVersion();
 	int getVersionMajor();
 	static void StripWhiteSpace(QString& str);

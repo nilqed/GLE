@@ -34,11 +34,11 @@
 
 #include <locale.h>
 
-void findDependencies(char** argv, int argi, int argc) {
+void findDependencies(int argc, char** argv, int argi) {
 	GLEInterface* gleInterface = GLEGetInterfacePointer();
 	SoftwareLocateDialogue dial(NULL, gleInterface, 0);
 	dial.setWindowTitle("GLE - Finding Dependencies");
-	if (gleInterface->initializeGLE("qgle", argv)) {
+	if (gleInterface->initializeGLE("qgle", argc, argv)) {
 		if (argi+1 < argc) {
 			QString file = QString::fromUtf8(argv[argi+1]);
 			QFileInfo fileinfo(file);
@@ -264,7 +264,7 @@ int main(int argc, char *argv[]) {
 	setlocale(LC_NUMERIC, "C");
 	for(int i = 0; i < argc; i++) {
 		if (QString(argv[i]) == "-finddeps") {
-			findDependencies(argv, i, argc);
+			findDependencies(argc, argv, i);
 			return 0;
 		}
 		if (QString(argv[i]) == "-crashrecover" && i+1 < argc) {
