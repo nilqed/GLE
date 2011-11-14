@@ -1,9 +1,9 @@
 
-size 16 14
+size 16 22
 
 symwd = 0.5
 wd = 4
-hi = 0.5
+hi = 0.45
 
 set font texcmr
 
@@ -16,13 +16,13 @@ ncols = 4
 
 fopen "symbols.csv" f1 read
 until feof(f1)
-	freadln f1 sym$
+	fread f1 sym$
 	amove x*wd+dx pageheight()-y*hi-dy
 	towrite$ = "\"+sym$
-	!print towrite$
+	! print towrite$
 	write towrite$
 	amove x*wd+dx+symwd pageheight()-y*hi-dy
-	write "\backslash{}"+sym$
+	tex "$\backslash{}$"+sym$
 	x = x + 1
 	if x = ncols then
 		x = 0
