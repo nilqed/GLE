@@ -62,10 +62,14 @@ Outputs software version, build date, GLE_TOP, GLE_BIN, etc..
 Sets the verbosity level of GLE console output.
 .IP \-device
 Selects output device(s).
+.IP \-cairo
+Use cairo output device.
 .IP \-resolution
 Sets the resolution for bitmap and PDF output.
 .IP \-fullpage
 Selects full page output.
+.IP \-landscape
+Selects full page landscape output.
 .IP \-output
 Specifies the name of the output file.
 .IP \-nosave
@@ -80,6 +84,8 @@ Selects a GLE version to run.
 Selects a GLE compatibility mode.
 .IP \-calc
 Runs GLE in "calculator" mode.
+.IP \-catcsv
+Pretty print a CSV file to standard output.
 .IP \-tex
 Indicates that the script includes LaTeX expressions.
 .IP \-inc
@@ -96,12 +102,18 @@ Creates transparent output (with \-d png).
 Excludes CTRL-D from the PostScript output.
 .IP \-nomaxpath
 Disables the upper-bound on the drawing path complexity.
+.IP \-noligatures
+Disable the use of ligatures for 'fl' and 'fi'.
+.IP \-gsoptions
+Specify additional options for GhostScript.
 .IP \-safemode
 Disables reading/writing to the file system.
 .IP \-allowread
 Allows reading from the given path.
 .IP \-allowwrite
 Allows writing to the given path.
+.IP \-keep
+Don't delete temporary files.
 .SH FILES
 .I @GLE_INSTALL_DATA@/glerc
 .RS
