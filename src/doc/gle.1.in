@@ -52,55 +52,55 @@ GLE (Graphics Layout Engine) is a graphics scripting language designed for creat
 .SH DOCUMENTATION
 GLE's documentation is distrubuted in PDF format and can be found at the GLE website:
 .P
-<http://www.gle-graphics.org>
+<http://www.gle\-graphics.org>
 .SH OPTIONS
-.IP -help
+.IP \-help
 Shows help about command line options.
-.IP -info
+.IP \-info
 Outputs software version, build date, GLE_TOP, GLE_BIN, etc..
-.IP -verbosity
+.IP \-verbosity
 Sets the verbosity level of GLE console output.
-.IP -device
+.IP \-device
 Selects output device(s).
-.IP -resolution
+.IP \-resolution
 Sets the resolution for bitmap and PDF output.
-.IP -fullpage
+.IP \-fullpage
 Selects full page output.
-.IP -output
+.IP \-output
 Specifies the name of the output file.
-.IP -nosave
+.IP \-nosave
 Don't write output file to disk (dry-run).
-.IP -preview
+.IP \-preview
 Previews the output with QGLE.
-.IP -gs
+.IP \-gs
 Previews the output with GhostScript.
-.IP -version
+.IP \-version
 Selects a GLE version to run.
-.IP -compatibility
+.IP \-compatibility
 Selects a GLE compatibility mode.
-.IP -calc
+.IP \-calc
 Runs GLE in "calculator" mode.
-.IP -tex
+.IP \-tex
 Indicates that the script includes LaTeX expressions.
-.IP -inc
+.IP \-inc
 Creates an .inc file with LaTeX code.
-.IP -texincprefix
+.IP \-texincprefix
 Adds the given subdirectory to the path in the .inc file.
-.IP -mkinittex
+.IP \-mkinittex
 Creates "inittex.ini" from "init.tex".
-.IP -nocolor
+.IP \-nocolor
 Forces grayscale output.
-.IP -transparent
-Creates transparent output (with -d png).
-.IP -noctrl-d
+.IP \-transparent
+Creates transparent output (with \-d png).
+.IP \-noctrl\-d
 Excludes CTRL-D from the PostScript output.
-.IP -nomaxpath
+.IP \-nomaxpath
 Disables the upper-bound on the drawing path complexity.
-.IP -safemode
+.IP \-safemode
 Disables reading/writing to the file system.
-.IP -allowread
+.IP \-allowread
 Allows reading from the given path.
-.IP -allowwrite
+.IP \-allowwrite
 Allows writing to the given path.
 .SH FILES
 .I @GLE_INSTALL_DATA@/glerc
