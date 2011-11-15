@@ -25,7 +25,7 @@ dfont delim1= 2.39
 dfont delim2= 1.01 
 dfont axisheight= .25 
 dfont paint="FILL"
-!------------------ end of main paramters
+!------------------ end of main parameters
 dfont  char=0			!-------------- Beginning of new char.
 dfont  wid=.777781 hei=.583334 dep=.083334 italic=0
 set path ! start of curve 

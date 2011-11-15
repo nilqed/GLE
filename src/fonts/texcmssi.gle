@@ -9,7 +9,7 @@ dfont x_hei= .156204
 dfont quad= .351461 
 dfont extra_space= .390513E-01 
 dfont paint="FILL"
-!------------------ end of main paramters
+!------------------ end of main parameters
 dfont  char=0			!-------------- Beginning of new char.
 dfont  wid=.541669 hei=.694445 dep=0 italic=.133718
 set path ! start of curve 

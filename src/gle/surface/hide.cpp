@@ -176,7 +176,7 @@ void hide(float *z ,int nx, int ny, float minz, float maxz, struct surface_struc
 	int x1,x2;
 	g_gsave();
 	g_set_line_cap(1); /* round */
-	sf = *sff; /* Make a local copy of all the paramters */
+	sf = *sff; /* Make a local copy of all the parameters */
 
 /* unit image */
 	init_user();

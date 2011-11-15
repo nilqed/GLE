@@ -2071,7 +2071,7 @@ int check_dev_type_ps(double wx, double wy) {
 	char devtype[200];
 	g_get_type(devtype);
 	if (str_i_str(devtype,"PS")== NULL) {
-		gprint("Ouput device does not support BITMAPS\n");
+		gprint("Output device does not support BITMAPS\n");
 		double cx, cy;
 		g_get_xy(&cx,&cy);
 		g_box_stroke(cx,cy,cx+wx,cy+wy);

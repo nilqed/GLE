@@ -47,7 +47,7 @@
 /* and give it the next unused index number			    */
 
 /* ret = Type of returned value,  1=number, 2=string */
-/* np = number of paramters expected */
+/* np = number of parameters expected */
 /* Parameters p0...p4  ==  1=number, 2=string, 0=none (e.g. height()) .  */
 
 #define NKEYS (sizeof keywfn / sizeof(struct keyw))

@@ -226,7 +226,7 @@ int geton() {
         ct++;
         if (str_i_equals(tk[ct],"ON")) return true;
         if (str_i_equals(tk[ct],"OFF")) return false;
-        gprint("Expecting ON | OFF, asuming ON\n");
+        gprint("Expecting ON | OFF, assuming ON\n");
         return true;
 }
 

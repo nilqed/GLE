@@ -15,7 +15,7 @@ dfont bigop3= .2
 dfont bigop4= .6 
 dfont bigop5= .1 
 dfont paint="FILL"
-!------------------ end of main paramters
+!------------------ end of main parameters
 dfont  char=0			!-------------- Beginning of new char.
 dfont  wid=.458336 hei=.039999 dep=1.16001 italic=0
 dfont  next_char=16

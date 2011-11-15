@@ -57,7 +57,7 @@ dfont design= 10
 dfont x_hei= 5
 dfont quad= 5
 dfont paint="FILL"
-!------------------ end of main paramters
+!------------------ end of main parameters
 dfont  char=1
 dfont  wid=10 hei=10
 size 20 20

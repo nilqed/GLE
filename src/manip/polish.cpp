@@ -150,7 +150,7 @@ notnumber:	/* NOT a number, Is it a built in function */
 				polish((char*)"xx",fcode,&flen,&vtype);
 				start_token = false;
 				flen = flen * 4;
-				if (nparam>np) {gprint("Too many paramters got=%d want=%d \n",nparam,np);abort;}
+				if (nparam>np) {gprint("Too many parameters got=%d want=%d \n",nparam,np);abort;}
 				if (vtype==0) abort;
 				add_pcode(pcode,plen,fcode,&flen);
 			   }
@@ -191,7 +191,7 @@ notnumber:	/* NOT a number, Is it a built in function */
 				polish((char*)"xx",fcode,&flen,&vtype);
 				start_token = false;
 				flen = flen * 4;
-				if (nparam>np) {gprint("Too many U paramters got=%d want=%d \n",nparam,np);abort;}
+				if (nparam>np) {gprint("Too many U parameters got=%d want=%d \n",nparam,np);abort;}
 				if (vtype==0) abort;
 				add_pcode(pcode,plen,fcode,&flen);
 			  }
