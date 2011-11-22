@@ -727,6 +727,15 @@ void tex_draw_accent_cmb(uchar **in, TexArgStrs* params, int *out, int *lout) {
 	}
 }
 
+int select_font_encoding(int font, int encoding, const char* defaultFont) {
+	GLECoreFont* crfont = get_core_font_ensure_loaded(font);
+	if (crfont->info.encoding == encoding) {
+		return font;
+	} else {
+		return pass_font(defaultFont);
+	}
+}
+
 void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 	int ci;
 	int ix;
@@ -833,6 +842,11 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 		i = atoi(params->getCStr1());  if (i>15) i = 1;
 		fontfam[i][k] = pass_font(params->getCStr2());
 		fontfamsz[i][k] = emtof(params->str3);
+		break;
+	  case tp_fontenc:
+		params->cmdParam2(in);
+		p_fnt = select_font_encoding(p_fnt, atoi(params->getCStr1()), params->getCStr2());
+		font_load_metric(p_fnt);
 		break;
 	  case tp_acccmb:
   		params->cmdParam4_swap34(in);

@@ -207,6 +207,7 @@ struct mkeyw tkeywfn[] = {
 	{ "defbegin",           tp_defbegin     },
 	{ "delcode",            tp_delcode      },
 	{ "delimiter",          tp_delimiter    },
+	{ "fontenc",            tp_fontenc      },
 	{ "frac",               tp_frac         },
 	{ "hfill",              tp_hfill        },
 	{ "left",               tp_left         },

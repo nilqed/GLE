@@ -105,10 +105,10 @@ begin text
 \def\AE{\char{$1d}}
 \def\OE{\char{$1e}}
 \def\O{\char{$1f}}
-\def\i{\char{$10}}
-\def\j{\char{$11}}
-\def\l{\char{248}}
-\def\L{\char{232}}
+\def\i{{\fontenc{3}{texcmr}\char{$10}}}
+\def\j{{\fontenc{3}{texcmr}\char{$11}}}
+\def\l{{\fontenc{1}{rm}\char{248}}}
+\def\L{{\fontenc{1}{rm}\char{232}}}
 
 \def\adobess{\char{251}}
 \def\adobeae{\char{241}}
@@ -124,7 +124,7 @@ begin text
 \def\adobesection{\char{167}}
 \def\adobecurrency{\char{168}}
 
-\def\degree{\char{202}}
+\def\degree{{\fontenc{1}{rm}\char{202}}}
 
 \def\dag{\mathchar{$279}}
 \def\ddag{\mathchar{$27A}}
@@ -200,10 +200,10 @@ begin text
 \mathchardef{\flat}{$015B}
 \mathchardef{\natural}{$015C}
 \mathchardef{\sharp}{$015D}
-\mathchardef{\clubsuit}{$027C}
-\mathchardef{\diamondsuit}{$027D}
-\mathchardef{\heartsuit}{$027E}
-\mathchardef{\spadesuit}{$027F}
+\def\clubsuit{{\setfont{pszd}\char{168}}}
+\def\diamondsuit{{\setfont{pszd}\char{169}}}
+\def\heartsuit{{\setfont{pszd}\char{170}}}
+\def\spadesuit{{\setfont{pszd}\char{171}}}
 
 \mathchardef{\coprod}{$1360}
 \mathchardef{\bigvee}{$1357}

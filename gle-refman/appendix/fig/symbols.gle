@@ -12,7 +12,7 @@ dy = 0.5
 
 x = 0
 y = 0
-ncols = 4
+nrows = 48
 
 fopen "symbols.csv" f1 read
 until feof(f1)
@@ -23,10 +23,10 @@ until feof(f1)
 	write towrite$
 	amove x*wd+dx+symwd pageheight()-y*hi-dy
 	tex "$\backslash{}$"+sym$
-	x = x + 1
-	if x = ncols then
-		x = 0
-		y = y + 1
+	y = y + 1
+	if y = nrows then
+		y = 0
+		x = x + 1
 	end if
 next
 fclose f1

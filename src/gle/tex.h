@@ -45,7 +45,7 @@ enum {	tp_parskip=1,   tp_char, 	tp_def, 	tp_defbegin,
  	tp_underbrace, 	tp_underline,	tp_presave,	tp_chardef,
 	tp_newline,	tp_hfill,	tp_setstretch,	tp_linegap,
 	tp_rule,	tp_accent,      tp_tex,         tp_accentxy,
-	tp_unicode,     tp_uchr,        tp_acccmb };
+	tp_unicode,     tp_uchr,        tp_acccmb,      tp_fontenc };
 
 void tex_term();
 void decode_utf8_notex(string& sc);
