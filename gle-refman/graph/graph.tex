@@ -68,7 +68,7 @@ commands are not explicitly mentioned in the following descriptions.
 {\sf dn key {\it "Dataset title"}}  \\
 {\sf dn line [impulses] [steps] [fsteps] [hist] [bar]}\\
 {\sf dn lstyle {\it line-style} lwidth {\it line-width} color {\it col}}  \\
-{\sf dn marker {\it marker-name} [color {\it c}] [msize {\it marker-size}] [mdata {\it dn}]}  \\
+{\sf dn marker {\it marker-name} [color {\it c}] [msize {\it marker-size}] [mdata {\it dn}] [mdist {\it dexp}]}  \\
 {\sf dn nomiss}  \\
 {\sf dn smooth | smoothm}  \\
 {\sf dn svg\_smooth [m]} \\
@@ -351,7 +351,7 @@ The options {\sf impulses}, {\sf steps}, {\sf fsteps}, {\sf hist}, and {\sf bar}
 These qualifiers are all fairly self explanatory.  See the {\sf lstyle} command
 in Chapter~\ref{prim:chap} (Page~\pageref{lstyle:cmd}) for details of specifying line styles.
 
-\item[{\sf dn marker {\it marker-name} [color {\it c}] [msize {\it marker-size}] [mdata {\it dn}]}]
+\item[{\sf dn marker {\it marker-name} [color {\it c}] [msize {\it marker-size}] [mdata {\it dn}] [mdist {\it dexp}]}]
 \index{dn!marker}
 \index{marker}
 Specifies the marker to be used for the dataset.  There is a set of pre-defined markers (refer to Appendix A.1 for a list)  which can be specified by name (e.g., {\sf circle, square, triangle, diamond, cross, ...}). The marker's color can be specified with the `{\sf color}' option.
@@ -360,6 +360,10 @@ Markers can also be drawn using a user-defined subroutine (See the {\sf define m
 
 \index{dn!msize}
 The {\sf msize} qualifier sets the marker size for that dataset. The size is a character height in cm, so that the actual size of the markers will be about 0.7 of this value.
+
+\index{dn!mdist}
+The `{\sf mdist}' option can be used to specify the distance between the markers on a curve. This can be used to add markers to a plot of a continuous function. See Fig.~\ref{grkey:fig} for an example.
+
 
 \item[{\sf dn nomiss}  ]
 \index{dn!nomiss}
