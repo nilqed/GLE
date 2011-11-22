@@ -115,7 +115,7 @@ ExportDialogue::ExportDialogue(GLEMainWindow *parent) {
 	p1->addStretch(1);
 	layout->addLayout(p1);
 	QHBoxLayout *p2 = new QHBoxLayout();
-	resolutionLabel = new QLabel(tr("Resolution:"));
+	resolutionLabel = new QLabel(tr("Resolution (dpi):"));
 	p2->addWidget(resolutionLabel);
 	resolution = new QSpinBox();
 	resolution->setMinimum(1);

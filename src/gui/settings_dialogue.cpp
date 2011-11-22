@@ -179,7 +179,7 @@ ApplicationTab::ApplicationTab(QWidget *parent)
 	autoScaleOnOpenBox = new QCheckBox(tr("Auto scale when opening diagrams"));
 	askAboutObjectsBox = new QCheckBox(tr("Automatically keep objects when reloading"));
 
-	QLabel *resolutionLabel = new QLabel(tr("Default resolution:"));
+	QLabel *resolutionLabel = new QLabel(tr("Default display resolution (dpi):"));
 	resolutionBox = new QSpinBox();
 	resolutionBox->setMinimum(0);
 	resolutionBox->setMaximum(500);
