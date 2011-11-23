@@ -36,7 +36,7 @@
 !                                                                      !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-$.,Makefile.*;config.*;configure.ac;configure;README.txt;LICENSE.txt,*.zip;*.gz;*.patch;Makefile;test.*;.*;extraconfig.*;srcfiles.txt;conf.txt*;config.status;config.log;aclocal.m4
+$.,Makefile.*;config.*;configure.ac;configure;README.txt;LICENSE.txt;ChangeLog.txt,*.zip;*.gz;*.patch;Makefile;test.*;.*;extraconfig.*;srcfiles.txt;conf.txt*;config.status;config.log;aclocal.m4
 platform/autoconf,config.*;install-sh;*.in,gle-graphics.pc
 platform/autopackage,gle.*;*.in;*.pl,gle4.apspec
 platform/script,*,

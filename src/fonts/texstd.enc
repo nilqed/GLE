@@ -78,3 +78,10 @@ $2020; dagger
 $2021; double dagger
 $2022; bullet
 $2030; per mille
+
+$00C6, 29; AE
+$00D8, 31; Oslash
+$0153, 27; oe
+$0152, 30; OE
+$00E6, 26; ae
+$00F8, 28; oslash
