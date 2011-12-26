@@ -228,7 +228,6 @@ protected:
 	GLERC<GLEColor> m_currentColor;
 	GLERC<GLEColor> m_currentFill;
 	std::vector<char> m_recorded;
-	bool m_showNoteAboutFallback;
 public:
 	GLECairoDevice(bool showerror);
 	virtual ~GLECairoDevice();

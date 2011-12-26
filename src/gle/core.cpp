@@ -36,6 +36,8 @@
  *                                                                      *
  ************************************************************************/
 
+#define FONTDEF extern
+
 #include "all.h"
 #include "bitmap/img2ps.h"
 #include "core.h"
@@ -52,6 +54,9 @@
 #include "texinterface.h"
 #include "tokens/stokenizer.h"
 #include "gle-interface/gle-interface.h"
+#include "font.h"
+#include "cmdline.h"
+#include "config.h"
 
 void g_graph_init();
 void dis_mat(char *s,double m[3][3]);
@@ -91,13 +96,17 @@ unsigned int farcoreleft() {
 	return 1200000;
 }
 
-GLECore::GLECore():
-	m_isComputingLength(false),
-	m_totalLength(0.0)
+GLECore::GLECore()
 {
 }
 
 GLECore::~GLECore() {
+}
+
+void GLECore::reset() {
+	m_isComputingLength = false;
+	m_totalLength = 0.0;
+	m_showNoteAboutFallback = true;
 }
 
 bool GLECore::isComputingLength() const {
@@ -118,6 +127,14 @@ void GLECore::setTotalLength(double length) {
 
 void GLECore::addToLength(double value) {
 	m_totalLength += value;
+}
+
+bool GLECore::isShowNoteAboutFallback() const {
+	return m_showNoteAboutFallback;
+}
+
+void GLECore::setShowNoteAboutFallback(bool value) {
+	m_showNoteAboutFallback = value;
 }
 
 GLEWithoutUpdates::GLEWithoutUpdates() {
@@ -1251,6 +1268,7 @@ void g_clear() {
 	g_set_fconst(GLEC_ATITLEDIST, 0.5);
 	g_set_fconst(GLEC_ALABELDIST, 0.5);
 	g_compatibility_settings();
+	g_get_core()->reset();
 }
 
 void g_compatibility_settings() {
@@ -3943,4 +3961,20 @@ void GLESaveRestore::save() {
 
 void GLESaveRestore::restore() {
 	g_set_state(model);
+}
+
+int g_font_fallback(int font) {
+	GLECoreFont* coreFont = get_core_font_ensure_loaded(font);
+	if (coreFont->info.encoding <= 2) {
+		CmdLineObj* cmdLine = GLEGetInterfacePointer()->getCmdLine();
+		if (cmdLine->hasOption(GLE_OPT_CAIRO)) {
+			GLECore* core = g_get_core();
+			if (core->isShowNoteAboutFallback()) {
+				core->setShowNoteAboutFallback(false);
+				g_message(">> PostScript fonts not supported with '-cairo'; using 'texcmr' instead");
+			}
+			return 17;
+		}
+	}
+	return font;
 }

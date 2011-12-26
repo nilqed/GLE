@@ -138,7 +138,7 @@ void text_gprint(int *in,int ilen);
 void fftext_block(const string& s,double width,int justify);
 void font_load(void);
 void tex_init(void);
-
+int g_font_fallback(int font);
 void decode_utf8_basic(string& sc);
 
 void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params);
@@ -241,6 +241,10 @@ void set_base_size() {
 	g_get_hei(&base_size);
 }
 
+void set_tex_font(int fnt) {
+	p_fnt = g_font_fallback(fnt);
+}
+
 void try_get_next_char(uchar **in, int *c1) {
 	*c1 = 0;
 	if (**in != 0) {
@@ -313,6 +317,7 @@ void text_topcode(uchar *in, int *out, int *lout) {
 		/* if next char is normal, then check for ligature and kern */
 norm_again:
 		w = 0;
+	    p_fnt = g_font_fallback(p_fnt);
 		cfont = get_core_font_ensure_loaded(p_fnt);
 		if (c2 != 0) {
 			if (!g_CmdLine.hasOption(GLE_OPT_NO_LIGATURES)) {
@@ -334,6 +339,7 @@ norm_again:
 		if (skip_space) break;
 		skip_space = true;
 		outlong(2);
+		p_fnt = g_font_fallback(p_fnt);
 		cfont = get_core_font_ensure_loaded(p_fnt);
 		outfloat(cfont->info.space*p_hei);
 		outfloat(cfont->info.space_stretch*p_hei*10*stretch_factor);
@@ -366,7 +372,7 @@ norm_again:
 			return;
 		}
 		p_hei = grphei[p_ngrp];
-		p_fnt = grpfnt[p_ngrp--];
+		set_tex_font(grpfnt[p_ngrp--]);
 		font_load_metric(p_fnt);
 
 		outlong(8); outfloat(p_hei);
@@ -692,7 +698,7 @@ void tex_draw_accent(uchar **in, TexArgStrs* params, int *out, int *lout) {
 	p_move(-cwid2+lef2+wid2/2-wid/2+accent_x,h+accent_y);  /* cwid2/2 - cwid/2 */
 	p_fntchar(newfnt,ix);        /* cwid2/2 + cwid/2 */
 	p_move(-cwid+cwid2-lef2-wid2/2+wid/2-accent_x,-h-accent_y);
-	p_fnt = savefnt;
+	set_tex_font(savefnt);
 	font_load_metric(p_fnt);
 }
 
@@ -845,7 +851,7 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 		break;
 	  case tp_fontenc:
 		params->cmdParam2(in);
-		p_fnt = select_font_encoding(p_fnt, atoi(params->getCStr1()), params->getCStr2());
+		set_tex_font(select_font_encoding(p_fnt, atoi(params->getCStr1()), params->getCStr2()));
 		font_load_metric(p_fnt);
 		break;
 	  case tp_acccmb:
@@ -914,7 +920,7 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 		break;
 	  case tp_setfont:
 		params->cmdParam1(in);
-		p_fnt = pass_font(params->getCStr1());
+		set_tex_font(pass_font(params->getCStr1()));
 		font_load_metric(p_fnt);
 		break;
 	  case tp_presave:
@@ -1040,7 +1046,7 @@ void texint(const string& s, int *i) {
 
 void text_wrapcode(int *in,int ilen,double width) {
 	double cx=0,cy=0,p_hei,ax=0,y,cdep=0,chei=0;
-	int i,c,p_fnt,si,skline,saveii;
+	int i,c,crFont,si,skline,saveii;
 	double totstretch=0,totshrink=0,ls=0,gap=0,last_y,last_x,lastdep,last_stret,last_shrink;
 	int *pcr=0,last_space=0;
 	double setlen;
@@ -1062,8 +1068,8 @@ void text_wrapcode(int *in,int ilen,double width) {
 	  switch (*(in+i)) {
 	    case 1: /* char     font+char,wx    */
 		eat_glue = false;
-		p_fnt = (*(in+ ++i)) / 1024;
-		cfont = get_core_font_ensure_loaded(p_fnt);
+		crFont = g_font_fallback((*(in+ ++i)) / 1024);
+		cfont = get_core_font_ensure_loaded(crFont);
 		c = *(in+i) & 0x3ff;
 		if (cdep > cy + p_hei * cfont->cdata[c]->y1)
 			cdep = cy + p_hei * cfont->cdata[c]->y1;
@@ -1194,8 +1200,8 @@ void text_wrapcode(int *in,int ilen,double width) {
 		g_set_hei(p_hei);
 		break;
 	    case 9: /* font     p_fnt   */
-		p_fnt = *(in+ ++i);
-		font_load_metric(p_fnt);
+	    crFont = g_font_fallback(*(in+ ++i));
+		font_load_metric(crFont);
 
 		break;
 	    case 20: /*  nop  */
@@ -1295,7 +1301,7 @@ void set_glue(int *in,int ilen,double actual,double width,double stretch,double	
 
 void text_draw(int *in,int ilen) {
 	double cx,cy,p_hei,x,y;
-	int i,c,p_fnt;
+	int i,c,crFont;
 	GLECoreFont* cfont;
 
 	dbg gprint("---TEXT DRAW, ilen = %d \n",ilen);
@@ -1309,14 +1315,14 @@ void text_draw(int *in,int ilen) {
 	for (i=0;i<ilen;i++) {
 	  switch (*(in+i)) {
 	    case 1: /* char     font+char,wx    */
-		p_fnt = (*(in+ ++i)) / 1024;
-		cfont = get_core_font_ensure_loaded(p_fnt);
+	    crFont = g_font_fallback((*(in+ ++i)) / 1024);
+		cfont = get_core_font_ensure_loaded(crFont);
 		c = *(in+i) & 0x3ff;
 		g_update_bounds(cx+p_hei*(cfont->cdata[c]->x1), cy+p_hei*(cfont->cdata[c]->y1));
 		g_update_bounds(cx+p_hei*(cfont->cdata[c]->x2), cy+p_hei*(cfont->cdata[c]->y2));
 		dp {
 			g_move(cx,cy);
-			g_char(p_fnt,c);
+			g_char(crFont,c);
 		}
 		cx += tofloat(*(in+ ++i));
 		break;
@@ -1350,8 +1356,8 @@ void text_draw(int *in,int ilen) {
 		g_set_hei(p_hei);
 		break;
 	    case 9: /* font     p_fnt   */
-		p_fnt = *(in+ ++i);
-		font_load_metric(p_fnt);
+	    crFont = g_font_fallback(*(in+ ++i));
+		font_load_metric(crFont);
 		break;
 	    case 10: /* Newline  x,y    (turned into a move) */
 		i += 2;
@@ -1391,7 +1397,7 @@ double tex_yend(void) {
 }
 
 void text_gprint(int *in,int ilen) {
-	int i,c,p_fnt;
+	int i,c,crFont;
 	for (i=0;i<ilen;i++) printf("%x ",*(in+i));
 	printf("\n");
 	printf("# ");
@@ -1399,8 +1405,8 @@ void text_gprint(int *in,int ilen) {
 	for (i=0;i<ilen;i++) {
 	  switch (*(in+i)) {
 	    case 1: /* char     font+char,wx    */
-		p_fnt = (*(in+ ++i)) / 1024;
-		font_load_metric(p_fnt);
+	    crFont = g_font_fallback((*(in+ ++i)) / 1024);
+		font_load_metric(crFont);
 		c = *(in+i) & 0x3ff;
 		x = tofloat(*(in+ ++i));
 		printf("%c[%3.3f]",c,x);

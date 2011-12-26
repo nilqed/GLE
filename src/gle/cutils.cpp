@@ -727,7 +727,6 @@ bool bool_vector_is(vector<bool>* v, unsigned int i) {
 }
 
 void split_into_lines(const std::vector<unsigned char>* input, std::vector<std::string>* output) {
-   char prevCh = 0;
    bool done = false;
    unsigned int pos = 0;
    while (!done) {

@@ -60,8 +60,7 @@ extern struct gmodel g;
 char *font_getname(int i);
 
 GLECairoDevice::GLECairoDevice(bool showerror):
-	m_ShowError(showerror),
-	m_showNoteAboutFallback(false)
+	m_ShowError(showerror)
 {
 }
 
@@ -141,11 +140,7 @@ void GLECairoDevice::dochar(int font, int cc) {
 	if (font_get_encoding(font) > 2) {
 		my_char(font, cc);
 	} else {
-		if (!m_showNoteAboutFallback) {
-			m_showNoteAboutFallback = true;
-			g_message(">> PostScript fonts not supported with '-cairo'; using 'texcmr' instead");
-		}
-		my_char(17, cc);
+		g_throw_parser_error("PostScript fonts not supported with '-cairo'");
 	}
 }
 

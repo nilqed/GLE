@@ -291,15 +291,19 @@ public:
 	GLECore();
 	~GLECore();
 
+	void reset();
 	bool isComputingLength() const;
 	void setComputingLength(bool computingLength);
 	double getTotalLength() const;
 	void setTotalLength(double length);
 	void addToLength(double value);
+	bool isShowNoteAboutFallback() const;
+	void setShowNoteAboutFallback(bool value);
 
 private:
 	bool m_isComputingLength;
 	double m_totalLength;
+	bool m_showNoteAboutFallback;
 };
 
 class GLEWithoutUpdates {
@@ -564,5 +568,6 @@ void g_undev(double ux,double uy, double *x,double *y);
 void my_char(int ff, int cc);
 int g_device_to_bitmap_type(int device);
 bool g_bitmap_supports_type(int type);
+int g_font_fallback(int font);
 
 #endif
