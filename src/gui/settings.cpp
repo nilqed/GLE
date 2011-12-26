@@ -52,6 +52,10 @@ void GLESettings::readAll()
 	setExportPageSize(settingStore->value("application/exportPageSize", 0).toInt());
 	setPreviewPageSize(settingStore->value("application/previewPageSize", 0).toInt());
 	setOpenExportedFigure(settingStore->value("application/openExportedFigure", true).toBool());
+	setExportGrayScale(settingStore->value("application/exportGrayScale", false).toBool());
+	setExportTransparent(settingStore->value("application/exportTransparent", false).toBool());
+	setExportBitmapResolution(settingStore->value("application/exportBitmapResolution", 150).toInt());
+	setExportVectorResolution(settingStore->value("application/exportVectorResolution", 600).toInt());
 	setRenderUsingCairo(settingStore->value("application/renderUsingCairo", false).toBool());
 
 	if (storeDirectory())
@@ -98,6 +102,10 @@ void GLESettings::writeAll()
 	settingStore->setValue("application/exportPageSize", getExportPageSize());
 	settingStore->setValue("application/previewPageSize", getPreviewPageSize());
 	settingStore->setValue("application/openExportedFigure", isOpenExportedFigure());
+	settingStore->setValue("application/exportGrayScale", isExportGrayScale());
+	settingStore->setValue("application/exportTransparent", isExportTransparent());
+	settingStore->setValue("application/exportBitmapResolution", getExportBitmapResolution());
+	settingStore->setValue("application/exportVectorResolution", getExportVectorResolution());
 	settingStore->setValue("application/renderUsingCairo", isRenderUsingCairo());
 
 	if (storeDirectory())

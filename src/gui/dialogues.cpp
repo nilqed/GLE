@@ -120,16 +120,18 @@ ExportDialogue::ExportDialogue(GLEMainWindow *parent) {
 	resolution = new QSpinBox();
 	resolution->setMinimum(1);
 	resolution->setMaximum(2000);
-	resolution->setValue(150);
 	connect(resolution, SIGNAL(valueChanged(int)), this, SLOT(resolutionChanged(int)));
 	p2->addWidget(resolution);
 	sizeLabel = new QLabel();
 	p2->addWidget(sizeLabel);
 	p2->addStretch(1);
 	layout->addLayout(p2);
+	layout->addWidget(new QLabel(tr("(For vector formats, 'resolution' specifies the bitmap fallback resolution.)")));
 	transp = new QCheckBox(tr("Transparent"));
+	transp->setChecked(mainWin->settings->isExportTransparent());
 	layout->addWidget(transp);
 	grayScale = new QCheckBox(tr("Grayscale"));
+	grayScale->setChecked(mainWin->settings->isExportGrayScale());
 	layout->addWidget(grayScale);
 	openResult = new QCheckBox(tr("View resulting file"));
 	openResult->setChecked(mainWin->settings->isOpenExportedFigure());
@@ -153,7 +155,7 @@ ExportDialogue::ExportDialogue(GLEMainWindow *parent) {
 	layout->addLayout(p3);
 	setLayout(layout);
 	resize(mainWin->width()/2, mainWin->height()/2);
-	exportFormatChanged(mainWin->settings->getExportFormat());
+	exportFormatChangedImpl(mainWin->settings->getExportFormat(), true);
 }
 
 void ExportDialogue::addFormat(const QString& name, int gleFormatID) {
@@ -168,9 +170,13 @@ int ExportDialogue::entryIDtoDevice(int id) {
 	return GLE_DEVICE_EPS;
 }
 
+bool ExportDialogue::isBitmap()
+{
+	return device == GLE_DEVICE_PNG || device == GLE_DEVICE_JPEG;
+}
+
 void ExportDialogue::resolutionChanged(int) {
-	bool isBitmap = device == GLE_DEVICE_PNG || device == GLE_DEVICE_JPEG;
-	if (isBitmap) {
+	if (isBitmap()) {
 		updateResolution();
 	}
 }
@@ -217,6 +223,13 @@ void ExportDialogue::performExport(const QString& file) {
 	iface->renderGLE(mainWin->getGLEScript(), file.toLatin1().constData(), device);
 	iface->clearAllCmdLine();
 	mainWin->settings->setOpenExportedFigure(openResult->isChecked());
+	if (isBitmap()) {
+		mainWin->settings->setExportBitmapResolution(resolution->value());
+	} else {
+		mainWin->settings->setExportVectorResolution(resolution->value());
+	}
+	mainWin->settings->setExportGrayScale(grayScale->isChecked());
+	mainWin->settings->setExportTransparent(transp->isChecked());
 	if (openResult->isChecked()) {
 		mainWin->showLocalFile(file);
 	}
@@ -232,22 +245,33 @@ void ExportDialogue::updateResolution() {
 }
 
 void ExportDialogue::exportFormatChanged(int idx) {
+	exportFormatChangedImpl(idx, false);
+}
+
+void ExportDialogue::exportFormatChangedImpl(int idx, bool updateAll) {
 	device = entryIDtoDevice(idx);
 	transp->setEnabled(device == GLE_DEVICE_PNG);
-	bool isBitmap = device == GLE_DEVICE_PNG || device == GLE_DEVICE_JPEG;
 	if (device == GLE_DEVICE_PS && format->currentIndex() == 0) {
 		// "Figure" output not compatible with PS
 		format->setCurrentIndex(1);
 	}
 	const char* ext = mainWin->getGLEInterface()->getDeviceFilenameExtension(device);
 	fname->setText(QGLE::addFileNameExtension(fname->text(), ext));
-	if (isBitmap) {
+	if (isBitmap()) {
 		updateResolution();
 	} else {
 		const GLEPoint& size = mainWin->getGLEScript()->getSize();
 		sizeLabel->setText(QString("(%1 x %2 cm)").arg(size.getX()).arg(size.getY()));
 	}
 	mainWin->settings->setExportFormat(idx);
+	if (previousWasBitmap != isBitmap() || updateAll) {
+		if (isBitmap()) {
+			resolution->setValue(mainWin->settings->getExportBitmapResolution());
+		} else {
+			resolution->setValue(mainWin->settings->getExportVectorResolution());
+		}
+	}
+	previousWasBitmap = isBitmap();
 }
 
 SoftwareLocateThread::SoftwareLocateThread(SoftwareLocateDialogue* parent, const QString& root) {

@@ -50,6 +50,7 @@ public:
 
 private slots:
 	void exportFormatChanged(int idx);
+	void exportFormatChangedImpl(int idx, bool updateAll);
 	int entryIDtoDevice(int id);
 	void resolutionChanged(int value);
 	void exportClicked();
@@ -59,6 +60,7 @@ private:
 	void updateResolution();
 	void performExport(const QString& file);
 	void addFormat(const QString& name, int gleFormatID);
+	bool isBitmap();
 	int device;
 	QList<int> fmtToDevice;
 	GLEMainWindow *mainWin;
@@ -71,6 +73,7 @@ private:
 	QLabel* resolutionLabel;
 	QLabel* sizeLabel;
 	QComboBox* format;
+	bool previousWasBitmap;
 };
 
 class SoftwareLocateDialogue;

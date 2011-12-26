@@ -176,6 +176,18 @@ public:
 	inline bool isOpenExportedFigure() { return openExportedFigure; }
 	inline void setOpenExportedFigure(bool value) { openExportedFigure = value; }
 
+	inline bool isExportGrayScale() { return exportGrayScale; }
+	inline void setExportGrayScale(bool value) { exportGrayScale = value; }
+
+	inline bool isExportTransparent() { return exportTransparent; }
+	inline void setExportTransparent(bool value) { exportTransparent = value; }
+
+	inline int getExportBitmapResolution() { return exportBitmapResolution; }
+	inline void setExportBitmapResolution(int value) { exportBitmapResolution = value; }
+
+	inline int getExportVectorResolution() { return exportVectorResolution; }
+	inline void setExportVectorResolution(int value) { exportVectorResolution = value; }
+
 	//! Should render using Cairo backend
 	inline bool isRenderUsingCairo() { return renderUsingCairo; }
 	inline void setRenderUsingCairo(bool value) { renderUsingCairo = value; }
@@ -211,6 +223,10 @@ private:
 	int exportPageSize;
 	int previewPageSize;
 	bool openExportedFigure;
+	bool exportGrayScale;
+	bool exportTransparent;
+	int exportBitmapResolution;
+	int exportVectorResolution;
 	bool renderUsingCairo;
 
 	bool startOSNAP;
