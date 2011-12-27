@@ -2381,7 +2381,7 @@ struct mark_struct stdmark[] = {
 	{ "DDAG",     "TEXSY",   122,0,0,0.79,       true  },   /* dagg */
 	{ "DIAMOND",  "GLEMARK", 10,-0.5,-0.5,0.7,   false },   /* diamond */
 	{ "DIAMONDZ", "TEXSY",   125,0,0,0.81,       true  },   /* diamondz */
-	{ "DOT",      "RM",      46,0,0,3.0,         true  },   /* dot */
+	{ "DOT",      "GLEMARK", 8,-0.5,-0.5,0.3325, false },   /* dot */
 	{ "FCIRCLE",  "GLEMARK", 8,-0.5,-0.5,0.7,    false },   /* fcircle */
 	{ "FDIAMOND", "GLEMARK", 11,-0.5,-0.5,0.7,   false },   /* fdiamond */
 	{ "FLOWER",   "PSZD",    96,0,0.03,0.97,     true  },   /* ZapDingbats */

@@ -163,6 +163,12 @@ void do_line()
 	} else if (str_i_equals(tk[ct],"AMOVE")) {
 		sendp(1);
 		sendxyabs(gx=atof(tk[2]),gy=atof(tk[3]));
+	} else if (str_i_equals(tk[ct],"ASETPOS")) {
+		sendp(9);
+		sendxyabs(gx=atof(tk[2]),gy=atof(tk[3]));
+	} else if (str_i_equals(tk[ct],"CIRCLE")) {
+		sendp(10);
+		sendx(atof(tk[2]));
 	} else if (str_i_equals(tk[ct],"CLOSEPATH")) 	sendp(4);
 	else if (str_i_equals(tk[ct],"FILL")) 	sendp(5);
 	else if (str_i_equals(tk[ct],"FILLWHITE")) sendp(7);

@@ -151,34 +151,37 @@ void my_load_font(int ff)
 	my_curfont = ff;
 }
 int frxi(char **s);
-int char_plen(char *s)
-{
+
+int char_plen(char *s) {
 	char *savelen;
 	savelen = s;
 	while (*s!=15) {
 	  switch (*s++) {
 	    case 1:
 	    case 2:
-		frxi(&s); frxi(&s);
-		break;
+	    case 9:
+	    	frxi(&s); frxi(&s);
+	    	break;
 	    case 3:
-		frxi(&s); frxi(&s);
-		frxi(&s); frxi(&s);
-		frxi(&s); frxi(&s);
-		break;
+	    	frxi(&s); frxi(&s);
+	    	frxi(&s); frxi(&s);
+	    	frxi(&s); frxi(&s);
+	    	break;
 	    case 4:
 	    case 5:
 	    case 6:
 	    case 7:
 	    case 8:
-		break;
+	    	break;
+	    case 10:
+	    	frxi(&s);
+	    	break;
 	    case 0: /* char does not exist */
-		goto abort;
+	    	goto abort;
 	    default:
-		gprint("Error in mychar pcode %d \n",*s++);
-		goto abort;
+	    	gprint("Error in mychar pcode %d \n",*s++);
+	    	goto abort;
 	  }
-
 	}
 abort:
 	return s-savelen;
@@ -209,46 +212,52 @@ int draw_char_pcode(char *s)
 	while (*s!=15) {
 	  switch (*s++) {
 	    case 1:
-		cx = ox + frx(&s); cy = oy + frx(&s);
-		g_move(cx,cy);
-		break;
+	    	cx = ox + frx(&s); cy = oy + frx(&s);
+	    	g_move(cx,cy);
+	    	break;
 	    case 2:
-		cx = cx + frx(&s); cy = cy + frx(&s);
-		g_line(cx,cy);
-		break;
+	    	cx = cx + frx(&s); cy = cy + frx(&s);
+	    	g_line(cx,cy);
+	    	break;
 	    case 3:
-		cx = cx + frx(&s); cy = cy + frx(&s);
-		x1 = cx; y1 = cy;
-		cx = cx + frx(&s); cy = cy + frx(&s);
-		x2 = cx; y2 = cy;
-		cx = cx + frx(&s); cy = cy + frx(&s);
-		g_bezier(x1,y1,x2,y2,cx,cy);
-		break;
+	    	cx = cx + frx(&s); cy = cy + frx(&s);
+	    	x1 = cx; y1 = cy;
+			cx = cx + frx(&s); cy = cy + frx(&s);
+			x2 = cx; y2 = cy;
+			cx = cx + frx(&s); cy = cy + frx(&s);
+			g_bezier(x1,y1,x2,y2,cx,cy);
+			break;
 	    case 4:
-		g_closepath();
-		break;
+	    	g_closepath();
+	    	break;
 	    case 5:
-		if (!old_path) g_fill();
-		break;
+	    	if (!old_path) g_fill();
+	    	break;
 	    case 6:
-		g_stroke();
-		break;
+	    	g_stroke();
+	    	break;
 	    case 7:
-		g_gsave();
-		g_set_fill(GLE_COLOR_WHITE);
-		g_fill();
-		g_grestore();
-		break;
+	    	g_gsave();
+	    	g_set_fill(GLE_COLOR_WHITE);
+	    	g_fill();
+	    	g_grestore();
+	    	break;
 	    case 8:
-		g_set_line_width(frx(&s));
-		break;
+	    	g_set_line_width(frx(&s));
+	    	break;
+	    case 9:
+	    	cx = ox + frx(&s); cy = oy + frx(&s);
+	    	g_set_pos(cx,cy);
+	    	break;
+	    case 10:
+	    	g_circle_stroke(frx(&s));
+	    	break;
 	    case 0:         /* no such char in this font */
-		goto abort;
+	    	goto abort;
 	    default:
-		gprint("Error in mychar pcode %d \n",*s++);
-		goto abort;
+	    	gprint("Error in mychar pcode %d \n",*s++);
+	    	goto abort;
 	  }
-
 	}
 abort:	if (!old_path) g_set_path(old_path);
 	g_set_line_join(old_join);

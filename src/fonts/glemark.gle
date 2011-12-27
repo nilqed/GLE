@@ -122,22 +122,16 @@ dfont endchar
 dfont  char=7
 dfont  wid=10 hei=10
 size 20 20
-	amove  0 5
-	bezier 0 7.5 2.5 10 5 10
-	bezier 7.5 10 10 7.5 10 5
-	bezier 10 2.5 7.5 0 5 0
-	bezier 2.5 0 0 2.5 0 5
+	asetpos 5 5
+	circle 5
 	closepath
 stroke
 dfont endchar
 dfont  char=8
 dfont  wid=10 hei=10
 size 20 20
-	amove  0 5
-	bezier 0 7.5 2.5 10 5 10
-	bezier 7.5 10 10 7.5 10 5
-	bezier 10 2.5 7.5 0 5 0
-	bezier 2.5 0 0 2.5 0 5
+	asetpos 5 5
+	circle 5
 	closepath
 fill
 stroke
@@ -145,11 +139,8 @@ dfont endchar
 dfont  char=9
 dfont  wid=10 hei=10
 size 20 20
-	amove  0 5
-	bezier 0 7.5 2.5 10 5 10
-	bezier 7.5 10 10 7.5 10 5
-	bezier 10 2.5 7.5 0 5 0
-	bezier 2.5 0 0 2.5 0 5
+	asetpos 5 5
+	circle 5
 	closepath
 fillwhite
 stroke
