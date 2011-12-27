@@ -1031,6 +1031,7 @@ void GLELoadOneFileManager::create_latex_eps_ps_pdf() throw(ParserError) {
 	GLEChDir(out_name_dir);
 	if (requires_tex_eps(device, m_CmdLine)) {
 		create_eps_file_latex_dvips(out_name_np, m_Script);
+		writeRecordedOutputFile(m_OutName->getFullPath(), GLE_DEVICE_EPS, m_Script);
 		setHasFile(GLE_DEVICE_EPS, true);
 	}
 	if ((device->hasValue(GLE_DEVICE_PDF) && !create_inc) || requires_tex_pdf(device, m_CmdLine)) {

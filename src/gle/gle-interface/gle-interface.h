@@ -1220,7 +1220,6 @@ public:
 	inline const GLEPoint& getBoundingBox() { return m_BoundingBox; }
 	inline const GLEPoint& getBoundingBoxOrigin() { return m_BoundingBoxOrigin; }
 
-
 	inline void setSize(double wd, double hi) { m_Size.setXY(wd, hi); }
 	inline void setBoundingBox(double wd, double hi) { m_BoundingBox.setXY(wd, hi); }
 	inline void setBoundingBoxOrigin(double x, double y) { m_BoundingBoxOrigin.setXY(x, y); }

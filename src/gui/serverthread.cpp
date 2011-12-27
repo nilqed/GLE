@@ -350,6 +350,9 @@ QString& GLERenderThread::getGhostScriptOutput()
 }
 
 GSInterpreterLib* GLERenderThread::setupInterpreter(const QSize& area, double b1, double b2, double width, double height, double& dpi, bool& newDPI) {
+	// QString gsError = QString("%1 %2 wd %3 %4 dpi %5").arg(b1).arg(b2).arg(width).arg(height).arg(dpi);
+	// qDebug() << "*** Origin: " << gsError;
+
 	// Auto scale new files to size of drawing area
 	if (dpi == 0.0) {
 		dpi = QGLE::computeAutoScaleDPIFromPts(area, 5, width, height);

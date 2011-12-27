@@ -1057,6 +1057,7 @@ bool read_eps_and_adjust_bounding_box(const string& name, GLEScript* script) {
 			int b4New = (int)ceil(b2 + bb.getY() + 1e-6);
 			out << "%%BoundingBox: " << b1 << " " << b2 << " " << b3New << " " << b4New << endl;
 			script->setBoundingBoxOrigin(b1, b2);
+			script->setBoundingBox(b3New - b1 + 1, b4New - b2 + 1);
 		}
 		else if (str_starts_with_trim(line, "%%HiResBoundingBox") != -1 ||
 		         str_starts_with_trim(line, "%%Creator") != -1 ||
