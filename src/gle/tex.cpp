@@ -372,7 +372,7 @@ norm_again:
 			return;
 		}
 		p_hei = grphei[p_ngrp];
-		set_tex_font(grpfnt[p_ngrp--]);
+		p_fnt = grpfnt[p_ngrp--];
 		font_load_metric(p_fnt);
 
 		outlong(8); outfloat(p_hei);

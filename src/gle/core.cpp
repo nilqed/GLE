@@ -1865,12 +1865,12 @@ void g_marker2(int i, double sz, double dval) throw(ParserError) {
 	scale = minf[i].scl*sz;
 	g_set_hei(scale);
 	if (minf[i].ff == 0) {
-		minf[i].ff = pass_font(mrk_fname[i]);
+		minf[i].ff = g_font_fallback(pass_font(mrk_fname[i]));
 		char_bbox(minf[i].ff,minf[i].cc,&x1,&y1,&x2,&y2);
 		minf[i].x1 = x1; minf[i].x2 = x2;
 		minf[i].y1 = y1; minf[i].y2 = y2;
 	} else if (minf[i].ff == -1) {
-		minf[i].ff = pass_font(mrk_fname[i]);
+		minf[i].ff = g_font_fallback(pass_font(mrk_fname[i]));
 		char_bbox(minf[i].ff,minf[i].cc,&x1,&y1,&x2,&y2);
 		minf[i].ry = (minf[i].ry + -y1-(y2-y1)/2.0);
 		minf[i].rx = (minf[i].rx + -x1-(x2-x1)/2.0);
