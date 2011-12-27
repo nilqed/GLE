@@ -56,6 +56,7 @@ const string& get_input_file();
 class GLESub;
 class GLESubMap;
 class GLEBlocks;
+class GLEStoredBox;
 
 // or replace by GLEObject sub class on global stack?
 struct GLELengthBlock {
@@ -96,6 +97,7 @@ public:
 	void name_to_point(const char *name, GLEPoint* point) throw(ParserError);
 	void name_to_size(const char *name, double *wd, double *hi) throw(ParserError);
 	void name_join(const char *n1, const char *n2, int marrow, double a1, double a2, double d1, double d2)  throw(ParserError);
+	GLEStoredBox* last_box() throw (ParserError);
 	bool box_end() throw (ParserError);
 	void begin_length(int var);
 	void end_length();

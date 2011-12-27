@@ -160,7 +160,6 @@ public:
 GLEBoxStack GLEBoxStack::m_Instance;
 
 GLEStoredBox* box_start(void);
-bool box_end(void) throw(ParserError);
 
 extern int this_line;
 extern int trace_on;
@@ -681,6 +680,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					break;
 				case 2: /* BOX add, fill, nobox, name, round */
 					{
+						g_drobj.push_back(mkdrobjs);
 						GLEStoredBox* box = box_start();
 						ptr = *(pcode + cp);
 						if (ptr) {
@@ -708,6 +708,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 						if (box->isFilled() && !g_is_dummy_device()) {
 							/* Draw over filled box, measure during first pass */
 							box->setDevice(g_set_dummy_device());
+							mkdrobjs = false;
 						}
 					}
 					break;
@@ -1008,6 +1009,10 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			  case 2: /* end box */
 				cp++;
 				readlong(jj);   /* jump to line */
+				if (!last_box()->isSecondPass() && g_drobj.size() != 0) {
+					mkdrobjs = g_drobj.back();
+					g_drobj.pop_back();
+				}
 				if (box_end()) {
 					*pend = 0;
 					*srclin = jj;
@@ -1560,7 +1565,6 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			} else {
 				g_text(temp_str);
 			}
-			g_get_bounds(&x1,&y1,&x2,&y2);
 			break;
 		  case 60: /* DEFMARKER */
 			break;
@@ -1791,6 +1795,14 @@ GLEStoredBox* box_start() {
 	g_get_bounds(box->getSaveBounds());
 	g_init_bounds();
 	return box;
+}
+
+GLEStoredBox* GLERun::last_box() throw (ParserError) {
+	GLEBoxStack* stack = GLEBoxStack::getInstance();
+	if (stack->size() <= 0) {
+		g_throw_parser_error("too many end boxes");
+	}
+	return stack->lastBox();
 }
 
 bool GLERun::box_end() throw (ParserError) {
