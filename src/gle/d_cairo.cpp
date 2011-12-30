@@ -60,7 +60,13 @@ extern struct gmodel g;
 char *font_getname(int i);
 
 GLECairoDevice::GLECairoDevice(bool showerror):
-	m_ShowError(showerror)
+	m_ShowError(showerror),
+	m_width(0.0),
+	m_height(0.0),
+	m_surface(0),
+	m_cr(0),
+	m_FillMethod(GLE_FILL_METHOD_DEFAULT),
+	m_currentFill(g_get_fill_clear())
 {
 }
 
