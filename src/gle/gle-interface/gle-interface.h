@@ -273,6 +273,8 @@ inline ostream& operator<<(ostream& os, const GLEPoint& pt) {
 	return pt.write(os);
 }
 
+#include "gle-shapemath.h"
+
 class DLLCLASS GLEPoint3D {
 public:
 	double m_C[3];
@@ -997,10 +999,19 @@ public:
 	void getPropertyAsString(GLEPropertyID id, string* result) { m_Properties->getPropertyAsString(id, result); }
 };
 
-class GLELineDO : public GLEDrawObject {
+class GLEHasArrowBase {
+public:
+	GLEHasArrowBase();
+	inline GLEHasArrow getArrow() { return m_Arrow; }
+	inline void setArrow(GLEHasArrow arrow) { m_Arrow = arrow; }
+
+protected:
+	GLEHasArrow m_Arrow;
+};
+
+class GLELineDO : public GLEDrawObject, public GLEHasArrowBase {
 protected:
 	GLEPoint m_P1, m_P2;
-	GLEHasArrow m_Arrow;
 public:
 	GLELineDO();
 	GLELineDO(double x1, double y1, double x2, double y2);
@@ -1011,8 +1022,6 @@ public:
 	inline GLEPoint& getP2() { return m_P2; }
 	inline void setP1(const GLEPoint& p1) { m_P1 = p1; }
 	inline void setP2(const GLEPoint& p2) { m_P2 = p2; }
-	inline GLEHasArrow getArrow() { return m_Arrow; }
-	inline void setArrow(GLEHasArrow arrow) { m_Arrow = arrow; }
 	virtual void initProperties(GLEInterface* iface);
 	virtual bool needsAMove(GLEPoint& pt);
 	virtual void createGLECode(string& code);
@@ -1051,7 +1060,7 @@ public:
 	virtual void initProperties(GLEInterface* iface);
 };
 
-class GLEArcDO : public GLEEllipseDO {
+class GLEArcDO : public GLEEllipseDO, public GLEHasArrowBase {
 protected:
 	double m_Angle1, m_Angle2;
 public:

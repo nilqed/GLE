@@ -1184,16 +1184,18 @@ string* GLEScript::getRecordedBytesBuffer(int device)
 	}
 }
 
+GLEHasArrowBase::GLEHasArrowBase():
+	m_Arrow(GLEHasArrowNone)
+{
+}
+
 GLELineDO::GLELineDO() {
-	m_Arrow = GLEHasArrowNone;
 }
 
 GLELineDO::GLELineDO(const GLEPoint& p1, const GLEPoint& p2) : m_P1(p1), m_P2(p2) {
-	m_Arrow = GLEHasArrowNone;
 }
 
 GLELineDO::GLELineDO(double x1, double y1, double x2, double y2) : m_P1(x1,y1), m_P2(x2,y2) {
-	m_Arrow = GLEHasArrowNone;
 }
 
 GLELineDO::~GLELineDO() {
@@ -1214,27 +1216,24 @@ bool GLELineDO::needsAMove(GLEPoint& pt) {
 	return true;
 }
 
+namespace {
+
+	void addArrowToCode(ostream& str, GLEHasArrow arrow) {
+		if (arrow == (GLEHasArrowStart | GLEHasArrowEnd)) {
+			str << " arrow both";
+		} else if (arrow == GLEHasArrowStart) {
+			str << " arrow start";
+		} else if (arrow == GLEHasArrowEnd) {
+			str << " arrow end";
+		}
+	}
+
+}
+
 void GLELineDO::createGLECode(string& code) {
 	ostringstream str;
-// FIXME: if we need this implementation -> need to detect amove at start of command
-//        if such amove is there -> need to include it again!!
-//        only don't include amove if position is correct from _previous_ line
-/*	if (getP1().approx(ox, oy)) {
-		str << "aline " << getP2().getX() << " " << getP2().getY();
-	} else if (getP2().approx(ox, oy)) {
-		str << "aline " << getP1().getX() << " " << getP1().getY();
-		m_P1.swap(m_P2);
-	} else {*/
-		str << "aline " << getP2().getX() << " " << getP2().getY();
-/*	}*/
-	GLEHasArrow arrow = getArrow();
-	if (arrow == (GLEHasArrowStart | GLEHasArrowEnd)) {
-		str << " arrow both";
-	} else if (arrow == GLEHasArrowStart) {
-		str << " arrow start";
-	} else if (arrow == GLEHasArrowEnd) {
-		str << " arrow end";
-	}
+	str << "aline " << getP2().getX() << " " << getP2().getY();
+	addArrowToCode(str, getArrow());
 	code = str.str();
 }
 
@@ -1398,6 +1397,7 @@ void GLEArcDO::createGLECode(string& code) {
 
 		str << "elliptical_arc " << m_Rx << " " << m_Ry << " " << m_Angle1 << " " << angle2;
 	}
+	addArrowToCode(str, getArrow());
 	code = str.str();
 }
 
@@ -1406,14 +1406,17 @@ void GLEArcDO::updateBoundingBox() {
 }
 
 GLEDrawObject* GLEArcDO::clone() {
-	return new GLEArcDO(m_Center.getX(), m_Center.getY(), m_Rx, m_Ry, m_Angle1, m_Angle2);
+	GLEArcDO* result = new GLEArcDO(m_Center.getX(), m_Center.getY(), m_Rx, m_Ry, m_Angle1, m_Angle2);
+	result->setArrow(getArrow());
+	return result;
 }
 
 bool GLEArcDO::approx(GLEDrawObject* other) {
 	GLEArcDO* otherc = (GLEArcDO*)other;
 	return GLEEllipseDO::approx(other) &&
 	       fabs(m_Angle1 - otherc->getAngle1()) < 1e-6 &&
-	       fabs(m_Angle2 - otherc->getAngle2()) < 1e-6;
+	       fabs(m_Angle2 - otherc->getAngle2()) < 1e-6 &&
+	       getArrow() == otherc->getArrow();
 }
 
 void GLEArcDO::normalize() {
@@ -1428,7 +1431,6 @@ double GLEArcDO::getNormalizedAngle2() {
 		return m_Angle2;
 	}
 }
-
 
 GLEPoint& GLEArcDO::getPoint1(GLEPoint& pt) {
 	pt.set(m_Center);

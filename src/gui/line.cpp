@@ -169,6 +169,7 @@ void GLELine::draw(QPainter *p)
 		if (tip == GLEArrowTipRound) new_pen.setJoinStyle(Qt::RoundJoin);
 		else new_pen.setJoinStyle(Qt::MiterJoin);
 		new_pen.setMiterLimit(20);
+		new_pen.setStyle(Qt::SolidLine);
 		GLEHasArrow arrow = obj->getArrow();
 		if ((arrow & GLEHasArrowStart) != 0) start_pt.setXY(pts1.xl, pts1.yl);
 		if ((arrow & GLEHasArrowEnd) != 0) end_pt.setXY(pts2.xl, pts2.yl);

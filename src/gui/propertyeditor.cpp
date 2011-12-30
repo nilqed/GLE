@@ -42,8 +42,6 @@ void GLEPropertyEditor::propertyChanged(const QModelIndex &index, const QModelIn
 	{
 		GLEDrawingObjectProperty prop;
 		prop = model->getFullProperty(index);
-		qDebug() << "Changed property: " << prop.description << " = " << prop.value;
-		QGLE::flushIO();
 		GLEDrawingObject *obj;
 		foreach(obj, objects)
 		{

@@ -140,7 +140,6 @@ void GLEServerThread::run()
 			// Find the bits we're interested in
 			foreach(part, parts)
 			{
-				qDebug() << "Received: " << part;
 				if(rxdpi.exactMatch(part))
 				{
 					// do something with dpi?

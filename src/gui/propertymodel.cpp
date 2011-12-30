@@ -96,8 +96,6 @@ Qt::ItemFlags GLEPropertyModel::flags(const QModelIndex &index) const
 
 bool GLEPropertyModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-	qDebug() << "Setting property data";
-	QGLE::flushIO();
 	if (index.isValid() && role == Qt::EditRole)
 	{
 		propertyList[index.row()].value = value;

@@ -164,8 +164,6 @@ void GLEArc::addRelativeOSnaps(QPointF p)
 {
 	if (isSet(CentrePoint) && isSet(Radius) && isSet(StartPoint) && isSet(EndPoint))
 	{
-		qDebug() << "Adding osnaps relative to " << QGLE::absQtToGLE(p,dpi,pixmap.height());
-
 		relativeOSnaps.clear();
 
 		QList<QPointF> perpendiculars = getPerpendiculars(p);
@@ -238,7 +236,6 @@ QList<QPointF> GLEArc::getPerpendiculars(QPointF p)
 	// The first perpendicular osnap is defined as the nearest point
 	QPointF np;
 	distanceToPointOnCircle(p,&np);
-	qDebug() << "Nearest point: " << QGLE::absQtToGLE(np,dpi,pixmap.height());
 	perpendiculars.append(np);
 
 	// The second perpendicular osnap is diametrically opposite the first one
@@ -267,35 +264,78 @@ bool GLEArc::hasPerpendiculars()
 	return(true);
 }
 
+void GLEArc::drawArc(QPainter *p, double t1, double t2)
+{
+	int sweep = (int)((t2 - t1)*16);
+	if (directionReversed) {
+		sweep = sweep-(360*16);
+	}
+	p->drawArc(arcRect(), (int)(t1 * 16), sweep);
+}
+
+void GLEArc::addBezier(QPainterPath *p, GLEBezier* bezier) {
+	QPointF p1(QGLE::absGLEToQt(bezier->getP1(), dpi, pixmap.height()));
+	QPointF p2(QGLE::absGLEToQt(bezier->getP2(), dpi, pixmap.height()));
+	QPointF p3(QGLE::absGLEToQt(bezier->getP3(), dpi, pixmap.height()));
+	p->cubicTo(p1, p2, p3);
+}
+
+void GLEArc::computeAndDraw(QPainter *p, GLEArcDO* obj, GLECurvedArrowHead* head) {
+	if (!head->isEnabled()) {
+		return;
+	}
+	head->computeArrowHead();
+	QPainterPath path;
+	path.moveTo(QGLE::absGLEToQt(head->getSide1()->getP0(), dpi, pixmap.height()));
+	addBezier(&path, head->getSide1());
+	addBezier(&path, head->getSide2());
+	if (head->getStyle() != GLEArrowStyleSimple) {
+		path.closeSubpath();
+		if (head->getStyle() == GLEArrowStyleEmpty) {
+			p->fillPath(path, QBrush(Qt::white));
+		} else {
+			QColor col;
+			GLEColor* color = obj->getProperties()->getColorProperty(GLEDOPropertyColor);
+			col.setRgbF(color->getRed(), color->getGreen(), color->getBlue());
+			p->fillPath(path, QBrush(col));
+		}
+	}
+	if (!head->isSharp()) {
+		p->drawPath(path);
+	}
+}
+
 void GLEArc::draw(QPainter *p)
 {
-	int sweep;
-
-	// Draw as normal
 	QPen cpen;
 	setPenProperties(cpen);
 	p->setPen(cpen);
-
-	// If we don't have a start point AND an end point, give up now
-	if (!(isSet(StartPoint) && isSet(EndPoint)))
+	if (!(isSet(StartPoint) && isSet(EndPoint))) {
 		return;
-
-	if (isSet(CentrePoint))
-	{
-		// If we have a centre point then we can draw an arc
-
-		// Calculate the sweep
-		sweep = (int) ((endAngleDegConstrained()-startAngleDeg())*16);
-		if (directionReversed)
-		{
-			sweep = sweep-(360*16);
-		}
-
-		// Draw the arc
-		p->drawArc(arcRect(), (int) (startAngleDeg()*16), sweep);
 	}
-	else
-	{
+	if (isSet(CentrePoint)) {
+		GLEArcDO* obj = (GLEArcDO*)getGLEObject();
+		if (obj != NULL && obj->getArrow() != 0) {
+			double r = getGLELength(Radius);
+			double t1 = startAngleDeg();
+			double t2 = endAngleDegConstrained();
+			GLEPoint orig(getGLEPoint(CentrePoint).x(), getGLEPoint(CentrePoint).y());
+			GLECircleArc circle(orig, r, QGLE::degreesToRadians(t1), QGLE::degreesToRadians(t2));
+			GLECurvedArrowHead head_start(&circle);
+			GLECurvedArrowHead head_end(&circle);
+			GLEUpdateCurvedArrowHeadsArc(&head_start, &head_end, &t1, &t2, obj->getProperties(), 1.0, obj->getArrow());
+			drawArc(p, t1, t2);
+			QPen new_pen = cpen;
+			new_pen.setJoinStyle(Qt::RoundJoin);
+			new_pen.setMiterLimit(20);
+			new_pen.setStyle(Qt::SolidLine);
+			p->setPen(new_pen);
+			computeAndDraw(p, obj, &head_start);
+			computeAndDraw(p, obj, &head_end);
+		} else {
+			drawArc(p, startAngleDeg(), endAngleDegConstrained());
+		}
+	} else {
 		// If we don't have a centre point, just draw a line
 		p->drawLine(getQtPoint(StartPoint),getQtPoint(EndPoint));
 	}

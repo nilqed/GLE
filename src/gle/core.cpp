@@ -83,6 +83,9 @@ extern int gle_debug;
 
 void test_unit(void);
 void clean_surface();
+void g_arrowsize_actual(GLEArrowProps* arrow, double* lwd, bool sz_az);
+void g_arrowsize_transform(GLEArrowProps* arrow, double lwd, bool sz_az);
+
 int gunit=false;
 
 GLERectangle g_UserBoxDev;
@@ -1460,6 +1463,17 @@ void g_circle_fill(dbl zr) {
 	g_update_bounds(g.curx+zr,g.cury+zr);
 }
 
+void g_update_arc_bounds_for_arrow_heads(GLECurvedArrowHead* head_start,
+		                                 GLECurvedArrowHead* head_end,
+		                                 double* t1,
+		                                 double* t2)
+{
+	if (head_start->getStyle() != GLE_ARRSTY_SIMPLE) {
+		if (head_start->isEnabled()) *t1 = head_start->getParamValueEnd()*180/GLE_PI;
+		if (head_end->isEnabled()) *t2 = head_end->getParamValueEnd()*180/GLE_PI;
+	}
+}
+
 void g_arc(double r, double t1, double t2, double cx, double cy, int arrow) {
 	g_flush();
 	GLEPoint orig(cx, cy);
@@ -1475,10 +1489,7 @@ void g_arc(double r, double t1, double t2, double cx, double cy, int arrow) {
 		GLECurvedArrowHead head_end(&circle);
 		if (arrow == 1 || arrow == 3) g_init_arrow_head(&head_start, true);
 		if (arrow == 2 || arrow == 3) g_init_arrow_head(&head_end, false);
-		if (head_start.getStyle() != GLE_ARRSTY_SIMPLE) {
-			if (head_start.isEnabled()) t1 = head_start.getParamValueEnd()*180/GLE_PI;
-			if (head_end.isEnabled())t2 = head_end.getParamValueEnd()*180/GLE_PI;
-		}
+		g_update_arc_bounds_for_arrow_heads(&head_start, &head_end, &t1, &t2);
 		g.dev->arc(r,t1,t2,cx,cy);
 		head_start.computeAndDraw();
 		head_end.computeAndDraw();
@@ -1503,10 +1514,7 @@ void g_narc(double r, double t1, double t2, double cx, double cy, int arrow) {
 		GLECurvedArrowHead head_end(&circle);
 		if (arrow == 1 || arrow == 3) g_init_arrow_head(&head_start, false);
 		if (arrow == 2 || arrow == 3) g_init_arrow_head(&head_end, true);
-		if (head_start.getStyle() != GLE_ARRSTY_SIMPLE) {
-			if (head_start.isEnabled()) t1 = head_start.getParamValueEnd()*180/GLE_PI;
-			if (head_end.isEnabled())t2 = head_end.getParamValueEnd()*180/GLE_PI;
-		}
+		g_update_arc_bounds_for_arrow_heads(&head_start, &head_end, &t1, &t2);
 		g.dev->narc(r,t1,t2,cx,cy);
 		head_start.computeAndDraw();
 		head_end.computeAndDraw();
@@ -1549,10 +1557,7 @@ void g_elliptical_arc(double rx, double ry, double t1, double t2, double cx, dou
 		GLECurvedArrowHead head_end(&ellipse);
 		if (arrow == 1 || arrow == 3) g_init_arrow_head(&head_start, true);
 		if (arrow == 2 || arrow == 3) g_init_arrow_head(&head_end, false);
-		if (head_start.getStyle() != GLE_ARRSTY_SIMPLE) {
-			if (head_start.isEnabled()) t1 = head_start.getParamValueEnd()*180/GLE_PI;
-			if (head_end.isEnabled())t2 = head_end.getParamValueEnd()*180/GLE_PI;
-		}
+		g_update_arc_bounds_for_arrow_heads(&head_start, &head_end, &t1, &t2);
 		g.dev->elliptical_arc(rx, ry, t1, t2, cx, cy);
 		head_start.computeAndDraw();
 		head_end.computeAndDraw();
@@ -1577,10 +1582,7 @@ void g_elliptical_narc(double rx, double ry, double t1, double t2, double cx, do
 		GLECurvedArrowHead head_end(&ellipse);
 		if (arrow == 1 || arrow == 3) g_init_arrow_head(&head_start, false);
 		if (arrow == 2 || arrow == 3) g_init_arrow_head(&head_end, true);
-		if (head_start.getStyle() != GLE_ARRSTY_SIMPLE) {
-			if (head_start.isEnabled()) t1 = head_start.getParamValueEnd()*180/GLE_PI;
-			if (head_end.isEnabled())t2 = head_end.getParamValueEnd()*180/GLE_PI;
-		}
+		g_update_arc_bounds_for_arrow_heads(&head_start, &head_end, &t1, &t2);
 		g.dev->elliptical_narc(rx, ry, t1, t2, cx, cy);
 		head_start.computeAndDraw();
 		head_end.computeAndDraw();
@@ -2344,72 +2346,6 @@ void g_arrowline(double x2, double y2, int flag, int can_fillpath) throw(ParserE
 	}
 }
 
-void g_arrowsize(GLEArrowProps* arrow) {
-	double width;
-	double arrow_len = g.arrowsize;
-	double arrow_angle = g.arrowangle;
-	arrow->tip = g.arrowtip;
-	arrow->style = g.arrowstyle;
-	g_get_line_width(&width);
-	if (width == 0) width = 0.02;
-	if (arrow_angle <= 0.0) {
-		if (arrow->style == GLE_ARRSTY_OLD35) {
-			arrow_angle = 10;
-		} else {
-			arrow_angle = 15;
-		}
-		if (width > 0.1) arrow_angle = 20;
-		if (width > 0.3) arrow_angle = 30;
-	}
-	if (arrow_len <= 0.0) {
-		double ang_rad = arrow_angle*GLE_PI/180;
-		if (arrow->style == GLE_ARRSTY_OLD35) {
-			g_get_hei(&arrow_len);
-			arrow_len = arrow_len/2 * cos(ang_rad);
-			if (arrow_len*tan(ang_rad) < width/1.5) {
-				arrow_len = width / (1.5*tan(ang_rad));
-			}
-		} else {
-			arrow_len = 0.2;
-			double fac = (20*width+2.5)/(20*width+1);
-			if (arrow_len*tan(ang_rad) < width*fac) {
-				arrow_len = width*fac / tan(ang_rad);
-			}
-			if (arrow->style == GLE_ARRSTY_EMPTY || arrow->style == GLE_ARRSTY_FILLED) {
-				arrow->size += width/2;
-			}
-		}
-	}
-	//cout << "size: " << arrow_len << endl;
-	arrow->size = arrow_len;
-	arrow->angle = arrow_angle;
-}
-
-void g_arrowsize_transform(GLEArrowProps* arrow, double lwd, bool sz_az) {
-	double ang_rad = arrow->angle*GLE_PI/180;
-	if (arrow->style != GLE_ARRSTY_OLD35) {
-		if (arrow->style == GLE_ARRSTY_EMPTY || arrow->style == GLE_ARRSTY_FILLED) {
-			arrow->size -= lwd/2;
-		}
-		if (arrow->tip == GLE_ARRTIP_SHARP) {
-			double dist = lwd/(2*sin(ang_rad));
-			arrow->size -= dist;
-		}
-		if (arrow->size < lwd*0.1) {
-			arrow->size = lwd*0.1;
-		}
-	}
-	if (sz_az) {
-		arrow->size /= cos(ang_rad);
-	}
-}
-
-void g_arrowsize_actual(GLEArrowProps* arrow, double* lwd, bool sz_az) {
-	g_get_line_width(lwd);
-	g_arrowsize(arrow);
-	g_arrowsize_transform(arrow, *lwd, sz_az);
-}
-
 int g_arrow_style() {
 	return g.arrowstyle;
 }
@@ -2454,6 +2390,109 @@ void g_arrowpoints(double cx, double cy, double dx, double dy, GLEArrowPoints* p
 	GLEPoint pt(cx, cy);
 	g_arrowsize_actual(&arrow, &lwd, true);
 	g_arrowpoints(pt, dx, dy, &arrow, lwd, pts);
+}
+
+void g_arrowsize(GLEArrowProps* arrow) {
+	double width;
+	double arrow_len = g.arrowsize;
+	double arrow_angle = g.arrowangle;
+	arrow->tip = g.arrowtip;
+	arrow->style = g.arrowstyle;
+	g_get_line_width(&width);
+	if (width == 0) width = 0.02;
+	if (arrow_angle <= 0.0) {
+		if (arrow->style == GLE_ARRSTY_OLD35) {
+			arrow_angle = 10;
+		} else {
+			arrow_angle = 15;
+		}
+		if (width > 0.1) arrow_angle = 20;
+		if (width > 0.3) arrow_angle = 30;
+	}
+	if (arrow_len <= 0.0) {
+		double ang_rad = arrow_angle*GLE_PI/180;
+		if (arrow->style == GLE_ARRSTY_OLD35) {
+			g_get_hei(&arrow_len);
+			arrow_len = arrow_len/2 * cos(ang_rad);
+			if (arrow_len*tan(ang_rad) < width/1.5) {
+				arrow_len = width / (1.5*tan(ang_rad));
+			}
+		} else {
+			arrow_len = 0.2;
+			double fac = (20*width+2.5)/(20*width+1);
+			if (arrow_len*tan(ang_rad) < width*fac) {
+				arrow_len = width*fac / tan(ang_rad);
+			}
+			if (arrow->style == GLE_ARRSTY_EMPTY || arrow->style == GLE_ARRSTY_FILLED) {
+				arrow->size += width/2;
+			}
+		}
+	}
+	//cout << "size: " << arrow_len << endl;
+	arrow->size = arrow_len;
+	arrow->angle = arrow_angle;
+}
+
+void g_arrowsize_actual(GLEArrowProps* arrow, double* lwd, bool sz_az) {
+	g_get_line_width(lwd);
+	g_arrowsize(arrow);
+	g_arrowsize_transform(arrow, *lwd, sz_az);
+}
+
+void g_arrowsize_transform(GLEArrowProps* arrow, double lwd, bool sz_az) {
+	double ang_rad = arrow->angle*GLE_PI/180;
+	if (arrow->style != GLE_ARRSTY_OLD35) {
+		if (arrow->style == GLE_ARRSTY_EMPTY || arrow->style == GLE_ARRSTY_FILLED) {
+			arrow->size -= lwd/2;
+		}
+		if (arrow->tip == GLE_ARRTIP_SHARP) {
+			double dist = lwd/(2*sin(ang_rad));
+			arrow->size -= dist;
+		}
+		if (arrow->size < lwd*0.1) {
+			arrow->size = lwd*0.1;
+		}
+	}
+	if (sz_az) {
+		arrow->size /= cos(ang_rad);
+	}
+}
+
+void g_init_arrow_head(GLECurvedArrowHead* head, bool startend) {
+	double lwidth;
+	GLEArrowProps arrow;
+	g_arrowsize_actual(&arrow, &lwidth, false);
+	head->setLineWidth(lwidth);
+	head->setSharp(arrow.tip == GLE_ARRTIP_SHARP);
+	head->setArrowAngleSizeSharp(arrow.style, arrow.size, arrow.angle);
+	head->setStartEnd(startend);
+}
+
+void g_init_arrow_head_from_properties(GLECurvedArrowHead* head, GLEPropertyStore* props, double fac, bool startend) {
+	GLEArrowProps arrow;
+	double lwd = props->getRealProperty(GLEDOPropertyLineWidth) * fac;
+	arrow.size = props->getRealProperty(GLEDOPropertyArrowSize) * fac;
+	arrow.angle = props->getRealProperty(GLEDOPropertyArrowAngle);
+	arrow.tip = (GLEArrowTip)props->getIntProperty(GLEDOPropertyArrowTip);
+	arrow.style = GLE_ARRSTY_FILLED;
+	g_arrowsize_transform(&arrow, lwd, false);
+	head->setLineWidth(lwd);
+	head->setSharp(arrow.tip == GLE_ARRTIP_SHARP);
+	head->setArrowAngleSizeSharp(arrow.style, arrow.size, arrow.angle);
+	head->setStartEnd(startend);
+}
+
+void GLEUpdateCurvedArrowHeadsArc(GLECurvedArrowHead* head_start,
+		                          GLECurvedArrowHead* head_end,
+		                          double* t1,
+		                          double* t2,
+		                          GLEPropertyStore* props,
+		                          double fac,
+		                          int arrow)
+{
+	if (arrow == 1 || arrow == 3) g_init_arrow_head_from_properties(head_start, props, fac, true);
+	if (arrow == 2 || arrow == 3) g_init_arrow_head_from_properties(head_end, props, fac, false);
+	g_update_arc_bounds_for_arrow_heads(head_start, head_end, t1, t2);
 }
 
 void GLEGetArrowPoints(GLEPoint& pt, double dx, double dy, GLEPropertyStore* props, double fac, GLEArrowPoints* pts) {
@@ -3927,16 +3966,6 @@ void GLECurvedArrowHead::computeAndDraw() {
 		computeArrowHead();
 		draw();
 	}
-}
-
-void g_init_arrow_head(GLECurvedArrowHead* head, bool startend) {
-	double lwidth;
-	GLEArrowProps arrow;
-	g_arrowsize_actual(&arrow, &lwidth, false);
-	head->setLineWidth(lwidth);
-	head->setSharp(arrow.tip == GLE_ARRTIP_SHARP);
-	head->setArrowAngleSizeSharp(arrow.style, arrow.size, arrow.angle);
-	head->setStartEnd(startend);
 }
 
 int GLEBBoxToPixels(double dpi, double bbox) {

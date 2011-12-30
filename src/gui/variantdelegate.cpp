@@ -193,8 +193,6 @@ void VariantDelegate::setModelData(QWidget *editor,
 		QAbstractItemModel *model,
 		const QModelIndex &index) const
 {
-	qDebug() << "Setting model data";
-	QGLE::flushIO();
 	GLEPropertyModel *glemodel = (GLEPropertyModel *) index.model();
 	QVariant entry = glemodel->data(index, Qt::DisplayRole);
 	GLEDrawingObjectProperty property = glemodel->getFullProperty(index);

@@ -184,7 +184,6 @@ void GLEDrawingArea::clearDirty()
 	dirty = false;
 	// The following sets the '*' on the title bar
 	mainWin->setWindowModified(false);
-	qDebug() << "Dirty flag cleared";
 	emit dirtyFlagChanged(dirty);
 }
 
@@ -201,7 +200,6 @@ void GLEDrawingArea::setDirty()
 	if (dirty) return;
 	dirty = true;
 	mainWin->setWindowModified(true);
-	qDebug() << "Dirty flag set";
 	emit dirtyFlagChanged(dirty);
 }
 
@@ -497,8 +495,7 @@ void GLEDrawingArea::clearObjects()
 		delete obj;
 	}
 	objectList.clear();
-	qDebug() << "Object list cleared";
-   updateSelection();
+    updateSelection();
 }
 
 // Update the resolution and notify children
@@ -610,10 +607,8 @@ void GLEDrawingArea::createPolarSnaps(QPointF qtPoint)
 	SnapLine *snap;
 	SnapLine *sn;
 	bool duplicate;
-	qDebug() << "Creating snaps from point " << qtPoint;
 	for(double i = polarStartAngle; i < 360.0 ; i += polarAngleIncrement)
 	{
-		qDebug() << "Creating snap line at angle " << i;
 		snap = new SnapLine(dpi, pixmap.size(), this);
 		snap->setPoint(SnapLine::StartPoint, qtPoint);
 		snap->setPoint(SnapLine::Angle, QPointF(QGLE::degreesToRadians(i),0.0));
@@ -1386,13 +1381,11 @@ void GLEDrawingArea::changeLastPoint(QPointF p)
 void GLEDrawingArea::clearNewObjectsFlag()
 {
 	newObjects = false;
-	qDebug() << "NEW Objects flag cleared";
 }
 
 void GLEDrawingArea::setNewObjectsFlag()
 {
 	newObjects = true;
-	qDebug() << "NEW Objects flag set";
 }
 
 // Identify whether there are new objects
@@ -1456,7 +1449,6 @@ void GLEDrawingArea::setEditMode(bool state)
 // Handle key presses
 void GLEDrawingArea::hitKey(int key, int modifiers)
 {
-	qDebug() << "Key event: " << key;
 	if (modifiers != Qt::NoModifier)
 		return;
 
@@ -2076,7 +2068,6 @@ void GLEDrawingArea::createNewTextObject(QPointF referencePoint)
 	thisTextObject->setGLEObject(gleScript->newGLEObject(GDOText));
 	objectList.append(thisTextObject);
 	currentIndex = objectList.size() - 1;
-	qDebug() << "Added new text object at index " << currentIndex;
 	// Make sure the line is updated when the image size changes
 	connect(this, SIGNAL(sizeChanged(QSize,double)), objectList[currentIndex], SLOT(setPixmapSize(QSize,double)));
 	objectList[currentIndex]->setTextProperties();
@@ -2095,8 +2086,6 @@ void GLEDrawingArea::createNewLine(QPointF startPoint)
 	objectList.append(currentLine);
 	// Get the index
 	currentIndex = objectList.size() - 1;
-
-	qDebug() << "Added new line at index " << currentIndex;
 
 	// Make sure the line is updated when the image size changes
 	connect(this, SIGNAL(sizeChanged(QSize,double)),
@@ -2149,8 +2138,6 @@ void GLEDrawingArea::createNewTanLine(QPointF startPoint)
 			currentIndex = objectList.size() - 1;
 			// Remember the object to which we are drawing
 			baseObject = shortest_index;
-
-			qDebug() << "Added new tan line at index " << currentIndex;
 
 			// Make sure the line is updated when the image size changes
 			connect(this, SIGNAL(sizeChanged(QSize,double)),
@@ -2214,8 +2201,6 @@ void GLEDrawingArea::createNewPerpLine(QPointF startPoint)
 			// Remember the object to which we are drawing
 			baseObject = shortest_index;
 
-			qDebug() << "Added new perpendicular line at index " << currentIndex;
-
 			// Make sure the line is updated when the image size changes
 			connect(this, SIGNAL(sizeChanged(QSize,double)),
 					objectList[currentIndex], SLOT(setPixmapSize(QSize,double)));
@@ -2251,7 +2236,6 @@ void GLEDrawingArea::createNewArc(QPointF startPoint)
 	objectList.append(currentArc);
 	// Get the index
 	currentIndex = objectList.size() - 1;
-	qDebug() << "Added new arc at index " << currentIndex;
 
 	// Make sure the line is updated when the image size changes
 	connect(this, SIGNAL(sizeChanged(QSize,double)),
@@ -2284,7 +2268,6 @@ void GLEDrawingArea::setAmove(QPointF pt)
 {
 	if (hasAMove)
 	{
-		qDebug() << "Removing old amove at index " << amoveIndex;
 		// Delete the object
 		delete(objectList[amoveIndex]);
 
@@ -2295,8 +2278,6 @@ void GLEDrawingArea::setAmove(QPointF pt)
 	GLEAmove *amove = new GLEAmove(dpi, pixmap.size(), this);
 	objectList.append(amove);
 	amoveIndex = objectList.size() - 1;
-
-	qDebug() << "Added new amove at index " << amoveIndex;
 
 	connect(this, SIGNAL(sizeChanged(QSize,double)),
 			objectList[amoveIndex], SLOT(setPixmapSize(QSize,double)));
@@ -2321,7 +2302,6 @@ void GLEDrawingArea::createNewCircle(QPointF centrePoint)
 	objectList.append(currentCircle);
 	// Get the index
 	currentIndex = objectList.size() - 1;
-	qDebug() << "Added new circle at index " << currentIndex;
 
 	// Make sure the line is updated when the image size changes
 	connect(this, SIGNAL(sizeChanged(QSize,double)),
@@ -2353,7 +2333,6 @@ void GLEDrawingArea::createNewEllipse(QPointF cornerPoint)
 	objectList.append(currentEllipse);
 	// Get the index
 	currentIndex = objectList.size() - 1;
-	qDebug() << "Added new ellipse at index " << currentIndex;
 
 	// Make sure the line is updated when the image size changes
 	connect(this, SIGNAL(sizeChanged(QSize,double)),
@@ -2543,7 +2522,6 @@ void GLEDrawingArea::selectObjects(QPointF pt, bool multiSelect)
 				// TODO: Set basePoint to centre of selection
 				// NOTE: Currently disabled because generating GLE script code
 				//       from rotated objects is not yet implemented
-				qDebug() << "Beginning rotate";
 				isRotating = true;
 				basePoint.setX((handleList[TopLeft].x() + handleList[BottomRight].x())/2);
 				basePoint.setY((handleList[TopLeft].y() + handleList[BottomRight].y())/2);

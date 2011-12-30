@@ -199,8 +199,6 @@ void SnapLine::setPoint(int pointChoice, const QPointF& p, bool)
 						pointHash[EndPoint] = pt;
 					else if (hitsRightBorder(&pt))
 						pointHash[EndPoint] = pt;
-					else
-						qDebug() << "Quadrant 1 failure";
 					break;
 
 				case 2: // Either hits top or left border
@@ -208,8 +206,6 @@ void SnapLine::setPoint(int pointChoice, const QPointF& p, bool)
 						pointHash[EndPoint] = pt;
 					else if (hitsLeftBorder(&pt))
 						pointHash[EndPoint] = pt;
-					else
-						qDebug() << "Quadrant 2 failure";
 					break;
 
 				case 3: // Either hits left or bottom border
@@ -217,8 +213,6 @@ void SnapLine::setPoint(int pointChoice, const QPointF& p, bool)
 						pointHash[EndPoint] = pt;
 					else if (hitsLeftBorder(&pt))
 						pointHash[EndPoint] = pt;
-					else
-						qDebug() << "Quadrant 3 failure";
 					break;
 
 				case 4: // Either hits right or bottom border
@@ -226,8 +220,6 @@ void SnapLine::setPoint(int pointChoice, const QPointF& p, bool)
 						pointHash[EndPoint] = pt;
 					else if (hitsRightBorder(&pt))
 						pointHash[EndPoint] = pt;
-					else
-						qDebug() << "Quadrant 4 failure";
 					break;
 			}
 			break;
@@ -271,7 +263,6 @@ bool SnapLine::hitsRightBorder(QPointF *pt)
 	if (QGLE::inOrder(0.0,p.y(),pixmap.height()))
 	{
 		*pt = QGLE::absQtToGLE(p,dpi,pixmap.height());
-		qDebug() << "Hits Right Border";
 		return(true);
 	}
 	return(false);
@@ -305,7 +296,6 @@ bool SnapLine::hitsLeftBorder(QPointF *pt)
 	if (QGLE::inOrder(0.0,p.y(),pixmap.height()))
 	{
 		*pt = QGLE::absQtToGLE(p,dpi,pixmap.height());
-		qDebug() << "Hits Left Border";
 		return(true);
 	}
 	return(false);
@@ -313,7 +303,6 @@ bool SnapLine::hitsLeftBorder(QPointF *pt)
 
 bool SnapLine::hitsTopBorder(QPointF *pt)
 {
-	qDebug() << "Page Size is " << pixmap;
 	QPointF p;
 	QPointF sp = getQtPoint(StartPoint);
 	double angle = getGLEAngle(Angle);
@@ -323,7 +312,6 @@ bool SnapLine::hitsTopBorder(QPointF *pt)
 	// If the line is horizontal, it'll never hit the top border
 	if (fmod(QGLE::radiansToDegrees(angle),180.0) == 0.0)
 	{
-		qDebug() << "Horizontal, cannot hit top border";
 		return(false);
 	}
 
@@ -332,13 +320,11 @@ bool SnapLine::hitsTopBorder(QPointF *pt)
 	{
 		p.setX(sp.x());
 		*pt = QGLE::absQtToGLE(p,dpi,pixmap.height());
-		qDebug() << "Hits Top Border";
 		return(true);
 	}
 
 	// If in quadrant 3 or 4, it'll never hit the top border
 	int q = QGLE::quadrant(angle);
-	qDebug() << "Quadrant: " << q;
 	if (q >= 3)
 		return(false);
 
@@ -351,12 +337,9 @@ bool SnapLine::hitsTopBorder(QPointF *pt)
 	if (q == 2)
 		p.setX(sp.x() - sp.y()*tan((M_PI/2.0)-angle));
 
-	qDebug() << "X is " << p.x();
-
 	if (QGLE::inOrder(0.0,p.x(),pixmap.width()))
 	{
 		*pt = QGLE::absQtToGLE(p,dpi,pixmap.height());
-		qDebug() << "Hits Top Border";
 		return(true);
 	}
 	return(false);
@@ -379,7 +362,6 @@ bool SnapLine::hitsBottomBorder(QPointF *pt)
 	{
 		p.setX(sp.x());
 		*pt = QGLE::absQtToGLE(p,dpi,pixmap.height());
-		qDebug() << "Hits Bottom Border";
 		return(true);
 	}
 
@@ -404,7 +386,6 @@ bool SnapLine::hitsBottomBorder(QPointF *pt)
 	if (QGLE::inOrder(0.0,p.x(),pixmap.width()))
 	{
 		*pt = QGLE::absQtToGLE(p,dpi,pixmap.height());
-		qDebug() << "Hits Bottom Border";
 		return(true);
 	}
 	return(false);

@@ -636,6 +636,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			}
 			if (mkdrobjs) {
 				GLEArcDO drawobj(ox, oy, r, a1, a2);
+				drawobj.setArrow((GLEHasArrow)marrow);
 				handleNewDrawObject(&drawobj, mkdrobjs);
 			} else {
 				g_arc(r, a1, a2, ox, oy, marrow);

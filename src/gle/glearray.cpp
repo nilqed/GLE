@@ -305,7 +305,7 @@ bool GLEReadFileOrGZIPTxt(const std::string& name, std::string* result) {
    result->clear();
    if (res) {
       std::ostringstream strm;
-      for (int i = 0; i < lines.size(); ++i) {
+      for (std::vector<string>::size_type i = 0; i < lines.size(); ++i) {
          strm << lines[i] << std::endl;
       }
       *result = strm.str();

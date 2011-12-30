@@ -120,6 +120,7 @@ public:
 	static QSizeF qtSizeToGLE(QSizeF qt, double dpi);
 	//! Static member used for converting between coordinate system
 	static QPointF absGLEToQt(QPointF gle, double dpi, int areaHeight);
+	static QPointF absGLEToQt(const GLEPoint& gle, double dpi, int areaHeight);
 	//! Static member used for converting between coordinate system
 	static QPointF relGLEToQt(double gleX, double gleY, double dpi);
 	//! Static member used for converting between coordinate system

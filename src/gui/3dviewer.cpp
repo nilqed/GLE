@@ -85,7 +85,6 @@ void QGLE3DWidget::perspectiveAngle(double delta) {
 	perspAngle += delta;
 	if (perspAngle < 5) perspAngle = 5;
 	if (perspAngle > 85) perspAngle = 85;
-	qDebug() << "angle: " << perspAngle;
 	updateGL();
 }
 

@@ -157,8 +157,6 @@ void GLEEllipse::addRelativeOSnaps(QPointF p)
 	// This should be very similar to the circle one
 	if (isSet(CentrePoint) && isSet(RadiusX) && isSet(RadiusY) && isSet(Angle))
 	{
-		qDebug() << "Adding osnaps relative to " << QGLE::absQtToGLE(p,dpi,pixmap.height());
-
 		relativeOSnaps.clear();
 
 		QList<QPointF> perpendiculars = getPerpendiculars(p);
@@ -332,9 +330,6 @@ QList<QPointF> GLEEllipse::getPerpendiculars(QPointF p)
 				t = t + M_PI/2.0;
 			}
 			iterations++;
-		}
-		if (iterations == MAX_ELLIPSE_PERP_ITERATIONS) {
-			qDebug() << "Iteration limit reached";
 		}
 
 		perpPoint = QPointF(rx*cos(t),ry*sin(t));
@@ -612,7 +607,6 @@ void GLEEllipse::updateEquationParameters()
 
 QList<QPointF> GLEEllipse::intersections(double qtm, double qtc, bool vertical)
 {
-	qDebug("Calculating intersection by m & c");
 	QPointF one, two;
 	// For ellipses, we'll deal with points individually:
 	if (vertical)

@@ -100,7 +100,9 @@ private:
 	bool isInsideCircle(QPointF p);
 	//! What's the closest point to the full circle?
 	double distanceToPointOnCircle(QPointF p, QPointF *nearestPoint);
-
+	void drawArc(QPainter *p, double t1, double t2);
+	void addBezier(QPainterPath *p, GLEBezier* bezier);
+	void computeAndDraw(QPainter *p, GLEArcDO* obj, GLECurvedArrowHead* head);
 };
 
 #endif

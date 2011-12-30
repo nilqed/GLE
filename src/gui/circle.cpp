@@ -123,8 +123,6 @@ void GLECircle::addRelativeOSnaps(QPointF p)
 {
 	if (isSet(CentrePoint) && isSet(Radius))
 	{
-		qDebug() << "Adding osnaps relative to " << QGLE::absQtToGLE(p,dpi,pixmap.height());
-
 		relativeOSnaps.clear();
 
 		QList<QPointF> perpendiculars = getPerpendiculars(p);
@@ -183,7 +181,6 @@ QList<QPointF> GLECircle::getPerpendiculars(QPointF p)
 	// The first perpendicular osnap is defined as the nearest point
 	QPointF np;
 	distanceToPoint(p,&np);
-	qDebug() << "Nearest point: " << QGLE::absQtToGLE(np,dpi,pixmap.height());
 	perpendiculars.append(np);
 
 	// The second perpendicular osnap is diametrically opposite the first one
@@ -272,7 +269,6 @@ QRectF GLECircle::circleRect()
 
 QList<QPointF> GLECircle::intersections(double qtm, double qtc, bool vertical)
 {
-	qDebug("Calculating intersection by m & c");
 	QPointF one, two;
 	// For circles, we'll deal with points individually:
 	if (vertical)
@@ -296,7 +292,6 @@ QList<QPointF> GLECircle::intersections(double qtm, double qtc, bool vertical)
 
 QList<QPointF> GLECircle::intersections(QPointF qtp1, QPointF qtp2)
 {
-	qDebug("Calculating intersection by two points");
 	QList<QPointF> pointArray;
 
 	if (!(isSet(CentrePoint) && isSet(Radius)))
@@ -339,7 +334,6 @@ QList<QPointF> GLECircle::intersections(QPointF qtp1, QPointF qtp2)
 
 QList<QPointF> GLECircle::intersections(QPointF qtp1, double angle)
 {
-	qDebug("Calculating intersection by a start point and angle");
 	// This intersection code must determine the intersections in
 	// a particular direction from a start point
 

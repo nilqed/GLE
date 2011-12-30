@@ -67,6 +67,7 @@ gle-block.h \
 numberformat.h \
 builtin-double.h \
 gle-poppler.h \
+gle-interface$(PATH_SEP)gle-shapemath.h \
 gle-interface$(PATH_SEP)gle-base.h \
 gle-interface$(PATH_SEP)gle-datatype.h
 

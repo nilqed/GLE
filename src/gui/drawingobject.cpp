@@ -39,7 +39,6 @@ PropertyDescriptor GLEDrawingObject::getPropertyDescription(int property)
 		return(propertyDescriptions[property]);
 	else
 	{
-		qDebug() << "Invalid property requested";
 		PropertyDescriptor x;
 		return(x);
 	}

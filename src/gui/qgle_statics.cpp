@@ -156,6 +156,11 @@ QPointF QGLE::absGLEToQt(QPointF gle, double dpi, int areaHeight)
 	return(absGLEToQt(gle.x(), gle.y(), dpi, areaHeight));
 }
 
+QPointF QGLE::absGLEToQt(const GLEPoint& gle, double dpi, int areaHeight)
+{
+	return(absGLEToQt(gle.getX(), gle.getY(), dpi, areaHeight));
+}
+
 QSizeF QGLE::qtSizeToGLE(QSizeF qt, double dpi)
 {
 	// DO NOT RELY ON THIS FOR ACCURACY!

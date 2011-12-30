@@ -320,12 +320,10 @@ void GLEMainWindow::checkForFileUpdates()
 		switch(answer)
 		{
 			case 0:
-				qDebug() << "Reload file selected";
 				openFile(currFile->primaryFile());
 				isOpen = true;
 				break;
 			default:
-				qDebug() << "Ignore selected";
 				break;
 		}
 
@@ -359,9 +357,6 @@ void GLEMainWindow::dropEvent(QDropEvent *event)
 
 	if (rx.exactMatch(uri))
 	{
-		qDebug() << "Dropped file: " <<
-			uri << ": " << rx.capturedTexts()[2];
-		QGLE::flushIO();
 		openFile(rx.capturedTexts()[2]);
 	}
 	else
@@ -479,21 +474,16 @@ void GLEMainWindow::keyPressEvent(QKeyEvent *event)
 			break;
 
 		case Qt::Key_Shift:
-			qDebug() << "Shift key depressed";
 			drawingArea->modifierToggle(GLEDrawingArea::ShiftKey, true);
 			break;
 
 		case Qt::Key_Control:
-			qDebug() << "Control key depressed";
 			drawingArea->modifierToggle(GLEDrawingArea::CtrlKey, true);
 			break;
 
 		case Qt::Key_Alt:
-			qDebug() << "Alt key depressed";
 			drawingArea->modifierToggle(GLEDrawingArea::AltKey, true);
 			break;
-
-
 
 		default:
 			event->ignore();
@@ -512,17 +502,14 @@ void GLEMainWindow::keyReleaseEvent(QKeyEvent *event)
 	switch (event->key())
 	{
 		case Qt::Key_Shift:
-			qDebug() << "Shift key released";
 			drawingArea->modifierToggle(GLEDrawingArea::ShiftKey, false);
 			break;
 
 		case Qt::Key_Control:
-			qDebug() << "Control key released";
 			drawingArea->modifierToggle(GLEDrawingArea::CtrlKey, false);
 			break;
 
 		case Qt::Key_Alt:
-			qDebug() << "Alt key released";
 			drawingArea->modifierToggle(GLEDrawingArea::AltKey, false);
 			break;
 
@@ -566,7 +553,6 @@ void GLEMainWindow::initRenderThread()
 // Start the server
 void GLEMainWindow::startServer()
 {
-	qDebug() << "Starting server";
 	// Initialise the GS library
 	initLibGS();
 
@@ -1359,7 +1345,6 @@ void GLEMainWindow::previewModeToggle(bool state)
 		// or if objects have been moved
 		if (drawingArea->thereAreNewObjects())
 		{
-			qDebug() << "Rendering new objects";
 			updateGLE();
 			if (settings->saveOnPreview())
 			{
@@ -1553,7 +1538,6 @@ void GLEMainWindow::renderEPS(double dpi)
 // Render an EPS file from a given QString
 void GLEMainWindow::renderEPS(QString outputFile, double dpi, const QSize& area)
 {
-	qDebug() << "About to render " << outputFile;
 	if (getCurrentFile()->isGLE())
 	{
 		GLEScript* script = getGLEScript();
@@ -2154,7 +2138,6 @@ void GLEMainWindow::browseScriptFolder()
 // SLOT: Open an existing file
 void GLEMainWindow::openFile(QString fileName, bool isOnStartup)
 {
-	qDebug() << "Open file " << fileName;
 	bool isReload = (getCurrentGleFile() == fileName);
 
 	// If changes have been made, ask what to do
@@ -2201,7 +2184,6 @@ void GLEMainWindow::openFile(QString fileName, bool isOnStartup)
 		// Get the file information
 		QFileInfo fname(fileName);
 		settings->setPwd(fname.dir().path());
-		qDebug() << "Open file: " << fileName;
 		// Regular expressions to check whether it's an EPS file or a GLE file
 		QRegExp rxeps(".*\\.eps$", Qt::CaseInsensitive);
 		QRegExp rxgle(".*\\.gle$", Qt::CaseInsensitive);
@@ -2587,7 +2569,6 @@ void GLEMainWindow::openInTextEditor(const QString& file)
 #ifdef Q_WS_WIN
 		filename.replace('/', '\\');
 #endif
-		qDebug() << "Opening:" << filename;
 
 #ifdef Q_WS_MAC
 		// This checks whether we're on a Mac and if so, handles .app files appropriately
