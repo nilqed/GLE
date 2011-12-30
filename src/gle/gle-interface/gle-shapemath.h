@@ -39,7 +39,7 @@
 #ifndef __GLE_SHAPEMATH__
 #define __GLE_SHAPEMATH__
 
-class GLECurve {
+class DLLCLASS GLECurve {
 public:
 	GLECurve();
 	virtual ~GLECurve();
@@ -56,7 +56,7 @@ protected:
 	double computeDistRecursive(double t1, GLEPoint& p1, double t2, GLEPoint& p2);
 };
 
-class GLECurveT0T1 : public GLECurve {
+class DLLCLASS GLECurveT0T1 : public GLECurve {
 protected:
 	double m_T0, m_T1;
 public:
@@ -66,7 +66,7 @@ public:
 	virtual double getT1();
 };
 
-class GLECircleArc : public GLECurveT0T1 {
+class DLLCLASS GLECircleArc : public GLECurveT0T1 {
 protected:
 	GLEPoint m_Orig;
 	double m_R;
@@ -81,7 +81,7 @@ public:
 	virtual double distToParamValue(double t1, double dist);
 };
 
-class GLEEllipseArc : public GLECurveT0T1 {
+class DLLCLASS GLEEllipseArc : public GLECurveT0T1 {
 protected:
 	GLEPoint m_Orig;
 	double m_Rx, m_Ry;
@@ -93,7 +93,7 @@ public:
 	virtual void getCpp(double t, GLEPoint& p);
 };
 
-class GLEBezier : public GLECurve {
+class DLLCLASS GLEBezier : public GLECurve {
 protected:
 	GLEPoint m_P0, m_P1, m_P2, m_P3;
 	double m_Ax, m_Bx, m_Cx, m_Ay, m_By, m_Cy;
@@ -128,7 +128,7 @@ public:
 	void cutFromParamValue(double t);
 };
 
-class GLECurvedArrowHead {
+class DLLCLASS GLECurvedArrowHead {
 protected:
 	GLECurve* m_Curve;
 	GLEBezier m_Side1, m_Side2;
@@ -148,7 +148,7 @@ public:
 	double getParamValueEnd();
 	double getArrowCurveDist();
 	void computeAndDraw();
-	void computeArrowHead();
+	DLLFCT void computeArrowHead();
 	void draw();
 	GLEBezier* getSide1() { return &m_Side1; }
 	GLEBezier* getSide2() { return &m_Side2; }
@@ -160,12 +160,12 @@ public:
 	inline void setEnabled(bool enable) { m_Enable = enable; }
 };
 
-void GLEUpdateCurvedArrowHeadsArc(GLECurvedArrowHead* head_start,
-		                          GLECurvedArrowHead* head_end,
-		                          double* t1,
-		                          double* t2,
-		                          GLEPropertyStore* props,
-		                          double fac,
-		                          int arrow);
+DLLFCT void GLEUpdateCurvedArrowHeadsArc(GLECurvedArrowHead* head_start,
+		                                   GLECurvedArrowHead* head_end,
+		                                   double* t1,
+		                                   double* t2,
+		                                   GLEPropertyStore* props,
+		                                   double fac,
+		                                   int arrow);
 
 #endif // __GLE_SHAPEMATH__
