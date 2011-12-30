@@ -254,6 +254,7 @@ void GLEDrawingArea::createNewArcFromScript(GLEArcDO* arc) {
 	objectList[currentIndex]->setPoint(GLEArc::MidPoint, gleToQt(arc->getPointMid(dummy)));
 	objectList[currentIndex]->setGLEObject(arc);
 	objectList[currentIndex]->setLineProperties();
+	objectList[currentIndex]->setPropertyNoUpdate(GLELine::ArrowHeadPresence, arc->getArrow());
 }
 
 // Create new text object based on GLE object

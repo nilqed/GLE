@@ -38,10 +38,12 @@ GLEArc::GLEArc(double resolution, QSize imageSize, GLEDrawingArea *area) :
 	validProperties
 		<< LineColour
 		<< LineWidth
-		<< LineStyle;
+		<< LineStyle
+		<< ArrowHeadPresence;
 	properties[LineColour] = propertyDescriptions[LineColour].defaultValue;
 	properties[LineWidth] = propertyDescriptions[LineWidth].defaultValue;
 	properties[LineStyle] = propertyDescriptions[LineStyle].defaultValue;
+	properties[ArrowHeadPresence] = propertyDescriptions[ArrowHeadPresence].defaultValue;
 
 	amove = false;
 }
@@ -64,6 +66,7 @@ void GLEArc::updateFromProperty(int)
 	GLEColor* gle_color = obj->getProperties()->getColorProperty(GLEDOPropertyColor);
 	gle_color->setRGB255(color.red(), color.green(), color.blue());
 	QGLE::qtToGLEString(getProperty(LineStyle).toString(), obj_prop->getStringProperty(GLEDOPropertyLineStyle));
+	obj->setArrow((GLEHasArrow)getProperty(ArrowHeadPresence).toInt());
 
 	((GLEDrawingArea*)parent())->setDirtyAndSave();
 }
