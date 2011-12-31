@@ -253,6 +253,7 @@ void g_arrowpoints(double cx,double cy,double dx,double dy, double *ax1,
                    double *ay1,double *ax2,double *ay2, double *nnx, double *nny);
 void g_psarrow(double x1, double y1, double x2, double y2, int flag);
 
+double g_arc_normalized_angle2(double a1, double a2);
 void g_arc(double r, double t1, double t2, double cx, double cy, int arrow);
 void g_narc(double r, double t1, double t2, double cx, double cy, int arrow);
 

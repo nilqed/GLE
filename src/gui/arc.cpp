@@ -71,6 +71,18 @@ void GLEArc::updateFromProperty(int)
 	((GLEDrawingArea*)parent())->setDirtyAndSave();
 }
 
+void GLEArc::getGLEArcT0T1(double* t0, double* t1)
+{
+	if (directionReversed) {
+		*t0 = endAngleDeg();
+		*t1 = startAngleDeg();
+	} else {
+		*t0 = startAngleDeg();
+		*t1 = endAngleDeg();
+	}
+	*t1 = GLEArcNormalizedAngle2(*t0, *t1);
+}
+
 // Update the painter path
 void GLEArc::updateArc()
 {
@@ -125,14 +137,10 @@ void GLEArc::updateArc()
 		if (arc != NULL) {
 			arc->setCenter(QGLE::QPointFToGLEPoint(getGLEPoint(CentrePoint)));
 			arc->setRadius(getGLELength(Radius));
-			if (directionReversed) {
-				arc->setAngle1(endAngleDeg());
-				arc->setAngle2(startAngleDeg());
-			} else {
-				arc->setAngle1(startAngleDeg());
-				arc->setAngle2(endAngleDeg());
-			}
-			arc->normalize();
+			double t0, t1;
+			getGLEArcT0T1(&t0, &t1);
+			arc->setAngle1(t0);
+			arc->setAngle2(t1);
 		}
 
 		// Now we add the osnap handles
@@ -269,11 +277,7 @@ bool GLEArc::hasPerpendiculars()
 
 void GLEArc::drawArc(QPainter *p, double t1, double t2)
 {
-	int sweep = (int)((t2 - t1)*16);
-	if (directionReversed) {
-		sweep = sweep-(360*16);
-	}
-	p->drawArc(arcRect(), (int)(t1 * 16), sweep);
+	p->drawArc(arcRect(), (int)(t1 * 16), (int)((t2 - t1) * 16));
 }
 
 void GLEArc::addBezier(QPainterPath *p, GLEBezier* bezier) {
@@ -317,16 +321,16 @@ void GLEArc::draw(QPainter *p)
 		return;
 	}
 	if (isSet(CentrePoint)) {
+		double t1, t2;
+		getGLEArcT0T1(&t1, &t2);
 		GLEArcDO* obj = (GLEArcDO*)getGLEObject();
 		if (obj != NULL && obj->getArrow() != 0) {
 			double r = getGLELength(Radius);
-			double t1 = startAngleDeg();
-			double t2 = endAngleDegConstrained();
 			GLEPoint orig(getGLEPoint(CentrePoint).x(), getGLEPoint(CentrePoint).y());
 			GLECircleArc circle(orig, r, QGLE::degreesToRadians(t1), QGLE::degreesToRadians(t2));
 			GLECurvedArrowHead head_start(&circle);
 			GLECurvedArrowHead head_end(&circle);
-			GLEUpdateCurvedArrowHeadsArc(&head_start, &head_end, &t1, &t2, obj->getProperties(), 1.0, obj->getArrow());
+			GLEArcUpdateCurvedArrowHeads(&head_start, &head_end, &t1, &t2, obj->getProperties(), 1.0, obj->getArrow());
 			drawArc(p, t1, t2);
 			QPen new_pen = cpen;
 			new_pen.setJoinStyle(Qt::RoundJoin);
@@ -336,7 +340,7 @@ void GLEArc::draw(QPainter *p)
 			computeAndDraw(p, obj, &head_start);
 			computeAndDraw(p, obj, &head_end);
 		} else {
-			drawArc(p, startAngleDeg(), endAngleDegConstrained());
+			drawArc(p, t1, t2);
 		}
 	} else {
 		// If we don't have a centre point, just draw a line

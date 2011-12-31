@@ -1082,7 +1082,6 @@ public:
 	DLLFCT GLEPoint& getPoint1(GLEPoint& pt);
 	DLLFCT GLEPoint& getPoint2(GLEPoint& pt);
 	DLLFCT GLEPoint& getPointMid(GLEPoint& pt);
-	double getNormalizedAngle2();
 	DLLFCT void normalize();
 };
 

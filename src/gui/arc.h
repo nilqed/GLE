@@ -103,6 +103,7 @@ private:
 	void drawArc(QPainter *p, double t1, double t2);
 	void addBezier(QPainterPath *p, GLEBezier* bezier);
 	void computeAndDraw(QPainter *p, GLEArcDO* obj, GLECurvedArrowHead* head);
+	void getGLEArcT0T1(double* t0, double* t1);
 };
 
 #endif

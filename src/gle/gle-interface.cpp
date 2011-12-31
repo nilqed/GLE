@@ -1390,7 +1390,7 @@ bool GLEArcDO::needsAMove(GLEPoint& pt) {
 
 void GLEArcDO::createGLECode(string& code) {
 	ostringstream str;
-	double angle2 = getNormalizedAngle2();
+	double angle2 = g_arc_normalized_angle2(m_Angle1, m_Angle2);
 	if (isCircle()) {
 		str << "arc " << m_Rx << " " << m_Angle1 << " " << angle2;
 	} else {
@@ -1420,16 +1420,7 @@ bool GLEArcDO::approx(GLEDrawObject* other) {
 }
 
 void GLEArcDO::normalize() {
-	m_Angle2 = getNormalizedAngle2();
-}
-
-double GLEArcDO::getNormalizedAngle2() {
-	if (m_Angle2 < m_Angle1) {
-		// Correctly normalize a2
-		return m_Angle2 + 360 * ceil((m_Angle1 - m_Angle2)/360.0);
-	} else {
-		return m_Angle2;
-	}
+	m_Angle2 = g_arc_normalized_angle2(m_Angle1, m_Angle2);
 }
 
 GLEPoint& GLEArcDO::getPoint1(GLEPoint& pt) {
@@ -1446,7 +1437,7 @@ GLEPoint& GLEArcDO::getPoint2(GLEPoint& pt) {
 
 GLEPoint& GLEArcDO::getPointMid(GLEPoint& pt) {
 	pt.set(m_Center);
-	double angle2 = getNormalizedAngle2();
+	double angle2 = g_arc_normalized_angle2(m_Angle1, m_Angle2);
 	double angleMid = (m_Angle1 + angle2)/2;
 	pt.add(m_Rx*cos(angleMid*GLE_PI/180.0), m_Ry*sin(angleMid*GLE_PI/180.0));
 	return pt;

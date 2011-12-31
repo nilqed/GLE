@@ -1474,6 +1474,15 @@ void g_update_arc_bounds_for_arrow_heads(GLECurvedArrowHead* head_start,
 	}
 }
 
+double g_arc_normalized_angle2(double a1, double a2) {
+	if (a2 < a1) {
+		// Correctly normalize a2
+		return a2 + 360 * ceil((a1 - a2)/360.0);
+	} else {
+		return a2;
+	}
+}
+
 void g_arc(double r, double t1, double t2, double cx, double cy, int arrow) {
 	g_flush();
 	GLEPoint orig(cx, cy);
@@ -2482,7 +2491,11 @@ void g_init_arrow_head_from_properties(GLECurvedArrowHead* head, GLEPropertyStor
 	head->setStartEnd(startend);
 }
 
-void GLEUpdateCurvedArrowHeadsArc(GLECurvedArrowHead* head_start,
+double GLEArcNormalizedAngle2(double a1, double a2) {
+	return g_arc_normalized_angle2(a1, a2);
+}
+
+void GLEArcUpdateCurvedArrowHeads(GLECurvedArrowHead* head_start,
 		                          GLECurvedArrowHead* head_end,
 		                          double* t1,
 		                          double* t2,

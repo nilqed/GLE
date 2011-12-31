@@ -160,12 +160,14 @@ public:
 	inline void setEnabled(bool enable) { m_Enable = enable; }
 };
 
-DLLFCT void GLEUpdateCurvedArrowHeadsArc(GLECurvedArrowHead* head_start,
-		                                   GLECurvedArrowHead* head_end,
-		                                   double* t1,
-		                                   double* t2,
-		                                   GLEPropertyStore* props,
-		                                   double fac,
-		                                   int arrow);
+DLLFCT void GLEArcUpdateCurvedArrowHeads(GLECurvedArrowHead* head_start,
+                                         GLECurvedArrowHead* head_end,
+                                         double* t1,
+                                         double* t2,
+                                         GLEPropertyStore* props,
+                                         double fac,
+                                         int arrow);
+
+DLLFCT double GLEArcNormalizedAngle2(double a1, double a2);
 
 #endif // __GLE_SHAPEMATH__
