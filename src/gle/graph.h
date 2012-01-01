@@ -330,7 +330,11 @@ char *un_quote(char *ct);
 #define next_vquote_cpp(s) (ct+=1,skipspace,pass_file_name(tk[ct],s))
 #define next_quote(s) (ct+=1,skipspace,strcpy(s,un_quote(tk[ct])))
 
-struct fill_data {
+class fill_data {
+public:
+	fill_data();
+	
+public:
 	int layer;
 	int da, db;	/* fill from, too */
 	int type; 	/* 1= x1,d1, 2=d1,x2, 3=d1,d2, 4=d1 */

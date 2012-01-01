@@ -143,6 +143,18 @@ void ensureDataSetCreatedAndSetUsed(int d) {
 
 void replace_exp(string& exp);
 
+fill_data::fill_data():
+	layer(0),
+	da(0),
+	db(0),
+	type(0),
+	xmin(GLE_INF),
+	ymin(GLE_INF),
+	xmax(-GLE_INF),
+	ymax(-GLE_INF)
+{
+}
+
 GLEInternalClassDefinitions::GLEInternalClassDefinitions() {
 	m_keySeparator = new GLEClassDefinition("key_separator");
 	m_keySeparator->addField("lstyle");
