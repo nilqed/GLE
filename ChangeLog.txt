@@ -1,4 +1,4 @@
-4.2.4 (November, 2011)
+4.2.4 (January, 2012)
 
 New Features
 
@@ -23,6 +23,9 @@ New Features
     Support for "key separator" in graph blocks
     Use Poppler PDF library for rendering in QGLE and for image exports
     Support GZIP compressed CSV data in graph blocks
+    QGLE export dialog remembers resolution and other settings
+    Better definition of circle style markers (including "dot")
+    Added support for arc arrow heads in QGLE edit mode
 
 Bug Fixes
 
@@ -36,6 +39,7 @@ Bug Fixes
     Subticks are now generated over the entire axis range
     g_bitmap now also works with "-cairo"
     Bug #3434175: Turning on sublabels produces wrong width of some subticks
+    Fixed bug in when QGLE edits scripts with filled boxes
 
 4.2.3 (September, 2010)
 
