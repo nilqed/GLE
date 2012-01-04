@@ -171,6 +171,8 @@ win32 {
 	LIBS += -lgle-graphics-@GLE_VERSION@ -L../../build/bin/
 }
 
+LIBS += -lGLU
+
 # place the resulting QGLE executable in the "bin" subdirectory of "build"
 DESTDIR = ../../build/bin
 

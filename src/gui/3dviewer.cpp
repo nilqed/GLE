@@ -26,6 +26,8 @@
 #include "../gle/gle-block.h"
 #include "../gle/surface/gsurface.h"
 
+#include "GL/glu.h"
+
 #include <math.h>
 
 QGLE3DWidget::QGLE3DWidget(QWidget *parent, GLEInterface* iface)
