@@ -87,7 +87,6 @@ public:
 	bool metric_loaded;
 	bool error;
 	GLEFontTable info;
-	vector<GLEFontCharData*> cdata;
 	GLEFontUnicodeMap* unimap;
 	IntKeyHash<FontCompositeInfo*> composites;
 public:
@@ -97,6 +96,12 @@ public:
 	void char_kern(int c1, int c2, float *w);
 	FontCompositeInfo* get_composite_char(int ch, int accent);
 	int unicode_map(unsigned int ucode);
+	GLEFontCharData* getCharData(int cc);
+	GLEFontCharData* getCharDataThrow(int cc);
+	GLEFontCharData* addCharData();
+
+private:
+	std::vector<GLEFontCharData*> cdata;
 };
 
 GLECoreFont* get_core_font(int font);

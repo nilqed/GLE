@@ -331,8 +331,8 @@ norm_again:
 		}
 		outlong(1);
 		outlong(c1 | p_fnt*1024);
-		dbg gprint("==char width %d %f %f \n", c1, cfont->cdata[c1]->wx, w);
-		outfloat((cfont->cdata[c1]->wx + w)*p_hei);
+		dbg gprint("==char width %d %f %f \n", c1, cfont->getCharDataThrow(c1)->wx, w);
+		outfloat((cfont->getCharDataThrow(c1)->wx + w)*p_hei);
 		skip_space = false;
 		break;
 	    case 2: /* Single space */
@@ -529,7 +529,7 @@ void mathchar_bbox(int m, double* x1, double* y1, double* x2, double* y2, double
 	if (mtyp == 7) mtyp = 0;
 	int font = fontfam[mfam][tofont[curstyle]];
 	char_bbox(font, mchar, x1, y1, x2, y2);
-	*cw = fnt[font]->cdata[mchar]->wx;
+	*cw = fnt[font]->getCharDataThrow(mchar)->wx;
 }
 
 void pp_fntchar(int ff, int ch, int *out,int *lout) {
@@ -537,7 +537,7 @@ void pp_fntchar(int ff, int ch, int *out,int *lout) {
 	if (ch == 0) ch = 254;
 	outlong(ch | ff*1024);
 	GLECoreFont* cfont = get_core_font_ensure_loaded(ff);
-	outfloat(cfont->cdata[ch]->wx * p_hei);
+	outfloat(cfont->getCharDataThrow(ch)->wx * p_hei);
 }
 
 void pp_pcode(int *pbuff, int plen, int *out,int *lout) {
@@ -568,7 +568,7 @@ void p_unichar(const string& str, int *out, int *lout) {
 		double crxpos = 0.0;
 		while (str[i] != 0) {
 			int ch = str[i];
-			double wid = cfont->cdata[ch]->wx * p_hei;
+			double wid = cfont->getCharDataThrow(ch)->wx * p_hei;
 			switch (i) {
 				case 0:
 				case 1:
@@ -676,10 +676,10 @@ void tex_draw_accent(uchar **in, TexArgStrs* params, int *out, int *lout) {
 	// cout << "'" << params->str1 << "' '" << params->str2 << "' '" << params->str3 << "'" << endl;
 	// cout << *in << endl;
 	char_bbox(newfnt, ix, &lef, &dep, &wid, &hei);
-	cwid = p_hei * fnt[newfnt]->cdata[ix]->wx;
+	cwid = p_hei * fnt[newfnt]->getCharDataThrow(ix)->wx;
 	if (m == NULL) {
 		char_bbox(p_fnt, ix2, &lef2, &dep2, &wid2, &hei2);
-		cwid2 = p_hei * fnt[p_fnt]->cdata[ix2]->wx;
+		cwid2 = p_hei * fnt[p_fnt]->getCharDataThrow(ix2)->wx;
 	} else {
 		mathchar_bbox(*m, &lef2, &dep2, &wid2, &hei2, &cwid2);
 		cwid2 *= p_hei;
@@ -711,8 +711,8 @@ void tex_draw_accent_cmb(uchar **in, TexArgStrs* params, int *out, int *lout) {
 			GLECoreFont* cfont = get_core_font_ensure_loaded(p_fnt);
 			FontCompositeInfo* info = cfont->get_composite_char(ch, accent);
 			if (info != NULL) {
-				double w1 = cfont->cdata[info->c1]->wx * p_hei;
-				double w2 = cfont->cdata[info->c2]->wx * p_hei;
+				double w1 = cfont->getCharDataThrow(info->c1)->wx * p_hei;
+				double w2 = cfont->getCharDataThrow(info->c2)->wx * p_hei;
 				double dx1 = info->dx1 * p_hei;
 				double dx2 = info->dx2 * p_hei;
 				double dy1 = info->dy1 * p_hei;
@@ -1071,10 +1071,13 @@ void text_wrapcode(int *in,int ilen,double width) {
 		crFont = g_font_fallback((*(in+ ++i)) / 1024);
 		cfont = get_core_font_ensure_loaded(crFont);
 		c = *(in+i) & 0x3ff;
-		if (cdep > cy + p_hei * cfont->cdata[c]->y1)
-			cdep = cy + p_hei * cfont->cdata[c]->y1;
-		if (chei < cy + p_hei * cfont->cdata[c]->y2)
-			chei = cy + p_hei * cfont->cdata[c]->y2;
+		{
+			GLEFontCharData* charData = cfont->getCharDataThrow(c);
+			if (cdep > cy + p_hei * charData->y1)
+				cdep = cy + p_hei * charData->y1;
+			if (chei < cy + p_hei * charData->y2)
+				chei = cy + p_hei * charData->y2;
+		}
 		/* gprint("chei=%f, cdep=%f \n",chei,cdep); */
 		cx += tofloat(*(in+ ++i));
 		ax = cx;
@@ -1318,8 +1321,11 @@ void text_draw(int *in,int ilen) {
 	    crFont = g_font_fallback((*(in+ ++i)) / 1024);
 		cfont = get_core_font_ensure_loaded(crFont);
 		c = *(in+i) & 0x3ff;
-		g_update_bounds(cx+p_hei*(cfont->cdata[c]->x1), cy+p_hei*(cfont->cdata[c]->y1));
-		g_update_bounds(cx+p_hei*(cfont->cdata[c]->x2), cy+p_hei*(cfont->cdata[c]->y2));
+		{
+			GLEFontCharData* cdata = cfont->getCharDataThrow(c);
+			g_update_bounds(cx+p_hei*(cdata->x1), cy+p_hei*(cdata->y1));
+			g_update_bounds(cx+p_hei*(cdata->x2), cy+p_hei*(cdata->y2));
+		}
 		dp {
 			g_move(cx,cy);
 			g_char(crFont,c);

@@ -111,8 +111,8 @@ char *font_getname(int i) {
 
 void char_bbox(int ff, int cc, double *xx1, double *yy1, double *xx2, double *yy2) {
 	GLECoreFont* cfont = get_core_font_ensure_loaded(ff);
-	if (cc >= 0 && (unsigned int)cc < cfont->cdata.size()) {
-		GLEFontCharData* cdata = cfont->cdata[cc];
+	GLEFontCharData* cdata = cfont->getCharData(cc);
+	if (cdata != 0) {
 		*xx1 = cdata->x1;
 		*yy1 = cdata->y1;
 		*xx2 = cdata->x2;
@@ -127,8 +127,8 @@ void char_bbox(int ff, int cc, double *xx1, double *yy1, double *xx2, double *yy
 
 void font_get_chardata(struct char_data *cd, int ff, int cc) {
 	GLECoreFont* cfont = get_core_font(ff);
-	if (cc >= 0 && (unsigned int)cc < cfont->cdata.size()) {
-		GLEFontCharData* cdata = cfont->cdata[cc];
+	GLEFontCharData* cdata = cfont->getCharData(cc);
+	if (cdata != 0) {
 		cd->x1 = cdata->x1;
 		cd->y1 = cdata->y1;
 		cd->x2 = cdata->x2;
@@ -323,8 +323,7 @@ void font_load_metric(int ff) {
 	}
 	/* read character data */
 	for (int i = 0; i < nb_chars; i++) {
-		cfont->cdata.push_back(new GLEFontCharData());
-		GLEFontCharData* cdata = cfont->cdata[cfont->cdata.size()-1];
+		GLEFontCharData* cdata = cfont->addCharData();
 		if (fgetc(fmt) == 1) {
 			fread(&cdata->wx, sizeof(float), 1, fmt);
 			fread(&cdata->wy, sizeof(float), 1, fmt);
@@ -349,7 +348,7 @@ void font_load_metric(int ff) {
 	/* add some dummy characters */
 	for (int i = nb_chars; i <= 256; i++) {
 		/* some routines in tex.cpp assume fonts have at least this number of characters */
-		cfont->cdata.push_back(new GLEFontCharData());
+		cfont->addCharData();
 	}
 	/* Also do the composites to support accents in GLE (new 070506) */
 	int char_code = 0;
@@ -399,22 +398,26 @@ GLECoreFont::~GLECoreFont() {
 }
 
 int GLECoreFont::char_lig(int *c1, int c2) {
-	GLEFontCharData* ch_data = cdata[*c1];
-	for (unsigned int i = 0; i < ch_data->Lig.size(); i++) {
-		if (ch_data->Lig[i].NextChar == (unsigned int)c2) {
-			*c1 = ch_data->Lig[i].RepChar;
-			return *c1;
+	GLEFontCharData* ch_data = getCharData(*c1);
+	if (ch_data != 0) {
+		for (unsigned int i = 0; i < ch_data->Lig.size(); i++) {
+			if (ch_data->Lig[i].NextChar == (unsigned int)c2) {
+				*c1 = ch_data->Lig[i].RepChar;
+				return *c1;
+			}
 		}
 	}
 	return 0;
 }
 
 void GLECoreFont::char_kern(int c1, int c2, float *w) {
-	GLEFontCharData* ch_data = cdata[c1];
-	for (unsigned int i = 0; i < ch_data->Kern.size(); i++) {
-		if (ch_data->Kern[i].CharCode == (unsigned int)c2) {
-			*w = ch_data->Kern[i].X;
-			return;
+	GLEFontCharData* ch_data = getCharData(c1);
+	if (ch_data != 0) {
+		for (unsigned int i = 0; i < ch_data->Kern.size(); i++) {
+			if (ch_data->Kern[i].CharCode == (unsigned int)c2) {
+				*w = ch_data->Kern[i].X;
+				return;
+			}
 		}
 	}
 	*w = 0;
@@ -432,4 +435,27 @@ int GLECoreFont::unicode_map(unsigned int ucode) {
 	} else {
 		return i->second;
 	}
+}
+
+GLEFontCharData* GLECoreFont::getCharData(int cc) {
+	if (cc >= 0 && (unsigned int)cc < cdata.size()) {
+		return cdata[cc];
+	} else {
+		return 0;
+	}
+}
+
+GLEFontCharData* GLECoreFont::addCharData() {
+	cdata.push_back(new GLEFontCharData());
+	return cdata[cdata.size() - 1];
+}
+
+GLEFontCharData* GLECoreFont::getCharDataThrow(int cc) {
+	GLEFontCharData* result = getCharData(cc);
+	if (result == 0) {
+		std::ostringstream msg;
+		msg << "font '" << name << "' does not contain a character with id = " << cc;
+		g_throw_parser_error(msg.str());
+	}
+	return result;
 }
