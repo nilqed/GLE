@@ -103,7 +103,6 @@ GLECoreFont* get_core_font_ensure_loaded(int font) {
 	return cfont;
 }
 
-
 char *font_getname(int i) {
 	GLECoreFont* cfont = get_core_font(i);
 	return cfont->name;

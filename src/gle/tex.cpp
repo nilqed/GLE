@@ -241,8 +241,9 @@ void set_base_size() {
 	g_get_hei(&base_size);
 }
 
-void set_tex_font(int fnt) {
+GLECoreFont* set_tex_font(int fnt) {
 	p_fnt = g_font_fallback(fnt);
+	return get_core_font_ensure_loaded(p_fnt);
 }
 
 void try_get_next_char(uchar **in, int *c1) {
@@ -273,7 +274,7 @@ uchar try_get_next_two_chars(uchar **in, int *c1, int *c2) {
 		if (str_ni_equals((const char*)*in, "UCHR{", 5)) {
 			char *ptr;
 			unsigned int unicode = strtol((const char*)(*in)+5, &ptr, 16);
-			GLECoreFont* cfont = get_core_font_ensure_loaded(p_fnt);
+			GLECoreFont* cfont = set_tex_font(p_fnt);
 			int font_code = cfont->unicode_map(unicode);
 			if (font_code != -1) {
 				code = 1;
@@ -290,7 +291,7 @@ uchar try_get_next_two_chars(uchar **in, int *c1, int *c2) {
 			if (str_ni_equals((const char*)(*in)+1, "UCHR{", 5)) {
 				char *ptr;
 				unsigned int unicode = strtol((const char*)(*in)+6, &ptr, 16);
-				GLECoreFont* cfont = get_core_font_ensure_loaded(p_fnt);
+				GLECoreFont* cfont = set_tex_font(p_fnt);
 				int font_code = cfont->unicode_map(unicode);
 				if (font_code != -1) {
 					*c2 = font_code;
@@ -317,8 +318,7 @@ void text_topcode(uchar *in, int *out, int *lout) {
 		/* if next char is normal, then check for ligature and kern */
 norm_again:
 		w = 0;
-	    p_fnt = g_font_fallback(p_fnt);
-		cfont = get_core_font_ensure_loaded(p_fnt);
+		cfont = set_tex_font(p_fnt);
 		if (c2 != 0) {
 			if (!g_CmdLine.hasOption(GLE_OPT_NO_LIGATURES)) {
 				if (cfont->char_lig(&c1, c2)) {
@@ -339,8 +339,7 @@ norm_again:
 		if (skip_space) break;
 		skip_space = true;
 		outlong(2);
-		p_fnt = g_font_fallback(p_fnt);
-		cfont = get_core_font_ensure_loaded(p_fnt);
+		cfont = set_tex_font(p_fnt);
 		outfloat(cfont->info.space*p_hei);
 		outfloat(cfont->info.space_stretch*p_hei*10*stretch_factor);
 		outfloat(cfont->info.space_shrink*p_hei*10);
@@ -533,6 +532,7 @@ void mathchar_bbox(int m, double* x1, double* y1, double* x2, double* y2, double
 }
 
 void pp_fntchar(int ff, int ch, int *out,int *lout) {
+	ff = g_font_fallback(ff);
 	outlong(1);
 	if (ch == 0) ch = 254;
 	outlong(ch | ff*1024);
@@ -560,7 +560,7 @@ void p_unichar(const string& str, int *out, int *lout) {
 		myfree(workbuff);
 	} else {
 		int i = 0;
-		int myfnt = 31;
+		int myfnt = g_font_fallback(31);
 		double savehei = p_hei;
 		p_sethei(0.4*savehei);
 		pp_move(0.0, 0.4*savehei, out, lout);
@@ -699,7 +699,6 @@ void tex_draw_accent(uchar **in, TexArgStrs* params, int *out, int *lout) {
 	p_fntchar(newfnt,ix);        /* cwid2/2 + cwid/2 */
 	p_move(-cwid+cwid2-lef2-wid2/2+wid/2-accent_x,-h-accent_y);
 	set_tex_font(savefnt);
-	font_load_metric(p_fnt);
 }
 
 void tex_draw_accent_cmb(uchar **in, TexArgStrs* params, int *out, int *lout) {
@@ -708,7 +707,7 @@ void tex_draw_accent_cmb(uchar **in, TexArgStrs* params, int *out, int *lout) {
 			int accent;
 			int ch = params->str3[0];
 			texint(params->str4, &accent);
-			GLECoreFont* cfont = get_core_font_ensure_loaded(p_fnt);
+			GLECoreFont* cfont = set_tex_font(p_fnt);
 			FontCompositeInfo* info = cfont->get_composite_char(ch, accent);
 			if (info != NULL) {
 				double w1 = cfont->getCharDataThrow(info->c1)->wx * p_hei;
@@ -852,7 +851,6 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 	  case tp_fontenc:
 		params->cmdParam2(in);
 		set_tex_font(select_font_encoding(p_fnt, atoi(params->getCStr1()), params->getCStr2()));
-		font_load_metric(p_fnt);
 		break;
 	  case tp_acccmb:
   		params->cmdParam4_swap34(in);
@@ -921,7 +919,6 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 	  case tp_setfont:
 		params->cmdParam1(in);
 		set_tex_font(pass_font(params->getCStr1()));
-		font_load_metric(p_fnt);
 		break;
 	  case tp_presave:
 		gprint("Saving definitions\n");
@@ -973,7 +970,7 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 
 double emtof(char *s) {       /* same as ATOF but if it sees EM then it multiplies by FONT HEI */
 	if (strstr(s,"sp")!=NULL) {
-		GLECoreFont* cfont = get_core_font_ensure_loaded(p_fnt);
+		GLECoreFont* cfont = set_tex_font(p_fnt);
 		return atof(s) * cfont->info.space*p_hei;
 	}
 	if (strstr(s,"em")!=NULL) {
@@ -984,7 +981,7 @@ double emtof(char *s) {       /* same as ATOF but if it sees EM then it multipli
 
 double emtof(const string& s) {
 	if (str_i_str(s, "sp") != -1) {
-		GLECoreFont* cfont = get_core_font_ensure_loaded(p_fnt);
+		GLECoreFont* cfont = set_tex_font(p_fnt);
 		return atof(s.c_str()) * cfont->info.space*p_hei;
 	}
 	if (str_i_str(s, "em") != -1) {
@@ -1205,7 +1202,6 @@ void text_wrapcode(int *in,int ilen,double width) {
 	    case 9: /* font     p_fnt   */
 	    crFont = g_font_fallback(*(in+ ++i));
 		font_load_metric(crFont);
-
 		break;
 	    case 20: /*  nop  */
 		break;
