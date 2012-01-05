@@ -164,7 +164,9 @@ GLEString::~GLEString() {
 }
 
 void GLEString::fromUTF8(const char* str) {
-	fromUTF8(str, strlen(str));
+	if (str != 0) {
+		fromUTF8(str, strlen(str));
+	}
 }
 
 void GLEString::fromUTF8(const string& str) {
