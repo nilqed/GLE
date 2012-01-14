@@ -22,11 +22,14 @@
 #include <QtGui>
 #include <QtOpenGL>
 #include "3dviewer.h"
+#include "../config.h"
 #include "../gle/cutils.h"
 #include "../gle/gle-block.h"
 #include "../gle/surface/gsurface.h"
 
-#include "GL/glu.h"
+#ifdef HAVE_LIBGLU_H
+	#include <GL/glu.h>
+#endif
 
 #include <math.h>
 

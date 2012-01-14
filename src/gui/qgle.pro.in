@@ -165,7 +165,6 @@ LIBS += $$QMAKE_LIBS_DYNLOAD
 
 # link against the GLE library (unix -> Linux and Mac OS/X)
 unix {
-   LIBS += -lGLU
 	LIBS += -lgle-graphics-@GLE_VERSION@ -L../../build/lib/
 }
 win32 {
@@ -178,7 +177,7 @@ DESTDIR = ../../build/bin
 
 # add the "lib" directory to the search path of the linker
 unix {
-	LIBS += @QT_RPATH@
+	LIBS += @QT_RPATH@ @QT_LIBGLU_LIB@
 }
 
 # vim:et

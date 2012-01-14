@@ -78,8 +78,10 @@ HAVE_NOCYGWIN=0
 HAVE_CYGWIN=0
 HAVE_MINGW=0
 HAVE_LIBZ=0
+HAVE_LIBGLU_H=0
 QT_CONFIG="CONFIG += release"
 QT_RPATH=
+QT_LIBGLU_LIB=
 
 HAVE_STATIC_LIBPNG=0
 HAVE_STATIC_LIBTIFF=0
@@ -638,6 +640,14 @@ if test "x$with_qt" != "xno"; then
         HAVE_QT=1
         QMAKE_VERS=`$QMAKE_PROG -v | tail -n 1`
     fi
+    
+    AC_CHECK_HEADERS(GL/glu.h,
+    [AC_DEFINE(HAVE_LIBGLU_H)],
+    [])
+    
+    AC_CHECK_LIB(GLU,gluLookAt,
+    [QT_LIBGLU_LIB=-lGLU],
+    [])
 fi
 
 if test "x$HAVE_RPATH" != "x0"; then
@@ -875,6 +885,7 @@ AC_SUBST(GLE_VERSION)
 AC_SUBST(MAKE_AUTOPACKAGE)
 AC_SUBST(QT_CONFIG)
 AC_SUBST(QT_RPATH)
+AC_SUBST(QT_LIBGLU_LIB)
 AC_SUBST(HAVE_EXTRA_FONTS)
 
 AC_CONFIG_FILES([Makefile src/gle/Makefile src/gle/bitmap/Makefile src/gle/letzfitz/Makefile src/gle/surface/Makefile src/gle/tokens/Makefile src/fbuild/Makefile src/makefmt/Makefile src/manip/Makefile src/TeX/Makefile src/gui/MakefileAC src/gui/qgle.pro src/doc/gle.1 platform/autoconf/gle-graphics.pc platform/autopackage/gle4.apspec])
