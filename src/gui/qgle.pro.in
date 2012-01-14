@@ -165,13 +165,13 @@ LIBS += $$QMAKE_LIBS_DYNLOAD
 
 # link against the GLE library (unix -> Linux and Mac OS/X)
 unix {
+   LIBS += -lGLU
 	LIBS += -lgle-graphics-@GLE_VERSION@ -L../../build/lib/
 }
 win32 {
+   LIBS += -lglu32
 	LIBS += -lgle-graphics-@GLE_VERSION@ -L../../build/bin/
 }
-
-LIBS += -lGLU
 
 # place the resulting QGLE executable in the "bin" subdirectory of "build"
 DESTDIR = ../../build/bin
