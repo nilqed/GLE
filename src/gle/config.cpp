@@ -555,7 +555,7 @@ bool check_correct_version(const string name, bool has_top, bool has_config, con
 			out << "       '" << name << "'" << endl;
 			out << "Is from GLE version '";
 			if (val == "") { out << "unknown"; } else { out << val; }
-			out << "' (and not '" << GLEVN << "' as espected)." << endl;
+			out << "' (and not '" << GLEVN << "' as expected)." << endl;
 			complain_about_gletop(has_top, out);
 			g_message(out.str().c_str());
 			return false;

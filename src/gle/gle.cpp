@@ -1168,7 +1168,7 @@ void GLELoadOneFileManager::delete_original_eps_pdf() {
 
 void complain_latex_not_supported(int device) {
 	if (TeXInterface::getInstance()->hasObjects()) {
-		g_throw_parser_error(">> LaTeX expressions not suppored in '", g_device_to_ext(device), "' output");
+		g_throw_parser_error(">> LaTeX expressions not supported in '", g_device_to_ext(device), "' output");
 	}
 }
 
