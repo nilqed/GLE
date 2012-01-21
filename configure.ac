@@ -139,6 +139,13 @@ dnl ****************************************************************************
 GLE_SNAPSHOT=""
 
 dnl ********************************************************************************
+dnl remember CPPFLAGS for qmake
+dnl ********************************************************************************
+
+QT_CPPFLAGS=$CPPFLAGS
+QT_LDFLAGS=$LDFLAGS
+
+dnl ********************************************************************************
 dnl check CPU type and OS
 dnl ********************************************************************************
 
@@ -886,6 +893,8 @@ AC_SUBST(MAKE_AUTOPACKAGE)
 AC_SUBST(QT_CONFIG)
 AC_SUBST(QT_RPATH)
 AC_SUBST(QT_LIBGLU_LIB)
+AC_SUBST(QT_CPPFLAGS)
+AC_SUBST(QT_LDFLAGS)
 AC_SUBST(HAVE_EXTRA_FONTS)
 
 AC_CONFIG_FILES([Makefile src/gle/Makefile src/gle/bitmap/Makefile src/gle/letzfitz/Makefile src/gle/surface/Makefile src/gle/tokens/Makefile src/fbuild/Makefile src/makefmt/Makefile src/manip/Makefile src/TeX/Makefile src/gui/MakefileAC src/gui/qgle.pro src/doc/gle.1 platform/autoconf/gle-graphics.pc platform/autopackage/gle4.apspec])

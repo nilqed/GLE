@@ -130,7 +130,7 @@ inline GLERefCountObject* GLE_SET_RC(GLERefCountObject* rc, GLERefCountObject* v
 
 template <class T> class GLERCVector : public vector< GLERC<T> > {
 public:
-	inline void add(T* elem) { push_back(GLERC<T>(elem)); }
+	inline void add(T* elem) { this->push_back(GLERC<T>(elem)); }
 	inline T* get(int i) { return (*this)[i].get(); }
 };
 
@@ -139,15 +139,15 @@ public:
 	GLEVectorAutoDelete() : vector<T*>() {
 	}
 	~GLEVectorAutoDelete() {
-		deleteAll();
+		this->deleteAll();
 	}
 	void clear() {
-		deleteAll();
+		this->deleteAll();
 		vector<T*>::clear();
 	}
 	void deleteAll() {
 		for (typename vector<T*>::size_type i = 0; i < vector<T*>::size(); i++) {
-			T* elem = at(i);
+			T* elem = this->at(i);
 			if (elem != NULL) delete elem;
 		}
 	}

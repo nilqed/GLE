@@ -254,7 +254,7 @@ public:
 			return i->second;
 		} else {
 			ElemType nelem(key);
-			insert(StringKeyPair<ElemType>(key, nelem));
+			this->insert(StringKeyPair<ElemType>(key, nelem));
 			return nelem;
 		}
 	}
@@ -309,7 +309,7 @@ public:
 	}
 
 	void add_item(int key, ElemType elem) {
-		insert(IntKeyPair<ElemType>(key, elem));
+		this->insert(IntKeyPair<ElemType>(key, elem));
 	}
 };
 

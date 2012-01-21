@@ -168,7 +168,7 @@ unix {
 	LIBS += -lgle-graphics-@GLE_VERSION@ -L../../build/lib/
 }
 win32 {
-   LIBS += -lglu32
+	LIBS += -lglu32
 	LIBS += -lgle-graphics-@GLE_VERSION@ -L../../build/bin/
 }
 
@@ -179,5 +179,9 @@ DESTDIR = ../../build/bin
 unix {
 	LIBS += @QT_RPATH@ @QT_LIBGLU_LIB@
 }
+
+QMAKE_CXXFLAGS += @QT_CPPFLAGS@
+QMAKE_CFLAGS += @QT_CPPFLAGS@
+QMAKE_LDFLAGS += @QT_LDFLAGS@
 
 # vim:et
