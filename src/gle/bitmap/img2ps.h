@@ -157,6 +157,7 @@ protected:
 	FILE* m_In;
 public:
 	GLEFileBitmap();
+	virtual ~GLEFileBitmap();
 	virtual int open(const string& fname);
 	virtual void close();
 	int read16BE();

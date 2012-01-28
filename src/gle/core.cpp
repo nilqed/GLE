@@ -2255,6 +2255,7 @@ void g_bitmap(string& fname, double wx, double wy, int type) throw(ParserError) 
 		g_throw_parser_error("can't open bitmap file: '", fname.c_str(), "'");
 	}
 	g_bitmap(bitmap, wx, wy, type);
+	bitmap->close();
 	delete bitmap;
 }
 

@@ -262,6 +262,10 @@ GLEFileBitmap::GLEFileBitmap() {
 	m_Palette = NULL;
 }
 
+GLEFileBitmap::~GLEFileBitmap() {
+	close();
+}
+
 int GLEFileBitmap::open(const string& fname) {
 	setFName(fname);
 	m_In = fopen(fname.c_str(), "rb");
