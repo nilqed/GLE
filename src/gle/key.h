@@ -51,6 +51,7 @@ class KeyEntry {
 public:
 	char lstyle[9];
 	GLERC<GLEColor> color;
+	GLERC<GLEColor> textcolor;
 	GLERC<GLEColor> fill;
 	int marker;
 	int column;

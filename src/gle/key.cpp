@@ -228,6 +228,7 @@ void GLEKeyBlockInstance::executeLine(GLESourceLine& sline)	{
 			else kw("MSIZE") entry->msize = next_exp;
 			else kw("MSCALE") entry->msize = (next_exp) * zzhei;
 			else kw("COLOR") entry->color = next_color;
+			else kw("TEXTCOLOR") entry->textcolor = next_color;
 			else kw("FILL") {
 				GLERC<GLEColor> fillColor(next_fill);
 				update_color_foreground(entry->fill.get(), fillColor.get());
@@ -263,8 +264,8 @@ GLEKeyBlockBase::GLEKeyBlockBase():
 		"BASE", "LPOS", "LLEN", "NOBOX", "NOLINE", "COMPACT",
 		"OFF", "HEI", "POSITION", "POS", "BOXCOLOR", "SEPARATOR",
 		"LSTYLE", "JUSTIFY", "JUST", "DIST", "COLDIST", "TEXT",
-		"MARKER", "MSIZE", "MSCALE", "COLOR", "FILL", "PATTERN",
-		"LINE", "LWIDTH", ""};
+		"MARKER", "MSIZE", "MSCALE", "COLOR", "TEXTCOLOR", "FILL",
+		"PATTERN", "LINE", "LWIDTH", ""};
 	for (int i = 0; commands[i][0] != 0; ++i) {
 		addKeyWord(commands[i]);
 	}
@@ -831,7 +832,13 @@ void do_draw_key(double ox, double oy, bool notxt, KeyInfo* info) {
 		g_get_xy(&cx,&cy);
 		if (!notxt) {
 			g_set_just(JUST_LEFT);
-			if (entry->descrip != "") g_text((char*)entry->descrip.c_str());
+			if (entry->descrip != "") {
+				g_set_color(entry->textcolor);
+				g_text((char*)entry->descrip.c_str());
+				if (!entry->textcolor.isNull()) {
+					g_set_color(info->getDefaultColor());
+				}
+			}
 		} else {
 			g_update_bounds(cx+col_info->size, cy+info->getRow(row)->size);
 		}
