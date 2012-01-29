@@ -79,6 +79,15 @@ public:
 	virtual void format(double number, string* output);
 };
 
+class GLENumberFormatterPercent : public GLENumberFormatter {
+protected:
+	int m_NbDecPlaces;
+public:
+	virtual ~GLENumberFormatterPercent();
+	virtual void parseOptions(GLENumberFormat* format);
+	virtual void format(double number, string* output);
+};
+
 class GLENumberFormatterRound : public GLENumberFormatter {
 protected:
 	int m_Sig;
@@ -305,6 +314,22 @@ void GLENumberFormatterFix::format(double number, string* output) {
 	sprintf(format, "%%.%df", m_NbDecPlaces);
 	sprintf(result, format, number);
 	*output = result;
+	doAll(output);
+}
+
+GLENumberFormatterPercent::~GLENumberFormatterPercent() {
+}
+
+void GLENumberFormatterPercent::parseOptions(GLENumberFormat* format) {
+	m_NbDecPlaces = format->nextInt();
+}
+
+void GLENumberFormatterPercent::format(double number, string* output) {
+	char format[20], result[100];
+	sprintf(format, "%%.%df", m_NbDecPlaces);
+	sprintf(result, format, 100*number);
+	*output = result;
+	*output += "%";
 	doAll(output);
 }
 
@@ -666,6 +691,9 @@ GLENumberFormat::GLENumberFormat(const string& formats) :
 		if (name == "fix") {
 			incTokens();
 			format = new GLENumberFormatterFix();
+		} else if (name == "percent") {
+			incTokens();
+			format = new GLENumberFormatterPercent();
 		} else if (name == "dec") {
 			incTokens();
 			format = new GLENumberFormatterInt(GLE_NF_INT_DEC);
