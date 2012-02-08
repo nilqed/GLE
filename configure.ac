@@ -547,7 +547,7 @@ dnl check Cairo
 dnl ********************************************************************************
 
 if test "x$with_cairo" != "xno"; then
-	PKG_CHECK_MODULES([cairo], [cairo >= 1.2.0],
+	PKG_CHECK_MODULES([cairo], [cairo >= 1.10.0],
 	   [
 		HAVE_CAIRO=1
 		AC_MSG_RESULT([   cairo CFLAGS: $cairo_CFLAGS])
