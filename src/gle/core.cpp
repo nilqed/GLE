@@ -85,6 +85,8 @@ void test_unit(void);
 void clean_surface();
 void g_arrowsize_actual(GLEArrowProps* arrow, double* lwd, bool sz_az);
 void g_arrowsize_transform(GLEArrowProps* arrow, double lwd, bool sz_az);
+void g_set_color_to_device();
+void g_set_fill_to_device();
 
 int gunit=false;
 
@@ -1709,7 +1711,7 @@ void g_set_fill(GLEColor* fill) {
 	} else {
 		g.fill = fill->clone();
 	}
-	g.dev->set_fill(g.fill);
+	g_set_fill_to_device();
 }
 
 void g_set_fill(const GLERC<GLEColor>& fill) {
@@ -1718,21 +1720,48 @@ void g_set_fill(const GLERC<GLEColor>& fill) {
 
 void g_set_background(const GLERC<GLEColor>& color) {
 	update_color_fill_background(g.fill.get(), color.get());
-	g.dev->set_fill(g.fill);
+	g_set_fill_to_device();
 }
 
 void g_set_fill_pattern(const GLERC<GLEColor>& pattern) {
 	if (pattern->isFill() && pattern->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
 		update_color_fill_pattern(g.fill.get(), static_cast<GLEPatternFill*>(pattern->getFill()));
-		g.dev->set_fill(g.fill);
+		g_set_fill_to_device();
 	} else {
 		g_throw_parser_error("expected fill pattern");
 	}
 }
 
+GLERC<GLEColor> g_modify_color_for_device(const GLERC<GLEColor>& color) {
+	GLERC<GLEColor> result(color);
+    CmdLineObj* cmdLine = GLEGetInterfacePointer()->getCmdLine();
+    if (cmdLine->hasOption(GLE_OPT_INVERSE)) {
+    	unsigned int hexValue = color->getHexValueGLE();
+    	if (hexValue == (unsigned int)GLE_COLOR_WHITE && color->getAlpha() == 1.0) {
+    		result = new GLEColor(0.0, 0.0, 0.0);
+    	}
+    	if (hexValue == (unsigned int)GLE_COLOR_BLACK && color->getAlpha() == 1.0) {
+    		result = new GLEColor(1.0, 1.0, 1.0);
+    	}
+    }
+    if (cmdLine->hasOption(GLE_OPT_NO_COLOR)) {
+    	double gray = color->getGray();
+    	result = new GLEColor(gray, gray, gray);
+    }
+	return result;
+}
+
+void g_set_color_to_device() {
+	g.dev->set_color(g_modify_color_for_device(g.color));
+}
+
+void g_set_fill_to_device() {
+	g.dev->set_fill(g_modify_color_for_device(g.fill));
+}
+
 void g_set_color(GLEColor* color) {
 	g.color = color->clone();
-	g.dev->set_color(g.color);
+	g_set_color_to_device();
 }
 
 void g_set_color(const GLERC<GLEColor>& color) {
@@ -1744,7 +1773,7 @@ void g_set_color(const GLERC<GLEColor>& color) {
 void g_set_color(int l) {
 	if (l==0) return;
 	g.color->setHexValueGLE(l);
-	g.dev->set_color(g.color);
+	g_set_color_to_device();
 }
 
 GLERC<GLEColor> g_get_color() {
@@ -1806,8 +1835,8 @@ void g_get_state(gmodel *s) {
 void g_set_state(gmodel* s) {
 	g_set_matrix(s->image, &g, s);
 	g = *s;
-	g.dev->set_color(g.color);
-	g.dev->set_fill(g.fill);
+	g_set_color_to_device();
+	g_set_fill_to_device();
 	g.dev->set_line_width(g.lwidth);
 	g.dev->set_line_style(g.lstyle);
 	g.dev->set_line_styled(g.lstyled);

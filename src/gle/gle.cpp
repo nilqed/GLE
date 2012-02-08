@@ -65,7 +65,6 @@ int MAX_VECTOR=MAXIMUM_PS_VECTOR;
 int gle_debug;
 bool control_d = true;
 extern int trace_on;
-bool BLACKANDWHITE = false;
 bool IS_INSTALL = false;
 bool GS_PREVIEW = false;
 
@@ -359,7 +358,6 @@ void process_option_args(CmdLineObj& cmdline, GLEOptions& options) {
 		/* Huh - what does this do? */
 		MAX_VECTOR = 10*MAXIMUM_PS_VECTOR;
 	}
-	BLACKANDWHITE = cmdline.hasOption(GLE_OPT_NO_COLOR);
 	if (cmdline.hasOption(GLE_OPT_BBTWEAK)) g_psbbtweak();
 	GS_PREVIEW = cmdline.hasOption(GLE_OPT_GSPREVIEW);
 	// .ps output implies full page
@@ -449,6 +447,9 @@ void init_option_args(CmdLineObj& cmdline) {
 	option = new CmdLineOption("nocolor", "bw");
 	option->setHelp("Forces grayscale output");
 	cmdline.addOption(option, GLE_OPT_NO_COLOR);
+	option = new CmdLineOption("inverse");
+	option->setHelp("Render black as white for using on dark backgrounds");
+	cmdline.addOption(option, GLE_OPT_INVERSE);
 	option = new CmdLineOption("transparent", "tr");
 	option->setHelp("Creates transparent output (with -d png)");
 	cmdline.addOption(option, GLE_OPT_TRANSPARENT);

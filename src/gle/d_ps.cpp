@@ -103,7 +103,6 @@ static char ellipse_fcn[] = "\
 extern int MAX_VECTOR; /* Cant send POSTSCRIPT too complex a path */
 extern bool control_d;
 extern struct gmodel g;
-extern bool BLACKANDWHITE;
 extern bool GS_PREVIEW;
 extern int gle_debug;
 
@@ -790,13 +789,14 @@ void PSGLEDevice::bezier(dbl x1,dbl y1,dbl x2,dbl y2,dbl x3,dbl y3) {
 }
 
 void PSGLEDevice::set_color_impl(const GLERC<GLEColor>& color) {
-	if (color->getHexValueGLE() == (unsigned int)GLE_COLOR_WHITE) {
+	unsigned int hexValue = color->getHexValueGLE();
+	if (hexValue == (unsigned int)GLE_COLOR_WHITE) {
 		out() << "1 setgray" << endl;
-	} else if (color->getHexValueGLE() == (unsigned int)GLE_COLOR_BLACK) {
+	} else if (hexValue == (unsigned int)GLE_COLOR_BLACK) {
 		out() << "0 setgray" << endl;
 	} else {
-		if (BLACKANDWHITE) {
-			out() << color->getGray() << " setgray" << endl;
+		if (color->getRed() == color->getGreen() && color->getRed() == color->getBlue()) {
+			out() << color->getRed() << " setgray" << endl;
 		} else {
 			out() << color->getRed() << " " << color->getGreen() << " " << color->getBlue() << " setrgbcolor" << endl;
 		}
