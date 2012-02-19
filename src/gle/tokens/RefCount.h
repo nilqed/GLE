@@ -125,7 +125,8 @@ public:
 template <class T> class MutableRefCountPtr : public RefCountPtr<T> {
 public:
 	inline RefCountPtr<T>& operator =(RefCountPtr<T> src) {
-		setPtr(src.get()); return *this;
+		this->setPtr(src.get());
+		return *this;
 	};
 };
 

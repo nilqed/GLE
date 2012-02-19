@@ -260,11 +260,11 @@ int GSLibFunctions::loadLibrary(const QString& location, QString& last_error) {
 	/* Try to load the library */
 	if (location == "") {
 		#ifdef Q_WS_X11
-		#ifdef __x86_64__
+		#if defined(__x86_64__) || defined(__ppc64__) || defined (__s390x__) || defined (__sparc64__)
 		// try 64 bit libraries on 64 bit system
       tryLocationLoop("/usr/lib64");
 		tryLocationLoop("/usr/local/lib64");
-		#endif // __x86_64__
+		#endif // 64 bit
       tryLocationLoop("/usr/lib");
 		tryLocationLoop("/usr/local/lib");
 		#endif // Q_WS_X11

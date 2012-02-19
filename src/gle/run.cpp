@@ -88,17 +88,8 @@ void begin_contour(int *pln, int *pcode, int *cp) throw(ParserError);
 // void begin_fitls(int *pln, int *pcode, int *cp) throw(ParserError);
 
 class GLEBox {
-protected:
-	const char* m_Name; // Should be replaced by string* later on
-	bool m_HasStroke;
-	bool m_HasReverse;
-	double m_Add;
-	bool m_IsRound;
-	double m_Round;
-	GLERC<GLEColor> m_Fill;
 public:
 	GLEBox();
-	GLEBox(const GLEBox& box);
 	void setFill(const GLERC<GLEColor>& fill);
 	void setRound(double round);
 	void draw(GLERun* run, double x1, double y1, double x2, double y2);
@@ -115,21 +106,19 @@ public:
 	inline const char* getName() const { return m_Name; }
 	inline void setAdd(double add) { m_Add = add; }
 	inline double getAdd() const { return m_Add; }
+protected:
+	const char* m_Name; // Should be replaced by string* later on
+	bool m_HasStroke;
+	bool m_HasReverse;
+	double m_Add;
+	bool m_IsRound;
+	double m_Round;
+	GLERC<GLEColor> m_Fill;
 };
 
 class GLEStoredBox : public GLEBox {
 public:
-	GLERectangle m_SaveBounds;
-	GLEPoint m_Orig;
-protected:
-	string m_Name;
-	bool m_HasName;
-	bool m_SecondPass;
-	GLEDevice* m_Device;
-	GLERC<GLEObjectRepresention> m_Object;
-public:
 	GLEStoredBox();
-	GLEStoredBox(const GLEStoredBox& box);
 	void setName(const char* name);
 	inline bool hasName() const { return m_HasName; }
 	inline const string& getName() const { return m_Name; }
@@ -143,6 +132,14 @@ public:
 	inline GLERectangle* getSaveBounds() { return &m_SaveBounds; }
 	void setOrigin(double x0, double y0) { m_Orig.setXY(x0, y0); }
 	const GLEPoint& getOrigin() { return m_Orig; }
+private:
+	GLERectangle m_SaveBounds;
+	GLEPoint m_Orig;
+	string m_Name;
+	bool m_HasName;
+	bool m_SecondPass;
+	GLEDevice* m_Device;
+	GLERC<GLEObjectRepresention> m_Object;
 };
 
 class GLEBoxStack {
@@ -1692,18 +1689,8 @@ GLEBox::GLEBox():
 	m_HasReverse(false),
 	m_Add(0.0),
 	m_IsRound(false),
+	m_Round(0.0),
 	m_Fill(g_get_fill_clear())
-{
-}
-
-GLEBox::GLEBox(const GLEBox& box):
-	m_Name(box.getName()),
-	m_HasStroke(box.hasStroke()),
-	m_HasReverse(box.hasReverse()),
-	m_Add(box.getAdd()),
-	m_IsRound(box.isRound()),
-	m_Round(box.getRound()),
-	m_Fill(box.getFill())
 {
 }
 
@@ -1773,14 +1760,11 @@ void GLEBox::draw(GLERun* run, double x1, double y1, double x2, double y2) {
 	g_move(ox, oy);
 }
 
-GLEStoredBox::GLEStoredBox() : GLEBox() {
-	m_SecondPass = false; m_HasName = false;
-	m_Device = NULL;
-}
-
-GLEStoredBox::GLEStoredBox(const GLEStoredBox& box) : GLEBox(box), m_SaveBounds(box.m_SaveBounds), m_Object(box.getObjectRep()) {
-	m_SecondPass = box.m_SecondPass; m_Device = box.m_Device;
-	m_HasName = box.hasName(); m_Name = box.getName();
+GLEStoredBox::GLEStoredBox():
+	m_HasName(false),
+	m_SecondPass(false),
+	m_Device(0)
+{
 }
 
 void GLEStoredBox::setName(const char* name) {
