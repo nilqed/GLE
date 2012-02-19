@@ -71,6 +71,9 @@ GLECairoDevice::GLECairoDevice(bool showerror):
 }
 
 GLECairoDevice::~GLECairoDevice() {
+	for (unsigned int i = 0; i < m_surfacesToDelete.size(); ++i) {
+		cairo_surface_destroy(m_surfacesToDelete[i]);
+	}
 }
 
 void GLECairoDevice::arc(dbl r,dbl t1,dbl t2,dbl cx,dbl cy) {
@@ -714,24 +717,10 @@ protected:
 	int m_scanLine;
 };
 
-void GLECairoDevice::bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, int type) {
-	/* Store current box */
-	GLERectangle save_box;
-	g_get_bounds(&save_box);
-	/* Generate header in postrscript output */
-	g_gsave();
+cairo_surface_t* GLECairoDevice::bitmapCreateSurface(GLEBitmap* bitmap) {
 	/* Set options */
 	bitmap->setCompress(0.0);
 	bitmap->setASCII85(1);
-	/* Get current position	*/
-	g_scale(scale->getX() / bitmap->getWidth(), scale->getY() / bitmap->getHeight());
-	g_translate(pos->getX(), pos->getY());
-	/* Flip image so that it is not upside down */
-	cairo_matrix_t mirror, current, result;
-	cairo_matrix_init(&mirror, 1, 0, 0, -1, 0, bitmap->getHeight());
-	cairo_get_matrix(m_cr, &current);
-	cairo_matrix_multiply(&result, &mirror, &current);
-	cairo_set_matrix(m_cr, &result);
 	/* Convert bitmap to postscript */
 	bitmap->prepare(GLE_BITMAP_PREPARE_SCANLINE);
 	cairo_format_t imageFormat = CAIRO_FORMAT_RGB24;
@@ -787,13 +776,48 @@ void GLECairoDevice::bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, i
 															(void*)stream);
 		CUtilsAssert(status == CAIRO_STATUS_SUCCESS);
 	}
-	bitmap->close();
+	return image;
+}
+
+void GLECairoDevice::bitmap(GLEBitmap* bitmap, GLEPoint* pos, GLEPoint* scale, int type) {
+	/* Store current box */
+	GLERectangle save_box;
+	g_get_bounds(&save_box);
+	/* Generate header in postrscript output */
+	g_gsave();
+	/* Get current position	*/
+	g_scale(scale->getX() / bitmap->getWidth(), scale->getY() / bitmap->getHeight());
+	g_translate(pos->getX(), pos->getY());
+	/* Flip image so that it is not upside down */
+	cairo_matrix_t mirror, current, result;
+	cairo_matrix_init(&mirror, 1, 0, 0, -1, 0, bitmap->getHeight());
+	cairo_get_matrix(m_cr, &current);
+	cairo_matrix_multiply(&result, &mirror, &current);
+	cairo_set_matrix(m_cr, &result);
+	/* Create image */
+	bool inCache = false;
+	cairo_surface_t* image = 0;
+	const std::string& name(bitmap->getFName());
+	if (name.empty()) {
+		image = bitmapCreateSurface(bitmap);
+	} else {
+		inCache = true;
+		image = (cairo_surface_t*)m_bitmapCache.try_get(name);
+		if (image == 0) {
+			image = bitmapCreateSurface(bitmap);
+			m_bitmapCache.add_item(name, image);
+			m_surfacesToDelete.push_back(image);
+		}
+	}
 	cairo_set_source_surface(m_cr, image, 0, 0);
 	cairo_paint(m_cr);
-	cairo_surface_destroy(image);
+	if (!inCache) {
+		cairo_surface_destroy(image);
+	}
 	/* Footer */
 	g_grestore();
 	g_set_bounds(&save_box);
+	bitmap->close();
 }
 
 void GLECairoDevice::getRecordedBytes(string* output) {

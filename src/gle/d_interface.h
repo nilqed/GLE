@@ -228,6 +228,8 @@ protected:
 	GLERC<GLEColor> m_currentColor;
 	GLERC<GLEColor> m_currentFill;
 	std::vector<char> m_recorded;
+	StringVoidPtrHash m_bitmapCache;
+	std::vector<cairo_surface_t*> m_surfacesToDelete;
 public:
 	GLECairoDevice(bool showerror);
 	virtual ~GLECairoDevice();
@@ -296,6 +298,8 @@ protected:
 	void shadeBounded(GLERectangle* bounds);
 	void shade(GLERectangle* bounds);
 	void clearRecordedData();
+private:
+	cairo_surface_t* bitmapCreateSurface(GLEBitmap* bitmap);
 };
 
 class GLECairoDevicePDF : public GLECairoDevice {
