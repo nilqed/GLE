@@ -439,7 +439,7 @@ void TeXInterface::writeInc(ostream& out, const char* prefix) {
 		TeXObject* obj = m_TeXObjects[i];
 		obj->output(out);
 	}
-	out << "\\end{picture}" << endl;
+	out << "\\end{picture}%" << endl;
 }
 
 void TeXInterface::createInc(const string& prefix) {
