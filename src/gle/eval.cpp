@@ -939,7 +939,7 @@ void eval(int *pcode, int *cp, double *oval, const char **ostr, int *otyp) throw
 	}
 	if (pcode[(*cp)] == 8) {
 		/*  Single constant  */
-		union {double d; int l[1];} both;
+		union {double d; int l[2];} both;
 		both.l[0] = *(pcode+ ++(*cp));
 		both.l[1] = 0;
 		dbg gprint("Constant %ld \n",both.l[0]);

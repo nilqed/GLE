@@ -646,7 +646,7 @@ void GLEGraphPartFills::drawFill(int n) {
 	}
 	double *xt = data1->getX();
 	double *yt = data1->getY();
-	double x2, y2;
+	double x2 = 0.0, y2 = 0.0;
 	double ymx = ff->ymax;
 	switch(ff->type) {
 		case 1: /* x1,d1 */
