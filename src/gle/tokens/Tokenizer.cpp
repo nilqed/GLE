@@ -636,9 +636,13 @@ void Tokenizer::reset_position() {
 	m_token_start.set(0, 0);
 }
 
-
 int Tokenizer::has_more_tokens() throw(ParserError) {
-  if (m_token_at_end == 1) return 0;
+  if (m_token_has_pushback > 0) {
+	  return 1;
+  }
+  if (m_token_at_end == 1) {
+	  return 0;
+  }
   char token_ch = token_read_sig_char();
   if (m_token_at_end == 1) {
     return 0;
