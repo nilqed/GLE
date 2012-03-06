@@ -289,7 +289,6 @@ protected:
 	int  m_token_has_pushback_ch;
 	bool m_space_before;
 	bool m_space_after;
-	char m_space_kind;
 	TokenizerPos m_token_start;
 	TokenizerPos m_token_count;
 	TokenizerLangHashPtr m_langhash;
@@ -300,10 +299,6 @@ public:
 	Tokenizer();
 	Tokenizer(TokenizerLanguage* lang);
 	virtual ~Tokenizer();
-	void init();
-	void reset_position();
-	void reset_nopos();
-	void reset_all();
 
 	int has_more_tokens() throw(ParserError);
 	// end of stream not reached
@@ -311,7 +306,7 @@ public:
 	string& next_token() throw(ParserError);
 	// returns next token.  throws exception if no more tokens.
 
-   string& next_continuous_string_excluding(const char* forbidden) throw(ParserError);
+	string& next_continuous_string_excluding(const char* forbidden) throw(ParserError);
 
 	string& try_next_token() throw(ParserError);
 
@@ -362,8 +357,6 @@ public:
 
 	void inc_line();
 
-	void jump(TokenizerPos& pos);
-
 	inline const TokenizerPos& token_pos() const { return m_token_start; };
 
 	inline int token_pos_col() const { return m_token_start.getColumn(); };
@@ -404,6 +397,7 @@ public:
 	string& next_multilevel_token() throw(ParserError);
 
 	virtual char token_read_sig_char() throw(ParserError);
+
 	virtual void on_trailing_space();
 
 	char token_read_char();
@@ -428,13 +422,13 @@ public:
 		m_token_pushback_ch[m_token_has_pushback_ch++] = ch;
 	}
    
-   virtual ParserError throwError(const char* s1, const char* s2, const char* s3);
+	virtual ParserError throwError(const char* s1, const char* s2, const char* s3);
    
-   virtual ParserError throwError(int pos, const string& error);
+	virtual ParserError throwError(int pos, const string& error);
    
-   virtual ParserError throwError(const string& error);
+	virtual ParserError throwError(const string& error);
    
-   virtual int getErrorPosition() const;
+	virtual int getErrorPosition() const;
 
 	ParserError error(const string& src) const;
 
@@ -449,20 +443,18 @@ public:
 	virtual const char* parse_string_in_error() const;
 
 protected:
-   void undo_pushback_token();
-
+	void init();
+	void reset_position();
+	void reset_nopos();
+	void reset_all();
+    void undo_pushback_token();
 	void copy_string(char endch) throw(ParserError);
-
 	void multi_level_do_multi(char open) throw(ParserError);
-
 	void get_token() throw(ParserError);
 	// consumes one token (and forgets it?)
 	// raises exception when e.g. a string constant is not terminated.
-
 	void get_token_2() throw(ParserError);
-
 	void get_check_token() throw(ParserError);
-
 	TokenizerLangElem* findLangElem(const TokenizerLangHash* hash);
 	TokenizerLangElem* findLangElem2(const TokenizerLangHash* hash);
 };
@@ -484,21 +476,6 @@ public:
 	virtual int stream_ok();
 	virtual int stream_get();
 	inline istream* getStream() { return m_is; };
-};
-
-class StreamEOFTokenizer : public StreamTokenizer {
-protected:
-	int m_fakeeof;
-public:
-	StreamEOFTokenizer();
-	StreamEOFTokenizer(TokenizerLanguage* lang);
-	StreamEOFTokenizer(istream* _is);
-	StreamEOFTokenizer(istream* _is, TokenizerLanguage* lang);
-	virtual ~StreamEOFTokenizer();
-	virtual int stream_ok();
-	virtual int stream_get();
-	inline int isFakeEOF() { return m_fakeeof; }
-	inline void setFakeEOF(int eof) { m_fakeeof = eof; }
 };
 
 class StringTokenizer : public Tokenizer {
@@ -529,35 +506,6 @@ class SpaceStringTokenizer : public StringTokenizer {
 public:
 	SpaceStringTokenizer(const char* tokens);
 	virtual ~SpaceStringTokenizer();
-};
-
-/*
- * Copy space tokens directly to output stream
- */
-class StreamEOFCopyTokenizer : public StreamEOFTokenizer {
-protected:
-	filebuf* m_out_fb;
-	ostream* m_os;
-	int m_intoken;
-	char m_termspace;
-public:
-	StreamEOFCopyTokenizer();
-	StreamEOFCopyTokenizer(TokenizerLanguage* lang);
-	StreamEOFCopyTokenizer(istream* _is);
-	StreamEOFCopyTokenizer(istream* _is, TokenizerLanguage* lang);
-	virtual ~StreamEOFCopyTokenizer();
-	void open_output(const char* fname) throw(ParserError);
-	void close_output();
-	void output_term_space();
-	void output_term_space(char ch);
-	string& try_next_token_output();
-	string& next_token_output();
-	void output_token_and_space();
-	virtual int stream_get();
-	virtual void on_trailing_space();
-	virtual char token_read_sig_char() throw(ParserError);
-	inline ostream& out() { return *m_os; };
-	inline char get_term_space() { return m_termspace; };
 };
 
 class MyOutputFile {
