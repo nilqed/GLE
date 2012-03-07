@@ -259,15 +259,24 @@ bool try_load_config(const string& fname) {
 	}
 }
 
-bool try_save_config(const string& fname, GLEInterface* iface) {
+bool try_save_config(const string& fname, GLEInterface* iface, bool isUser) {
 	ConfigCollection* collection = iface->getConfig()->getRCFile();
 	if (collection->allDefaults()) {
 		return true;
+	}
+	if (fname == "") {
+		return false;
+	}
+	if (IsAbsPath(fname)) {
+		std::string dirname;
+		GetDirName(fname, dirname);
+		EnsureMkDir(dirname);
 	}
 	ofstream fout(fname.c_str());
 	if (!fout.is_open()) {
 		return false;
 	}
+	CmdLineOption* versionOption = collection->getSection(GLE_CONFIG_GLE)->getOption(GLE_CONFIG_GLE_VERSION);
 	ostringstream out;
 	out << "Save configuration to: '" << fname << "'";
 	GLEOutputStream* output = iface->getOutput();
@@ -278,7 +287,7 @@ bool try_save_config(const string& fname, GLEInterface* iface) {
 			fout << "begin config " << sec->getName() << endl;
 			for (int j = 0; j < sec->getNbOptions(); j++) {
 				CmdLineOption* option = sec->getOption(j);
-				if (!option->allDefaults()) {
+				if (!option->allDefaults() && (!isUser || option != versionOption)) {
 					fout << "\t" << option->getName() << " = ";
 					for (int k = 0; k < option->getMaxNbArgs(); k++) {
 						if (k != 0) fout << " ";
@@ -669,10 +678,10 @@ void do_find_deps_sub(GLEInterface* iface, const string& loc) {
 void do_save_config() {
 	GLEInterface* iface = GLEGetInterfacePointer();
 	string conf_name = GLE_TOP_DIR + DIR_SEP + "glerc";
-	bool is_ok = try_save_config(conf_name, iface);
+	bool is_ok = try_save_config(conf_name, iface, false);
 	if (!is_ok) {
 		string user_conf = iface->getUserConfigLocation();
-		is_ok = try_save_config(user_conf, iface);
+		is_ok = try_save_config(user_conf, iface, true);
 	}
 	if (!is_ok) {
 		ostringstream err;
