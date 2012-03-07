@@ -660,7 +660,7 @@ void do_find_deps_sub(GLEInterface* iface, const string& loc) {
 	string myloc = loc;
 #ifdef __WIN32__
 	if (myloc.length() == 0) {
-		myloc = "C:\\Program Files";
+		GLEGetEnv("ProgramFiles", myloc);
 	}
 #endif
 	find_deps(myloc, iface);
