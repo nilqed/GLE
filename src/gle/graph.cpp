@@ -560,6 +560,9 @@ void do_bar(int& ct, GLEGraphBlockInstance* graphBlock) {
 		3dbar .5 .5 top black,black,black side red,green,blue  notop */
 	int ng = 0,fi;
 	char *ss;
+	if (g_nbar + 1 >= MAX_NB_BAR) {
+		g_throw_parser_error("too many bar commands in graph block");
+	}
 	g_nbar++;
 	br[g_nbar] = new bar_struct();
 	br[g_nbar]->ngrp = 0;
@@ -650,6 +653,9 @@ void do_bar(int& ct, GLEGraphBlockInstance* graphBlock) {
 /* fill d1,d2 color green xmin 1 xmax 2 ymin 1 ymax 2   */
 /* fill d1 color green xmin 1 xmax 2 ymin 1 ymax 2      */
 void do_fill(int& ct, GLEGraphBlockInstance* graphBlock) {
+	if (nfd + 1 >= MAX_NB_FILL) {
+		g_throw_parser_error("too many fill commands in graph block");
+	}
 	fd[++nfd] = new fill_data();
 	GLEGraphDataSetOrder* order = graphBlock->getData()->getOrder();
 	GLEClassDefinition* classDef = graphBlock->getGraphBlockBase()->getClassDefinitions()->getFill();
@@ -1986,6 +1992,9 @@ void get_data_value(GLECSVData* csvData, int dn, GLEArrayImpl* array, int arrayI
 }
 
 void createDataSet(int dn) {
+	if (dn < 0 || dn >= MAX_NB_DATA) {
+		g_throw_parser_error("too many data sets");
+	}
 	if (dn > ndata) ndata = dn;
 	if (dp[dn] == NULL) {
 		dp[dn] = new GLEDataSet(dn);

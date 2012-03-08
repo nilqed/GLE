@@ -511,7 +511,8 @@ public:
 #define GRAPHDEF
 #endif
 
-#define MAX_NB_FILL 20
+#define MAX_NB_FILL 100
+#define MAX_NB_BAR 100
 
 GRAPHDEF double graph_x1,graph_y1,graph_x2,graph_y2;  /* in cm */
 GRAPHDEF double graph_xmin,graph_ymin,graph_xmax,graph_ymax; /* graph units */
@@ -533,7 +534,7 @@ GRAPHDEF int gntmp;
 
 GRAPHDEF GLEDataSet *dp[MAX_NB_DATA];
 
-GRAPHDEF bar_struct *br[20];
+GRAPHDEF bar_struct *br[MAX_NB_BAR];
 void vinit_axis(int i);
 void vinit_title_axis();
 void draw_bar(double x, double yf, double yt, double wd, bar_struct* barset, int di, GLEDataSet* toDataSet) throw(ParserError);
