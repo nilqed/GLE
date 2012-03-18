@@ -126,8 +126,9 @@ void my_load_font(int ff)
 	char vector_file[60];
 	font_file_vector(ff,vector_file);
 	string fontfname = fontdir(vector_file);
-	FILE *fin = fopen(fontfname.c_str(),READ_BIN);
-	if (fin == NULL) {
+	GLEFileIO fin;
+	fin.open(fontfname.c_str(), READ_BIN);
+	if (!fin.isOpen()) {
 		ostringstream err;
 		err << "font vector file not found: '" << fontfname << "'; using texcmr instead";
 		g_message(err.str().c_str());
@@ -135,10 +136,12 @@ void my_load_font(int ff)
 		font_replace_vector(ff);
 		font_file_vector(ff, vector_file);
 		fontfname = fontdir(vector_file);
-		fin = fopen(fontfname.c_str(),READ_BIN);
-		if (fin == NULL) gle_abort("Font vector texcmr.fve not found\n");
+		fin.open(fontfname.c_str(), READ_BIN);
+		if (!fin.isOpen()) {
+			gle_abort("Font vector texcmr.fve not found\n");
+		}
 	}
-	fread(my_pnt,sizeof(int),256,fin);
+	fin.fread(my_pnt, sizeof(int), 256);
 	/* gprint("Size of rest of font %d \n",my_pnt[0]); */
 	if (my_buff==0) my_buff = (char*) myallocz(10 + my_pnt[0]);
 	else 		{
@@ -146,10 +149,11 @@ void my_load_font(int ff)
 		my_buff = (char*) myallocz(10 + my_pnt[0]);
 	}
 	if (my_buff==0) gprint("Memory allocation failure MY_BUFF , in myfont.c \n");
-	fread(my_buff,1,my_pnt[0],fin);
-	fclose(fin);
+	fin.fread(my_buff, 1, my_pnt[0]);
+	fin.close();
 	my_curfont = ff;
 }
+
 int frxi(char **s);
 
 int char_plen(char *s) {

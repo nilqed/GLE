@@ -283,7 +283,7 @@ void passcmd(char *source,char *tk[],int *ntok) {
 	}
 }
 
-struct op_key { char *name; int typ; int pos; int32 idx; } ;
+struct op_key { char *name; int typ; int pos; unsigned int idx; } ;
 typedef struct op_key (*OPKEY)[100];
 
 void do_assign(char *t1, char *t2) {

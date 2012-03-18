@@ -42,6 +42,7 @@
  */
 
 #include "../basicconf.h"
+#include "../file_io.h"
 #include "img2ps.h"
 
 #ifdef HAVE_LIBPNG
@@ -63,7 +64,7 @@ GLEPNG::~GLEPNG() {
 
 int GLEPNG::readHeader() {
 	GLEBYTE sig[GLEPNG_SIG_SIZE];
-	fread(sig, 1, GLEPNG_SIG_SIZE, m_In);
+	m_file.fread(sig, 1, GLEPNG_SIG_SIZE);
 	if (png_sig_cmp(sig, 0, GLEPNG_SIG_SIZE)) {
 		setError("invalid PNG file");
 		return GLE_IMAGE_ERROR_TYPE;
@@ -82,7 +83,7 @@ int GLEPNG::readHeader() {
 		png_destroy_read_struct(&m_PNGPtr, &m_InfoPtr, (png_infopp)NULL);
 		return GLE_IMAGE_ERROR_INTERN;
 	}
-	png_init_io(m_PNGPtr, m_In);
+	png_init_io(m_PNGPtr, m_file.getFile());
 	png_set_sig_bytes(m_PNGPtr, GLEPNG_SIG_SIZE);
 	png_read_info(m_PNGPtr, m_InfoPtr);
 	// Get most important parts from header

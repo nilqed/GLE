@@ -44,6 +44,7 @@
  */
 
 #include "../basicconf.h"
+#include "../file_io.h"
 #include "img2ps.h"
 
 #define PS_MAXLINE 36

@@ -41,6 +41,7 @@
 /*--------------------------------------------------------------*/
 
 #include "all.h"
+#include "file_io.h"
 #include "bitmap/img2ps.h"
 #include "core.h"
 #include "d_interface.h"
@@ -49,7 +50,6 @@
 #include "op_def.h"
 #include "cmdline.h"
 #include "config.h"
-#include "file_io.h"
 #ifdef __WIN32__
 #include <time.h>
 #endif

@@ -43,6 +43,7 @@
 
 #include "../basicconf.h"
 #include "../gprint.h"
+#include "../file_io.h"
 #include "img2ps.h"
 
 GLEBitmap::GLEBitmap() {
@@ -257,8 +258,12 @@ void GLEBitmap::printInfo(ostream& os) {
 void GLEBitmap::close() {
 }
 
+string GLEBitmap::getFName()
+{
+	return "";
+}
+
 GLEFileBitmap::GLEFileBitmap() {
-	m_In = NULL;
 	m_Palette = NULL;
 }
 
@@ -267,32 +272,29 @@ GLEFileBitmap::~GLEFileBitmap() {
 }
 
 int GLEFileBitmap::open(const string& fname) {
-	setFName(fname);
-	m_In = fopen(fname.c_str(), "rb");
-	if (m_In == NULL) {
-		return 0;
-	} else {
-		return 1;
-	}
+	m_file.open(fname.c_str(), "rb");
+	return m_file.isOpen() ? 1 : 0;
 }
 
 int GLEFileBitmap::read16BE() {
-	int lh = fgetc(m_In);
-	int ll = fgetc(m_In);
+	int lh = fgetc(m_file.getFile());
+	int ll = fgetc(m_file.getFile());
 	return (lh << 8) | ll;
 }
 
 int GLEFileBitmap::read16LE() {
-	int lh = fgetc(m_In);
-	int ll = fgetc(m_In);
+	int lh = fgetc(m_file.getFile());
+	int ll = fgetc(m_file.getFile());
 	return (ll << 8) | lh;
 }
 
 void GLEFileBitmap::close() {
-	if (m_In != NULL) {
-		fclose(m_In);
-		m_In = NULL;
-	}
+	m_file.close();
+}
+
+string GLEFileBitmap::getFName()
+{
+	return m_file.getName();
 }
 
 GLEByteStream::GLEByteStream() {

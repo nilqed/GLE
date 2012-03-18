@@ -1979,7 +1979,7 @@ void fsendstr(char *s, FILE *fout) {
 
 void tex_preload() {
 	int i,j;
-	FILE *fout;
+	GLEFileIO fout;
 	char str1[80],str2[80];
 	/* reload all defined features */
 #ifdef DO_TEX_DECODE
@@ -1987,33 +1987,33 @@ void tex_preload() {
 	fhv = fopen("decode.tex","w");
 #endif
 	string fname = gledir("inittex.ini");
-	fout = fopen(fname.c_str(), "rb");
-	if (fout == NULL) {
+	fout.open(fname.c_str(), "rb");
+	if (!fout.isOpen()) {
 		if (!IS_INSTALL) gprint("Could not open inittex.ini file \n");
 		return;
 	}
-	fread(fontfam,sizeof(int),16*4,fout);
-	fread(fontfamsz,sizeof(double),16*4,fout);
-	fread(chr_mathcode,sizeof(char),256,fout);
+	fout.fread(fontfam, sizeof(int), 16*4);
+	fout.fread(fontfamsz, sizeof(double), 16*4);
+	fout.fread(chr_mathcode, sizeof(char), 256);
 #ifdef DO_TEX_DECODE
 	for(k=0;k<=16;k++){
 		fprintf(fhv,"*fontfam[%d]=%s  fontfamsz[%d]=%s\n",k,fontfam[k],k,fontfamsz[k]);
 	}
 	fprintf(fhv,"chr_mathcode=%s\n",chr_mathcode);
 #endif
-	for (;  (fread(&i,sizeof(i),1,fout)), i != 0x0fff;) {
-		fread(&j,sizeof(j),1,fout);
-		fgetcstr(str1,fout);
-		fgetcstr(str2,fout);
+	for (; fout.fread(&i, sizeof(i), 1), i != 0x0fff;) {
+		fout.fread(&j, sizeof(j), 1);
+		fgetcstr(str1, fout.getFile());
+		fgetcstr(str2, fout.getFile());
 		tex_def(str1,str2,j);
 #ifdef DO_TEX_DECODE
 		fprintf(fhv,"str1=%s  str2=%s j=%d\n",str1,str2,j);
 #endif
 	}
 	i=0;
-	for (;  (fread(&i,sizeof(i),1,fout)), i != 0x0fff;) {
-		fread(&j,sizeof(j),1,fout);
-		fgetcstr(str1,fout);
+	for (; fout.fread(&i, sizeof(i), 1), i != 0x0fff;) {
+		fout.fread(&j, sizeof(j), 1);
+		fgetcstr(str1, fout.getFile());
 		tex_mathdef(str1,j);
 #ifdef DO_TEX_DECODE
 		fprintf(fhv,"str1=%s  i=%d\n",str1,i);
@@ -2021,7 +2021,7 @@ void tex_preload() {
 	}
 	i=0;
 	for (i=0;i<256;i++){
-		fgetvstr(&cdeftable[i],fout);
+		fgetvstr(&cdeftable[i], fout.getFile());
 #ifdef DO_TEX_DECODE
 		fprintf(fhv,"cdeftable[%d]=%s\n",i,cdeftable[i]);
 #endif
@@ -2029,23 +2029,23 @@ void tex_preload() {
 	/* load unicode definitions */
 	m_Unicode.clear();
 	int key;
-	fread(&key,sizeof(int),1,fout);
+	fout.fread(&key, sizeof(int), 1);
 	char* read_ptr = NULL;
 	int read_ptr_len = 0;
 	while (key != 0) {
 		int len;
-		fread(&len,sizeof(int),1,fout);
+		fout.fread(&len, sizeof(int), 1);
 		if (len >= read_ptr_len) {
 			read_ptr_len = 2*read_ptr_len + len + 1;
 			read_ptr = (char*)realloc(read_ptr, read_ptr_len);
 		}
-		fread(read_ptr,sizeof(char),len,fout);
+		fout.fread(read_ptr, sizeof(char), len);
 		read_ptr[len] = 0;
 		m_Unicode.add_item(key, read_ptr);
-		fread(&key,sizeof(int),1,fout);
+		fout.fread(&key, sizeof(int), 1);
 	}
 	if (read_ptr != NULL) free(read_ptr);
-	fclose(fout);
+	fout.close();
 #ifdef DO_TEX_DECODE
 	fclose(fhv);
 #endif

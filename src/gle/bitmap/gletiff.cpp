@@ -42,6 +42,7 @@
  */
 
 #include "../basicconf.h"
+#include "../file_io.h"
 
 #ifdef HAVE_LIBTIFF
 
@@ -59,7 +60,7 @@ GLETIFF::~GLETIFF() {
 }
 
 int GLETIFF::open(const string& fname) {
-	setFName(fname);
+	m_fname = fname;
 	/* leave as "r" for WINDOWS VL */
 	m_Tiff = TIFFOpen(fname.c_str(), "r");
 	if (m_Tiff == NULL) {
@@ -203,6 +204,10 @@ int GLETIFF::isCCITTCompression() {
 		m_TIFFCompress == COMPRESSION_CCITTRLEW);
 }
 
+string GLETIFF::getFName()
+{
+	return m_fname;
+}
 
 #endif
 

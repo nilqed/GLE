@@ -88,7 +88,6 @@ class GLEByteStream;
 
 class GLEBitmap {
 protected:
-	string m_FName;
 	string m_Error;
 	int  m_Height;
 	int  m_Width;
@@ -124,8 +123,6 @@ public:
 	inline void setEncoding(char encoding) { m_Encoding = encoding; }
 	inline int getBitsPerComponent() { return m_BitsPerComponent; }
 	inline void setBitsPerComponent(int bits) { m_BitsPerComponent = bits; }
-	inline const string& getFName() { return m_FName; }
-	inline void setFName(const string& fname) { m_FName = fname; }
 	inline int isASCII85() { return m_ASCII85; }
 	inline void setASCII85(int val) { m_ASCII85 = val; }
 	inline double getCompress() { return m_Compress; }
@@ -149,20 +146,22 @@ public:
 	virtual int decode(GLEByteStream* output);
 	virtual int coded(GLEByteStream* output);
 	virtual void close();
+	virtual string getFName();
 	void printInfo(ostream& os);
 };
 
 class GLEFileBitmap : public GLEBitmap {
 protected:
-	FILE* m_In;
+	GLEFileIO m_file;
 public:
 	GLEFileBitmap();
 	virtual ~GLEFileBitmap();
 	virtual int open(const string& fname);
 	virtual void close();
+	virtual string getFName();
 	int read16BE();
 	int read16LE();
-	inline int read8() { return fgetc(m_In); }
+	inline int read8() { return fgetc(m_file.getFile()); }
 };
 
 class GLEJPEG : public GLEFileBitmap {
@@ -197,6 +196,7 @@ class GLETIFF : public GLEBitmap {
 protected:
 	TIFF* m_Tiff;
 	uint16 m_TIFFCompress;
+	string m_fname;
 public:
 	GLETIFF();
 	virtual ~GLETIFF();
@@ -205,6 +205,7 @@ public:
 	virtual int prepare(int mode);
 	virtual int decode(GLEByteStream* output);
 	virtual void close();
+	virtual string getFName();
 	int isCCITTCompression();
 	uint16 getTIFFCompression() { return m_TIFFCompress; }
 };

@@ -767,8 +767,12 @@ int GLESystem(const string& cmd, bool wait, bool redirout, istream* ins, ostream
 	int* const pin = fd;
 	int* const pout = fd+2;
 	if (wait) {
-		pipe(pin);
-		pipe(pout);
+		if (pipe(pin) != 0) {
+			return GLE_SYSTEM_ERROR;
+		}
+		if (pipe(pout) != 0) {
+			return GLE_SYSTEM_ERROR;
+		}
 		fcntl(pin[GLESYS_PIPE_WR], F_SETFL, O_NONBLOCK);
 		fcntl(pout[GLESYS_PIPE_RD], F_SETFL, O_NONBLOCK);
 	}
@@ -1546,3 +1550,90 @@ bool GLEReadFileBinary(const string& name, std::vector<char>* contents) {
 	inFile.close();
 	return true;
 }
+
+GLEFileIO::GLEFileIO():
+	m_file(0)
+{
+}
+
+GLEFileIO::~GLEFileIO()
+{
+}
+
+void GLEFileIO::open(const char* fname, const char* flags)
+{
+	m_fname = fname;
+	m_file = fopen(fname, flags);
+}
+
+bool GLEFileIO::isOpen() const
+{
+	return m_file != 0;
+}
+
+void GLEFileIO::close()
+{
+	if (m_file != 0) {
+		fclose(m_file);
+		m_file = 0;
+	}
+}
+
+void GLEFileIO::fread(void *ptr, size_t size, size_t nmemb)
+{
+	size_t nbRead = ::fread(ptr, size, nmemb, m_file);
+	if (nbRead != nmemb) {
+		std::cerr << "error reading from file '" << m_fname << "'";
+	}
+}
+
+void GLEFileIO::fwrite(const void *ptr, size_t size, size_t nmemb)
+{
+	size_t nbWritten = ::fwrite(ptr, size, nmemb, m_file);
+	if (nbWritten != nmemb) {
+		std::cerr << "error writing to file '" << m_fname << "'";
+	}
+}
+
+FILE* GLEFileIO::getFile()
+{
+	return m_file;
+}
+
+std::string GLEFileIO::getName() const
+{
+	return m_fname;
+}
+
+void GLEFileIO::setName(const std::string& name)
+{
+	m_fname = name;
+}
+
+int GLEFileIO::fgetc()
+{
+	return ::fgetc(m_file);
+}
+
+int GLEFileIO::feof()
+{
+	return ::feof(m_file);
+}
+
+long GLEFileIO::ftell()
+{
+	return ::ftell(m_file);
+}
+
+int GLEFileIO::fseek(long offset, int whence)
+{
+	return ::fseek(m_file, offset, whence);
+}
+
+int GLEReadConsoleInteger()
+{
+	int value = 0;
+	std::cin >> value;
+	return value;
+}
+

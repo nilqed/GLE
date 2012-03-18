@@ -1749,8 +1749,8 @@ bool is_dataset_identifier(const char* ds) {
 		return true;
 	}
 	char* ptr = NULL;
-	strtol(ds+1, &ptr, 10);
-	return ptr != NULL && *ptr == 0;
+	int result = strtol(ds+1, &ptr, 10);
+	return ptr != NULL && *ptr == 0 && result >= 0;
 }
 
 int get_dataset_identifier(const char* ds, bool def) throw(ParserError) {

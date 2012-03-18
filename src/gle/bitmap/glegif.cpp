@@ -42,6 +42,7 @@
  */
 
 #include "../basicconf.h"
+#include "../file_io.h"
 #include "img2ps.h"
 #include "glegif.h"
 
@@ -58,7 +59,7 @@ GLEGIF::~GLEGIF () {
 
 int GLEGIF::readHeader() {
 	GIFHEADER hdr;
-	if (hdr.get(m_In)) {
+	if (hdr.get(m_file.getFile())) {
 		return GLE_IMAGE_ERROR_INTERN;
 	}
 	if (! hdr.isvalid()) {
@@ -73,13 +74,13 @@ int GLEGIF::readHeader() {
 		// Skip global color table - should remember position?
 		m_Colors = scd.ncolors();
 		for (int i = 0; i < m_Colors; i++) {
-			pal[i].red = fgetc(m_In);
-			pal[i].green = fgetc(m_In);
-			pal[i].blue = fgetc(m_In);
+			pal[i].red = m_file.fgetc();
+			pal[i].green = m_file.fgetc();
+			pal[i].blue = m_file.fgetc();
 		}
 	}
 	int type;
-	while ((type = fgetc(m_In)) > 0) {
+	while ((type = m_file.fgetc()) > 0) {
 		// printf("GIF Block Ox%X\n", type);
 		if (type == 0x2C) {
 			// image descriptor
@@ -107,12 +108,12 @@ int GLEGIF::headerImage() {
 		rgb* pal = getPalette();
 		m_Colors = imd.ncolors();
 		for (int i = 0; i < m_Colors; i++) {
-			pal[i].red = fgetc(m_In);
-			pal[i].green = fgetc(m_In);
-			pal[i].blue = fgetc(m_In);
+			pal[i].red = m_file.fgetc();
+			pal[i].green = m_file.fgetc();
+			pal[i].blue = m_file.fgetc();
 		}
 	}
-	m_ImageOffs = ftell(m_In);
+	m_ImageOffs = ftell(m_file.getFile());
 	updateImageType();
 	m_Width = imd.getWidth();
 	m_Height = imd.getHeight();
@@ -130,7 +131,7 @@ void GLEGIF::updateImageType() {
 }
 
 int GLEGIF::headerExtension() {
-	int label = fgetc(m_In);
+	int label = m_file.fgetc();
 	switch (label) {
 		case 0xFE : // comment extension
 			headerCOMExt();
@@ -148,8 +149,8 @@ int GLEGIF::headerExtension() {
 
 void GLEGIF::skipBlocks() {
 	int nbytes;
-	while ((nbytes = fgetc(m_In)) > 0) {
-		fseek(m_In, nbytes, SEEK_CUR);
+	while ((nbytes = m_file.fgetc()) > 0) {
+		fseek(m_file.getFile(), nbytes, SEEK_CUR);
 	}
 }
 
@@ -166,9 +167,9 @@ void GLEGIF::headerCOMExt() {
 }
 
 int GLEGIF::decode(GLEByteStream* out) {
-	fseek(m_In, m_ImageOffs, SEEK_SET);
+	fseek(m_file.getFile(), m_ImageOffs, SEEK_SET);
 	GLEGIFDecoder decoder(this, out);
-	int result = decoder.decode(m_In);
+	int result = decoder.decode(m_file.getFile());
 	return result;
 }
 

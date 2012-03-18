@@ -508,7 +508,9 @@ void pass_zdata(string fname,int *nx, int *ny, double *zmin, double *zmax) {
                         mx = (*nx - 1)/xsample + 1;
                         my = (*ny - 1)/ysample + 1;
                         if (alloc_zdata(mx,my)) return;
-                        fgets(buff,2000,df);
+                        if (fgets(buff,2000,df) == 0) {
+                        	return;
+                        }
                 }
 check_again:
                 b = strlen(buff);

@@ -24,6 +24,7 @@
  */
 
 #include "../basicconf.h"
+#include "../file_io.h"
 #include "img2ps.h"
 
 GLELZWByteStream::GLELZWByteStream(GLEByteStream* pipe) : GLEPipedByteStream(pipe) {

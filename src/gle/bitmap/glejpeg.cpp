@@ -42,6 +42,7 @@
  */
 
 #include "../basicconf.h"
+#include "../file_io.h"
 #include "img2ps.h"
 
 /*
@@ -78,10 +79,10 @@ GLEJPEG::~GLEJPEG() {
 }
 
 int GLEJPEG::readImageSize() {
-	m_BitsPerComponent = fgetc(m_In);
+	m_BitsPerComponent = m_file.fgetc();
 	m_Height = read16BE();
 	m_Width = read16BE();
-	m_Components = fgetc(m_In);
+	m_Components = m_file.fgetc();
 	if (m_Components == 1) {
 		setMode(GLE_BITMAP_GRAYSCALE);
 	} else {
@@ -109,13 +110,13 @@ int GLEJPEG::checkJPG() {
 
 int GLEJPEG::readHeader() {
 	char markstr[20];
-	while (!feof(m_In)) {
+	while (!m_file.feof()) {
 		/* Skip padding at start of section */
 		int marker = 0;
 		int nbpadding = 0;
 		while (true) {
-			marker = fgetc(m_In);
-			if (feof(m_In)) {
+			marker = m_file.fgetc();
+			if (m_file.feof()) {
 				setError("SOF marker not found");
 				return GLE_IMAGE_ERROR_DATA;
 			}
@@ -141,7 +142,7 @@ int GLEJPEG::readHeader() {
 			return GLE_IMAGE_ERROR_DATA;
 		}
 		/* Read section length */
-		int crpos = ftell(m_In);
+		int crpos = m_file.ftell();
 		int size = read16BE();
 		if (size < 2) {
 			sprintf(markstr, "0x%X", marker);
@@ -167,16 +168,16 @@ int GLEJPEG::readHeader() {
 				return checkJPG();
 		}
 		/* Skip till after section */
-		fseek(m_In, crpos+size, SEEK_SET);
+		fseek(m_file.getFile(), crpos+size, SEEK_SET);
 	}
 	setError("SOF marker not found");
 	return GLE_IMAGE_ERROR_DATA;
 }
 
 int GLEJPEG::coded(GLEByteStream* output) {
-	fseek(m_In, 0, SEEK_SET);
+	fseek(m_file.getFile(), 0, SEEK_SET);
 	while (true) {
-		int nextByte = fgetc(m_In);
+		int nextByte = m_file.fgetc();
 		if (nextByte == EOF) {
 			break;
 		} else {

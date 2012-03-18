@@ -281,8 +281,9 @@ void font_load_metric(int ff) {
 	cfont->metric_loaded = true;
 	/* try to open font metric file */
 	string fname = fontdir(cfont->file_metric);
-	FILE *fmt = fopen(fname.c_str(), READ_BIN);
-	if (fmt == NULL) {
+	GLEFileIO fmt;
+	fmt.open(fname.c_str(), READ_BIN);
+	if (!fmt.isOpen()) {
 		cfont->error = true;
 		ostringstream err;
 		err << "font metric file not found: '" << fname << "'; spacing will be incorrect";
@@ -290,28 +291,28 @@ void font_load_metric(int ff) {
 		myfree(cfont->file_metric);
 		cfont->file_metric = sdup(fnt[1]->file_metric);
 		fname = fontdir(cfont->file_metric);
-		fmt = fopen(fname.c_str(), READ_BIN);
-		if (fmt == NULL) {
+		fmt.open(fname.c_str(), READ_BIN);
+		if (!fmt.isOpen()) {
 			gprint("can't open metric file: '%s'\n", fname.c_str());
 			return;
 		}
 	}
 	/* reads in font data */
-	fread(&cfont->info, sizeof(GLEFontTable), 1, fmt);
+	fmt.fread(&cfont->info, sizeof(GLEFontTable), 1);
 	dbg printf("Encoding %d  slant %f,  box %f %f %f %f \n",
 	           cfont->info.encoding,cfont->info.slant,cfont->info.fx1,
 	           cfont->info.fy1,cfont->info.fx2,cfont->info.fy2);
 	/* read number of characters */
 	int nb_chars;
-	fread(&nb_chars, sizeof(int), 1, fmt);
+	fmt.fread(&nb_chars, sizeof(int), 1);
 	/* read unicode map */
 	int uni_map_size;
-	fread(&uni_map_size, sizeof(int), 1, fmt);
+	fmt.fread(&uni_map_size, sizeof(int), 1);
 	if (uni_map_size != 0) {
 		unsigned int* encoding_unicode = new unsigned int[uni_map_size];
 		unsigned int* encoding_code = new unsigned int[uni_map_size];
-		fread(encoding_unicode, sizeof(unsigned int), uni_map_size, fmt);
-		fread(encoding_code, sizeof(unsigned int), uni_map_size, fmt);
+		fmt.fread(encoding_unicode, sizeof(unsigned int), uni_map_size);
+		fmt.fread(encoding_code, sizeof(unsigned int), uni_map_size);
 		for (int i = 0; i < uni_map_size; i++) {
 			if (encoding_code[i] < (unsigned int)nb_chars) {
 				(*cfont->unimap)[encoding_unicode[i]] = encoding_code[i];
@@ -323,24 +324,24 @@ void font_load_metric(int ff) {
 	/* read character data */
 	for (int i = 0; i < nb_chars; i++) {
 		GLEFontCharData* cdata = cfont->addCharData();
-		if (fgetc(fmt) == 1) {
-			fread(&cdata->wx, sizeof(float), 1, fmt);
-			fread(&cdata->wy, sizeof(float), 1, fmt);
-			fread(&cdata->x1, sizeof(float), 1, fmt);
-			fread(&cdata->y1, sizeof(float), 1, fmt);
-			fread(&cdata->x2, sizeof(float), 1, fmt);
-			fread(&cdata->y2, sizeof(float), 1, fmt);
+		if (fmt.fgetc() == 1) {
+			fmt.fread(&cdata->wx, sizeof(float), 1);
+			fmt.fread(&cdata->wy, sizeof(float), 1);
+			fmt.fread(&cdata->x1, sizeof(float), 1);
+			fmt.fread(&cdata->y1, sizeof(float), 1);
+			fmt.fread(&cdata->x2, sizeof(float), 1);
+			fmt.fread(&cdata->y2, sizeof(float), 1);
 			unsigned int ksize;
-			fread(&ksize, sizeof(unsigned int), 1, fmt);
+			fmt.fread(&ksize, sizeof(unsigned int), 1);
 			if (ksize > 0) {
 				cdata->Kern.resize(ksize);
-				fread(&cdata->Kern[0], sizeof(GLEFontKernInfo), ksize, fmt);
+				fmt.fread(&cdata->Kern[0], sizeof(GLEFontKernInfo), ksize);
 			}
 			unsigned int lsize;
-			fread(&lsize, sizeof(unsigned int), 1, fmt);
+			fmt.fread(&lsize, sizeof(unsigned int), 1);
 			if (lsize > 0) {
 				cdata->Lig.resize(lsize);
-				fread(&cdata->Lig[0], sizeof(GLEFontLigatureInfo), lsize, fmt);
+				fmt.fread(&cdata->Lig[0], sizeof(GLEFontLigatureInfo), lsize);
 			}
 		}
 	}
@@ -351,23 +352,23 @@ void font_load_metric(int ff) {
 	}
 	/* Also do the composites to support accents in GLE (new 070506) */
 	int char_code = 0;
-	fread(&char_code, sizeof(int), 1, fmt);
+	fmt.fread(&char_code, sizeof(int), 1);
 	while (char_code != 0) {
 		int accent_idx;
-		fread(&accent_idx, sizeof(int), 1, fmt);
+		fmt.fread(&accent_idx, sizeof(int), 1);
 		int hash_key = (char_code << 7) | accent_idx;
 		FontCompositeInfo* info = new FontCompositeInfo();
 		cfont->composites.add_item(hash_key, info);
-		fread(&info->c1,  sizeof(int), 1, fmt);
-		fread(&info->dx1, sizeof(double), 1, fmt);
-		fread(&info->dy1, sizeof(double), 1, fmt);
-		fread(&info->c2,  sizeof(int), 1, fmt);
-		fread(&info->dx2, sizeof(double), 1, fmt);
-		fread(&info->dy2, sizeof(double), 1, fmt);
+		fmt.fread(&info->c1,  sizeof(int), 1);
+		fmt.fread(&info->dx1, sizeof(double), 1);
+		fmt.fread(&info->dy1, sizeof(double), 1);
+		fmt.fread(&info->c2,  sizeof(int), 1);
+		fmt.fread(&info->dx2, sizeof(double), 1);
+		fmt.fread(&info->dy2, sizeof(double), 1);
 		/* another character in the file? */
-		fread(&char_code, sizeof(int), 1, fmt);
+		fmt.fread(&char_code, sizeof(int), 1);
 	}
-	fclose(fmt);
+	fmt.close();
 }
 
 GLEFontCharData::GLEFontCharData() {

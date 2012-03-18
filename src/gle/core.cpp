@@ -39,6 +39,7 @@
 #define FONTDEF extern
 
 #include "all.h"
+#include "file_io.h"
 #include "bitmap/img2ps.h"
 #include "core.h"
 #include "d_interface.h"
@@ -46,7 +47,6 @@
 #include "gprint.h"
 #include "var.h"
 #include "sub.h"
-#include "file_io.h"
 #include "cutils.h"
 #include "keyword.h"
 #include "run.h"

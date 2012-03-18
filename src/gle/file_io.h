@@ -167,4 +167,28 @@ public:
 	inline ifstream& getFile() { return m_File; }
 };
 
+class GLEFileIO {
+public:
+	GLEFileIO();
+	~GLEFileIO();
+	void open(const char* fname, const char* flags);
+	bool isOpen() const;
+	void close();
+	FILE* getFile();
+	std::string getName() const;
+	void setName(const std::string& name);
+	void fread(void *ptr, size_t size, size_t nmemb);
+	void fwrite(const void *ptr, size_t size, size_t nmemb);
+	int fgetc();
+	int feof();
+	long ftell();
+	int fseek(long offset, int whence);
+
+private:
+	FILE* m_file;
+	std::string m_fname;
+};
+
+int GLEReadConsoleInteger();
+
 #endif

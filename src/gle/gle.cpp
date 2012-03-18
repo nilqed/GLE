@@ -1183,8 +1183,8 @@ void load_one_file_sub(GLEScript* script, CmdLineObj& cmdline, size_t* exit_code
 	GLEGetColorList()->reset();
 	if (cmdline.hasOption(GLE_OPT_DEBUG)){
 		printf("Debug options 16=do_pcode, 8=pass 4=polish, 2=eval ");
-		printf("Debug "); scanf("%d",&gle_debug);
-		printf("Trace "); scanf("%d",&trace_on);
+		printf("Debug "); gle_debug = GLEReadConsoleInteger();
+		printf("Trace "); trace_on = GLEReadConsoleInteger();
 	}
 	GLELoadOneFileManager manager(script, &cmdline, &out_name);
 	CmdLineArgSet* device = (CmdLineArgSet*)cmdline.getOption(GLE_OPT_DEVICE)->getArg(0);
