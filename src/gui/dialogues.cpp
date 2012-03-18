@@ -330,7 +330,7 @@ SoftwareLocateDialogue::SoftwareLocateDialogue(GLEMainWindow *parent, GLEInterfa
 	connect(searchButton, SIGNAL(clicked()), this, SLOT(searchAuto()));
 	buttonLayout->addWidget(searchButton);
 	if ((buttons & QGLE_SOFT_DIALOG_SEARCH_MANUAL) != 0) {
-		locButton = new QPushButton(tr("Manually Locate"));
+		locButton = new QPushButton(tr("Manually Locate GhostScript"));
 		connect(locButton, SIGNAL(clicked()), this, SLOT(locateManual()));
 		buttonLayout->addWidget(locButton);
 	}

@@ -278,6 +278,9 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 			stk[nstk-1] = (int)stk[nstk-1] % (int)stk[nstk];
 			nstk--;
 			break;
+		case 25:  /* . */
+			g_throw_parser_error("operator '.' does not apply to a numeric type");
+			break;
 		/* String Binary operators 30..49 ----------------------- */
 		case 31:  /* + */
 			*otyp = 2;
@@ -296,38 +299,55 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 			}
 			break;
 		case 32:  /* - */
+			g_throw_parser_error("operator '-' does not apply to a string type");
 			break;
 		case 33:  /* * */
+			g_throw_parser_error("operator '*' does not apply to a string type");
 			break;
 		case 34:  /* / */
+			g_throw_parser_error("operator '/' does not apply to a string type");
 			break;
 		case 35:  /* ^ */
+			g_throw_parser_error("operator '^' does not apply to a string type");
 			break;
 		case 36:  /* = */
 			*otyp = 1;
 			nstk--;
-			if (str_i_equals(stk_str[nstk],stk_str[nstk+1]))
-				stk[nstk]=true;
-			else
-				stk[nstk]=false;
+			stk[nstk] = str_i_equals(stk_str[nstk], stk_str[nstk+1]);
 			break;
 		case 37:  /* <   */
+			*otyp = 1;
+			nstk--;
+			stk[nstk] = str_i_cmp(stk_str[nstk], stk_str[nstk+1]) < 0;
 			break;
 		case 38:  /* <=  */
+			*otyp = 1;
+			nstk--;
+			stk[nstk] = str_i_cmp(stk_str[nstk], stk_str[nstk+1]) <= 0;
 			break;
 		case 39:  /* >   */
+			*otyp = 1;
+			nstk--;
+			stk[nstk] = str_i_cmp(stk_str[nstk], stk_str[nstk+1]) > 0;
 			break;
 		case 40:  /* >=  */
+			*otyp = 1;
+			nstk--;
+			stk[nstk] = str_i_cmp(stk_str[nstk], stk_str[nstk+1]) >= 0;
 			break;
 		case 41:  /* <>  */
 			*otyp = 1;
 			nstk--;
-			if (str_i_equals(stk_str[nstk],stk_str[nstk+1]))
-				stk[nstk]=false;
-			else
-				stk[nstk]=true;
+			stk[nstk] = !str_i_equals(stk_str[nstk], stk_str[nstk+1]);
 			break;
-		case 42:  /* .OR.   */
+		case 42:  /* .AND.  */
+			g_throw_parser_error("operator 'AND' does not apply to a string type");
+			break;
+		case 43:  /* .OR.  */
+			g_throw_parser_error("operator 'OR' does not apply to a string type");
+			break;
+		case 44:  /* %  */
+			g_throw_parser_error("operator '%' does not apply to a string type");
 			break;
 		case 45:  /* . */
 			*otyp = 2;
@@ -867,7 +887,7 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 				*/
 				getGLERunInstance()->sub_call(*(pcode+c)-LOCAL_START_INDEX,stk,stk_str,&nstk,otyp);
 			} else {
-				gprint("Unrecognised pcode exp prim %d at position=%d \n",*(pcode+c),c);
+				g_throw_parser_error("unrecognized byte code expression");
 			}
 		break;
 	  }
@@ -939,7 +959,7 @@ void eval(int *pcode, int *cp, double *oval, const char **ostr, int *otyp) throw
 	}
 	if (pcode[(*cp)] == 8) {
 		/*  Single constant  */
-		union {double d; int l[1];} both;
+		union {double d; int l[2];} both;
 		both.l[0] = *(pcode+ ++(*cp));
 		both.l[1] = 0;
 		dbg gprint("Constant %ld \n",both.l[0]);

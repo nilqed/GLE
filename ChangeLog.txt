@@ -1,3 +1,24 @@
+4.2.4c (March, 2012)
+
+Bug Fixes
+
+    Added checks on number of data sets, bar definitions, and fill definitions (QGLE crash reports 02/07/2012 and 02/16/2012)
+    Save .glerc in user's AppData on Windows
+    Added manifest to prevent AUC Virtualization on Windows Vista and above
+    Search "C:\Program Files (x86)" on 64 bit Windows for installed software
+    Fixed type in manual: logfit -> logefit
+    Fixed bug in tokenizer
+    Fixed crash when parsing "let d1 = x.x" (QGLE crash report 02/28/2012)
+    Fix for message "QWidget::setWindowModified: The window title does not contain a '[*]' placeholder"
+    Fixed bug in centering of .inc output (reported by Antonio DiCesare)
+    Bug 3485409: GLE should check for Cairo version >= 1.10.0
+    Added Python script to generate GLE palette functions (contributed by Brandon Aubie)
+    Fixed "too many open files" when including bitmaps in filled boxes (reported by Alexis Letessier)
+    Fixed issue with filled boxes (reported by Alexis Letessier)
+    Make GLE compile with GCC 4.7.x (issue raised by Terje Røsten)
+    Support other 64bit systems besides x86
+    Fixed more GLU problems introduced in Qt4.8
+
 4.2.4b (January, 2012)
 
 Bug Fixes

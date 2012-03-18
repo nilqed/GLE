@@ -611,7 +611,6 @@ void Tokenizer::reset_nopos() {
 	m_token_start.set(0, 0);
 	m_space_before = false;
 	m_space_after = false;
-	m_space_kind = 0;
 	m_pushback_tokens.clear();
 }
 
@@ -636,9 +635,13 @@ void Tokenizer::reset_position() {
 	m_token_start.set(0, 0);
 }
 
-
 int Tokenizer::has_more_tokens() throw(ParserError) {
-  if (m_token_at_end == 1) return 0;
+  if (m_token_has_pushback > 0) {
+	  return 1;
+  }
+  if (m_token_at_end == 1) {
+	  return 0;
+  }
   char token_ch = token_read_sig_char();
   if (m_token_at_end == 1) {
     return 0;
@@ -917,12 +920,6 @@ string& Tokenizer::next_multilevel_token() throw(ParserError) {
 		}
 	} while (m_token_at_end == 0);
 	return m_token;
-}
-
-void Tokenizer::jump(TokenizerPos& pos) {
-	goto_position(pos);
-	m_pushback_tokens.clear();
-	m_token_has_pushback = 0;
 }
 
 void Tokenizer::on_trailing_space() {
@@ -1213,11 +1210,9 @@ char Tokenizer::token_read_char() {
 			if (ch == '\n') m_token_count.incRow();
 			if (m_language->isLineCommentToken(ch)) {
 				token_skip_to_end();
-				m_space_kind = ch;
 				return SPACE_CHAR;
 			}
 			if (m_language->isSpaceToken(ch)) {
-				m_space_kind = ch;
 				return SPACE_CHAR;
 			} else {
 				return ch;
@@ -1243,7 +1238,6 @@ char Tokenizer::token_read_char_no_comment() {
 			else m_token_count.incCol();
 			if (ch == '\n') m_token_count.incRow();
 			if (m_language->isSpaceToken(ch)) {
-				m_space_kind = ch;
 				return SPACE_CHAR;
 			} else {
 				return ch;
@@ -1408,38 +1402,6 @@ int StreamTokenizer::stream_get() {
 	return m_is->get();
 }
 
-StreamEOFTokenizer::StreamEOFTokenizer() : StreamTokenizer() {
-	setFakeEOF(0);
-}
-
-StreamEOFTokenizer::StreamEOFTokenizer(TokenizerLanguage* lang) : StreamTokenizer(lang) {
-	setFakeEOF(0);
-}
-
-StreamEOFTokenizer::StreamEOFTokenizer(istream* _is) : StreamTokenizer(_is) {
-	setFakeEOF(0);
-}
-
-StreamEOFTokenizer::StreamEOFTokenizer(istream* _is, TokenizerLanguage* lang) : StreamTokenizer(_is, lang) {
-	setFakeEOF(0);
-}
-
-StreamEOFTokenizer::~StreamEOFTokenizer() {
-}
-
-int StreamEOFTokenizer::stream_ok() {
-	return m_fakeeof == 0 && m_is->good();
-}
-
-int StreamEOFTokenizer::stream_get() {
-	int res = m_is->get();
-	if (res == 0) {
-		m_fakeeof = 1;
-		return ' ';
-	}
-	return res;
-}
-
 StringTokenizer::StringTokenizer(bool show_str_err) : Tokenizer() {
 	init_st();
 	m_token_count.set_line(0);
@@ -1539,100 +1501,6 @@ SpaceStringTokenizer::SpaceStringTokenizer(const char* tokens) : StringTokenizer
 }
 
 SpaceStringTokenizer::~SpaceStringTokenizer() {
-}
-
-StreamEOFCopyTokenizer::StreamEOFCopyTokenizer() : StreamEOFTokenizer() {
-	m_out_fb = NULL;
-	m_os = NULL;
-}
-
-StreamEOFCopyTokenizer::StreamEOFCopyTokenizer(TokenizerLanguage* lang) : StreamEOFTokenizer(lang) {
-	m_out_fb = NULL;
-	m_os = NULL;
-}
-
-StreamEOFCopyTokenizer::StreamEOFCopyTokenizer(istream* _is) : StreamEOFTokenizer(_is)  {
-	m_out_fb = NULL;
-	m_os = NULL;
-}
-
-StreamEOFCopyTokenizer::StreamEOFCopyTokenizer(istream* _is, TokenizerLanguage* lang) : StreamEOFTokenizer(_is, lang) {
-	m_out_fb = NULL;
-	m_os = NULL;
-}
-
-StreamEOFCopyTokenizer::~StreamEOFCopyTokenizer() {
-	close_output();
-}
-
-void StreamEOFCopyTokenizer::open_output(const char* fname) throw(ParserError) {
-	m_out_fb = new filebuf();
-	if (m_out_fb->open(fname, ios::out) == NULL) {
-		TokenizerPos pos;
-		throw ParserError(string("can't open: ") + fname, pos, fname);
-	}
-	m_os = new ostream(m_out_fb);
-}
-
-void StreamEOFCopyTokenizer::output_term_space() {
-	if (m_termspace != -1) *m_os << m_termspace;
-}
-
-void StreamEOFCopyTokenizer::output_term_space(char ch) {
-	if (ch != -1) *m_os << ch;
-}
-
-void StreamEOFCopyTokenizer::close_output() {
-	if (m_out_fb != NULL) {
-		m_out_fb->close();
-		delete m_out_fb;
-		m_out_fb = NULL;
-		delete m_os;
-		m_os = NULL;
-	}
-}
-
-string& StreamEOFCopyTokenizer::try_next_token_output() {
-	string& token = try_next_token();
-	out() << token;
-	output_term_space();
-	return token;
-}
-
-string& StreamEOFCopyTokenizer::next_token_output() {
-	string& token = next_token();
-	out() << token;
-	output_term_space();
-	return token;
-}
-
-void StreamEOFCopyTokenizer::output_token_and_space() {
-	out() << m_token;
-	output_term_space();
-}
-
-void StreamEOFCopyTokenizer::on_trailing_space() {
-	m_termspace = m_space_kind;
-}
-
-char StreamEOFCopyTokenizer::token_read_sig_char() throw(ParserError) {
-	m_intoken = 0;
-	m_termspace = -1;
-	char ch = StreamTokenizer::token_read_sig_char();
-	m_intoken = 1;
-	return ch;
-}
-
-int StreamEOFCopyTokenizer::stream_get() {
-	int ch = m_is->get();
-	if (ch == 0) {
-		m_fakeeof = 1;
-		return ' ';
-	}
-	if (m_intoken == 0 && m_language->isSpaceToken(ch)) {
-		*m_os << (char)ch;
-	}
-	return ch;
 }
 
 MyOutputFile::MyOutputFile() {

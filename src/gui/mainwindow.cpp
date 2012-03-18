@@ -697,9 +697,9 @@ void GLEMainWindow::updateWindowTitle()
 	QString title(APP_NAME);
 	if (has) {
 		title += tr(" - ") + currFile->primaryFile();
-		// Always include "[*]", it is treated special by Qt and only filled in when actually modified
-		title += tr(" [*]");
 	}
+	// Always include "[*]", it is treated special by Qt and only filled in when actually modified
+	title += tr(" [*]");
 	setWindowTitle(title);
 }
 
@@ -2299,8 +2299,8 @@ void GLEMainWindow::newFile()
 	{
 		gleScript = gleInterface->newGLEFile(code.toLatin1().constData(), tempFiles[NewGLE].toLatin1().constData());
 		// Since we've added a "size" line, the file has (arguably) changed
-		drawingArea->setDirty();
 		updateWindowTitle();
+		drawingArea->setDirty();
 	}
 	else
 	{

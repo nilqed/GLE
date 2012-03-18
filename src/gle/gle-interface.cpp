@@ -632,16 +632,22 @@ string GLEInterface::getToolLocation(const char* name) {
 }
 
 string GLEInterface::getUserConfigLocation() {
+	string location;
 	#if defined(__UNIX__) || defined (__OS2__)
-		const char* home = getenv("HOME");
-		if (home != NULL && home[0] != 0) {
-			string home_str(home);
-			AddDirSep(home_str);
-			home_str += ".glerc";
-			return home_str;
+		GLEGetEnv("HOME", location);
+	#endif
+	#ifdef __WIN32__	
+		GLEGetEnv("APPDATA", location);
+		if (location != "") {
+			AddDirSep(location);
+			location += "gle-graphics.org";
 		}
 	#endif
-	return string("");
+	if (location != "") {
+		AddDirSep(location);
+		location += ".glerc";
+	}
+	return location;
 }
 
 string GLEInterface::getManualLocation() {
