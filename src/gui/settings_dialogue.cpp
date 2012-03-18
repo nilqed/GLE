@@ -40,10 +40,10 @@ SettingsDialogue::SettingsDialogue(GLEMainWindow *parent)
 	toolTab = new ToolTab(this, parent);
 
 	tabWidget = new QTabWidget;
-	tabWidget->addTab(appTab, tr("Application"));
-	tabWidget->addTab(servTab, tr("Server"));
-	tabWidget->addTab(drawTab, tr("Drawing"));
 	tabWidget->addTab(toolTab, tr("Tools"));
+	tabWidget->addTab(appTab, tr("Application"));
+	tabWidget->addTab(drawTab, tr("Drawing"));
+	tabWidget->addTab(servTab, tr("Server"));
 
 		// Add ok and cancel button
 	QPushButton *okButton = new QPushButton(tr("OK"));
