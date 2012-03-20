@@ -40,7 +40,7 @@ struct op_key {
 	char name[256];
 	int typ;
 	int pos;
-	int idx;
+	unsigned int idx;
 };
 
 #define typ_end     0

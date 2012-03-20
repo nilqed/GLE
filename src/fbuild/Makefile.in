@@ -53,7 +53,7 @@ LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
 
 ifeq (@HAVE_LIBGLE_CPPFLAGS@,1)
-	EXTRA_OBJS := ../gle/cutils.static.$(OBJ_SUFF)
+	EXTRA_OBJS := ../gle/cutils.static.$(OBJ_SUFF) ../gle/file_io.static.$(OBJ_SUFF)
 endif
 
 CPPFLAGS := $(strip $(CPPFLAGS))

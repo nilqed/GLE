@@ -135,8 +135,8 @@ void token(char *lin,TOKENS tok,int *ntok,char *outbuff)
 {
 	int jj;
 	int tj=0;
-	char *cp;
-	char *p2;
+	char* cp;
+	char* p2 = 0;
 	*ntok = 0;
 	bool in_quote = false;
 	if (table_loaded==false) token_init();
@@ -172,7 +172,7 @@ endofline:;
 		if (str_i_equals(tok[*ntok]," ")) (*ntok)--;
 //		if (*ntok>0) p2 =  (*tok)[*ntok] + strlen((*tok)[*ntok])  - 1;
 		if (*ntok > 0) p2 =  tok[*ntok] + strlen(tok[*ntok])  - 1;
-		if (*p2 == 10) *p2 = 0;
+		if (p2 != 0 && *p2 == 10) *p2 = 0;
 	}
 //	for(vi=1;vi<=*ntok;vi++) printf("(token) tok[%d]=%s\n",vi,tok[vi]);
 }

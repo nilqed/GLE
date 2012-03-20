@@ -41,6 +41,7 @@
 
 #include "basicconf.h"
 #include "../gle/tokens/stokenizer.h"
+#include "../gle/file_io.h"
 
 #include "parseAFM.h"
 
@@ -178,8 +179,9 @@ unsigned int font_str_to_code(map<string, unsigned int>& charcodes, const char* 
 
 void writefmt(const char* fmtname, const char* encname, FontInfo *fi) {
 	/* create output file */
-	FILE* fmt = fopen(fmtname, WRITE_BIN);
-	if (fmt == NULL) {
+	GLEFileIO fmt;
+	fmt.open(fmtname, WRITE_BIN);
+	if (!fmt.isOpen()) {
 		perror ("Cant open output file");
 		exit(1);
 	}
@@ -217,7 +219,7 @@ void writefmt(const char* fmtname, const char* encname, FontInfo *fi) {
 		}
 	}
 	/* write out global font information */
-	fwrite(&fnt, sizeof(GLEFontTable), 1, fmt);
+	fmt.fwrite(&fnt, sizeof(GLEFontTable), 1);
 	/* read encoding table */
 	map<string, unsigned int> charcodes;
 	vector<unsigned int> encoding_unicode;
@@ -340,33 +342,33 @@ void writefmt(const char* fmtname, const char* encname, FontInfo *fi) {
 		chardata[c1]->Kern.push_back(kinfo);
 	}
 	/* write out number of characters */
-	fwrite(&nb_chars, sizeof(int), 1, fmt);
+	fmt.fwrite(&nb_chars, sizeof(int), 1);
 	/* write unicode table */
 	int size = encoding_code.size();
-	fwrite(&size, sizeof(int), 1, fmt);
+	fmt.fwrite(&size, sizeof(int), 1);
 	if (size > 0) {
-		fwrite(&encoding_unicode[0], sizeof(unsigned int), size, fmt);
-		fwrite(&encoding_code[0], sizeof(unsigned int), size, fmt);
+		fmt.fwrite(&encoding_unicode[0], sizeof(unsigned int), size);
+		fmt.fwrite(&encoding_code[0], sizeof(unsigned int), size);
 	}
 	/* write out character data */
 	for (int i = 0; i < nb_chars; i++) {
 		GLEFontCharData* cdata = chardata[i];
 		if (cdata->used) {
-			fputc(1, fmt);
-			fwrite(&cdata->wx, sizeof(float), 1, fmt);
-			fwrite(&cdata->wy, sizeof(float), 1, fmt);
-			fwrite(&cdata->x1, sizeof(float), 1, fmt);
-			fwrite(&cdata->y1, sizeof(float), 1, fmt);
-			fwrite(&cdata->x2, sizeof(float), 1, fmt);
-			fwrite(&cdata->y2, sizeof(float), 1, fmt);
+			fmt.fputc(1);
+			fmt.fwrite(&cdata->wx, sizeof(float), 1);
+			fmt.fwrite(&cdata->wy, sizeof(float), 1);
+			fmt.fwrite(&cdata->x1, sizeof(float), 1);
+			fmt.fwrite(&cdata->y1, sizeof(float), 1);
+			fmt.fwrite(&cdata->x2, sizeof(float), 1);
+			fmt.fwrite(&cdata->y2, sizeof(float), 1);
 			unsigned int ksize = cdata->Kern.size();
-			fwrite(&ksize, sizeof(unsigned int), 1, fmt);
-			if (ksize > 0) fwrite(&cdata->Kern[0], sizeof(GLEFontKernInfo), ksize, fmt);
+			fmt.fwrite(&ksize, sizeof(unsigned int), 1);
+			if (ksize > 0) fmt.fwrite(&cdata->Kern[0], sizeof(GLEFontKernInfo), ksize);
 			unsigned int lsize = cdata->Lig.size();
-			fwrite(&lsize, sizeof(unsigned int), 1, fmt);
-			if (lsize > 0) fwrite(&cdata->Lig[0], sizeof(GLEFontLigatureInfo), lsize, fmt);
+			fmt.fwrite(&lsize, sizeof(unsigned int), 1);
+			if (lsize > 0) fmt.fwrite(&cdata->Lig[0], sizeof(GLEFontLigatureInfo), lsize);
 		} else {
-			fputc(0, fmt);
+			fmt.fputc(0);
 		}
 	}
 	/* Also do the composites to support accents in GLE (new 070506) */
@@ -381,19 +383,19 @@ void writefmt(const char* fmtname, const char* encname, FontInfo *fi) {
 				if (ccd->numOfPieces != 2) {
 					cout << ">>> incorrect number of pieces: '" << name << "': " << ccd->numOfPieces << endl;
 				} else {
-					fwrite(&char_code, sizeof(int), 1, fmt);
-					fwrite(&accent_idx, sizeof(int), 1, fmt);
+					fmt.fwrite(&char_code, sizeof(int), 1);
+					fmt.fwrite(&accent_idx, sizeof(int), 1);
 					for (int j = 0; j < ccd->numOfPieces; j++) {
 						Pcc* piece = &ccd->pieces[j];
 						int piece_code = font_str_to_code(charcodes, piece->pccName);
 						if (piece_code == 0) {
 							cout << ">>> can't find piece: '" << piece->pccName << "'" << endl;
 						}
-						fwrite(&piece_code, sizeof(int), 1, fmt);
+						fmt.fwrite(&piece_code, sizeof(int), 1);
 						float dx = piece->deltax * scl;
 						float dy = piece->deltay * scl;
-						fwrite(&dx, sizeof(float), 1, fmt);
-						fwrite(&dy, sizeof(float), 1, fmt);
+						fmt.fwrite(&dx, sizeof(float), 1);
+						fmt.fwrite(&dy, sizeof(float), 1);
 					}
 				}
 			} else {
@@ -404,6 +406,6 @@ void writefmt(const char* fmtname, const char* encname, FontInfo *fi) {
 		}
 	}
 	int term = 0;
-	fwrite(&term, sizeof(int), 1, fmt);
-	fclose(fmt);
+	fmt.fwrite(&term, sizeof(int), 1);
+	fmt.close();
 }

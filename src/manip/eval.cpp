@@ -78,7 +78,7 @@ void eval(int32 *pcode,int *cp,double *oval,char *ostr,int *otyp) {
 		/* place to put result number 			*/
 		/* place to put result string 			*/
 		/* place to put result type, 1=num, 2=str 	*/
-	union {double d; int32 l[1];} both;
+	union {double d; int32 l[2];} both;
 	int plen,i,c;
 	time_t today;
 	double xx;

@@ -1911,70 +1911,55 @@ void  text_tomacro(const string& in, uchar *out) {
 void tex_presave() {
 	int i;
 	deftable *dt;
-	FILE *fout;
+	GLEFileIO fout;
 	mdeftable *mdt;
 	/* Save all defined features possible */
 	string fname = gledir("inittex.ini");
-	fout = fopen(fname.c_str(), "wb");
-	if (fout==NULL) gprint("Could not create inittex.ini file \n");
-	fwrite(fontfam,sizeof(int),16*4,fout);
-	fwrite(fontfamsz,sizeof(double),16*4,fout);
-	fwrite(chr_mathcode,sizeof(char),256,fout);
+
+	fout.open(fname.c_str(), "wb");
+	if (!fout.isOpen()) gprint("Could not create inittex.ini file \n");
+	fout.fwrite(fontfam, sizeof(int), 16*4);
+	fout.fwrite(fontfamsz, sizeof(double), 16*4);
+	fout.fwrite(chr_mathcode, sizeof(char), 256);
 	for (i=0;i<HASHSIZE;i++) {
 	  for (dt = def_hashtab[i]; dt != NULL; dt = dt->next) {
-		fwrite(&i,sizeof(i),1,fout);
-		fwrite(&dt->npm,sizeof(i),1,fout);
-		fsendstr(dt->name,fout);
-		fsendstr(dt->defn,fout);
+		fout.fwrite(&i, sizeof(i), 1);
+		fout.fwrite(&dt->npm, sizeof(i), 1);
+		fout.fsendstr(dt->name);
+		fout.fsendstr(dt->defn);
 	  }
 	}
-	i = 0x0fff; fwrite(&i,sizeof(i),1,fout);
+	i = 0x0fff; fout.fwrite(&i, sizeof(i), 1);
 	for (i=0;i<HASHSIZE;i++) {
 	  for (mdt = mdef_hashtab[i]; mdt != NULL; mdt = mdt->next) {
-		fwrite(&i,sizeof(i),1,fout);
-		fwrite(&mdt->defn,sizeof(i),1,fout);
-		fsendstr(mdt->name,fout);
+		fout.fwrite(&i, sizeof(i), 1);
+		fout.fwrite(&mdt->defn, sizeof(i), 1);
+		fout.fsendstr(mdt->name);
 	  }
 	}
-	i = 0x0fff; fwrite(&i,sizeof(i),1,fout);
-	for (i=0;i<256;i++) fsendstr(cdeftable[i],fout);
+	i = 0x0fff; fout.fwrite(&i, sizeof(i), 1);
+	for (i=0;i<256;i++) fout.fsendstr(cdeftable[i]);
 	/* write unicode definitions */
 	for (IntStringHash::const_iterator it = m_Unicode.begin(); it != m_Unicode.end(); it++ ) {
 		int key = it->first;
 		const string& data = it->second;
 		int len = data.size();
-		fwrite(&key,sizeof(int),1,fout);
-		fwrite(&len,sizeof(int),1,fout);
-		fwrite(data.c_str(),sizeof(char),len,fout);
+		fout.fwrite(&key, sizeof(int), 1);
+		fout.fwrite(&len, sizeof(int), 1);
+		fout.fwrite(data.c_str(), sizeof(char),len);
 	}
 	i = 0;
-	fwrite(&i,sizeof(int),1,fout);
-	fclose(fout);
+	fout.fwrite(&i, sizeof(int), 1);
+	fout.close();
 }
 
-void fgetvstr(char **s,FILE *fmt) {
-	int i = fgetc(fmt);
+void fgetvstr(char** s, GLEFileIO* fmt) {
+	int i = fmt->fgetc();
 	if (i == 0) return;
 	if (*s != NULL) myfree(*s);
 	*s = (char*) myalloc(i+1);
-	fread(*s, 1, i, fmt);
+	fmt->fread(*s, 1, i);
 	*(*s+i) = 0;
-}
-
-void fgetcstr(char s[],FILE *fmt) {
-	int i = fgetc(fmt);
-	if (i == 0) return;
-	fread(s, 1, i, fmt);
-	s[i] = 0;
-}
-
-void fsendstr(char *s, FILE *fout) {
-	if (s == NULL) {
-		fputc(0, fout);
-		return;
-	}
-	fputc(strlen(s), fout);
-	fwrite(s, 1, strlen(s), fout);
 }
 
 void tex_preload() {
@@ -2003,8 +1988,8 @@ void tex_preload() {
 #endif
 	for (; fout.fread(&i, sizeof(i), 1), i != 0x0fff;) {
 		fout.fread(&j, sizeof(j), 1);
-		fgetcstr(str1, fout.getFile());
-		fgetcstr(str2, fout.getFile());
+		fout.fgetcstr(str1);
+		fout.fgetcstr(str2);
 		tex_def(str1,str2,j);
 #ifdef DO_TEX_DECODE
 		fprintf(fhv,"str1=%s  str2=%s j=%d\n",str1,str2,j);
@@ -2013,7 +1998,7 @@ void tex_preload() {
 	i=0;
 	for (; fout.fread(&i, sizeof(i), 1), i != 0x0fff;) {
 		fout.fread(&j, sizeof(j), 1);
-		fgetcstr(str1, fout.getFile());
+		fout.fgetcstr(str1);
 		tex_mathdef(str1,j);
 #ifdef DO_TEX_DECODE
 		fprintf(fhv,"str1=%s  i=%d\n",str1,i);
@@ -2021,7 +2006,7 @@ void tex_preload() {
 	}
 	i=0;
 	for (i=0;i<256;i++){
-		fgetvstr(&cdeftable[i], fout.getFile());
+		fgetvstr(&cdeftable[i], &fout);
 #ifdef DO_TEX_DECODE
 		fprintf(fhv,"cdeftable[%d]=%s\n",i,cdeftable[i]);
 #endif

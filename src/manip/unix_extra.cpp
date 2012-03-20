@@ -97,18 +97,20 @@ int findfirst(char *wild, struct ffblk *ffblk, int zz) {
 	wilddir = fopen("gledir.tmp","r");
 	if (wilddir==NULL) {printf("Fork ls failed \n"); return true;}
 	if (feof(wilddir)) { fclose(wilddir); return true;}
-	fgets(buff,100,wilddir);
-	trimcr(buff);
-	ffblk->ff_name = buff;
+	if (fgets(buff,100,wilddir) != 0) {
+		trimcr(buff);
+		ffblk->ff_name = buff;
+	}
 	return false;
 }
 
 int findnext(struct ffblk *ffblk) {
 	static char buff[200];
 	if (feof(wilddir)) { fclose(wilddir); return true;}
-	fgets(buff,100,wilddir);
-	trimcr(buff);
-	ffblk->ff_name = buff;
+	if (fgets(buff,100,wilddir) != 0) {
+		trimcr(buff);
+		ffblk->ff_name = buff;
+	}
 	return false;
 }
 

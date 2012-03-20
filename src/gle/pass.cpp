@@ -2219,7 +2219,7 @@ const char* GLESourceBlockName(int type) {
 		int count, width;
 		get_key_info(op_begin, &count, &width);
 		for (int i = 0; i < count; i++) {
-			if (op_begin[i].idx == type - GLE_SRCBLK_MAGIC) return op_begin[i].name;
+			if (int(op_begin[i].idx) == type - GLE_SRCBLK_MAGIC) return op_begin[i].name;
 		}
 	}
 	switch (type) {

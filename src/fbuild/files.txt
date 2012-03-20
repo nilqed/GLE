@@ -51,4 +51,5 @@ OBJECTS = \
 token.$(OBJ_SUFF)
 
 EXTRA_OBJS = \
-../gle/cutils.$(OBJ_SUFF)
+../gle/cutils.$(OBJ_SUFF) \
+../gle/file_io.$(OBJ_SUFF)

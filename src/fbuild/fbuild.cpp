@@ -56,6 +56,7 @@
 #include "basicconf.h"
 #include "token.h"
 #include "../gle/cutils.h"
+#include "../gle/file_io.h"
 
 #define gprint printf
 
@@ -84,55 +85,56 @@ int main(int argc, char **argv) {
 	int ntok;
 	int i;
 	FILE *fptr;
-	FILE *fout;
 	char *s;
 	char space_str[] = " ";
 	char fname[80];
 	char outfile[80];
-
 	design = 1;
 	token_equal();
 	strcpy(fname,*(++argv));
-        s = strchr(fname,'.');
-        if (s!=NULL) *s = 0;
+    s = strchr(fname,'.');
+    if (s!=NULL) *s = 0;
 	strcpy(outfile,fname);
 	if (strchr(fname,':')!=NULL) strcpy(outfile,strchr(fname,':')+1);
 	strcat(outfile,".fve");
 	strcat(fname,".gle");
 	printf("[%s]==>[%s]\n",fname,outfile);
 	outbuff = (unsigned char*) malloc(64000);
-	fout = fopen(outfile,WRITE_BIN);
-	if (fout==NULL) perror("Could not open output file \n");
+	GLEFileIO fout;
+	fout.open(outfile, WRITE_BIN);
+	if (!fout.isOpen()) perror("Could not open output file \n");
 	fptr = fopen(fname,"r");
 	if (fptr==NULL) perror("Could not open input file \n");
 	for (i=0;i<TOKEN_LENGTH;i++) strcpy(tk[i],space_str);
-	for (fgets(inbuff,200,fptr);!feof(fptr);fgets(inbuff,200,fptr)) {
-		#ifdef __UNIX__
-			// remove DOS CR if present
-			i = strlen(inbuff);
-			if (i >= 2 && inbuff[i-2] == '\r') {
-				inbuff[i-2] = '\n';
-				inbuff[i-1] = '\0';
+	if (fgets(inbuff,200,fptr) != 0) {
+		while (!feof(fptr)) {
+			#ifdef __UNIX__
+				// remove DOS CR if present
+				i = strlen(inbuff);
+				if (i >= 2 && inbuff[i-2] == '\r') {
+					inbuff[i-2] = '\n';
+					inbuff[i-1] = '\0';
+				}
+			#endif
+	/* 		printf("Source | %s",inbuff); */
+			token(inbuff,tk,&ntok,tkbuff);
+			do_line();
+			if (fgets(inbuff,200,fptr) == 0) {
+				break;
 			}
-		#endif
-/* 		printf("Source | %s",inbuff); */
-		token(inbuff,tk,&ntok,tkbuff);
-		do_line();
+		}
 	}
 	//printf(" nbig %d nsmall %d nbytes %d\n",nbig,nsmall,nout);
-
 /*	for (i=0;i<100;i++) if (outpnt[i]>0) dbg printf("index %d %d ",i,outpnt[i]);*/
 	dbg printf("\n\n");
 	dbg printf("\n nbig %d nsmall %d nbytes %d\n\n",nbig,nsmall,nout);
-
 	for (i=0;i<100;i++) dbg printf("%d ",*(outbuff+i));
 	dbg printf("\n nbig %d nsmall %d nbytes %d\n\n",nbig,nsmall,nout);
-
-
 	outpnt[0] = nout;
-	fwrite(outpnt,sizeof(i),256,fout);
-	fwrite(outbuff,1,nout,fout);
-	fclose(fout); fclose(fptr);
+	fout.fwrite(outpnt, sizeof(i), 256);
+	fout.fwrite(outbuff, 1, nout);
+	fout.close();
+	fclose(fptr);
 	return 0;
 }
 /*--------------------------------------------------------------------------*/

@@ -235,7 +235,9 @@ void passcmd(char *source,char *tk[],int *ntok) {
 		window(1,1,80,25); scr_norm(); clrscr();
 		printf("Type in EXIT to return to MANIP\n\n");
 		#ifndef DJ	/* a.r. */
-		system("");
+		if (system("") == -1) {
+			printf("Can't show shell prompt\n\n");
+		}
 		#else
 		system(getenv("COMSPEC"));
 		#endif
@@ -677,11 +679,13 @@ int strcpydecimal(char *dest, char *src, int wid, int dpoints) {
 
 int strcpywidth(char *dest, char *src, int wid) {
 	static char buff[80];
-	int i;
-	i = wid-strlen(src);
-	if (i<0) i = 0;
-	memset(buff,' ',i);
-	buff[i] = 0;
+	int i = wid-strlen(src);
+    if (i < 0) {
+    	buff[0] = 0;
+    } else {
+    	memset(buff, (int)' ',i);
+    	buff[i] = 0;
+    }
 	strcpy(dest,buff);
 	strcat(dest,src);
 	return strlen(dest);

@@ -350,15 +350,10 @@ void init_installed_versions(CmdLineObj& cmdline, ConfigCollection* collection) 
 	}
 }
 
-void wait_for_enter() {
-	char Line[5];
-	fgets(Line, sizeof(Line), stdin);
-}
-
 void do_wait_for_enter() {
 	if (g_CmdLine.hasOption(GLE_OPT_PAUSE)) {
 		cout << "Press enter to continue ..." << endl;
-		wait_for_enter();
+		GLEReadConsoleInteger();
 	}
 }
 

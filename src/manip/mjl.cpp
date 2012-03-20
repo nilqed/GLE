@@ -38,30 +38,32 @@
 
 #include "all.h"
 #include "edt.h"
+#include "../gle/file_io.h"
 
 FILE *jouptr;
 extern int in_recover,single_step;
 
 void init_logging(char *infile) {
-	FILE *jptr;
+	GLEFileIO jptr;
+	int nbRead = 0;
 	unsigned char ccc;
 	static char buff[80];
 	if (in_recover) {
 		jouptr = fopen("manip_.j1","rb");
 		if (jouptr==NULL) fner("Unable to open/read journal file manip_.j1");
-		fread(&ccc,1,1,jouptr);
-		fread(buff,1,ccc,jouptr);
+		nbRead += fread(&ccc,1,1,jouptr);
+		nbRead += fread(buff,1,ccc,jouptr);
 		if (strlen(infile)==0) strcpy(infile,buff);
 		return;
 	}
 	unlink("manip_.j3");
 	rename("manip_.j2","manip_.j3");
 	rename("manip_.j1","manip_.j2");
-	jptr = fopen("manip_.j1","wb");
-	fputc(strlen(infile),jptr);
-	fwrite(infile,1,strlen(infile),jptr);
-	if (jptr==NULL) fner("Unable to open journal file manip_.j1");
-	fclose(jptr);
+	jptr.open("manip_.j1","wb");
+	jptr.fputc(strlen(infile));
+	jptr.fwrite(infile, 1, strlen(infile));
+	if (!jptr.isOpen()) fner("Unable to open journal file manip_.j1");
+	jptr.close();
 }
 
 unsigned char mjl_buff[80];
@@ -77,13 +79,13 @@ void mjl_key(int c) {
 }
 
 void mjl_flush() {
-	FILE *jptr;
 	if (in_recover) return;
 	if (strlen((char*)mjl_buff)<7) return;
-	jptr = fopen("manip_.j1","ab");
-	if (jptr==NULL) fner("Unable to append to journal file manip_.j1");
-	fwrite(mjl_buff,1,strlen((char*)mjl_buff),jptr);
-	fclose(jptr);
+	GLEFileIO fptr;
+	fptr.open("manip_.j1","ab");
+	if (!fptr.isOpen()) fner("Unable to append to journal file manip_.j1");
+	fptr.fwrite(mjl_buff, 1, strlen((char*)mjl_buff));
+	fptr.close();
 	mjl_buff[0] = 0;
 }
 

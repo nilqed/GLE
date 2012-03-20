@@ -993,15 +993,20 @@ void PSGLEDevice::read_psfont(void) {
 	fptr = fopen(fname.c_str(), "r");
 	if (fptr == 0) return; /* if not exists then don't bother */
 
-	for (fgets(inbuff,200,fptr);!feof(fptr);fgets(inbuff,200,fptr)) {
-		s = strchr(inbuff,'!');
-		if (s!=NULL) *s=0;
-		s = strtok(inbuff," \t,\n");
-		if (s!=NULL) if (*s!='\n') {
-			psf[i].sname = sdup(s);
-			s = strtok(0," \t,\n");
-			psf[i].lname = sdup(s);
-			i++;
+	if (fgets(inbuff, 200, fptr) != 0) {
+		while (!feof(fptr)) {
+			s = strchr(inbuff,'!');
+			if (s!=NULL) *s=0;
+			s = strtok(inbuff," \t,\n");
+			if (s!=NULL) if (*s!='\n') {
+				psf[i].sname = sdup(s);
+				s = strtok(0," \t,\n");
+				psf[i].lname = sdup(s);
+				i++;
+			}
+			if (fgets(inbuff, 200, fptr) == 0) {
+				break;
+			}
 		}
 	}
 	psf[i].sname = NULL;

@@ -1615,6 +1615,11 @@ int GLEFileIO::fgetc()
 	return ::fgetc(m_file);
 }
 
+void GLEFileIO::fputc(int value)
+{
+	::fputc(value, m_file);
+}
+
 int GLEFileIO::feof()
 {
 	return ::feof(m_file);
@@ -1630,10 +1635,34 @@ int GLEFileIO::fseek(long offset, int whence)
 	return ::fseek(m_file, offset, whence);
 }
 
+void GLEFileIO::fgetcstr(char* s) {
+	int i = fgetc();
+	if (i != 0) {
+		fread(s, 1, i);
+		s[i] = 0;
+	}
+}
+
+void GLEFileIO::fsendstr(const char *s) {
+	if (s == NULL) {
+		::fputc(0, m_file);
+	} else {
+		::fputc(strlen(s), m_file);
+		fwrite(s, 1, strlen(s));
+	}
+}
+
 int GLEReadConsoleInteger()
 {
-	int value = 0;
-	std::cin >> value;
-	return value;
+	char* ptr = 0;
+	std::string line;
+	getline(std::cin, line);
+	int result = strtol(line.c_str(), &ptr, 10);
+	if (ptr == 0 || *ptr != 0) {
+		return 0;
+	} else {
+		return result;
+	}
 }
+
 

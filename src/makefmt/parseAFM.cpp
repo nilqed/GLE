@@ -463,7 +463,7 @@ int initializeArray(FILE *fp, int *cwi)
                 keyword = linetoken(fp);
                 break;
             case CODE:
-                atoi(token(fp));
+                token(fp);
                 break;
             case XWIDTH:
                 width = atoi(token(fp));

@@ -180,9 +180,12 @@ public:
 	void fread(void *ptr, size_t size, size_t nmemb);
 	void fwrite(const void *ptr, size_t size, size_t nmemb);
 	int fgetc();
+	void fputc(int value);
 	int feof();
 	long ftell();
 	int fseek(long offset, int whence);
+	void fgetcstr(char* s);
+	void fsendstr(const char* s);
 
 private:
 	FILE* m_file;

@@ -68,7 +68,7 @@ extern int *gplen;     /* gpcode is a pointer to an array of int */
 
 string get_b_name(int jj) {
 	for (int i=0; op_begin[i].typ!=0; i++) {
-		if( op_begin[i].idx == jj){
+		if(int(op_begin[i].idx) == jj){
 			return string(op_begin[i].name);
 		}
 	}
