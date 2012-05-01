@@ -57,6 +57,8 @@
 #include "font.h"
 #include "cmdline.h"
 #include "config.h"
+#include "glearray.h"
+#include "polish.h"
 
 void g_graph_init();
 void dis_mat(char *s,double m[3][3]);
@@ -1871,11 +1873,9 @@ void g_marker(int i, double sz) {
 void g_marker2(int i, double sz, double dval) throw(ParserError) {
 	static double cx,cy,h,scale;
 	static double x1,y1,x2,y2;
-	int otype;
 	if (i<0) {
-		char *stk_str[6];
-		double stk[6];
-		int nstk=2;
+		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+		int nstk = 2;
 		++i;
 		i = -i;
 		if (mark_subp[i] == -1) {
@@ -1891,10 +1891,10 @@ void g_marker2(int i, double sz, double dval) throw(ParserError) {
 				g_throw_parser_error(err.str());
 			}
 		}
-		stk[1] = sz;
-		stk[2] = dval;
+		setEvalStack(stk.get(), 1, sz);
+		setEvalStack(stk.get(), 2, dval);
 		g_get_xy(&cx,&cy);
-		getGLERunInstance()->sub_call(mark_subp[i], (double *)&stk, (char **)&stk_str, &nstk, &otype);
+		getGLERunInstance()->sub_call(mark_subp[i], stk.get(), &nstk);
 		g_move(cx,cy);
 		return;
 	}

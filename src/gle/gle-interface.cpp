@@ -1047,7 +1047,7 @@ GLEScript* GLEObjectDOConstructor::getScript() {
 }
 
 void output_error(ParserError& err);
-void eval(int *pcode,int *cp,double *oval,const char **ostr,int *otyp) throw(ParserError);
+void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, const char **ostr, int *otyp) throw(ParserError);
 
 GLEObjectDO* GLEObjectDOConstructor::constructObject() {
 	GLEObjectDO* obj = new GLEObjectDO(this);
@@ -1711,7 +1711,8 @@ void GLEObjectDO::render() {
 		}
 		pcode.addFunction(sub->getIndex() + LOCAL_START_INDEX);
 		pcode.setInt(savelen, pcode.size() - savelen - 1);
-		eval((int*)&pcode[0], &cp, &oval, NULL, &otyp);
+		GLEArrayImpl* stk = 0;
+		eval(stk, (int*)&pcode[0], &cp, &oval, NULL, &otyp);
 		// g_flush() required to make sure that all line segments are output
 		g_flush();
 		measure.measureEnd();

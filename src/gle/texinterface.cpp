@@ -1524,14 +1524,14 @@ void begin_tex(GLERun* run, int *pln, int *pcode, int *cp) {
 	int ptr = *(pcode + (*cp)); /* add */
 	if (ptr) {
 		int zzcp = 0, otyp;
-		eval(pcode + (*cp) + ptr, &zzcp, &add, NULL, &otyp);
+		eval(run->getStack(), pcode + (*cp) + ptr, &zzcp, &add, NULL, &otyp);
 	}
 	(*cp) = (*cp) + 1;
 	ptr = *(pcode + (*cp)); /* name */
 	if (ptr) {
 		int zzcp = 0, otyp;
 		const char* ostr = NULL;
-		eval(pcode + (*cp) + ptr, &zzcp, &x, &ostr, &otyp);
+		eval(run->getStack(), pcode + (*cp) + ptr, &zzcp, &x, &ostr, &otyp);
 		name = ostr;
 	}
 	// Start with pcode from the next line

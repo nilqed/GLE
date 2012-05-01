@@ -41,9 +41,9 @@
 
 void sub_call(int idx,double *pval,char **pstr,int *npm, int *otyp) throw(ParserError);
 
-void eval(int *pcode,int *cp,double *oval,const char **ostr,int *otyp) throw(ParserError);
-GLESub* eval_subroutine_call(int *pcode, int *cp, int* otyp) throw(ParserError);
-void eval_do_object_block_call(GLESub* sub, GLEObjectDO* obj) throw(ParserError);
+void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, const char **ostr, int *otyp) throw(ParserError);
+GLESub* eval_subroutine_call(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
+void eval_do_object_block_call(GLEArrayImpl* stk, GLESub* sub, GLEObjectDO* obj) throw(ParserError);
 
 void clear_run();
 
@@ -72,6 +72,7 @@ protected:
 	GLEVars* m_Vars;
 	GLEBlocks* m_blockTypes;
 	GLERC<GLEObjectRepresention> m_CrObj;
+	GLERC<GLEArrayImpl> m_stack;
 	vector<GLELengthBlock> m_lengthBlocks;
 	bool m_AllowBeforeSize[GLE_KW_NB];
 public:
@@ -88,7 +89,7 @@ public:
 	void draw_object_dynamic(int idx, GLEObjectRepresention* newobj, GLEArrayImpl* path, GLEPoint* orig) throw (ParserError);
 	void draw_object(const string& name, const char* newname) throw (ParserError);
 	void sub_call(GLESub* sub, GLEArrayImpl* arguments = 0) throw(ParserError);
-	void sub_call(int idx, double *pval, char **pstr, int *npm, int *otyp) throw(ParserError);
+	void sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError);
 	void name_set(const char *n, double x1, double y1, double x2, double y2);
 	static GLEObjectRepresention* name_to_object(GLEObjectRepresention* obj, GLEArrayImpl* path, GLEJustify* just, unsigned int offs) throw (ParserError);
 	GLEObjectRepresention* name_to_object(const char *name, GLEJustify* just) throw(ParserError);
@@ -102,6 +103,7 @@ public:
 	void begin_length(int var);
 	void end_length();
 	GLESubMap* getSubroutines();
+	inline GLEArrayImpl* getStack() { return m_stack.get(); }
 	inline GLEObjectRepresention* getCRObjectRep() { return m_CrObj.get(); };
 	inline void setCRObjectRep(GLEObjectRepresention* obj) { m_CrObj.set(obj); }
 	inline GLEVars* getVars() { return m_Vars; }

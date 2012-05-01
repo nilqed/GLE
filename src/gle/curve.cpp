@@ -89,10 +89,11 @@ void cvec_list(int *pcode) {
 	ncvec = 0;
 	cvecx[0] = cx;
 	cvecy[0] = cy;
+	GLEArrayImpl* stk = 0;
 	while ( *(pcode + cp++)==111) {
 		if (ncvec>27) {gprint("Too many param in curve\n"); return; }
-		eval(pcode,&cp,&x1,NULL,&otyp);
-		eval(pcode,&cp,&y1,NULL,&otyp);
+		eval(stk,pcode,&cp,&x1,NULL,&otyp);
+		eval(stk,pcode,&cp,&y1,NULL,&otyp);
 		cvecx[++ncvec] = x1;
 		cvecx[ncvec] = cvecx[ncvec] + cvecx[ncvec-1];
 		cvecy[ncvec] = y1;

@@ -371,7 +371,8 @@ void GLEPolish::eval(const char *exp, double *x) throw(ParserError) {
 		err.setParserString(exp);
 		throw err;
 	}
-	::eval((int*)&pcode[0], &cp, x, NULL, &otyp);
+	GLEArrayImpl* stk = 0;
+	::eval(stk, (int*)&pcode[0], &cp, x, NULL, &otyp);
 }
 
 void GLEPolish::internalEval(const char *exp, double *x) throw(ParserError) {
@@ -379,7 +380,8 @@ void GLEPolish::internalEval(const char *exp, double *x) throw(ParserError) {
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
 	polish(exp, pcode, &rtype);
-	::eval((int*)&pcode[0], &cp, x, NULL, &otyp);
+	GLEArrayImpl* stk = 0;
+	::eval(stk, (int*)&pcode[0], &cp, x, NULL, &otyp);
 }
 
 void GLEPolish::internalEvalString(const char* exp, string* str) throw(ParserError) {
@@ -389,7 +391,8 @@ void GLEPolish::internalEvalString(const char* exp, string* str) throw(ParserErr
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
 	polish(exp, pcode, &rtype);
-	::eval((int*)&pcode[0], &cp, &oval, &ostr, &otyp);
+	GLEArrayImpl* stk = 0;
+	::eval(stk, (int*)&pcode[0], &cp, &oval, &ostr, &otyp);
 	if (otyp == 1) {
 		stringstream str_cnv;
 		str_cnv << oval;
@@ -412,7 +415,8 @@ void GLEPolish::eval_string(const char *exp, string *str, bool allownum) throw(P
 		err.setParserString(exp);
 		throw err;
 	}
-	::eval((int*)&pcode[0], &cp, &oval, &ostr, &otyp);
+	GLEArrayImpl* stk = 0;
+	::eval(stk, (int*)&pcode[0], &cp, &oval, &ostr, &otyp);
 	if (otyp == 1) {
 		if (allownum) {
 			stringstream str_cnv;
@@ -463,14 +467,16 @@ void polish(char *expr, GLEPcode& pcode, int *rtype) throw(ParserError) {
 
 void eval_pcode(GLEPcode& pcode, double* x) {
 	int otyp = 0, cp = 0;
-	::eval((int*)&pcode[0], &cp, x, NULL, &otyp);
+	GLEArrayImpl* stk = 0;
+	::eval(stk, (int*)&pcode[0], &cp, x, NULL, &otyp);
 }
 
 void eval_pcode_str(GLEPcode& pcode, string& x) {
 	const char* ostr;
 	int otyp = 1, cp = 0;
 	double value;
-	::eval((int*)&pcode[0], &cp, &value, &ostr, &otyp);
+	GLEArrayImpl* stk = 0;
+	::eval(stk, (int*)&pcode[0], &cp, &value, &ostr, &otyp);
 	x = ostr;
 }
 

@@ -45,6 +45,8 @@
 #include "keyword.h"
 #include "run.h"
 #include "cutils.h"
+#include "glearray.h"
+#include "polish.h"
 
 extern int **gpcode;   /* gpcode is a pointer to an array of poiter to int */
 extern int *gplen;     /* gpcode is a pointer to an array of int */
@@ -368,7 +370,7 @@ GLESub* sub_get(int idx) throw(ParserError) {
 extern int this_line;
 
 /* 	Run a user defined function  */
-void GLERun::sub_call(int idx, double *pval, char **pstr, int *npm, int *otyp) throw(ParserError) {
+void GLERun::sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError) {
 	// Save current return value
 	int save_return_type = return_type;
 	double save_return_value = return_value;
@@ -386,9 +388,9 @@ void GLERun::sub_call(int idx, double *pval, char **pstr, int *npm, int *otyp) t
 	for (int i = sub->getNbParam()-1; i >= 0; i--) {
 		int var = i | GLE_VAR_LOCAL_BIT;
 		if (sub->getParamType(i) == 1)  {
-			var_set(var, *(pval+(*npm)--));
+			var_set(var, getEvalStackDouble(stk, (*npm)--));
 		} else {
-			var_setstr(var, *(pstr+(*npm)--));
+			var_setstr(var, getEvalStackString(stk, (*npm)--));
 		}
 	}
 	// Run subroutine
@@ -408,13 +410,14 @@ void GLERun::sub_call(int idx, double *pval, char **pstr, int *npm, int *otyp) t
 	this_line = oldline;
 	// Return type of subroutine
 	if (return_type == 1) {
-		*(pval + ++(*npm)) = return_value;
-		*otyp = 1;
+		// FIXME STACK
+		//*(pval + ++(*npm)) = return_value;
+		//*otyp = 1;
 	} else {
-		(*npm) = (*npm) + 1;
+		/*(*npm) = (*npm) + 1;
 		if (pstr[(*npm)] != NULL) myfree(pstr[(*npm)]);
 		pstr[(*npm)] = sdup((char*)return_value_str.c_str());
-		*otyp = 2;
+		*otyp = 2;*/
 	}
 	// Restore var map
 	var_set_local_map(save_var_map);
@@ -500,8 +503,8 @@ void call_sub_byname(const string& name, double* args, int nb, const char* err_i
 			g_throw_parser_error(err.str());
 		}
 	}
-	int otype;
-	getGLERunInstance()->sub_call(idx, args, NULL, &nb, &otype);
+	GLEArrayImpl* stk = 0;
+	getGLERunInstance()->sub_call(idx, stk, &nb);
 }
 
 void call_sub_byid(int idx, double* args, int nb, const char* err_inf) throw(ParserError) {
@@ -521,8 +524,8 @@ void call_sub_byid(int idx, double* args, int nb, const char* err_inf) throw(Par
 			g_throw_parser_error(err.str());
 		}
 	}
-	int otype;
-	getGLERunInstance()->sub_call(idx, args, NULL, &nb, &otype);
+	GLEArrayImpl* stk = 0;
+	getGLERunInstance()->sub_call(idx, stk, &nb);
 }
 
 void sub_set_return(double d) {

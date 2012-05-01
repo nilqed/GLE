@@ -596,7 +596,8 @@ void GLEParser::evaluate_subroutine_arguments(GLESubCallInfo* info, GLEArrayImpl
 		const char* ostr;
 		int cp = 0;
 		int otyp = sub->getParamType(i);
-		::eval((int*)&pcode[0], &cp, &oval, &ostr, &otyp);
+		GLEArrayImpl* stk = 0;
+		::eval(stk, (int*)&pcode[0], &cp, &oval, &ostr, &otyp);
 		if (sub->getParamType(i) == 2) {
 			if (otyp == 1) {
 				ostringstream str_cnv;
@@ -896,14 +897,14 @@ GLERC<GLEColor> pass_color_list_or_fill(const string& color, IThrowsError* error
 
 void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
 	int vtype = 1;
-    int result = 0;
+	int result = 0;
 	string& token = m_tokens.next_token();
 	if (pass_color_hash_value(token, &result, &m_tokens)) {
 		GLEColor color;
 		color.setHexValue(result);
 		pcode.addDoubleExpression(color.getDoubleEncoding());
-    } else if (is_float(token)) {
-        string expr(string("CVTGRAY(") + token + ")");
+    	} else if (is_float(token)) {
+        	string expr(string("CVTGRAY(") + token + ")");
 		polish(expr.c_str(), pcode, &vtype);
 	} else if (str_i_str(token.c_str(), "RGB") != NULL) {
 		m_tokens.pushback_token();

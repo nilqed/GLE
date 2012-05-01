@@ -163,7 +163,8 @@ void begin_letz(int *pln, int *pcode, int *cp) throw(ParserError) {
 			var_set(yvar, y);
 			int mcp = 0;
 			double value;
-			eval(evalcode,&mcp,&value,NULL,&vtype);
+			GLEArrayImpl* stk = 0;
+			eval(stk,evalcode,&mcp,&value,NULL,&vtype);
 			fprintf(fp,"%g ",value);
 		}
 		fprintf(fp,"\n");

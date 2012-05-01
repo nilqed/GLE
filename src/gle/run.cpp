@@ -229,11 +229,11 @@ extern int gle_debug;
 int can_fillpath = false;
 vector<int> g_drobj;
 
-#define readval(x) eval(pcode,&cp,&x,&ostr,&otyp)
-#define readxy(x,y) {eval(pcode,&cp,&x,&ostr,&otyp);eval(pcode,&cp,&y,&ostr,&otyp);}
-#define readstr(s) {eval(pcode,&cp,&x,&ostr,&otyp); s = ostr;}
+#define readval(x) eval(getStack(),pcode,&cp,&x,&ostr,&otyp)
+#define readxy(x,y) {eval(getStack(),pcode,&cp,&x,&ostr,&otyp);eval(getStack(),pcode,&cp,&y,&ostr,&otyp);}
+#define readstr(s) {eval(getStack(),pcode,&cp,&x,&ostr,&otyp); s = ostr;}
 #define readlong(i) i = *(pcode+cp++)
-#define readvalp(x,p) {zzcp=0; eval(p,&zzcp,&x,&ostr,&otyp);}
+#define readvalp(x,p) {zzcp=0; eval(getStack(),p,&zzcp,&x,&ostr,&otyp);}
 
 #define PCODE_UNKNOWN_COMMAND 1
 
@@ -467,6 +467,7 @@ GLERun::GLERun(GLEScript* script, GLEFileLocation* outfile) {
 	m_OutFile = outfile;
 	m_Vars = getVarsInstance();
 	m_CrObj = new GLEObjectRepresention();
+	m_stack = new GLEArrayImpl();
 	m_blockTypes = 0;
 	for (int i = 0; i < GLE_KW_NB; i++) {
 		m_AllowBeforeSize[i] = false;
@@ -2050,8 +2051,9 @@ void GLERun::draw_object_static(const string& path, const string& name, int* pco
 	GLEMeasureBox measure;
 	measure.measureStart();
 	g_move(0.0, 0.0);
+	GLEArrayImpl* stk;
 	if (mkdrobjs) {
-		GLESub* sub = eval_subroutine_call(pcode, cp, &otyp);
+		GLESub* sub = eval_subroutine_call(stk, pcode, cp);
 		sub->setScript(getScript());
 		GLEObjectDOConstructor* cons = sub->getObjectDOConstructor();
 		GLEObjectDO objdo(cons);
@@ -2059,10 +2061,10 @@ void GLERun::draw_object_static(const string& path, const string& name, int* pco
 		GLEString* refpt = new GLEString();
 		refpt->join('.', a_path.get(), 1);
 		objdo.setRefPointString(refpt);
-		eval_do_object_block_call(sub, &objdo);
+		eval_do_object_block_call(stk, sub, &objdo);
 		handleNewDrawObject(&objdo, mkdrobjs, &orig);
 	} else {
-		eval(pcode, cp, &x, NULL, &otyp);
+		eval(getStack(), pcode, cp, &x, NULL, &otyp);
 	}
 	if (hasoffs) measure.measureEndIgnore();
 	else measure.measureEnd();
@@ -2086,7 +2088,7 @@ void GLERun::draw_object_static(const string& path, const string& name, int* pco
 			g_translate(transl.getX(), transl.getY());
 			*cp = cp_backup;
 			g_move(0.0, 0.0);
-			eval(pcode, cp, &x, NULL, &otyp);
+			eval(getStack(), pcode, cp, &x, NULL, &otyp);
 			g_grestore();
 		} else {
 			/* dummy device, just update bounds */

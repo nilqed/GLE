@@ -3724,8 +3724,7 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 		}
 		int otype;
 		int nstk = 1;
-		char *stk_str[6];
-		double stk[6];
+		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 		colortyp colvar;
 		union {double d; int l[1];} both;
 		for (int i = img_hi-1; i >= 0; i--) {
@@ -3736,9 +3735,9 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 				} else {
 					zvalue = (ipol.ipol(j,i) - zmin) / scale;
 				}
-				stk[1] = zvalue;
-				getGLERunInstance()->sub_call(sub->getIndex(), (double *)&stk, (char **)&stk_str, &nstk, &otype);
-				both.d = stk[1];
+				setEvalStack(stk.get(), 1, zvalue);
+				getGLERunInstance()->sub_call(sub->getIndex(), stk.get(), &nstk);
+				both.d = getEvalStackDouble(stk.get(), 1);
 				colvar.l = both.l[0];
 				scanline[pos++] = colvar.b[B_R];
 				scanline[pos++] = colvar.b[B_G];
@@ -3828,8 +3827,7 @@ void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByte
 		}
 		int otype;
 		int nstk = 1;
-		char *stk_str[6];
-		double stk[6];
+		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 		colortyp colvar;
 		union {double d; int l[1];} both;
 		for (int i = 0; i < img_hi; i++) {
@@ -3846,9 +3844,9 @@ void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByte
 				} else {
 					zvalue = scale * (zvalue - delta);
 				}
-				stk[1] = zvalue;
-				getGLERunInstance()->sub_call(sub->getIndex(), (double *)&stk, (char **)&stk_str, &nstk, &otype);
-				both.d = stk[1];
+				setEvalStack(stk.get(), 1, zvalue);
+				getGLERunInstance()->sub_call(sub->getIndex(), stk.get(), &nstk);
+				both.d = getEvalStackDouble(stk.get(), 1);
 				colvar.l = both.l[0];
 				scanline[pos++] = colvar.b[B_R];
 				scanline[pos++] = colvar.b[B_G];
