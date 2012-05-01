@@ -593,7 +593,7 @@ void GLEParser::evaluate_subroutine_arguments(GLESubCallInfo* info, GLEArrayImpl
 		GLEPcode pcode(&pcodeList);
 		gen_subroutine_call_polish_arg(info, i, pcode);
 		double oval;
-		const char* ostr;
+		GLEString* ostr;
 		int cp = 0;
 		int otyp = sub->getParamType(i);
 		GLEArrayImpl* stk = 0;
@@ -604,7 +604,7 @@ void GLEParser::evaluate_subroutine_arguments(GLESubCallInfo* info, GLEArrayImpl
 				str_cnv << oval;
 				arguments->setObject(i, new GLEString(str_cnv.str()));
 			} else {
-				arguments->setObject(i, new GLEString(ostr));
+				arguments->setObject(i, ostr);
 			}
 		} else {
 			arguments->setDouble(i, oval);

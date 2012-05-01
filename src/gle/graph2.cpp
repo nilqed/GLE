@@ -1368,7 +1368,7 @@ double get_next_exp(TOKENS tk,int ntok,int *curtok) {
 void get_next_exp_string(TOKENS tk, int ntok, int *curtok, string* res) {
 	(*curtok)++;
 	if ((*curtok) <= ntok) {
-		polish_eval_string(tk[*curtok],res);
+		polish_eval_string(tk[*curtok], res);
 	} else {
 		*res = "";
 	}
@@ -3722,7 +3722,6 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 			err << "palette subroutine '" << m_map->getPaletteFunction() << "' should take one argument";
 			g_throw_parser_error(err.str());
 		}
-		int otype;
 		int nstk = 1;
 		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 		colortyp colvar;
@@ -3825,7 +3824,6 @@ void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByte
 			err << "palette subroutine '" << m_map->getPaletteFunction() << "' should take one argument";
 			g_throw_parser_error(err.str());
 		}
-		int otype;
 		int nstk = 1;
 		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 		colortyp colvar;

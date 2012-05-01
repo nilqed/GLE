@@ -122,7 +122,7 @@ public:
 	void polish(const char *expr, GLEPcode& pcode, int *rtype) throw(ParserError);
 	void polish(GLEPcode& pcode, int *rtype) throw(ParserError);
 	void eval(const char *exp, double *x) throw(ParserError);
-	void eval_string(const char *exp, string *str, bool allownum = false) throw(ParserError);
+	void eval_string(GLEArrayImpl* stk, const char *exp, string *str, bool allownum = false) throw(ParserError);
 	void internalEval(const char *exp, double *x) throw(ParserError);
    void internalEvalString(const char* exp, string* str) throw(ParserError);
 	void get_params(GLEPcode& pcode, int np, int* plist, const string& name) throw(ParserError);

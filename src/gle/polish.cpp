@@ -385,8 +385,8 @@ void GLEPolish::internalEval(const char *exp, double *x) throw(ParserError) {
 }
 
 void GLEPolish::internalEvalString(const char* exp, string* str) throw(ParserError) {
-   double oval;
-	const char* ostr;
+    double oval;
+	GLEString* ostr;
 	int rtype = 2, otyp = 0, cp = 0;
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
@@ -398,13 +398,11 @@ void GLEPolish::internalEvalString(const char* exp, string* str) throw(ParserErr
 		str_cnv << oval;
 		*str = str_cnv.str();
 	} else {
-		*str = ostr;
+		*str = ostr->toUTF8();
 	}
 }
 
-void GLEPolish::eval_string(const char *exp, string *str, bool allownum) throw(ParserError) {
-	const char* ostr;
-	double oval = 0.0;
+void GLEPolish::eval_string(GLEArrayImpl* stk, const char *exp, string *str, bool allownum) throw(ParserError) {
 	int rtype = allownum ? 0 : 2;
 	int otyp = 0, cp = 0;
 	GLEPcodeList pc_list;
@@ -415,19 +413,8 @@ void GLEPolish::eval_string(const char *exp, string *str, bool allownum) throw(P
 		err.setParserString(exp);
 		throw err;
 	}
-	GLEArrayImpl* stk = 0;
-	::eval(stk, (int*)&pcode[0], &cp, &oval, &ostr, &otyp);
-	if (otyp == 1) {
-		if (allownum) {
-			stringstream str_cnv;
-			str_cnv << oval;
-			*str = str_cnv.str();
-		} else {
-			throw error(string("expression does not evaluate to string '")+exp+"'");
-		}
-	} else {
-		*str = ostr;
-	}
+	GLERC<GLEString> result(evalStr(stk, (int*)&pcode[0], &cp, allownum));
+	*str = result->toUTF8();
 }
 
 bool valid_unquoted_string(const string& str) {
@@ -472,12 +459,12 @@ void eval_pcode(GLEPcode& pcode, double* x) {
 }
 
 void eval_pcode_str(GLEPcode& pcode, string& x) {
-	const char* ostr;
+	GLEString* ostr;
 	int otyp = 1, cp = 0;
 	double value;
 	GLEArrayImpl* stk = 0;
 	::eval(stk, (int*)&pcode[0], &cp, &value, &ostr, &otyp);
-	x = ostr;
+	x = ostr->toUTF8();
 }
 
 void polish(char *expr, char *pcode, int *plen, int *rtype) throw(ParserError) {
@@ -503,7 +490,8 @@ void polish_eval(char *exp, double *x) throw(ParserError) {
 
 void polish_eval_string(const char *exp, string *str, bool allownum) throw(ParserError) {
 	GLEPolish* polish = get_global_polish();
-	if (polish != NULL) polish->eval_string(exp, str, allownum);
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	if (polish != NULL) polish->eval_string(stk.get(), exp, str, allownum);
 }
 
 GLEPcode::GLEPcode(GLEPcodeList* list) {

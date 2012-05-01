@@ -296,8 +296,8 @@ void g_resetfont() {
 	g.dev->resetfont();
 }
 
-void g_dfont(const char *s) {
-	g.dev->dfont((char*)s);
+void g_dfont(const std::string& s) {
+	g.dev->dfont((char*)s.c_str());
 }
 
 GLERC<GLEColor> g_get_fill_clear() {
@@ -2137,6 +2137,10 @@ int check_dev_type_ps(double wx, double wy) {
 	} else {
 		return 1;
 	}
+}
+
+int g_bitmap_string_to_type(const std::string& stype) {
+	return g_bitmap_string_to_type(stype.c_str());
 }
 
 int g_bitmap_string_to_type(const char* stype) {

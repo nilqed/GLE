@@ -238,6 +238,7 @@ GLECore* g_get_core();
 //
 void g_bitmap(string& fname, double wx, double wy, int type) throw(ParserError);
 void g_bitmap_info(string& fname, int xvar, int yvar, int type) throw(ParserError);
+int g_bitmap_string_to_type(const std::string& stype);
 int g_bitmap_string_to_type(const char* stype);
 string g_bitmap_supported_types();
 
@@ -373,7 +374,7 @@ void g_curve(int *pcode);
 void g_dbezier(dbl x1,dbl y1,dbl x2,dbl y2,dbl x3,dbl y3);
 void g_dev(double x, double y,double *xd,double *yd);
 void g_devcmd(const char *s);
-void g_dfont(const char *s);
+void g_dfont(const std::string& s);
 void g_dline(double x, double y);
 void g_dmove(double x, double y);
 void g_dojust(dbl *x1, dbl *y1, dbl *x2, dbl *y2, int jj);

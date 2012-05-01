@@ -41,7 +41,9 @@
 
 void sub_call(int idx,double *pval,char **pstr,int *npm, int *otyp) throw(ParserError);
 
-void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, const char **ostr, int *otyp) throw(ParserError);
+void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError);
+GLERC<GLEString> evalStr(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOther) throw(ParserError);
+GLEMemoryCell* evalMemoryCell(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
 GLESub* eval_subroutine_call(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
 void eval_do_object_block_call(GLEArrayImpl* stk, GLESub* sub, GLEObjectDO* obj) throw(ParserError);
 
@@ -82,7 +84,7 @@ public:
 	GLEBlocks* getBlockTypes();
 	void setDeviceIsOpen(bool open);
 	void do_pcode(GLESourceLine &SLine,int *srclin, int *pcode, int plen, int *pend, bool& mkdrobjs) throw(ParserError);
-	void begin_object(const char* name, GLESub* sub) throw (ParserError);
+	void begin_object(const std::string& name, GLESub* sub) throw (ParserError);
 	void end_object() throw (ParserError);
 	void draw_object_static(const string& path, const string& name, int* pcode, int* cp, bool mkdrobjs) throw (ParserError);
 	void draw_object_subbyname(GLESub* sub, GLEObjectRepresention* newobj, GLEArrayImpl* path, GLEPoint* orig) throw (ParserError);
@@ -90,12 +92,12 @@ public:
 	void draw_object(const string& name, const char* newname) throw (ParserError);
 	void sub_call(GLESub* sub, GLEArrayImpl* arguments = 0) throw(ParserError);
 	void sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError);
-	void name_set(const char *n, double x1, double y1, double x2, double y2);
+	void name_set(GLEString* name, double x1, double y1, double x2, double y2);
 	static GLEObjectRepresention* name_to_object(GLEObjectRepresention* obj, GLEArrayImpl* path, GLEJustify* just, unsigned int offs) throw (ParserError);
 	GLEObjectRepresention* name_to_object(const char *name, GLEJustify* just) throw(ParserError);
 	bool is_name(GLEObjectRepresention* obj, GLEArrayImpl* path, unsigned int offs);
 	bool is_name(const char *name);
-	void name_to_point(const char *name, GLEPoint* point) throw(ParserError);
+	void name_to_point(const std::string& name, GLEPoint* point) throw(ParserError);
 	void name_to_size(const char *name, double *wd, double *hi) throw(ParserError);
 	void name_join(const char *n1, const char *n2, int marrow, double a1, double a2, double d1, double d2)  throw(ParserError);
 	GLEStoredBox* last_box() throw (ParserError);

@@ -58,7 +58,7 @@ GLESubMap g_Subroutines;
 
 int return_type = 1;
 double return_value = 0.0;
-string return_value_str;
+GLERC<GLEString> return_value_str;
 vector<string> return_str_stack;
 
 GLESubArgNames::GLESubArgNames() {
@@ -377,7 +377,7 @@ void GLERun::sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError) {
 	if (return_type == 2) {
 		// Efficiency of this will be improved if RefCount objects are introduced
 		// see glearray.cpp (Jan Struyf)
-		return_str_stack.push_back(return_value_str);
+		// FIXME STACK
 	}
 	GLESub* sub = sub_get(idx);
 	// Set local variable map
@@ -426,8 +426,6 @@ void GLERun::sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError) {
 	if (return_type == 1) {
 		return_value = save_return_value;
 	} else {
-		return_value_str = return_str_stack.back();
-		return_str_stack.pop_back();
 	}
 	var_free_local();
 }
@@ -437,11 +435,6 @@ void GLERun::sub_call(GLESub* sub, GLEArrayImpl* arguments) throw(ParserError) {
 	// Save current return value
 	int save_return_type = return_type;
 	double save_return_value = return_value;
-	if (return_type == 2) {
-		// Efficiency of this will be improved if RefCount objects are introduced
-		// see glearray.cpp (Jan Struyf)
-		return_str_stack.push_back(return_value_str);
-	}
 	// Set local variable map
 	GLEVarMap* sub_map = sub->getLocalVars();
 	GLEVarMap* save_var_map = var_swap_local_map(sub_map);
@@ -472,12 +465,7 @@ void GLERun::sub_call(GLESub* sub, GLEArrayImpl* arguments) throw(ParserError) {
 	var_set_local_map(save_var_map);
 	// Get saved return values back
 	return_type = save_return_type;
-	if (return_type == 1) {
-		return_value = save_return_value;
-	} else {
-		return_value_str = return_str_stack.back();
-		return_str_stack.pop_back();
-	}
+	return_value = save_return_value;
 	var_free_local();
 }
 
@@ -533,7 +521,7 @@ void sub_set_return(double d) {
 	return_value = d;
 }
 
-void sub_set_return_str(const char* s) {
+void sub_set_return_str(GLEString* s) {
 	return_type = 2;
 	return_value_str = s;
 }

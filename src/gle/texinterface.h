@@ -221,7 +221,7 @@ public:
 	~TeXInterface();
 	TeXObject* draw(const char* str) throw(ParserError);
 	TeXObject* drawUTF8(const char* str, GLERectangle* box = NULL) throw(ParserError);
-	TeXObject* draw(const char* str, GLERectangle* box) throw(ParserError);
+	TeXObject* draw(const std::string& str, GLERectangle* box) throw(ParserError);
 	TeXObject* draw(const char* str, int nblines, GLERectangle* box = NULL) throw(ParserError);
 	TeXObject* draw(const char* str, TeXObjectInfo& info, int nblines, GLERectangle* box = NULL) throw(ParserError);
 	TeXObject* drawObj(TeXHashObject* hobj, TeXObjectInfo& info, GLERectangle* box = NULL) throw(ParserError);

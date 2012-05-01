@@ -41,6 +41,34 @@
 #include "var.h"
 #include "core.h"
 
+const char* gle_object_type_to_string(GLEObjectType type) {
+	switch (type) {
+	case GLEObjectTypeBool:
+		return "bool";
+	case GLEObjectTypeInt:
+		return "integer";
+	case GLEObjectTypeDouble:
+		return "double";
+	case GLEObjectTypeString:
+		return "string";
+	case GLEObjectTypeArray:
+		return "array";
+	case GLEObjectTypeColor:
+		return "color";
+	case GLEObjectTypeDynamicSub:
+		return "subroutine";
+	case GLEObjectTypeObjectRep:
+		return "object";
+	case GLEObjectTypePoint:
+		return "point";
+	case GLEObjectTypeClassDefinition:
+		return "definition";
+	case GLEObjectTypeClassInstance:
+		return "instance";
+	}
+	return "unknown";
+}
+
 bool gle_memory_cell_equals(GLEMemoryCell* a, GLEMemoryCell* b) {
 	if (a->Type != b->Type) return false;
 	switch (a->Type) {

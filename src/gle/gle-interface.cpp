@@ -726,7 +726,8 @@ void GLEInterface::evalString(const char* str, GLEScript* script) {
 		GLEPolish polish;
 		polish.initTokenizer();
 		string value;
-		polish.eval_string(str, &value, true);
+		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+		polish.eval_string(stk.get(), str, &value, true);
 		g_message_first_newline(false);
 		g_message(value);
 	} catch (ParserError err) {
@@ -1047,7 +1048,7 @@ GLEScript* GLEObjectDOConstructor::getScript() {
 }
 
 void output_error(ParserError& err);
-void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, const char **ostr, int *otyp) throw(ParserError);
+void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError);
 
 GLEObjectDO* GLEObjectDOConstructor::constructObject() {
 	GLEObjectDO* obj = new GLEObjectDO(this);

@@ -42,6 +42,7 @@
 #include "tokens/Tokenizer.h"
 
 class GLEColor;
+class GLEString;
 
 #define SC (char *)
 #define UC (unsigned char *)
@@ -122,7 +123,7 @@ void spush(int v);
 void sub_clear(bool undef);
 void sub_get_startend(int idx, int *ss, int *ee);
 void sub_set_return(double d);
-void sub_set_return_str(const char* s);
+void sub_set_return_str(GLEString* s);
 void subscript();
 void text_block(const string& s,double width,int justify);
 void text_block(const string& s,double width,int justify, int innerjust);

@@ -78,7 +78,7 @@ string get_b_name(int jj) {
 void text_def(uchar *ss);
 void run_bigfile(char *ss);
 
-void begin_config(const char* block, int *pln, int *pcode, int *cp);
+void begin_config(const std::string& block, int *pln, int *pcode, int *cp);
 void begin_tex_preamble(int *pln, int *pcode, int *cp);
 void begin_tex(GLERun* run, int *pln, int *pcode, int *cp);
 void begin_surface(int *pln, int *pcode, int *cp) throw(ParserError);
@@ -101,27 +101,24 @@ public:
 	inline GLERC<GLEColor> getFill() const { return m_Fill; }
 	inline bool isRound() const { return m_IsRound; }
 	inline double getRound() const { return m_Round; }
-	inline void setNamePtr(const char* name) { m_Name = name; }
-	inline bool hasName() const { return m_Name != NULL; }
-	inline const char* getName() const { return m_Name; }
+	inline void setName(GLEString* name) { m_name = name; }
+	inline bool hasName() const { return !m_name.isNull(); }
+	inline GLEString* getName() const { return m_name.get(); }
 	inline void setAdd(double add) { m_Add = add; }
 	inline double getAdd() const { return m_Add; }
 protected:
-	const char* m_Name; // Should be replaced by string* later on
 	bool m_HasStroke;
 	bool m_HasReverse;
 	double m_Add;
 	bool m_IsRound;
 	double m_Round;
+	GLERC<GLEString> m_name;
 	GLERC<GLEColor> m_Fill;
 };
 
 class GLEStoredBox : public GLEBox {
 public:
 	GLEStoredBox();
-	void setName(const char* name);
-	inline bool hasName() const { return m_HasName; }
-	inline const string& getName() const { return m_Name; }
 	inline bool isSecondPass() const { return m_SecondPass; }
 	inline void setSecondPass(bool second) { m_SecondPass = second; }
 	inline GLEDevice* getDevice() { return m_Device; }
@@ -135,8 +132,6 @@ public:
 private:
 	GLERectangle m_SaveBounds;
 	GLEPoint m_Orig;
-	string m_Name;
-	bool m_HasName;
 	bool m_SecondPass;
 	GLEDevice* m_Device;
 	GLERC<GLEObjectRepresention> m_Object;
@@ -187,9 +182,9 @@ public:
 	void gotoNewLine() throw(ParserError);
 	void resetLang();
 	void setLangChars(int type, const char* str);
-	inline void setCommentChars(const char* str) { setLangChars(0, str); }
-	inline void setSpaceTokens(const char* str) { setLangChars(1, str); }
-	inline void setSingleCharTokens(const char* str) { setLangChars(2, str); }
+	inline void setCommentChars(const std::string& str) { setLangChars(0, str.c_str()); }
+	inline void setSpaceTokens(const std::string& str) { setLangChars(1, str.c_str()); }
+	inline void setSingleCharTokens(const std::string& str) { setLangChars(2, str.c_str()); }
 	inline bool isRead() { return m_ReadWrite; }
 	inline void setRdWr(bool rd) { m_ReadWrite = rd; }
 	inline FILE* getOutput() { return m_Output; }
@@ -231,7 +226,7 @@ vector<int> g_drobj;
 
 #define readval(x) eval(getStack(),pcode,&cp,&x,&ostr,&otyp)
 #define readxy(x,y) {eval(getStack(),pcode,&cp,&x,&ostr,&otyp);eval(getStack(),pcode,&cp,&y,&ostr,&otyp);}
-#define readstr(s) {eval(getStack(),pcode,&cp,&x,&ostr,&otyp); s = ostr;}
+#define readstr(s) {eval(getStack(),pcode,&cp,&x,&ostr,&otyp); s = ostr->toUTF8();}
 #define readlong(i) i = *(pcode+cp++)
 #define readvalp(x,p) {zzcp=0; eval(getStack(),p,&zzcp,&x,&ostr,&otyp);}
 
@@ -530,11 +525,13 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 /* plne =   a pointer to the length of the pcode output */
 	union {double d; int l; int ll[2];} both;
 	int otyp,cp=*pend,i,zzcp;
-	const char* ostr;
+	GLEString* ostr;
+	GLERC<GLEString> gstr;
 	string temp_str;
 	double x,y,ox,oy,x1,y1,x2,y2,x3,y3,a1,a2,r,z,rx,ry;
 	int t,j,jj,jj2,ptr,ptr_fill,mask_just,mask_nostroke,marrow;
-	static char ss[255],ss2[80],ss1[90];
+	static char ss[255];
+    string ss1, ss2;
 	static bool jump_back = false;
 	GLEPoint orig;
 	GLERC<GLEColor> colorBackup;
@@ -649,9 +646,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			break;
 		  case 51: /* Assignment  var=exp */
 			readlong(jj);
-			readval(x);
-			if (otyp==1) var_set(jj,x);
-			if (otyp==2) var_setstr(jj, (char*)ostr);
+			getVars()->set(jj, evalMemoryCell(getStack(), pcode, &cp));
 			break;
 		  case 5:  /* BEGIN box | path | scale | rotate | EXTERNAL */
 			g_flush();
@@ -784,7 +779,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					break;
 				case 22: /* config */
 					readval(z);
-					begin_config(ostr,srclin,pcode,&cp);
+					begin_config(ostr->toUTF8(), srclin, pcode, &cp);
 					break;
 				case 23: /* tex preamble */
 					begin_tex_preamble(srclin,pcode,&cp);
@@ -814,7 +809,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 						}
 						readlong(jj);
 						readval(z);
-						begin_object(ostr, getSubroutines()->get(jj));
+						begin_object(ostr->toUTF8(), getSubroutines()->get(jj));
 					} else {
 						/* statical object - identical to sub */
 						readlong(jj);
@@ -867,7 +862,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				ptr = *(pcode + ++cp);
 				if (ptr) {
 					readvalp(z,pcode+cp+ptr);
-					box.setNamePtr(ostr);
+					box.setName(ostr);
 				}
 				box.draw(this, ox, oy, x, y);
 			}
@@ -984,7 +979,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			break;
 		  case 12: /* DFONT */
 			readval(x);
-			g_dfont(ostr);
+			g_dfont(ostr->toUTF8());
 			break;
 		  case 14: /* END */
 			readlong(jj);
@@ -1121,7 +1116,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 						temp_str += ss;
 					} else {
 						readval(x);
-						temp_str += ostr;
+						temp_str += ostr->toUTF8();
 					}
 				}
 				if (p==64) temp_str += "\n";
@@ -1149,11 +1144,11 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				GLEFile* file = g_Files[chn];
 				file->resetLang();
 				readval(x);
-				file->setCommentChars(ostr);
+				file->setCommentChars(ostr->toUTF8());
 				readval(x);
-				file->setSpaceTokens(ostr);
+				file->setSpaceTokens(ostr->toUTF8());
 				readval(x);
-				file->setSingleCharTokens(ostr);
+				file->setSingleCharTokens(ostr->toUTF8());
 			} break;
 		  case 77: /* papersize */
   			if (done_open) error_before_drawing_cmds("papersize");
@@ -1225,18 +1220,18 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  case 25: /* JOIN  str1,type,str2 */
 			{
 				readval(z);
-				strcpy(ss1,ostr);
+				ss1 = ostr->toUTF8();
 				readlong(jj);
 				readval(z);
-				strcpy(ss2,ostr);
+				ss2 = ostr->toUTF8();
 				ptr = *(pcode + cp); /* curve angle1 angle2 d1 d2 */
 				if (ptr) {
 					cp += ptr;
 					readxy(x2, y2);
 					readxy(x3, y3);
-					name_join(ss1, ss2, (int)jj, x2, y2, x3, y3);
+					name_join(ss1.c_str(), ss2.c_str(), (int)jj, x2, y2, x3, y3);
 				} else {
-					name_join(ss1, ss2, (int)jj, 0, 0, 0, 0);
+					name_join(ss1.c_str(), ss2.c_str(), (int)jj, 0, 0, 0, 0);
 				}
 			}
 			break;
@@ -1254,7 +1249,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  	{
 		  		readval(z);
 		  		GLEPoint pt;
-		  		name_to_point(ostr, &pt);
+		  		name_to_point(ostr->toUTF8(), &pt);
 		  		g_move(pt);
 		  		break;
 		  	}
@@ -1326,7 +1321,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				ptr = *(pcode + cp); /* type */
 				if (ptr) {
 					readvalp(z, pcode + cp + ptr);
-					bm_type = g_bitmap_string_to_type(ostr);
+					bm_type = g_bitmap_string_to_type(ostr->toUTF8());
 				}
 				g_bitmap(temp_str, x1, y1, bm_type);
 			}
@@ -1339,7 +1334,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				ptr = *(pcode + cp); /* type */
 				if (ptr) {
 					readvalp(z, pcode + cp + ptr);
-					bm_type = g_bitmap_string_to_type(ostr);
+					bm_type = g_bitmap_string_to_type(ostr->toUTF8());
 				}
 				g_bitmap_info(temp_str, jj, jj2, bm_type);
 			}
@@ -1348,7 +1343,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  	{
 				GLEColorMap map;
 				readval(x);
-				map.setFunction(ostr);
+				map.setFunction(ostr->toUTF8());
 				readxy(x1, y1);
 				map.setXRange(x1, y1);
 				readxy(x1, y1);
@@ -1364,7 +1359,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				ptr = *(pcode + ++cp); /* palette */
 				if (ptr) {
 					readvalp(z, pcode + cp + ptr);
-					temp_str = ostr;
+					temp_str = ostr->toUTF8();
 					// because palette can be subroutine name!
 					str_to_uppercase(temp_str);
 					map.setPalette(temp_str.c_str());
@@ -1498,15 +1493,18 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					break;
 				  case OP_SET_FILL_METHOD:
 					readval(x);
-				  	g_set_fill_method(ostr);
+					ss1 = ostr->toUTF8();
+				  	g_set_fill_method(ss1.c_str());
 				  	break;
 				  case OP_SET_ARROW_STYLE:
 					readval(x);
-				  	g_set_arrow_style(ostr);
+					ss1 = ostr->toUTF8();
+				  	g_set_arrow_style(ss1.c_str());
 				  	break;
 				  case OP_SET_ARROW_TIP:
 					readval(x);
-					g_set_arrow_tip(ostr);
+					ss1 = ostr->toUTF8();
+					g_set_arrow_tip(ss1.c_str());
 					break;
 				  case OP_SET_ARROW_SIZE:
 				  	readval(x);
@@ -1518,11 +1516,13 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					break;
 				  case OP_SET_IMAGE_FORMAT:
 					readval(x);
-					g_set_pdf_image_format(ostr);
+					ss1 = ostr->toUTF8();
+					g_set_pdf_image_format(ss1.c_str());
 					break;
 				  case OP_SET_TEX_SCALE:
 					readval(x);
-					g_set_tex_scale(ostr);
+					ss1 = ostr->toUTF8();
+					g_set_tex_scale(ss1.c_str());
 					break;
 				  case OP_SET_TEX_LABELS:
 				  	readval(x);
@@ -1572,18 +1572,18 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			if (jj == 0) {
 				// draw static object
 				readval(z);
-				string path = ostr;
+				string path = ostr->toUTF8();
 				readval(z);
-				string name = ostr;
+				string name = ostr->toUTF8();
 				draw_object_static(path, name, pcode, &cp, mkdrobjs);
 			} else {
 				// draw dynamic object (as before?)
 				readval(z);
-				temp_str = ostr;
+				temp_str = ostr->toUTF8();
 				ptr = *(pcode + ++cp); /* name */
 				if (ptr) {
 					readvalp(z, pcode + cp + ptr);
-					string obj_name = ostr;
+					string obj_name = ostr->toUTF8();
 					draw_object(temp_str, obj_name.c_str());
 				} else {
 					draw_object(temp_str, NULL);
@@ -1616,16 +1616,15 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			temp_str = "";
 			while (cp < cmd_plen) {
 				readlong(t);
-				if (t!=49 && t!=32) gprint("WRITE, PCODE ERROR, %d  cp %d plen %d\n",t,cp,plen);
-				readlong(t);
-				if (t == 1) {
-					readval(x);
-					sprintf(ss,"%g ",x);
-					temp_str += ss;
-				} else {
-					readval(x);
-					temp_str += ostr;
+				if (t != 49 && t != 32) {
+					g_throw_parser_error("pcode error in print/write");
 				}
+				readlong(t);
+				gstr = evalStr(getStack(), pcode, &cp, true);
+				if (!temp_str.empty()) {
+					temp_str += " ";
+				}
+				temp_str += gstr->toUTF8();
 			}
 			if (p == 49) {
 				/* WRITE */
@@ -1650,7 +1649,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				x = 0.0;
 				readval(z);
 				GLERectangle box;
-				TeXInterface::getInstance()->draw(ostr, &box);
+				TeXInterface::getInstance()->draw(ostr->toUTF8(), &box);
 				ptr = *(pcode + cp); /* add */
 				if (ptr) {
 					readvalp(x, pcode + cp + ptr);
@@ -1685,7 +1684,6 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 }
 
 GLEBox::GLEBox():
-	m_Name(NULL),
 	m_HasStroke(true),
 	m_HasReverse(false),
 	m_Add(0.0),
@@ -1756,21 +1754,15 @@ void GLEBox::draw(GLERun* run, double x1, double y1, double x2, double y2) {
 	}
 	g_set_fill(cur_fill);
 	if (hasName()) {
-		run->name_set((char*)getName(), rect.getXMin(), rect.getYMin(), rect.getXMax(), rect.getYMax());
+		run->name_set(getName(), rect.getXMin(), rect.getYMin(), rect.getXMax(), rect.getYMax());
 	}
 	g_move(ox, oy);
 }
 
 GLEStoredBox::GLEStoredBox():
-	m_HasName(false),
 	m_SecondPass(false),
 	m_Device(0)
 {
-}
-
-void GLEStoredBox::setName(const char* name) {
-	m_HasName = true;
-	m_Name = name;
 }
 
 GLEStoredBox* box_start() {
@@ -1811,7 +1803,7 @@ bool GLERun::box_end() throw (ParserError) {
 	if (box->getDevice() != NULL) {
 		g_restore_device(box->getDevice());
 	}
-	box->setNamePtr(box->hasName() ? box->getName().c_str() : NULL);
+	box->setName(box->hasName() ? box->getName() : NULL);
 	box->draw(this, x1, y1, x2, y2);
 	if (box->getSaveBounds()->isValid()) {
 		g_update_bounds(box->getSaveBounds());
@@ -1828,12 +1820,11 @@ bool GLERun::box_end() throw (ParserError) {
 
 void nm_adjust(GLEJustify jj, double *sx, double *sy, double ex, double ey, GLERectangle* r);
 
-void GLERun::name_set(const char *n, double x1, double y1, double x2, double y2) {
-	GLERC<GLEString> name(new GLEString(n));
+void GLERun::name_set(GLEString* name, double x1, double y1, double x2, double y2) {
 	GLERC<GLEObjectRepresention> obj(new GLEObjectRepresention());
 	obj->getRectangle()->setDimensions(x1, y1, x2, y2);
 	g_dev(obj->getRectangle());
-	if (!getCRObjectRep()->setChildObject(name.get(), obj.get())) {
+	if (!getCRObjectRep()->setChildObject(name, obj.get())) {
 		char ostr[80];
 		int idx, type;
 		name->toUTF8(ostr);
@@ -1970,9 +1961,9 @@ GLEObjectRepresention* GLERun::name_to_object(const char *name, GLEJustify* just
 	return NULL;
 }
 
-void GLERun::name_to_point(const char *name, GLEPoint* point) throw(ParserError) {
+void GLERun::name_to_point(const std::string& name, GLEPoint* point) throw(ParserError) {
 	GLEJustify just;
-	GLEObjectRepresention* obj = name_to_object(name, &just);
+	GLEObjectRepresention* obj = name_to_object(name.c_str(), &just);
 	if (obj != NULL) {
 		GLERectangle rect;
 		rect.copy(obj->getRectangle());
@@ -2276,7 +2267,7 @@ void GLERun::draw_object(const string& path, const char* newname) throw (ParserE
 	g_move(orig);
 }
 
-void GLERun::begin_object(const char* name, GLESub* sub) throw (ParserError) {
+void GLERun::begin_object(const std::string& name, GLESub* sub) throw (ParserError) {
 	GLEStoredBox* box = box_start();
 	box->setStroke(false);
 	box->setObjectRep(getCRObjectRep());
@@ -2286,7 +2277,7 @@ void GLERun::begin_object(const char* name, GLESub* sub) throw (ParserError) {
 	setCRObjectRep(newobj);
 	/* set name */
 	int idx, type;
-	getVars()->findAdd(name, &idx, &type);
+	getVars()->findAdd(name.c_str(), &idx, &type);
 	getVars()->setObject(idx, newobj);
 	/* create corresponding dynamic subroutine */
 	GLEDynamicSub* dynsub = new GLEDynamicSub(sub);

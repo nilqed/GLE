@@ -205,17 +205,12 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
  			dbg gprint("Got float %f %d %f \n",getEvalStackDouble(stk, nstk),nstk,*(pcode+(c)));
 			break;
 		case 3: /* Floating_point variable number follows */
-			var_get(*(pcode+(++c)),&xx);
-			dbg gprint("Got variable value %ld %f \n",*(pcode+(c)),xx);
-			setEvalStack(stk, ++nstk, xx);
-			break;
 		case 4: /* string variable number follows */
-			{
-				string result;
-				var_getstr(*(pcode+(++c)), result); nstk++;
-				setEvalStack(stk, nstk, sdup(result.c_str()));
-			}
- 			break;
+			i = *(pcode+(++c));
+			j = ++nstk;
+			stk->ensure(j + 1);
+			getVarsInstance()->get(i, stk->get(j));
+			break;
 		case 5: /* Null terminated string follows (int alligned) */
 			c++; nstk++;
 			setEvalStack(stk, nstk, eval_str(pcode,&c));
@@ -566,11 +561,11 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 71: /* left$ */
 			{
-				int i1 = (int)getEvalStackDouble(stk, nstk);
+				/*int i1 = (int)getEvalStackDouble(stk, nstk);
 				int len = strlen(getEvalStackString(stk, nstk-1));
 				if (i1 < 0) i1 = 0;
 				if (i1 > len) i1 = len;
-				char* result = (char*)malloc((i1+1)*sizeof(char));
+				char* result = (char*)malloc((i1+1)*sizeof(char));*/
 				// FIXME STACK
 				// ncpy(result, getEvalStackString(stk, nstk-1), i1);
 				// setsstr(&getEvalStackString(stk, --nstk), result);
@@ -875,7 +870,6 @@ GLESub* eval_subroutine_call(GLEArrayImpl* stk, int *pcode, int *cp) throw(Parse
 }
 
 void eval_do_object_block_call(GLEArrayImpl* stk, GLESub* sub, GLEObjectDO* obj) throw(ParserError) {
-	int otyp = 1;
 	GLEObjectDOConstructor* cons = obj->getConstructor();
 	obj->makePropertyStore();
 	GLEArrayImpl* arr = obj->getProperties()->getArray();
@@ -905,56 +899,70 @@ void eval_do_object_block_call(GLEArrayImpl* stk, GLESub* sub, GLEObjectDO* obj)
 	}
 }
 
-void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, const char **ostr, int *otyp) throw(ParserError) {
-	/*
-	..
-	evaluate an expression
-	..
-	pcode......a pointer to the pcode to execute
-	cp.........Current point in this line of pcode
-	oval.......place to put result number
-	ostr.......place to put result string
-	otyp.......place to put result type, 1=num, 2=str
-	*/
-	if (ostr != NULL) {
-		/* make sure output string is valid */
-		*ostr = "";
-	}
+void evalDoConstant(GLEArrayImpl* stk, int *pcode, int *cp)
+{
+	union {double d; int l[2];} both;
+	both.l[0] = *(pcode+ ++(*cp));
+	both.l[1] = 0;
+	stk->ensure(1);
+	stk->setDouble(1, both.d);
+	nstk++;
+}
+
+void evalCommon(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
 	if (pcode[(*cp)] == 8) {
-		/*  Single constant  */
-		union {double d; int l[2];} both;
-		both.l[0] = *(pcode+ ++(*cp));
-		both.l[1] = 0;
-		dbg gprint("Constant %ld \n",both.l[0]);
-		memcpy(oval,&both.d,sizeof(both.d));
-		++(*cp);
-		return;
+		evalDoConstant(stk, pcode, cp);
+		*cp = *cp + 1;
+	} else {
+		if (pcode[(*cp)++] != 1) {
+			g_throw_parser_error("pcode error: expected expression");
+		}
+		int plen = pcode[(*cp)++];
+		eval_pcode_loop(stk, pcode + (*cp), plen);
+		*cp = *cp + plen;
 	}
-	if (pcode[(*cp)++] != 1) {
-		(*cp)--;
-		gprint("PCODE, Expecting expression, v=%ld cp=%d \n", *(pcode + (*cp)), *cp);
-		return;
+	if (nstk != 1) {
+		g_throw_parser_error("pcode error: stack underflow in eval");
 	}
-	int plen = pcode[(*cp)++];
-	eval_pcode_loop(stk, pcode + (*cp), plen);
-	int type = stk->getType(nstk);
+	nstk = 0;
+}
+
+GLEMemoryCell* evalMemoryCell(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
+	evalCommon(stk, pcode, cp);
+	return stk->get(1);
+}
+
+GLERC<GLEString> evalStr(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOther) throw(ParserError) {
+	GLERC<GLEString> result;
+	evalCommon(stk, pcode, cp);
+	int type = stk->getType(1);
+	if (type == GLEObjectTypeString) {
+		result = (GLEString*)stk->getObject(1);
+	} else {
+		if (allowOther) {
+			result = stk->getString(1);
+		} else {
+			std::ostringstream msg;
+			msg << "found type '" << gle_object_type_to_string((GLEObjectType)stk->getType(1)) << " but expected 'string'";
+			g_throw_parser_error(msg.str());
+		}
+	}
+	return result;
+}
+
+void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError) {
+	if (ostr != 0) {
+		*ostr = 0;
+	}
+	evalCommon(stk, pcode, cp);
+	int type = stk->getType(1);
 	if (type == GLEObjectTypeString) {
 		*otyp = 2;
-		if (ostr != NULL) {
-		}
+		*ostr = (GLEString*)stk->getObject(1);
 	} else {
 		*otyp = 1;
-		*oval = getEvalStackDouble(stk, nstk);
+		*oval = getEvalStackDouble(stk, 1);
 	}
-	dbg gprint("RESULT ISb ==== %d [1] %f   [nstk] %f \n",nstk,getEvalStackDouble(stk, 1),getEvalStackDouble(stk, nstk));
-	dbg gprint("oval %g \n",*oval);
-	nstk--;
-	if (nstk < 0) {
- 		gprint("Stack stuffed up in EVAL %d \n",nstk);
-		gprint("oval=%f  ostr=%s otype=%d\n",*oval,*ostr,*otyp);
-		nstk = 0;
-	}
-	*cp = *cp + plen;
 }
 
 void debug_polish(int *pcode,int *zcp)
@@ -1025,9 +1033,10 @@ void setsstr(char **s, const char *in)
 }
 
 void gle_as_a_calculator_eval(GLEPolish& polish, const string& line) {
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 	try {
 		string value;
-		polish.eval_string(line.c_str(), &value, true);
+		polish.eval_string(stk.get(), line.c_str(), &value, true);
 		cout << "  " << value << endl;
 	} catch (ParserError err) {
 		// do not use the gprint version as no GLE file is "active"

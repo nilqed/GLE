@@ -587,7 +587,7 @@ public:
 	inline bool hasZMax() { return m_has_zmax; }
 	inline double getZMin() { return m_zmin; }
 	inline double getZMax() { return m_zmax; }
-	inline void setFunction(const char* f) { m_function = f; }
+	inline void setFunction(const std::string& f) { m_function = f; }
 	inline void setWidth(int wd) { m_wd = wd; }
 	inline void setHeight(int hi) { m_hi = hi; }
 	inline const string& getFunction() { return m_function; }

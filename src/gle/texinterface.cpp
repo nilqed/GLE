@@ -109,9 +109,9 @@ TeXObject* TeXInterface::draw(const char* str) throw(ParserError) {
 	return draw(str, info, 1);
 }
 
-TeXObject* TeXInterface::draw(const char* str, GLERectangle* box) throw(ParserError) {
+TeXObject* TeXInterface::draw(const std::string& str, GLERectangle* box) throw(ParserError) {
 	TeXObjectInfo info;
-	return draw(str, info, 1, box);
+	return draw(str.c_str(), info, 1, box);
 }
 TeXObject* TeXInterface::drawUTF8(const char* str, GLERectangle* box) throw(ParserError) {
 	TeXObjectInfo info;
@@ -1519,7 +1519,7 @@ void begin_tex_preamble(int *pln, int *pcode, int *cp) {
 
 void begin_tex(GLERun* run, int *pln, int *pcode, int *cp) {
 	// Get optional params
-	string name;
+	GLERC<GLEString> name;
 	double add = 0.0, x;
 	int ptr = *(pcode + (*cp)); /* add */
 	if (ptr) {
@@ -1530,7 +1530,7 @@ void begin_tex(GLERun* run, int *pln, int *pcode, int *cp) {
 	ptr = *(pcode + (*cp)); /* name */
 	if (ptr) {
 		int zzcp = 0, otyp;
-		const char* ostr = NULL;
+		GLEString* ostr = NULL;
 		eval(run->getStack(), pcode + (*cp) + ptr, &zzcp, &x, &ostr, &otyp);
 		name = ostr;
 	}
@@ -1559,10 +1559,10 @@ void begin_tex(GLERun* run, int *pln, int *pcode, int *cp) {
 	decode_utf8_basic(text_block);
 	TeXInterface::getInstance()->draw(text_block.c_str(), nblines, &box);
 	// Name object
-	if (name.length() != 0) {
+	if (!name.isNull() && name->length() != 0) {
 		double x1, x2, y1, y2;
 		box.getDimensions(&x1,&y1,&x2,&y2);
 		x1 -= add; x2 += add; y1 -= add; y2 += add;
-		run->name_set(name.c_str(),x1,y1,x2,y2);
+		run->name_set(name.get(),x1,y1,x2,y2);
 	}
 }

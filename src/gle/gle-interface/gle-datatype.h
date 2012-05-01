@@ -59,6 +59,8 @@ typedef enum {
 	GLEObjectTypeClassInstance
 } GLEObjectType;
 
+const char* gle_object_type_to_string(GLEObjectType type);
+
 class GLEDataObject : public GLERefCountObject {
 public:
 	GLEDataObject();
