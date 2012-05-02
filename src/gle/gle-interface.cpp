@@ -1701,12 +1701,7 @@ void GLEObjectDO::render() {
 				} else {
 					GLEString* args = (GLEString*)arr->getObject(i);
 					args->toUTF8(argi);
-					try {
-						polish->polish(argi.c_str(), pcode, &rtype);
-					} catch (ParserError err) {
-						err.setParserString(argi);
-						throw err;
-					}
+					polish->polish(argi.c_str(), pcode, &rtype);
 				}
 			}
 		}

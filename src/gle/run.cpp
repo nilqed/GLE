@@ -646,7 +646,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			break;
 		  case 51: /* Assignment  var=exp */
 			readlong(jj);
-			getVars()->set(jj, evalMemoryCell(getStack(), pcode, &cp));
+			getVars()->set(jj, evalGeneric(getStack(), pcode, &cp));
 			break;
 		  case 5:  /* BEGIN box | path | scale | rotate | EXTERNAL */
 			g_flush();

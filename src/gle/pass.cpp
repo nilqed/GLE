@@ -343,7 +343,7 @@ void GLEParser::polish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 	// cout << "pos = " << pos << endl;
 	try {
 		// cout << "Polish: '" << expr << "'" << endl;
-		m_polish->polish(expr.c_str(), pcode, rtype);
+		m_polish->internalPolish(expr.c_str(), pcode, rtype);
 	} catch (ParserError err) {
 		err.incColumn(pos-1);
 		throw err;
@@ -357,17 +357,12 @@ void GLEParser::polish_eol(GLEPcode& pcode, int *rtype) throw(ParserError) {
 }
 
 void GLEParser::polish(const char* str, GLEPcode& pcode, int *rtype) throw(ParserError) {
-	try {
-		m_polish->polish(str, pcode, rtype);
-	} catch (ParserError err) {
-		err.setParserString(str);
-		throw err;
-	}
+	m_polish->polish(str, pcode, rtype);
 }
 
 void GLEParser::polish_pos(const string& arg, int pos, GLEPcode& pcode, int* rtype) throw(ParserError) {
 	try {
-		m_polish->polish(arg.c_str(), pcode, rtype);
+		m_polish->internalPolish(arg.c_str(), pcode, rtype);
 	} catch (ParserError err) {
 		err.incColumn(pos-1);
 		throw err;
@@ -420,7 +415,7 @@ void GLEParser::get_if(GLEPcode& pcode) throw(ParserError) {
 	try {
 		int rtype = 1;
 		// cout << "Polish: '" << expr << "'" << endl;
-		m_polish->polish(expr.c_str(), pcode, &rtype);
+		m_polish->internalPolish(expr.c_str(), pcode, &rtype);
 	} catch (ParserError err) {
 		err.incColumn(pos-1);
 		throw err;
@@ -571,7 +566,7 @@ void GLEParser::gen_subroutine_call_polish_arg(GLESubCallInfo* info, int i, GLEP
 	GLESub* sub = info->getSub();
 	try {
 		int vtype = sub->getParamType(i);
-		m_polish->polish(info->getParamVal(i).c_str(), pcode, &vtype);
+		m_polish->internalPolish(info->getParamVal(i).c_str(), pcode, &vtype);
 	} catch (ParserError err) {
 		if (info->getParamPos(i) != -2) {
 			/* in place given argument */

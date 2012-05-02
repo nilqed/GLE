@@ -144,6 +144,8 @@ inline void GLE_MC_COPY(GLEMemoryCell* a, GLEMemoryCell* b) {
 bool gle_memory_cell_equals(GLEMemoryCell* a, GLEMemoryCell* b);
 void gle_memory_cell_print(GLEMemoryCell* a, ostream& out);
 bool gle_memory_cell_to_double(GLEMemoryCell* a, double* result);
+void gle_memory_cell_check(GLEMemoryCell* a, int expected);
+int gle_memory_cell_type(GLEMemoryCell* a);
 
 unsigned int getUTF8NumberOfChars(const char* str, unsigned int len);
 
@@ -227,6 +229,7 @@ public:
 	inline unsigned int size() { return m_Length; }
 	void init(unsigned int i);
 	int getType(unsigned int i);
+	void checkType(unsigned int i, int expected);
 	double DLLFCT getDouble(unsigned int i);
 	void DLLFCT setDouble(unsigned int i, double v);
 	int DLLFCT getInt(unsigned int i);

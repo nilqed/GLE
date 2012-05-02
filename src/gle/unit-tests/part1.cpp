@@ -49,14 +49,25 @@
 #include "../gprint.h"
 #include "../tokens/RefCount.h"
 #include "../glearray.h"
+#include "../polish.h"
+#include "../var.h"
+#include "../keyword.h"
+#include "../run.h"
+
+#include <memory>
 
 #define unit_test(a) unit_test_impl(a, #a, __FILE__, __LINE__)
+#define unit_test_msg(a, b) unit_test_impl(a, b, __FILE__, __LINE__)
 
 void unit_test_impl(bool expr, const char* exprStr, const char* file, int line) {
 	if (!expr) {
 		cout << "unit test failed (" << file << ":" << line << "): " << exprStr << std::endl;
 		exit(1);
 	}
+}
+
+void unit_test_impl(bool expr, const std::string& exprStr, const char* file, int line) {
+	unit_test_impl(expr, exprStr.c_str(), file, line);
 }
 
 void test_csv_reader1() {
@@ -163,9 +174,58 @@ void test_csv_reader3() {
 	}
 }
 
+void test_expression_evaluator_each(GLEPolish* polish, const std::string& expression, const std::string& expectedValue) {
+	int cp = 0;
+	int rtype = 0;
+	GLEPcodeList pc_list;
+	GLEPcode pcode(&pc_list);
+	polish->polish(expression.c_str(), pcode, &rtype);
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	std::ostringstream msg;
+	msg << expression << ": ";
+	if (is_float(expectedValue)) {
+		GLEMemoryCell* mc = evalGeneric(stk.get(), (int*)&pcode[0], &cp);
+		gle_memory_cell_check(mc, GLEObjectTypeDouble);
+		double expectedDouble = tokenizer_string_to_double(expectedValue.c_str());
+		msg << mc->Entry.DoubleVal << " == " << expectedValue;
+		if (expectedDouble == 0.0) {
+			unit_test_msg(fabs(mc->Entry.DoubleVal) < CUTILS_REL_PREC_FINE, msg.str());
+		} else {
+			unit_test_msg(equals_rel_fine(mc->Entry.DoubleVal, expectedDouble), msg.str());
+		}
+	} else {
+		GLERC<GLEString> result(evalStr(stk.get(), (int*)&pcode[0], &cp, true));
+		std::string computedString(result->toUTF8());
+		msg << computedString << " == " << expectedValue;
+		unit_test_msg(expectedValue == computedString, msg.str());
+	}
+}
+
+void test_expression_evaluator() {
+	GLECSVData reader;
+	reader.read("unit-tests/expressions.txt");
+	GLECSVError* error = reader.getError();
+	unit_test(error->errorCode == GLECSVErrorNone);
+	std::auto_ptr<GLEPolish> polish(new GLEPolish());
+	polish->initTokenizer();
+	for (unsigned int i = 0; i < reader.getNbLines(); i++) {
+		unit_test(reader.getNbColumns(i) == 2);
+		string expression(reader.getCellString(i, 0));
+		string expectedValue(reader.getCellString(i, 1));
+		test_expression_evaluator_each(polish.get(), expression, expectedValue);
+	}
+}
+
 int main(void) {
-	test_csv_reader1();
-	test_csv_reader2();
-	test_csv_reader3();
+	try {
+		test_csv_reader1();
+		test_csv_reader2();
+		test_csv_reader3();
+		test_expression_evaluator();
+	} catch (ParserError& err) {
+		std::string errMsg;
+		err.toString(errMsg);
+		unit_test_msg(false, errMsg.c_str());
+	}
 	return 0;
 }

@@ -51,6 +51,26 @@ class GLESub;
 
 class GLEArrayImpl;
 
+const int BINARY_OPERATOR_OFFSET = 10;
+
+enum BinaryOperators {
+	BIN_OP_PLUS = 1,
+	BIN_OP_MINUS,
+	BIN_OP_MULTIPLY,
+	BIN_OP_DIVIDE,
+	BIN_OP_POW,
+	BIN_OP_EQUALS,
+	BIN_OP_LT,
+	BIN_OP_LE,
+	BIN_OP_GT,
+	BIN_OP_GE,
+	BIN_OP_NOT_EQUALS,
+	BIN_OP_AND,
+	BIN_OP_OR,
+	BIN_OP_MOD,
+	BIN_OP_DOT
+};
+
 void setEvalStack(GLEArrayImpl* stk, int pos, double value);
 void setEvalStack(GLEArrayImpl* stk, int pos, const char* value);
 void setEvalStack(GLEArrayImpl* stk, int pos, int value);
@@ -119,12 +139,13 @@ protected:
 public:
 	GLEPolish();
 	~GLEPolish();
-	void polish(const char *expr, GLEPcode& pcode, int *rtype) throw(ParserError);
-	void polish(GLEPcode& pcode, int *rtype) throw(ParserError);
-	void eval(const char *exp, double *x) throw(ParserError);
-	void eval_string(GLEArrayImpl* stk, const char *exp, string *str, bool allownum = false) throw(ParserError);
+	void internalPolish(const char *expr, GLEPcode& pcode, int *rtype) throw(ParserError);
+	void internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError);
 	void internalEval(const char *exp, double *x) throw(ParserError);
-   void internalEvalString(const char* exp, string* str) throw(ParserError);
+    void internalEvalString(const char* exp, string* str) throw(ParserError);
+	void polish(const char *expr, GLEPcode& pcode, int *rtype) throw(ParserError);
+	void eval(GLEArrayImpl* stk, const char *exp, double *x) throw(ParserError);
+	void eval_string(GLEArrayImpl* stk, const char *exp, string *str, bool allownum = false) throw(ParserError);
 	void get_params(GLEPcode& pcode, int np, int* plist, const string& name) throw(ParserError);
 	double evalTokenToDouble() throw(ParserError);
 	Tokenizer* getTokens(const string& str);

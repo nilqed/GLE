@@ -58,8 +58,8 @@ extern int gle_debug;
 
 /*---------------------------------------------------------------------------*/
 /* bin = 10..29, binstr = 30..49, fn= 60...139, userfn=LOCAL_START_INDEX..nnn */
-#define stack_bin(i,p) 	stack_op(pcode,stk,stkp,&nstk,i-10+(last_typ*20),p+curpri)
-#define stack_fn(i) 	stack_op(pcode,stk,stkp,&nstk,i+60,10+curpri)
+#define stack_bin(i,p) stack_op(pcode, stk, stkp, &nstk, i + BINARY_OPERATOR_OFFSET, p + curpri)
+#define stack_fn(i)    stack_op(pcode, stk, stkp, &nstk, i + 60, 10 + curpri)
 #define dbg if ((gle_debug & 4)>0)
 
 // #define dbg
@@ -101,7 +101,7 @@ void GLEPolish::get_params(GLEPcode& pcode, int np, int* plist, const string& na
 				throw error(string("too many parameters in call to '")+name+err_str);
 			}
 			int vtype = *(plist + nb_param);
-			polish(pcode, &vtype);
+			internalPolish(pcode, &vtype);
 			int next_token = m_tokens.is_next_token_in(",)");
 			if (next_token == -1) {
 				throw error(string("expecting ',' or ')' in parameter list of function '")+name+"'");
@@ -118,14 +118,23 @@ void GLEPolish::get_params(GLEPcode& pcode, int np, int* plist, const string& na
 }
 
 void GLEPolish::polish(const char *expr, GLEPcode& pcode, int *rtype) throw(ParserError) {
+	try {
+		internalPolish(expr, pcode, rtype);
+	} catch (ParserError err) {
+		err.setParserString(expr);
+		throw err;
+	}
+}
+
+void GLEPolish::internalPolish(const char *expr, GLEPcode& pcode, int *rtype) throw(ParserError) {
 	#ifdef DEBUG_POLISH
 		gprint("==== Start of expression {%s} \n",expr);
 	#endif
 	m_tokens.set_string(expr);
-	polish(pcode, rtype);
+	internalPolish(pcode, rtype);
 }
 
-void GLEPolish::polish(GLEPcode& pcode, int *rtype) throw(ParserError) {
+void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 	GLESub* sub;
 	string uc_token;
 	int idx, ret, np, *plist, term_bracket = false;
@@ -299,34 +308,34 @@ void GLEPolish::polish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 			int priority = 0;
 			if (token_len == 1) {
 				switch (first_char) {
-					case '+' : v = 1;  priority = 2; break;
-					case '-' : v = 2;  priority = 2; break;
-					case '*' : v = 3;  priority = 3; break;
-					case '/' : v = 4;  priority = 3; break;
-					case '%' : v = 14; priority = 3; break;
-					case '^' : v = 5;  priority = 4; break;
-					case '=' : v = 6;  priority = 1; break;
-					case '&' : v = 12; priority = 1; break;
-					case '|' : v = 13; priority = 1; break;
-					case '<' : v = 7;  priority = 1; break;
-					case '>' : v = 9;  priority = 1; break;
-					case '.' : v = 15;  priority = 2; break;
+					case '+' : v = BIN_OP_PLUS;  priority = 2; break;
+					case '-' : v = BIN_OP_MINUS;  priority = 2; break;
+					case '*' : v = BIN_OP_MULTIPLY;  priority = 3; break;
+					case '/' : v = BIN_OP_DIVIDE;  priority = 3; break;
+					case '%' : v = BIN_OP_MOD; priority = 3; break;
+					case '^' : v = BIN_OP_POW;  priority = 4; break;
+					case '=' : v = BIN_OP_EQUALS;  priority = 1; break;
+					case '&' : v = BIN_OP_AND; priority = 1; break;
+					case '|' : v = BIN_OP_OR; priority = 1; break;
+					case '<' : v = BIN_OP_LT;  priority = 1; break;
+					case '>' : v = BIN_OP_GT;  priority = 1; break;
+					case '.' : v = BIN_OP_DOT;  priority = 2; break;
 					default  : v = 0;
 				}
 			} else {
 				str_to_uppercase(token, uc_token);
 				if (token == "<=") {
-					v = 8; priority = 1;
+					v = BIN_OP_LE; priority = 1;
 				} else if (token == "<>") {
-					v = 11; priority = 1;
+					v = BIN_OP_NOT_EQUALS; priority = 1;
 				} else if (token == ">=") {
-					v = 10; priority = 1;
+					v = BIN_OP_GE; priority = 1;
 				} else if (token == "**") {
-					v = 5;  priority = 4;
+					v = BIN_OP_POW;  priority = 4;
 				} else if (uc_token == "AND") {
-					v = 12; priority = 1;
+					v = BIN_OP_AND; priority = 1;
 				} else if (uc_token == "OR") {
-					v = 13; priority = 1;
+					v = BIN_OP_OR; priority = 1;
 				} else {
 					v = 0;
 				}
@@ -360,37 +369,32 @@ Tokenizer* GLEPolish::getTokens(const string& str) {
 	return &m_tokens;
 }
 
-void GLEPolish::eval(const char *exp, double *x) throw(ParserError) {
-	int rtype = 1, otyp = 0, cp = 0;
-	GLEPcodeList pc_list;
-	GLEPcode pcode(&pc_list);
-	// cout << "eval '" << exp << "'" << endl;
-	try {
-		polish(exp, pcode, &rtype);
-	} catch (ParserError err) {
-		err.setParserString(exp);
-		throw err;
-	}
-	GLEArrayImpl* stk = 0;
-	::eval(stk, (int*)&pcode[0], &cp, x, NULL, &otyp);
-}
-
-void GLEPolish::internalEval(const char *exp, double *x) throw(ParserError) {
+void GLEPolish::eval(GLEArrayImpl* stk, const char *exp, double *x) throw(ParserError) {
 	int rtype = 1, otyp = 0, cp = 0;
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
 	polish(exp, pcode, &rtype);
+	::eval(stk, (int*)&pcode[0], &cp, x, NULL, &otyp);
+}
+
+void GLEPolish::internalEval(const char *exp, double *x) throw(ParserError) {
+	// difference with eval: no try / catch
+	int rtype = 1, otyp = 0, cp = 0;
+	GLEPcodeList pc_list;
+	GLEPcode pcode(&pc_list);
+	internalPolish(exp, pcode, &rtype);
 	GLEArrayImpl* stk = 0;
 	::eval(stk, (int*)&pcode[0], &cp, x, NULL, &otyp);
 }
 
 void GLEPolish::internalEvalString(const char* exp, string* str) throw(ParserError) {
+	// difference with eval_string: no try / catch
     double oval;
 	GLEString* ostr;
 	int rtype = 2, otyp = 0, cp = 0;
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
-	polish(exp, pcode, &rtype);
+	internalPolish(exp, pcode, &rtype);
 	GLEArrayImpl* stk = 0;
 	::eval(stk, (int*)&pcode[0], &cp, &oval, &ostr, &otyp);
 	if (otyp == 1) {
@@ -404,15 +408,10 @@ void GLEPolish::internalEvalString(const char* exp, string* str) throw(ParserErr
 
 void GLEPolish::eval_string(GLEArrayImpl* stk, const char *exp, string *str, bool allownum) throw(ParserError) {
 	int rtype = allownum ? 0 : 2;
-	int otyp = 0, cp = 0;
+	int cp = 0;
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
-	try {
-		polish(exp, pcode, &rtype);
-	} catch (ParserError err) {
-		err.setParserString(exp);
-		throw err;
-	}
+	polish(exp, pcode, &rtype);
 	GLERC<GLEString> result(evalStr(stk, (int*)&pcode[0], &cp, allownum));
 	*str = result->toUTF8();
 }
@@ -443,12 +442,7 @@ void stack_op(GLEPcode& pcode, int stk[], int stkp[], int *nstk,  int i, int p) 
 void polish(char *expr, GLEPcode& pcode, int *rtype) throw(ParserError) {
 	GLEPolish* polish = get_global_polish();
 	if (polish != NULL) {
-		try {
-			polish->polish(expr, pcode, rtype);
-		} catch (ParserError err) {
-			err.setParserString(expr);
-			throw err;
-		}
+		polish->polish(expr, pcode, rtype);
 	}
 }
 
@@ -472,12 +466,7 @@ void polish(char *expr, char *pcode, int *plen, int *rtype) throw(ParserError) {
 	if (polish != NULL) {
 		GLEPcodeList pc_list;
 		GLEPcode my_pcode(&pc_list);
-		try {
-			polish->polish(expr, my_pcode, rtype);
-		} catch (ParserError err) {
-			err.setParserString(expr);
-			throw err;
-		}
+		polish->polish(expr, my_pcode, rtype);
 		*plen = my_pcode.size();
 		memcpy(pcode,&my_pcode[0],my_pcode.size()*sizeof(int));
 	}
@@ -485,7 +474,8 @@ void polish(char *expr, char *pcode, int *plen, int *rtype) throw(ParserError) {
 
 void polish_eval(char *exp, double *x) throw(ParserError) {
 	GLEPolish* polish = get_global_polish();
-	if (polish != NULL) polish->eval(exp, x);
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	if (polish != NULL) polish->eval(stk.get(), exp, x);
 }
 
 void polish_eval_string(const char *exp, string *str, bool allownum) throw(ParserError) {
@@ -610,15 +600,10 @@ GLEFunctionParserPcode::~GLEFunctionParserPcode() {
 void GLEFunctionParserPcode::polish(const char* fct, StringIntHash* vars) throw(ParserError) {
 	GLEPolish* polish = get_global_polish();
 	if (polish != NULL) {
-		try {
-			int rtype = 1;
-			polish->setExprVars(vars);
-			polish->polish(fct, m_Pcode, &rtype);
-			polish->setExprVars(NULL);
-		} catch (ParserError err) {
-			err.setParserString(fct);
-			throw err;
-		}
+		int rtype = 1;
+		polish->setExprVars(vars);
+		polish->polish(fct, m_Pcode, &rtype);
+		polish->setExprVars(NULL);
 	}
 }
 
@@ -628,7 +613,7 @@ void GLEFunctionParserPcode::polishPos(const char* fct, int pos, StringIntHash* 
 		try {
 			int rtype = 1;
 			polish->setExprVars(vars);
-			polish->polish(fct, m_Pcode, &rtype);
+			polish->internalPolish(fct, m_Pcode, &rtype);
 			polish->setExprVars(NULL);
 		} catch (ParserError err) {
 			err.incColumn(pos-1);

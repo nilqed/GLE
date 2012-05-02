@@ -170,12 +170,106 @@ void setEvalStack(GLEArrayImpl* stk, int pos, int value) {
 	stk->setDouble(pos, (double)value);
 }
 
+void setEvalStackBool(GLEArrayImpl* stk, int pos, bool value) {
+	stk->ensure(pos + 1);
+	stk->setBool(pos, value);
+}
+
 double getEvalStackDouble(GLEArrayImpl* stk, int pos) {
+	stk->checkType(pos, GLEObjectTypeDouble);
 	return stk->getDouble(pos);
 }
 
 char* getEvalStackString(GLEArrayImpl* stk, int pos) {
 	return (char*)"";
+}
+
+void complain_operator_type(int op, int type) {
+	std::ostringstream msg;
+	msg << "operator " << op << " does not apply to type '" << gle_object_type_to_string((GLEObjectType)type) << "'";
+	g_throw_parser_error(msg.str());
+}
+
+void eval_binary_operator_string(GLEArrayImpl* stk, int op, GLEString* a, GLEString* b) {
+	complain_operator_type(op, GLEObjectTypeString);
+}
+
+void eval_binary_operator_double(GLEArrayImpl* stk, int op, double a, double b) {
+	switch (op) {
+		case BIN_OP_PLUS:
+			setEvalStack(stk, nstk - 1, a + b);
+			break;
+		case BIN_OP_MINUS:
+			setEvalStack(stk, nstk - 1, a - b);
+			break;
+		case BIN_OP_MULTIPLY:
+			setEvalStack(stk, nstk - 1, a * b);
+			break;
+		case BIN_OP_DIVIDE:
+			// do not test on divide by zero, otherwise "let"
+			// cannot plot functions with divide by zero anymore
+			setEvalStack(stk, nstk - 1, a / b);
+			break;
+		case BIN_OP_POW:
+			setEvalStack(stk, nstk - 1, pow(a, b));
+			break;
+		case BIN_OP_EQUALS:
+			setEvalStackBool(stk, nstk - 1, a == b);
+			break;
+		case BIN_OP_LT:
+			setEvalStackBool(stk, nstk - 1, a < b);
+			break;
+		case BIN_OP_LE:
+			setEvalStackBool(stk, nstk - 1, a <= b);
+			break;
+		case BIN_OP_GT:
+			setEvalStackBool(stk, nstk - 1, a > b);
+			break;
+		case BIN_OP_GE:
+			setEvalStackBool(stk, nstk - 1, a >= b);
+			break;
+		case BIN_OP_NOT_EQUALS:
+			setEvalStackBool(stk, nstk - 1, a != b);
+			break;
+		case BIN_OP_MOD:
+			setEvalStack(stk, nstk - 1, gle_round_int(a) % gle_round_int(b));
+			break;
+		default:
+			complain_operator_type(op, GLEObjectTypeDouble);
+			break;
+	}
+}
+
+void eval_binary_operator(GLEArrayImpl* stk, int op) {
+	// a OP b
+	GLEMemoryCell* a = stk->get(nstk - 1);
+	GLEMemoryCell* b = stk->get(nstk);
+	int a_type = gle_memory_cell_type(a);
+	int b_type = gle_memory_cell_type(b);
+	if (a_type == b_type) {
+		switch (a_type) {
+			case GLEObjectTypeDouble:
+				eval_binary_operator_double(stk, op, a->Entry.DoubleVal, b->Entry.DoubleVal);
+				break;
+			case GLEObjectTypeString:
+				eval_binary_operator_string(stk, op, (GLEString*)a->Entry.ObjectVal, (GLEString*)b->Entry.ObjectVal);
+				break;
+			default:
+				complain_operator_type(op, a_type);
+				break;
+		}
+	} else if (op == BIN_OP_PLUS && (a_type == GLEObjectTypeString || b_type == GLEObjectTypeString)) {
+		GLERC<GLEString> a_str(stk->getString(nstk - 1));
+		GLERC<GLEString> b_str(stk->getString(nstk));
+		eval_binary_operator_string(stk, op, a_str.get(), b_str.get());
+	} else {
+		std::ostringstream msg;
+		msg << "operator " << op
+			<< " does not apply to types '" << gle_object_type_to_string((GLEObjectType)a_type)
+			<< "' and '" << gle_object_type_to_string((GLEObjectType)b_type) << "'";
+		g_throw_parser_error(msg.str());
+	}
+	nstk--;
 }
 
 void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError) {
@@ -206,7 +300,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 3: /* Floating_point variable number follows */
 		case 4: /* string variable number follows */
-			i = *(pcode+(++c));
+			i = *(pcode + (++c));
 			j = ++nstk;
 			stk->ensure(j + 1);
 			getVarsInstance()->get(i, stk->get(j));
@@ -216,81 +310,26 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, nstk, eval_str(pcode,&c));
 			break;
 		/*
-
-
-		Numeric Binary operators 10..29 -----------------------
-
-
+			Binary operators 10..29 -----------------------
 		*/
-		case 11:  /* + */
-			nstk--;
-			setEvalStack(stk, nstk, getEvalStackDouble(stk, nstk+1) + getEvalStackDouble(stk, nstk));
+		case BIN_OP_PLUS + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_MINUS + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_MULTIPLY + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_DIVIDE + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_POW + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_EQUALS + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_LT + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_LE + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_GT + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_GE + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_NOT_EQUALS + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_AND + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_OR + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_MOD + BINARY_OPERATOR_OFFSET:
+		case BIN_OP_DOT + BINARY_OPERATOR_OFFSET:
+			eval_binary_operator(stk, pcode[c] - BINARY_OPERATOR_OFFSET);
 			break;
-		case 12:  /* - */
-			setEvalStack(stk, nstk-1, getEvalStackDouble(stk, nstk-1) - getEvalStackDouble(stk, nstk));
-			nstk--;
-			break;
-		case 13:  /* * */
-			setEvalStack(stk, nstk-1, getEvalStackDouble(stk, nstk-1) * getEvalStackDouble(stk, nstk));
-			nstk--;
-			break;
-		case 14:  /* / */
-			// do not test on divide by zero, otherwise "let"
-			// cannot plot functions with divide by zero anymore
-			setEvalStack(stk, nstk-1, getEvalStackDouble(stk, nstk-1) / getEvalStackDouble(stk, nstk));
-			nstk--;
-			break;
-		case 15:  /* ^ */
-			setEvalStack(stk, nstk-1, pow(getEvalStackDouble(stk, nstk-1),getEvalStackDouble(stk, nstk)));
-			nstk--;
-			break;
-		case 16:  /* = */
-			nstk--;
-			if (getEvalStackDouble(stk, nstk) == getEvalStackDouble(stk, nstk+1)) setEvalStack(stk, nstk, true);
-			else setEvalStack(stk, nstk, false);
-			break;
-		case 17:  /* <   */
-			nstk--;
-			if (getEvalStackDouble(stk, nstk) < getEvalStackDouble(stk, nstk+1)) setEvalStack(stk, nstk, true);
-			else setEvalStack(stk, nstk, false);
-			break;
-		case 18:  /* <=  */
-			nstk--;
-			if (getEvalStackDouble(stk, nstk) <= getEvalStackDouble(stk, nstk+1)) setEvalStack(stk, nstk, true);
-			else setEvalStack(stk, nstk, false);
-			break;
-		case 19:  /* >   */
-			nstk--;
-			if (getEvalStackDouble(stk, nstk) > getEvalStackDouble(stk, nstk+1)) setEvalStack(stk, nstk, true);
-			else setEvalStack(stk, nstk, false);
-			break;
-		case 20:  /* >=  */
-			nstk--;
-			if (getEvalStackDouble(stk, nstk) >= getEvalStackDouble(stk, nstk+1)) setEvalStack(stk, nstk, true);
-			else setEvalStack(stk, nstk, false);
-			break;
-		case 21:  /*  <>  */
-			nstk--;
-			if (getEvalStackDouble(stk, nstk) != getEvalStackDouble(stk, nstk+1)) setEvalStack(stk, nstk, true);
-			else setEvalStack(stk, nstk, false);
-			break;
-		case 22:  /* .AND.  */
-			nstk--;
-			if (getEvalStackDouble(stk, nstk) && getEvalStackDouble(stk, nstk+1)) setEvalStack(stk, nstk, true);
-			else setEvalStack(stk, nstk, false);
-			break;
-		case 23:  /* .OR.   */
-			nstk--;
-			if (getEvalStackDouble(stk, nstk) || getEvalStackDouble(stk, nstk+1)) setEvalStack(stk, nstk, true);
-			else setEvalStack(stk, nstk, false);
-			break;
-		case 24:  /* % */
-			setEvalStack(stk, nstk-1, (int)getEvalStackDouble(stk, nstk-1) % (int)getEvalStackDouble(stk, nstk));
-			nstk--;
-			break;
-		case 25:  /* . */
-			g_throw_parser_error("operator '.' does not apply to a numeric type");
-			break;
+
 		/* String Binary operators 30..49 ----------------------- */
 		case 31:  /* + */
 			nstk--;
@@ -927,7 +966,7 @@ void evalCommon(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
 	nstk = 0;
 }
 
-GLEMemoryCell* evalMemoryCell(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
+GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
 	evalCommon(stk, pcode, cp);
 	return stk->get(1);
 }
@@ -943,7 +982,7 @@ GLERC<GLEString> evalStr(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOther
 			result = stk->getString(1);
 		} else {
 			std::ostringstream msg;
-			msg << "found type '" << gle_object_type_to_string((GLEObjectType)stk->getType(1)) << " but expected 'string'";
+			msg << "found type '" << gle_object_type_to_string((GLEObjectType)stk->getType(1)) << "' but expected 'string'";
 			g_throw_parser_error(msg.str());
 		}
 	}

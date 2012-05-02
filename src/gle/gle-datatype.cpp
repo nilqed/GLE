@@ -123,6 +123,28 @@ bool gle_memory_cell_to_double(GLEMemoryCell* a, double* result) {
 	}
 }
 
+int gle_memory_cell_type(GLEMemoryCell* a) {
+	switch (a->Type) {
+		case GLE_MC_UNKNOWN: return GLEObjectTypeUnknown;
+		case GLE_MC_BOOL:    return GLEObjectTypeBool;
+		case GLE_MC_INT:     return GLEObjectTypeInt;
+		case GLE_MC_DOUBLE:  return GLEObjectTypeDouble;
+		case GLE_MC_OBJECT:  return a->Entry.ObjectVal->getType();
+	}
+	return GLEObjectTypeUnknown;
+}
+
+void gle_memory_cell_check(GLEMemoryCell* a, int expected) {
+	int cellType = gle_memory_cell_type(a);
+	if (cellType != expected) {
+		std::ostringstream msg;
+		msg << "found type '" << gle_object_type_to_string((GLEObjectType)cellType) << "' (value = '";
+		gle_memory_cell_print(a, msg);
+		msg << "') but expected '" << gle_object_type_to_string((GLEObjectType)expected) << "'";
+		g_throw_parser_error(msg.str());
+	}
+}
+
 GLEDataObject::GLEDataObject() {
 }
 
@@ -592,15 +614,12 @@ void GLEArrayImpl::clear() {
 	m_Alloc = 0;
 }
 
+void GLEArrayImpl::checkType(unsigned int i, int expected) {
+	gle_memory_cell_check(get(i), expected);
+}
+
 int GLEArrayImpl::getType(unsigned int i) {
-	switch (m_Data[i].Type) {
-		case GLE_MC_UNKNOWN: return GLEObjectTypeUnknown;
-		case GLE_MC_BOOL:    return GLEObjectTypeBool;
-		case GLE_MC_INT:     return GLEObjectTypeInt;
-		case GLE_MC_DOUBLE:  return GLEObjectTypeDouble;
-		case GLE_MC_OBJECT:  return m_Data[i].Entry.ObjectVal->getType();
-	}
-	return GLEObjectTypeUnknown;
+	return gle_memory_cell_type(get(i));
 }
 
 void GLEArrayImpl::init(unsigned int i) {
