@@ -170,6 +170,11 @@ void setEvalStack(GLEArrayImpl* stk, int pos, int value) {
 	stk->setDouble(pos, (double)value);
 }
 
+void setEvalStack(GLEArrayImpl* stk, int pos, GLEString* value) {
+	stk->ensure(pos + 1);
+	stk->setObject(pos, value);
+}
+
 void setEvalStackBool(GLEArrayImpl* stk, int pos, bool value) {
 	stk->ensure(pos + 1);
 	stk->setBool(pos, value);
@@ -186,12 +191,41 @@ char* getEvalStackString(GLEArrayImpl* stk, int pos) {
 
 void complain_operator_type(int op, int type) {
 	std::ostringstream msg;
-	msg << "operator " << op << " does not apply to type '" << gle_object_type_to_string((GLEObjectType)type) << "'";
+	msg << "operator " << gle_operator_to_string(op) << " does not apply to type '" << gle_object_type_to_string((GLEObjectType)type) << "'";
 	g_throw_parser_error(msg.str());
 }
 
 void eval_binary_operator_string(GLEArrayImpl* stk, int op, GLEString* a, GLEString* b) {
-	complain_operator_type(op, GLEObjectTypeString);
+	switch (op) {
+		case BIN_OP_PLUS:
+			setEvalStack(stk, nstk - 1, a->concat(b));
+			break;
+		case BIN_OP_EQUALS:
+			setEvalStackBool(stk, nstk - 1, a->equalsI(b));
+			break;
+		case BIN_OP_LT:
+			setEvalStackBool(stk, nstk - 1, a->strICmp(b) < 0);
+			break;
+		case BIN_OP_LE:
+			setEvalStackBool(stk, nstk - 1, a->strICmp(b) <= 0);
+			break;
+		case BIN_OP_GT:
+			setEvalStackBool(stk, nstk - 1, a->strICmp(b) > 0);
+			break;
+		case BIN_OP_GE:
+			setEvalStackBool(stk, nstk - 1, a->strICmp(b) >= 0);
+			break;
+		case BIN_OP_NOT_EQUALS:
+			setEvalStackBool(stk, nstk - 1, !a->equalsI(b));
+			break;
+		case BIN_OP_DOT:
+			{
+				GLERC<GLEString> dot(new GLEString("."));
+				GLERC<GLEString> temp(a->concat(dot.get()));
+				setEvalStack(stk, nstk - 1, temp->concat(b));
+			}
+			break;
+	}
 }
 
 void eval_binary_operator_double(GLEArrayImpl* stk, int op, double a, double b) {
@@ -240,6 +274,20 @@ void eval_binary_operator_double(GLEArrayImpl* stk, int op, double a, double b) 
 	}
 }
 
+void eval_binary_operator_bool(GLEArrayImpl* stk, int op, bool a, bool b) {
+	switch (op) {
+		case BIN_OP_AND:
+			setEvalStackBool(stk, nstk - 1, a && b);
+			break;
+		case BIN_OP_OR:
+			setEvalStackBool(stk, nstk - 1, a || b);
+			break;
+		default:
+			complain_operator_type(op, GLEObjectTypeDouble);
+			break;
+	}
+}
+
 void eval_binary_operator(GLEArrayImpl* stk, int op) {
 	// a OP b
 	GLEMemoryCell* a = stk->get(nstk - 1);
@@ -254,6 +302,9 @@ void eval_binary_operator(GLEArrayImpl* stk, int op) {
 			case GLEObjectTypeString:
 				eval_binary_operator_string(stk, op, (GLEString*)a->Entry.ObjectVal, (GLEString*)b->Entry.ObjectVal);
 				break;
+			case GLEObjectTypeBool:
+				eval_binary_operator_bool(stk, op, a->Entry.BoolVal, b->Entry.BoolVal);
+				break;
 			default:
 				complain_operator_type(op, a_type);
 				break;
@@ -264,7 +315,7 @@ void eval_binary_operator(GLEArrayImpl* stk, int op) {
 		eval_binary_operator_string(stk, op, a_str.get(), b_str.get());
 	} else {
 		std::ostringstream msg;
-		msg << "operator " << op
+		msg << "operator " << gle_operator_to_string(op)
 			<< " does not apply to types '" << gle_object_type_to_string((GLEObjectType)a_type)
 			<< "' and '" << gle_object_type_to_string((GLEObjectType)b_type) << "'";
 		g_throw_parser_error(msg.str());

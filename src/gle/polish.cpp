@@ -141,12 +141,10 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 	int curpri = 0;
 	int nstk = 0, stk[50], stkp[50];   /* stack for operators */
 	int unary = 1;                     /* binary or unary operation expected */
-	/* last_typ, 1=number,2=string */
 	bool isa_string = false;
 	bool not_string = false;
 	if (*rtype==1) not_string = true;
 	if (*rtype>0) term_bracket = true;
-	int last_typ = *rtype;
 	pcode.addInt(PCODE_EXPR);   /* Expression follows */
 	int savelen = pcode.size(); /* Used to set acutal length at end */
 	pcode.addInt(0);	    /* Length of expression */
@@ -161,7 +159,7 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 			if (token_len != 0) {
 				m_tokens.pushback_token();
 			}
-			*rtype = last_typ;
+			*rtype = 0;
 			dbg gprint("Found END OF EXPRESSION \n");
 			if (curpri != 0) {
 				throw error("unexpected end of expression, missing closing ')'");
@@ -187,10 +185,6 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 				dbg gprint("Found number {%s}\n",token.c_str());
 				double value = atof(token.c_str());
 				pcode.addDouble(value);
-				if (last_typ == 2) {
-					throw error(token_col, "expecting string, but found number");
-				}
-				last_typ = 1;
 				unary = 2;
 				break;
 			}
@@ -204,10 +198,6 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 				//
 				dbg gprint("Found built in function \n");
 				get_params(pcode, np, plist, uc_token);
-				if (last_typ == (3-ret)) {
-					throw error(token_col, string("illegal function return type: ")+ns[ret]);
-				}
-				last_typ = ret;
 				pcode.addFunction(idx+60);
 				unary = 2;
 				break;
@@ -225,7 +215,6 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 //				printf("User cts=%s  idx=%d ret=%d np=%d plist=%d\n",cts,idx,ret,np,plist);
 				dbg gprint("Found user function \n");
 				get_params(pcode, sub->getNbParam(), sub->getParamTypes(), uc_token);
-				if (ret > 0 && ret < 3) last_typ = ret;
 				pcode.addFunction(sub->getIndex()+LOCAL_START_INDEX);
 				unary = 2;
 				break;
@@ -235,7 +224,6 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 			var_find((char*)uc_token.c_str(), &v, &ret);
 			if (v >= 0) {
 				// cout << "found var: '" << uc_token << "' -> " << v << endl;
-				last_typ = ret;
 				if (ret == 2) pcode.addStrVar(v);
 				else pcode.addVar(v);
 				unary = 2;
@@ -248,7 +236,6 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 			/* Is it a string */
 			if (first_char == '"' || first_char == '\'') {
 				dbg gprint("Found string \n");
-				last_typ = 2;
 				string str_no_quote = token;
 				str_remove_quote(str_no_quote);
 				pcode.addString(str_no_quote);
@@ -274,7 +261,6 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 					throw error(token_col, "illegal variable name '"+uc_token+"'");
 				}
 				var_findadd((char*)uc_token.c_str(), &v, &ret);
-				last_typ = ret;
 				if (ret == 2) pcode.addStrVar(v);
 				else pcode.addVar(v);
 				not_string = true;
@@ -285,7 +271,6 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 				}
 				break;
 			}
-			last_typ = 2;
 			dbg printf("Unquoted string (%s) \n",token.c_str());
 			pcode.addString(token);
 			if (!valid_unquoted_string(token)) {
@@ -341,10 +326,6 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 				}
 			}
 			if (v > 0) {
-				if (last_typ < 1 || last_typ > 3) {
-					last_typ = 1;
-				}
-				dbg gprint("stack, i %d, type %d \n",v,last_typ);
 				stack_bin(v, priority);
 				dbg gprint("Found binary operator \n");
 				unary = 1;
@@ -482,6 +463,48 @@ void polish_eval_string(const char *exp, string *str, bool allownum) throw(Parse
 	GLEPolish* polish = get_global_polish();
 	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 	if (polish != NULL) polish->eval_string(stk.get(), exp, str, allownum);
+}
+
+std::string gle_operator_to_string(int op) {
+	switch (op) {
+		case BIN_OP_PLUS:
+			return "+";
+		case BIN_OP_MINUS:
+			return "-";
+		case BIN_OP_MULTIPLY:
+			return "*";
+		case BIN_OP_DIVIDE:
+			return "/";
+		case BIN_OP_POW:
+			return "^";
+		case BIN_OP_EQUALS:
+			return "=";
+		case BIN_OP_LT:
+			return "<";
+		case BIN_OP_LE:
+			return "<=";
+		case BIN_OP_GT:
+			return ">";
+		case BIN_OP_GE:
+			return ">=";
+		case BIN_OP_NOT_EQUALS:
+			return "<>";
+		case BIN_OP_AND:
+			return "AND";
+		case BIN_OP_OR:
+			return "OR";
+		case BIN_OP_MOD:
+			return "%";
+		case BIN_OP_DOT:
+			return ".";
+		default:
+			break;
+	}
+	{
+		std::ostringstream msg;
+		msg << "OP" << op;
+		return msg.str();
+	}
 }
 
 GLEPcode::GLEPcode(GLEPcodeList* list) {

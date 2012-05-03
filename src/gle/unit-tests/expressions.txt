@@ -10,3 +10,20 @@
 6>10,false
 6>=6,true
 5<>5,false
+(2 < 6) and (4 = 3),false
+(2 < 6) and (4 = 4),true
+"'hello' + ' ' + 'world'",hello world
+"'ape' < 'zebra'",true
+"'zebra' < 'ape'",false
+"'ape' > 'zebra'",false
+"'zebra' > 'ape'",true
+"'ape' <= 'zebra'",true
+"'zebra' <= 'ape'",false
+"'ape' >= 'zebra'",false
+"'zebra' >= 'ape'",true
+"'APE' >= 'ape'",true
+"'APE' <= 'ape'",true
+"'APE' > 'ape'",false
+"'APE' < 'ape'",false
+"'x' . 'y'",x.y
+"'5 = ' + 5",5 = 5

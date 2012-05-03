@@ -71,6 +71,8 @@ enum BinaryOperators {
 	BIN_OP_DOT
 };
 
+std::string gle_operator_to_string(int op);
+
 void setEvalStack(GLEArrayImpl* stk, int pos, double value);
 void setEvalStack(GLEArrayImpl* stk, int pos, const char* value);
 void setEvalStack(GLEArrayImpl* stk, int pos, int value);

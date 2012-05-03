@@ -472,6 +472,26 @@ bool GLEString::equalsI(const char* str) {
 	return true;
 }
 
+bool GLEString::equalsI(GLEString* other) {
+	if (m_Length != other->m_Length) return false;
+	for (unsigned int i = 0; i < m_Length; ++i) {
+		if (getI(i) != other->getI(i)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+int GLEString::strICmp(GLEString* other) const {
+	int s1 = 0;
+	int s2 = 0;
+	while (true) {
+		int c1 = s1 < m_Length ? getI(s1++) : 0;
+		int c2 = s2 < other->m_Length ? other->getI(s2++) : 0;
+		if (c1 == 0 || c1 != c2) return c1 - c2;
+	}
+}
+
 bool GLEString::equals(GLEDataObject* obj) {
 	if (obj->getType() != GLEObjectTypeString) return false;
 	GLEString* other = (GLEString*)obj;
@@ -480,6 +500,21 @@ bool GLEString::equals(GLEDataObject* obj) {
 		if (get(i) != other->get(i)) return false;
 	}
 	return true;
+}
+
+GLEString* GLEString::concat(GLEString* other) const {
+	GLEString* res = new GLEString();
+	int size = m_Length + other->m_Length;
+	res->resize(size);
+	res->m_Length = size;
+	unsigned int idx = 0;
+	for (int i = 0; i < m_Length; ++i) {
+		res->set(idx++, get(i));
+	}
+	for (int i = 0; i < other->m_Length; ++i) {
+		res->set(idx++, other->get(i));
+	}
+	return res;
 }
 
 GLEString* GLEString::substring(unsigned int from, unsigned int to) const {

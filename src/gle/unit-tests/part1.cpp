@@ -203,6 +203,7 @@ void test_expression_evaluator_each(GLEPolish* polish, const std::string& expres
 
 void test_expression_evaluator() {
 	GLECSVData reader;
+	reader.setDelims(",");
 	reader.read("unit-tests/expressions.txt");
 	GLECSVError* error = reader.getError();
 	unit_test(error->errorCode == GLECSVErrorNone);
@@ -212,6 +213,8 @@ void test_expression_evaluator() {
 		unit_test(reader.getNbColumns(i) == 2);
 		string expression(reader.getCellString(i, 0));
 		string expectedValue(reader.getCellString(i, 1));
+		str_remove_quote(expression);
+		str_remove_quote(expectedValue);
 		test_expression_evaluator_each(polish.get(), expression, expectedValue);
 	}
 }

@@ -177,6 +177,8 @@ public:
 	unsigned int getI(unsigned int i) const;
 	bool isSmallerThanI(const GLEString* s2) const;
 	bool equalsI(const char* str);
+	bool equalsI(GLEString* other);
+	int strICmp(GLEString* other) const;
 	virtual bool equals(GLEDataObject* obj);
 	virtual void print(ostream& out) const;
 	void fromUTF8(const char* str);
@@ -186,6 +188,7 @@ public:
 	void toUTF8(string& out) const;
 	void toUTF8(char* out) const;
 	string toUTF8() const;
+	GLEString* concat(GLEString* other) const;
 	GLEString* substring(unsigned int from, unsigned int to) const;
 	GLEArrayImpl* split(char bych) const;
 	void addQuotes();
