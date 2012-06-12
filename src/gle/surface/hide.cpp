@@ -48,6 +48,7 @@
 #include "gsurface.h"
 
 typedef int int32;
+class GLENumberFormat;
 
 void initminmax(void);
 void init_user(void);
@@ -86,6 +87,8 @@ void clipline(float x1, float y1, float z1, float x2, float y2, float z2);
 void draw_markers(int nx, int ny);
 void matshow(const char *s, float m[4][4]);
 void show_horizon();
+std::string g_format_label(double fi, double dticks, GLENumberFormat* format);
+
 float base;
 extern int ngerror;
 extern int batch_only;
@@ -534,8 +537,7 @@ void draw_maintitle() {
 }
 
 void draw_axis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
-	float ux,uy,ux2,uy2,ux3,uy3,r,a,ta,r2,x,xx,t1,tn;
-	char buff[80];
+	float ux,uy,ux2,uy2,ux3,uy3,r,a,ta,r2,xx,t1,tn;
 	if (ax->type>1)
 		return;
 	if (!ax->on)
@@ -568,7 +570,7 @@ void draw_axis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
 
 	nice_ticks(&ax->step, &ax->min, &ax->max, &t1, &tn);
 
-	for (x=t1; x<=.00001+ax->max; x+=ax->step) {
+	for (double x=t1; x<=.00001+ax->max; x+=ax->step) {
 		if (ax->type==0) {
 			xx =  (nx-1)*(x-ax->min)/(ax->max - ax->min);
 			touser(xx,0,minz,&ux,&uy);
@@ -579,14 +581,12 @@ void draw_axis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
 		g_move(ux,uy);
 		g_line(ux+ux2,uy+uy2);
 		g_move(ux+ux3,uy+uy3);
-		if (fabs(x)<(.0001*ax->step))
-			x = 0;
-		sprintf(buff,"%g",x);
+		std::string label(g_format_label(x, ax->step, 0));
 		g_gsave();
 		g_rotate(ta);
 		if (ax->nolast && x> (ax->max - .5*(ax->step))) /* do nothing */ ;
 		else if (ax->nofirst && x==t1) /* do nothing */;
-		else g_text(buff);
+		else g_text(label);
 		g_grestore();
 	}
 	g_set_just(pass_justify("TC"));
@@ -612,8 +612,7 @@ void draw_axis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
 }
 
 void draw_zaxis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
-	float ux,uy,ux2,uy2,ux3,uy3,r,a,r2,x,t1,tn;
-	char buff[80];
+	float ux,uy,ux2,uy2,ux3,uy3,r,a,r2,t1,tn;
 
 	if (!ax->on)
 		return;
@@ -636,15 +635,13 @@ void draw_zaxis(struct GLEAxis3D *ax, int nx, int ny, float minz, float maxz) {
 	g_set_hei(ax->hei);
 	g_set_just(pass_justify("RC"));
 	nice_ticks(&ax->step, &ax->min, &ax->max, &t1, &tn);
-	for (x=t1; x<=.0001+ax->max; x+=ax->step) {
+	for (double x=t1; x<=.0001+ax->max; x+=ax->step) {
 		touser(0,0,x,&ux,&uy);
 		g_move(ux,uy);
 		g_line(ux+ux2,uy+uy2);
 		g_move(ux+ux3,uy+uy3);
-		if (fabs(x)<(.0001*ax->step))
-			x = 0;
-		sprintf(buff,"%g",x);
-		g_text(buff);
+		std::string label(g_format_label(x, ax->step, 0));
+		g_text(label);
 	}
 	g_set_just(pass_justify("BC"));
 /* Now draw the title for this axis */

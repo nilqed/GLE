@@ -146,7 +146,7 @@ public:
 	~GLEAxis();
 	void init(int i);
 	string* getNamePtr(int i);
-	void setName(int i, const char* name);
+	void setName(int i, const std::string& name);
 	void setPlace(int i, double place);
 	void clearNoTicks();
 	void addNoTick(double pos);
