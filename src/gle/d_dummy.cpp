@@ -124,8 +124,8 @@ void GLEDummyDevice::fill_ary(int nwk,double *wkx,double *wky) {
 void GLEDummyDevice::flush(void) {
 }
 
-void GLEDummyDevice::get_type(char *t) {
-	strcpy(t,"DUMMY");
+std::string GLEDummyDevice::get_type() {
+	return "DUMMY";
 }
 
 void GLEDummyDevice::line(double zx,double zy) {

@@ -418,9 +418,9 @@ void X11GLEDevice::source(const char *s)
 	dbg fprintf(stderr,"drawing %s ....",s);
 }
 /*---------------------------------------------------------------------------*/
-void X11GLEDevice::get_type(char *t)
+std::string X11GLEDevice::get_type()
 {
-	strcpy(t,"INTERACTIVE, X, DECWINDOWS, XWINDOWS");
+	return "INTERACTIVE, X, DECWINDOWS, XWINDOWS";
 }
 /*---------------------------------------------------------------------------*/
 void X11GLEDevice::set_path(int onoff)

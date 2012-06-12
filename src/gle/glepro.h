@@ -115,6 +115,7 @@ void polar_xy(double rx, double ry, double angle, double *dx, double *dy);
 void scheck(int v);
 void set_glue(int *in,int ilen,double actual,double width,double stretch,double shrink,double *setlen);
 void setdstr(char **s, const char *in);
+void setdstr(char **s, const std::string& in);
 void setsstr(char **s, const char *in);
 void showpcode(int *p);
 void spop(int v);

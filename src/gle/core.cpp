@@ -385,8 +385,8 @@ void g_init_bounds() {
 	g.ymax = -1e30;
 }
 
-void g_get_type(char *t) {
-	g.dev->get_type(t);
+std::string g_get_type() {
+	return g.dev->get_type();
 }
 
 void g_set_path(int onoff) {
@@ -2044,9 +2044,8 @@ void g_postscript(char *fname, double wx, double wy) throw(ParserError) {
 		wx = wy*bx2/by2;
 	}
 	/* non-Postscript device? */
-	char inbuff[500];
-	g_get_type(inbuff);
-	if (str_i_str(inbuff, "PS") == NULL) {
+	std::string inbuff(g_get_type());
+	if (str_i_str(inbuff, "POSTSCRIPT") == NULL) {
 		input.close();
 		g_get_xy(&cx,&cy);
 		g_box_stroke(cx,cy,cx+wx,cy+wy);
@@ -2094,20 +2093,6 @@ void g_postscript(char *fname, double wx, double wy) throw(ParserError) {
 	g_set_bounds(&save_box);
 	g_update_bounds(cx, cy);
 	g_update_bounds(cx+wx, cy+wy);
-}
-
-int check_dev_type_ps(double wx, double wy) {
-	char devtype[200];
-	g_get_type(devtype);
-	if (str_i_str(devtype,"PS")== NULL) {
-		gprint("Output device does not support BITMAPS\n");
-		double cx, cy;
-		g_get_xy(&cx,&cy);
-		g_box_stroke(cx,cy,cx+wx,cy+wy);
-		return 0;
-	} else {
-		return 1;
-	}
 }
 
 int g_bitmap_string_to_type(const char* stype) {
@@ -4020,4 +4005,38 @@ int g_font_fallback(int font) {
 		}
 	}
 	return font;
+}
+
+void g_create_device_string_add(CmdLineArgSet* device, int deviceId, const char* deviceName, std::vector<std::string>& result) {
+	if (device->hasValue(deviceId)) {
+		result.push_back(deviceName);
+	}
+}
+
+std::vector<std::string> g_create_device_string() {
+	CmdLineObj* cmdLine = GLEGetInterfacePointer()->getCmdLine();
+	CmdLineArgSet* device = (CmdLineArgSet*)cmdLine->getOption(GLE_OPT_DEVICE)->getArg(0);
+	std::vector<std::string> result(device->getValues());
+	if (cmdLine->hasOption(GLE_OPT_LANDSCAPE)) {
+		result.push_back("LANDSCAPE");
+	}
+	if (cmdLine->hasOption(GLE_OPT_FULL_PAGE)) {
+		result.push_back("FULLPAGE");
+	}
+	if (cmdLine->hasOption(GLE_OPT_TEX) || cmdLine->hasOption(GLE_OPT_CREATE_INC)) {
+		result.push_back("TEX");
+	}
+	if (cmdLine->hasOption(GLE_OPT_NO_COLOR)) {
+		result.push_back("GRAYSCALE");
+	}
+	if (cmdLine->hasOption(GLE_OPT_TRANSPARENT)) {
+		result.push_back("TRANSPARENT");
+	}
+	if (cmdLine->hasOption(GLE_OPT_NO_LIGATURES)) {
+		result.push_back("NOLIGATURES");
+	}
+	if (cmdLine->hasOption(GLE_OPT_SAFEMODE)) {
+		result.push_back("SAFE");
+	}
+	return strs_to_uppercase(result);
 }

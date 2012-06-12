@@ -544,8 +544,7 @@ void eval_pcode_loop(int *pcode, int plen, int *otyp) throw(ParserError) {
 			break;
 		case 111: /* device$ */
 			*otyp = 2;
-			g_get_type(sbuf);
-			setdstr(&stk_str[++nstk],sbuf);
+			setdstr(&stk_str[++nstk], g_get_type());
 			break;
 		case 115: /* feof(chan) */
 			stk[nstk] = f_eof((int) stk[nstk]);
@@ -1062,6 +1061,12 @@ void setdstr(char **s, const char *in)
 {
 	if (*s != NULL) myfree(*s);
 	*s = sdup(in);
+}
+
+void setdstr(char **s, const std::string& in)
+{
+	if (*s != NULL) myfree(*s);
+	*s = sdup(in.c_str());
 }
 
 void setsstr(char **s, const char *in)

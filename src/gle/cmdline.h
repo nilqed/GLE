@@ -167,6 +167,7 @@ public:
 	void removeValue(int i);
 	void addPossibleValue(const char* value);
 	bool hasOnlyValue(int id);
+	vector<string> getValues();
 	inline void setUnsupportedValue(int id) { m_HasValue[id] = CMDLINE_UNSUPPORTED; }
 	inline void addDefaultValue(int id) { m_Defaults.push_back(id); }
 	inline int getNbValues() { return m_Values.size(); }

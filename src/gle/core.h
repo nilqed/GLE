@@ -396,7 +396,7 @@ void g_get_line_style(char *s);
 void g_get_line_styled(double *w);
 void g_get_line_width(double *w);
 void g_get_path(int *pathonoff);
-void g_get_type(char *t);
+std::string g_get_type();
 void g_get_usersize(dbl *x,dbl *y);
 void g_get_pagesize(dbl *x,dbl *y,int *type);
 void g_get_pagesize(dbl *x,dbl *y);

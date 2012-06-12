@@ -114,6 +114,7 @@ extern ConfigCollection g_Config;
 //
 char *font_getname(int i);
 void AddExtension(string& fname, const string& ext);
+std::vector<std::string> g_create_device_string();
 
 void d_tidyup() {
 }
@@ -149,9 +150,11 @@ void PSGLEDevice::source(const char *s) {
 	dbg out() << "%% SOURCE, " << s;
 }
 
-void PSGLEDevice::get_type(char *t) {
-	strcpy(t,"HARDCOPY, PS, FILLPATH");
-	if (isEps()) strcat(t,", EPS,");
+std::string PSGLEDevice::get_type() {
+	std::vector<std::string> temp(g_create_device_string());
+	temp.push_back("FILLPATH");
+	temp.push_back("POSTSCRIPT");
+	return str_join(temp);
 }
 
 void PSGLEDevice::set_path(int onoff) {

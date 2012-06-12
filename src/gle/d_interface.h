@@ -77,7 +77,7 @@ public:
 	virtual void fill_ary(int nwk,double *wkx,double *wky) = 0;
 	virtual void flush(void) = 0;
 	// virtual void get_line_cap(int *i) = 0;
-	virtual void get_type(char *t) = 0;
+	virtual std::string get_type() = 0;
 	virtual void line(double zx,double zy) = 0;
 	virtual void line_ary(int nwk,double *wkx,double *wky) = 0;
 	virtual void message(char *s) = 0;
@@ -160,7 +160,7 @@ public:
 	virtual void fill_ary(int nwk,double *wkx,double *wky);
 	virtual void flush(void);
 	// virtual void get_line_cap(int *i);
-	virtual void get_type(char *t);
+	virtual std::string get_type();
 	virtual void line(double zx,double zy);
 	virtual void line_ary(int nwk,double *wkx,double *wky);
 	virtual void message(char *s);
@@ -254,7 +254,7 @@ public:
 	virtual void fill(void);
 	virtual void fill_ary(int nwk,double *wkx,double *wky);
 	virtual void flush(void);
-	virtual void get_type(char *t);
+	virtual std::string get_type();
 	virtual void line(double zx,double zy);
 	virtual void line_ary(int nwk,double *wkx,double *wky);
 	virtual void message(char *s);
@@ -376,7 +376,7 @@ public:
 	virtual void fill(void);
 	virtual void fill_ary(int nwk,double *wkx,double *wky);
 	virtual void flush(void);
-	virtual void get_type(char *t);
+	virtual std::string get_type();
 	virtual void line(double zx,double zy);
 	virtual void line_ary(int nwk,double *wkx,double *wky);
 	virtual void message(char *s);
@@ -477,7 +477,7 @@ public:
 	virtual void fill_ary(int nwk,double *wkx,double *wky);
 	virtual void flush(void);
 	// virtual void get_line_cap(int *i);
-	virtual void get_type(char *t);
+	virtual std::string get_type();
 	virtual void line(double zx,double zy);
 	virtual void line_ary(int nwk,double *wkx,double *wky);
 	virtual void message(char *s);
