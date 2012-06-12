@@ -34,7 +34,7 @@ MAKE_PROG=$(MAKE)
 .PHONY : dosed
 
 ifeq (@HAVE_MINGW@,1)
-	MAKE_PROG=mingw32-make
+   MAKE_PROG=mingw32-make
 endif
 
 prefix=@prefix@
@@ -54,22 +54,22 @@ TOMAKE=
 TOCLEAN=
 QMAKE_OPTS=
 ifeq (@HAVE_QT@,1)
-	TOMAKE=Makefile
-	ifeq (@HAVE_AUTOPACKAGE@,1)
-		TOMAKE:=$(TOMAKE) repmake
-	endif
+   TOMAKE=Makefile
+   ifeq (@HAVE_AUTOPACKAGE@,1)
+      TOMAKE:=$(TOMAKE) repmake
+   endif
    TOMAKE:=$(TOMAKE) domake
-	TOCLEAN=doclean
-	ifeq (@HAVE_MAC@,1)
-		QMAKE_OPTS:=-spec macx-g++
-		TOMAKE:=$(TOMAKE) install_qgle_name_mac
-	endif
-	ifeq (@HAVE_FREEBSD@,1)
-		QMAKE_OPTS:=-spec freebsd-g++
-	endif
+   TOCLEAN=doclean
+   ifeq (@HAVE_MAC@,1)
+      QMAKE_OPTS:=-spec macx-g++
+      TOMAKE:=$(TOMAKE) install_qgle_name_mac
+   endif
+   ifeq (@HAVE_FREEBSD@,1)
+      QMAKE_OPTS:=-spec freebsd-g++
+   endif
 endif
 ifeq (@HAVE_MAC@,1)
-	TOMAKE:=$(TOMAKE) $(PROJECT_BINDIR)/bin/glegs
+   TOMAKE:=$(TOMAKE) $(PROJECT_BINDIR)/bin/glegs
 endif
 
 all: $(TOMAKE)
@@ -107,7 +107,7 @@ dosed:
 
 EXTRA_OBJS := ../gle/cutils.$(OBJ_SUFF) ../gle/file_io.$(OBJ_SUFF)
 ifeq (@HAVE_LIBGLE_CPPFLAGS@,1)
-	EXTRA_OBJS := ../gle/cutils.static.$(OBJ_SUFF) ../gle/file_io.static.$(OBJ_SUFF)
+   EXTRA_OBJS := ../gle/cutils.static.$(OBJ_SUFF) ../gle/file_io.static.$(OBJ_SUFF)
 endif
 
 $(PROJECT_BINDIR)/bin/glegs: glegs.cpp $(EXTRA_OBJS)
