@@ -58,7 +58,6 @@
 extern struct gmodel g;
 
 char *font_getname(int i);
-std::vector<std::string> g_create_device_string();
 
 GLECairoDevice::GLECairoDevice(bool showerror):
 	m_ShowError(showerror),

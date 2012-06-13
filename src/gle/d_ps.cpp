@@ -114,7 +114,6 @@ extern ConfigCollection g_Config;
 //
 char *font_getname(int i);
 void AddExtension(string& fname, const string& ext);
-std::vector<std::string> g_create_device_string();
 
 void d_tidyup() {
 }

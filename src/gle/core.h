@@ -451,5 +451,6 @@ void my_char(int ff, int cc);
 int g_device_to_bitmap_type(int device);
 bool g_bitmap_supports_type(int type);
 int g_font_fallback(int font);
+std::vector<std::string> g_create_device_string();
 
 #endif

@@ -4007,12 +4007,6 @@ int g_font_fallback(int font) {
 	return font;
 }
 
-void g_create_device_string_add(CmdLineArgSet* device, int deviceId, const char* deviceName, std::vector<std::string>& result) {
-	if (device->hasValue(deviceId)) {
-		result.push_back(deviceName);
-	}
-}
-
 std::vector<std::string> g_create_device_string() {
 	CmdLineObj* cmdLine = GLEGetInterfacePointer()->getCmdLine();
 	CmdLineArgSet* device = (CmdLineArgSet*)cmdLine->getOption(GLE_OPT_DEVICE)->getArg(0);
