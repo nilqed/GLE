@@ -1888,7 +1888,7 @@ GLEColor* GLEColor::clone() {
 	return result;
 }
 
-int GLEColor::getType() {
+int GLEColor::getType() const {
 	return GLEObjectTypeColor;
 }
 
@@ -1900,7 +1900,7 @@ bool GLEColor::equalsApprox(GLEColor* other) {
 		   m_Transparent == other->m_Transparent;
 }
 
-bool GLEColor::equals(GLEDataObject* obj) {
+bool GLEColor::equals(GLEDataObject* obj) const {
 	if (obj->getType() != GLEObjectTypeColor) return false;
 	GLEColor* other = (GLEColor*)obj;
 	return m_Red == other->m_Red &&
@@ -1910,7 +1910,7 @@ bool GLEColor::equals(GLEDataObject* obj) {
 	       m_Transparent == other->m_Transparent;
 }
 
-void GLEColor::toString(ostream& out) {
+void GLEColor::print(ostream& out) const {
 	if (isTransparent()) {
 		out << "clear";
 	} else {
@@ -2129,7 +2129,7 @@ void GLEProperty::getPropertyAsString(string* result, GLEMemoryCell* value) {
 			break;
 		case GLEPropertyTypeColor:
 			color = (GLEColor*)value->Entry.ObjectVal;
-			color->toString(str);
+			color->print(str);
 			break;
 		case GLEPropertyTypeFont:
 			font = (GLEFont*)value->Entry.ObjectVal;

@@ -46,6 +46,7 @@ GLERC<GLEString> evalString(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOt
 GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
 double evalDouble(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
 bool evalBool(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
+GLERC<GLEColor> evalColor(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
 GLESub* eval_subroutine_call(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
 void eval_do_object_block_call(GLEArrayImpl* stk, GLESub* sub, GLEObjectDO* obj) throw(ParserError);
 

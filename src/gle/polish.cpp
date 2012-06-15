@@ -55,11 +55,12 @@ extern int gle_debug;
 #include "cutils.h"
 #include "keyword.h"
 #include "run.h"
+#include "fn.h"
 
 /*---------------------------------------------------------------------------*/
 /* bin = 10..29, binstr = 30..49, fn= 60...139, userfn=LOCAL_START_INDEX..nnn */
 #define stack_bin(i,p) stack_op(pcode, stk, stkp, &nstk, i + BINARY_OPERATOR_OFFSET, p + curpri)
-#define stack_fn(i)    stack_op(pcode, stk, stkp, &nstk, i + 60, 10 + curpri)
+#define stack_fn(i)    stack_op(pcode, stk, stkp, &nstk, i + FN_BUILTIN_MAGIC, 10 + curpri)
 #define dbg if ((gle_debug & 4)>0)
 
 // #define dbg
@@ -198,7 +199,7 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 				//
 				dbg gprint("Found built in function \n");
 				get_params(pcode, np, plist, uc_token);
-				pcode.addFunction(idx+60);
+				pcode.addFunction(idx + FN_BUILTIN_MAGIC);
 				unary = 2;
 				break;
 			} else if (idx > 0 && idx <= 3) {
@@ -508,6 +509,17 @@ std::string gle_operator_to_string(int op) {
 
 GLEPcode::GLEPcode(GLEPcodeList* list) {
 	m_PCodeList = list;
+}
+
+void GLEPcode::addColor(GLEColor* color) {
+	addInt(PCODE_EXPR);
+	int savelen = size(); /* Used to set acutal length at end */
+	addInt(0);	          /* Length of expression */
+	addDoubleExpression(color->getRed());
+	addDoubleExpression(color->getGreen());
+	addDoubleExpression(color->getBlue());
+	addFunction(FN_RGB + FN_BUILTIN_MAGIC);
+	setInt(savelen, size() - savelen - 1);
 }
 
 void GLEPcode::addDoubleExpression(double val) {

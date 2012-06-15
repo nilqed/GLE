@@ -110,6 +110,7 @@ double string_to_number(const char* str) {
 }
 
 void format_number_to_string(char* out, const char* format, double value);
+GLERC<GLEColor> memory_cell_to_color(GLEPolish* polish, GLEArrayImpl* stk, GLEMemoryCell* cell, IThrowsError* throwsError, int depth);
 
 unsigned char float_to_color_comp(double value) {
 	int color = (int)floor(value*255 + 0.5);
@@ -774,7 +775,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, ++nstk, getGLERunInstance()->getScript()->getLocation()->getDirectory().c_str());
 			break;
 		case 60+FN_FONT:
-			setEvalStack(stk, nstk, check_has_font(getEvalStackString(stk, nstk)));
+			setEvalStackBool(stk, nstk, check_has_font(getEvalStackString(stk, nstk)) != 0);
 			break;
 		case 92: /* twidth */
 			g_measure(getEvalStackString(stk, nstk),&x1,&x2,&y1,&y2);
@@ -1000,11 +1001,16 @@ void evalDoConstant(GLEArrayImpl* stk, int *pcode, int *cp)
 }
 
 void evalCommon(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
+	int fixed_cp;
+	if (cp == 0) {
+		fixed_cp = 0;
+		cp = &fixed_cp;
+	}
 	if (pcode[(*cp)] == 8) {
 		evalDoConstant(stk, pcode, cp);
 		*cp = *cp + 1;
 	} else {
-		if (pcode[(*cp)++] != 1) {
+		if (pcode[(*cp)++] != PCODE_EXPR) {
 			g_throw_parser_error("pcode error: expected expression");
 		}
 		int plen = pcode[(*cp)++];
@@ -1034,6 +1040,11 @@ bool evalBool(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
 	GLEMemoryCell* mc = stk->get(1);
 	gle_memory_cell_check(mc, GLEObjectTypeBool);
 	return mc->Entry.BoolVal;
+}
+
+GLERC<GLEColor> evalColor(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
+	evalCommon(stk, pcode, cp);
+	return memory_cell_to_color(get_global_polish(), stk, stk->get(1), g_get_throws_error(), 0);
 }
 
 GLERC<GLEString> evalString(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOther) throw(ParserError) {

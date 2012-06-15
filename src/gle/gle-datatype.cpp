@@ -153,11 +153,11 @@ GLEDataObject::GLEDataObject() {
 GLEDataObject::~GLEDataObject() {
 }
 
-int GLEDataObject::getType() {
+int GLEDataObject::getType() const {
 	return GLEObjectTypeUnknown;
 }
 
-bool GLEDataObject::equals(GLEDataObject* obj) {
+bool GLEDataObject::equals(GLEDataObject* obj) const {
 	return false;
 }
 
@@ -170,11 +170,11 @@ GLEPointDataObject::GLEPointDataObject(double x, double y) : m_point(x, y) {
 GLEPointDataObject::~GLEPointDataObject() {
 }
 
-int GLEPointDataObject::getType() {
+int GLEPointDataObject::getType() const {
 	return GLEObjectTypePoint;
 }
 
-bool GLEPointDataObject::equals(GLEDataObject* obj) {
+bool GLEPointDataObject::equals(GLEDataObject* obj) const {
 	if (obj->getType() != GLEObjectTypePoint) return false;
 	GLEPointDataObject* other = (GLEPointDataObject*)obj;
 	return m_point.getX() == other->m_point.getX()
@@ -484,7 +484,7 @@ bool GLEString::equalsI(GLEString* other) {
 	return true;
 }
 
-bool GLEString::containsI(int ch) {
+bool GLEString::containsI(unsigned int ch) {
 	for (unsigned int i = 0; i < m_Length; ++i) {
 		if (getI(i) == ch) {
 			return true;
@@ -503,7 +503,7 @@ int GLEString::strICmp(GLEString* other) const {
 	}
 }
 
-bool GLEString::equals(GLEDataObject* obj) {
+bool GLEString::equals(GLEDataObject* obj) const {
 	if (obj->getType() != GLEObjectTypeString) return false;
 	GLEString* other = (GLEString*)obj;
 	if (m_Length != other->length()) return false;
@@ -623,7 +623,7 @@ void GLEString::resize(unsigned int size) {
 	}
 }
 
-int GLEString::getType() {
+int GLEString::getType() const {
 	return GLEObjectTypeString;
 }
 
@@ -664,7 +664,7 @@ void GLEArrayImpl::checkType(unsigned int i, int expected) {
 	gle_memory_cell_check(get(i), expected);
 }
 
-int GLEArrayImpl::getType(unsigned int i) {
+int GLEArrayImpl::getType(unsigned int i) const {
 	return gle_memory_cell_type(get(i));
 }
 
@@ -797,7 +797,7 @@ void GLEArrayImpl::enumStrings(ostream& out) {
 	}
 }
 
-int GLEArrayImpl::getType() {
+int GLEArrayImpl::getType() const {
 	return GLEObjectTypeArray;
 }
 
@@ -851,7 +851,7 @@ GLEDynamicSub::~GLEDynamicSub() {
 	if (m_State != NULL) delete m_State;
 }
 
-int GLEDynamicSub::getType() {
+int GLEDynamicSub::getType() const {
 	return GLEObjectTypeDynamicSub;
 }
 
@@ -884,7 +884,7 @@ void GLEObjectRepresention::enableChildObjects() {
 	if (m_SubObjs.isNull()) m_SubObjs = new GLEStringHash();
 }
 
-int GLEObjectRepresention::getType() {
+int GLEObjectRepresention::getType() const {
 	return GLEObjectTypeObjectRep;
 }
 
@@ -941,11 +941,11 @@ void GLEClassDefinition::addField(const char* fieldName) {
 	m_FieldNames->addObject(new GLEString(fieldName));
 }
 
-int GLEClassDefinition::getType() {
+int GLEClassDefinition::getType() const {
 	return GLEObjectTypeClassDefinition;
 }
 
-bool GLEClassDefinition::equals(GLEDataObject* obj) {
+bool GLEClassDefinition::equals(GLEDataObject* obj) const {
 	return false;
 }
 
@@ -957,11 +957,11 @@ GLEClassInstance::GLEClassInstance(GLEClassDefinition* definition):
 {
 }
 
-int GLEClassInstance::getType() {
+int GLEClassInstance::getType() const {
 	return GLEObjectTypeClassInstance;
 }
 
-bool GLEClassInstance::equals(GLEDataObject* obj) {
+bool GLEClassInstance::equals(GLEDataObject* obj) const {
 	return false;
 }
 

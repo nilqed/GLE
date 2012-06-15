@@ -883,7 +883,7 @@ GLERC<GLEColor> pass_color_list_or_fill(const string& color, IThrowsError* error
 			} else {
 				result->setFill(new GLEPatternFill(fillDescr));
 			}
-		} else {
+		} else if (error != 0) {
 			throw error->throwError("found '", color.c_str(), "', but expecting color or fill specification");
 		}
 	}
@@ -939,29 +939,20 @@ GLERC<GLEColor> pass_color_var(const char *s) throw(ParserError) {
 }
 
 void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
-	int vtype = 1;
 	int result = 0;
+	GLERC<GLEColor> color;
 	string& token = m_tokens.next_token();
 	if (pass_color_hash_value(token, &result, &m_tokens)) {
-		GLEColor color;
-		color.setHexValue(result);
-		pcode.addDoubleExpression(color.getDoubleEncoding());
-	} else if (is_float(token)) {
-        string expr(string("CVTGRAY(") + token + ")");
-		polish(expr.c_str(), pcode, &vtype);
-	} else if (str_i_str(token.c_str(), "RGB") != NULL) {
+		color = new GLEColor();
+		color->setHexValue(result);
+	} else {
+		color = pass_color_list_or_fill(token, 0);
+	}
+	if (color.isNull()) {
 		m_tokens.pushback_token();
 		get_exp(pcode);
-	} else if (token == "(") {
-		string expr(string("CVTGRAY(") + m_tokens.next_token() + ")");
-		polish(expr.c_str(), pcode, &vtype);
-		m_tokens.ensure_next_token(")");
-	} else if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
-		string expr(string("CVTCOLOR(") + token + ")");
-		polish(expr.c_str(), pcode, &vtype);
 	} else {
-		GLERC<GLEColor> color(pass_color_list_or_fill(token, &m_tokens));
-		pcode.addDoubleExpression(color->getDoubleEncoding());
+		pcode.addColor(color.get());
 	}
 }
 

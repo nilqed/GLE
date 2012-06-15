@@ -378,11 +378,7 @@ void GLERun::sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError) {
 	// Copy parameters to local variables
 	for (int i = sub->getNbParam()-1; i >= 0; i--) {
 		int var = i | GLE_VAR_LOCAL_BIT;
-		if (sub->getParamType(i) == 1)  {
-			var_set(var, getEvalStackDouble(stk, (*npm)--));
-		} else {
-			var_setstr(var, getEvalStackString(stk, (*npm)--));
-		}
+		getVars()->set(var, stk->get((*npm)--));
 	}
 	// Run subroutine
 	int s_start = sub->getStart();
@@ -394,7 +390,7 @@ void GLERun::sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError) {
 	for (int i = s_start + 1; i < s_end; i++) {
 		// cout << "executing line " << i << " of " << getSource()->getNbLines() << endl;
 		GLESourceLine* line = getSource()->getLine(i - 1);
-		do_pcode(*line,&i,gpcode[i],gplen[i],&endp,mkdrobjs);
+		do_pcode(*line, &i, gpcode[i], gplen[i], &endp, mkdrobjs);
 		dbg gprint("AFTER DO_PCODE I = %d \n",i);
 	}
 	// FIXME: Find more elegant way to back up current line

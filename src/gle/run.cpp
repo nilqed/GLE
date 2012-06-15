@@ -666,8 +666,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 						path_fill[npath] = g_get_fill_clear();
 					}
 					if (ptr) {
-						readvalp(z,pcode+cp+ptr);
-						path_fill[npath] = color_from_double_encoding(z);
+						path_fill[npath] = evalColor(getStack(), pcode + cp + ptr, 0);
 					}
 					cp++;
 					g_set_path(true);
@@ -684,8 +683,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 						}
 						ptr = *(pcode + ++cp);
 						if (ptr) {
-							readvalp(z,pcode+cp+ptr);
-							box->setFill(color_from_double_encoding(z));
+							box->setFill(evalColor(getStack(), pcode + cp + ptr, 0));
 						}
 						if (*(pcode + ++cp)) {
 							box->setStroke(false);
@@ -846,8 +844,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				}
 				ptr = *(pcode + ++cp);
 				if (ptr) {
-					readvalp(z,pcode+cp+ptr);
-					box.setFill(color_from_double_encoding(z));
+					box.setFill(evalColor(getStack(), pcode + cp + ptr, 0));
 				}
 				if (*(pcode + ++cp)) {
 					box.setStroke(false);
@@ -869,7 +866,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			}
 			break;
 		  case 52:  /* CALL or @ */
-			readval(r);
+			evalGeneric(getStack(), pcode, &cp);
 			break;
 		  case 8:  /* CIRCLE */
 			readval(r);
@@ -885,8 +882,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			colorBackup = g_get_fill();
 			ptr_fill = *(pcode + cp);
 			if (ptr_fill) {
-				readvalp(z,pcode + cp + ptr_fill);
-				g_set_fill(color_from_double_encoding(z));
+				g_set_fill(evalColor(getStack(), pcode + cp + ptr_fill, 0));
 			}
 			if (mkdrobjs) {
 				GLEEllipseDO drawobj(ox, oy, r);
@@ -913,8 +909,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			mask_nostroke = *(pcode + cp++);
 			ptr_fill = *(pcode + cp);
 			if (ptr_fill) {
-				readvalp(z,pcode + cp + ptr_fill);
-				g_set_fill(color_from_double_encoding(z));
+				g_set_fill(evalColor(getStack(), pcode + cp + ptr_fill, 0));
 			}
 			if (mkdrobjs) {
 				GLEEllipseDO drawobj(ox, oy, rx, ry);
@@ -1448,20 +1443,16 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					g_set_just(both.l);
 					break;
 				  case 4: /* color */
-					readval(x);
-					g_set_color(color_from_double_encoding(x));
+					g_set_color(evalColor(getStack(), pcode, &cp));
 					break;
 				  case OP_SET_BACKGROUND: /* background */
-					readval(x);
-					g_set_background(color_from_double_encoding(x));
+					g_set_background(evalColor(getStack(), pcode, &cp));
 					break;
 				  case OP_SET_FILL: /* fill */
-					readval(x);
-					g_set_fill(color_from_double_encoding(x));
+					g_set_fill(evalColor(getStack(), pcode, &cp));
 					break;
 				  case OP_SET_FILL_PATTERN: /* fill pattern */
-					readval(x);
-					g_set_fill_pattern(color_from_double_encoding(x));
+					g_set_fill_pattern(evalColor(getStack(), pcode, &cp));
 					break;
 				  case 5: /* dashlen */
 					readval(x);

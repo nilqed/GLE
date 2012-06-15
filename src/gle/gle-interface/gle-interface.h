@@ -418,8 +418,9 @@ public:
 	GLEColor(double r, double g, double b, double a);
 	explicit GLEColor(double gray);
 	~GLEColor();
-	virtual int getType();
-	virtual bool equals(GLEDataObject* obj);
+	virtual int getType() const;
+	virtual bool equals(GLEDataObject* obj) const;
+	virtual void print(ostream& out) const;
 	bool equalsApprox(GLEColor* other);
 	DLLFCT void setRGB(double r, double g, double b);
 	DLLFCT void setRGBA(double r, double g, double b, double a);
@@ -437,15 +438,15 @@ public:
 	unsigned int getHexValueGLE();
 	double getGray();
 	GLEColor* clone();
-	inline double getRed() { return m_Red; }
-	inline double getGreen() { return m_Green; }
-	inline double getBlue() { return m_Blue; }
-	inline double getAlpha() { return m_Alpha; }
-	inline bool hasAlpha() { return float_to_color_comp(m_Alpha) != 255; }
-	inline unsigned char getRedI() { return float_to_color_comp(m_Red); }
-	inline unsigned char getGreenI() { return float_to_color_comp(m_Green); }
-	inline unsigned char getBlueI() { return float_to_color_comp(m_Blue); }
-	inline unsigned char getAlphaI() { return float_to_color_comp(m_Alpha); }
+	inline double getRed() const { return m_Red; }
+	inline double getGreen() const { return m_Green; }
+	inline double getBlue() const { return m_Blue; }
+	inline double getAlpha() const { return m_Alpha; }
+	inline bool hasAlpha() const { return float_to_color_comp(m_Alpha) != 255; }
+	inline unsigned char getRedI() const { return float_to_color_comp(m_Red); }
+	inline unsigned char getGreenI() const { return float_to_color_comp(m_Green); }
+	inline unsigned char getBlueI() const { return float_to_color_comp(m_Blue); }
+	inline unsigned char getAlphaI() const { return float_to_color_comp(m_Alpha); }
 	inline void setRed(double v) { m_Red = v; }
 	inline void setGreen(double v) { m_Green = v; }
 	inline void setBlue(double v) { m_Blue = v; }
@@ -454,11 +455,9 @@ public:
 	inline bool isFill() const { return !m_Fill.isNull(); }
 	inline GLEFillBase* getFill() { return m_Fill.get(); }
 	inline void setFill(GLEFillBase* fill) { m_Fill = fill; }
-	DLLFCT void toString(ostream& out);
 	inline std::string* getNameS() { return m_Name; }
 };
 
-GLERC<GLEColor> color_from_double_encoding(double encoding);
 GLERC<GLEColor> color_or_fill_from_int(int hexValue);
 void update_color_foreground(GLEColor* updateMe, GLEColor* color);
 void update_color_fill_pattern(GLEColor* updateMe, GLEPatternFill* fill);

@@ -65,8 +65,8 @@ class GLEDataObject : public GLERefCountObject {
 public:
 	GLEDataObject();
 	virtual ~GLEDataObject();
-	virtual int getType();
-	virtual bool equals(GLEDataObject* obj);
+	virtual int getType() const;
+	virtual bool equals(GLEDataObject* obj) const;
 	virtual void print(ostream& out) const;
 };
 
@@ -155,8 +155,8 @@ protected:
 public:
 	GLEPointDataObject(double x, double y);
 	virtual ~GLEPointDataObject();
-	virtual int getType();
-	virtual bool equals(GLEDataObject* obj);
+	virtual int getType() const;
+	virtual bool equals(GLEDataObject* obj) const;
 	virtual void print(ostream& out) const;
 };
 
@@ -178,9 +178,9 @@ public:
 	bool isSmallerThanI(const GLEString* s2) const;
 	bool equalsI(const char* str);
 	bool equalsI(GLEString* other);
-	bool containsI(int ch);
+	bool containsI(unsigned int ch);
 	int strICmp(GLEString* other) const;
-	virtual bool equals(GLEDataObject* obj);
+	virtual bool equals(GLEDataObject* obj) const;
 	virtual void print(ostream& out) const;
 	void fromUTF8(const char* str);
 	void fromUTF8(const string& str);
@@ -196,7 +196,7 @@ public:
 	void join(char bych, GLEArrayImpl* arr, int from = 0, int to = -1);
 	void resize(unsigned int size);
 	void DLLFCT setSize(unsigned int size);
-	virtual int getType();
+	virtual int getType() const;
 	static GLEString* getEmptyString();
 };
 
@@ -228,11 +228,11 @@ public:
 	virtual ~GLEArrayImpl();
 	void clear();
 	void set(unsigned int i, const GLEMemoryCell* cell);
-	inline GLEMemoryCell* get(unsigned int i) { return &m_Data[i]; }
+	inline GLEMemoryCell* get(unsigned int i) const { return &m_Data[i]; }
 	inline GLEDataObject* getObjectUnsafe(unsigned int i) { return m_Data[i].Entry.ObjectVal; }
 	inline unsigned int size() { return m_Length; }
 	void init(unsigned int i);
-	int getType(unsigned int i);
+	int getType(unsigned int i) const;
 	void checkType(unsigned int i, int expected);
 	double DLLFCT getDouble(unsigned int i);
 	void DLLFCT setDouble(unsigned int i, double v);
@@ -251,7 +251,7 @@ public:
 	void resize(unsigned int size);
 	void extend(unsigned int size);
 	void enumStrings(ostream& out);
-	virtual int getType();
+	virtual int getType() const;
 private:
 	void resizeMemory(unsigned int size);
 };
@@ -285,7 +285,7 @@ public:
 	GLEDynamicSub();
 	GLEDynamicSub(GLESub* sub);
 	virtual ~GLEDynamicSub();
-	virtual int getType();
+	virtual int getType() const;
 	inline GLESub* getSub() { return m_Sub; }
 	inline void setSub(GLESub* sub) { m_Sub = sub; }
 	inline GLELocalVars* getLocalVars() { return m_VarValues; }
@@ -309,7 +309,7 @@ public:
 	void translateChildrenRecursive(GLEPoint* trans);
 	void copyChildrenRecursive(GLEObjectRepresention* newobj, gmodel* oldstate);
 	void printNames();
-	virtual int getType();
+	virtual int getType() const;
 	inline bool isChildObjectsEnabled() { return !m_SubObjs.isNull(); }
 	inline GLEStringHash* getChilds() { return m_SubObjs.get(); }
 	inline bool hasSub() { return !m_DynSub.isNull(); }
@@ -324,8 +324,8 @@ protected:
 public:
 	GLEClassDefinition(const char* name);
 	void addField(const char* fieldName);
-	virtual int getType();
-	virtual bool equals(GLEDataObject* obj);
+	virtual int getType() const;
+	virtual bool equals(GLEDataObject* obj) const;
 	virtual void print(ostream& out) const;
 };
 
@@ -335,8 +335,8 @@ protected:
 	GLEArrayImpl m_Data;
 public:
 	GLEClassInstance(GLEClassDefinition* definition);
-	virtual int getType();
-	virtual bool equals(GLEDataObject* obj);
+	virtual int getType() const;
+	virtual bool equals(GLEDataObject* obj) const;
 	virtual void print(ostream& out) const;
 	inline GLEClassDefinition* getDefinition() { return m_Definition.get(); }
 	inline GLEArrayImpl* getArray() { return &m_Data; }

@@ -36,6 +36,7 @@
  *                                                                      *
  ************************************************************************/
 
+#define FN_RGB      47
 #define FN_EVAL     76
 #define FN_NARGS    81
 #define FN_ARG      82
@@ -59,3 +60,5 @@
 #define FN_JUSTIFY  100
 #define FN_RGBA     101
 #define FN_RGBA255  102
+
+#define FN_BUILTIN_MAGIC 60

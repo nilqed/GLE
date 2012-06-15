@@ -396,12 +396,6 @@ GLERC<GLEColor> color_or_fill_from_int(int hexValue) {
 	return result;
 }
 
-GLERC<GLEColor> color_from_double_encoding(double encoding) {
-	GLERC<GLEColor> result(new GLEColor());
-	result->setDoubleEncoding(encoding);
-	return result;
-}
-
 void update_color_foreground(GLEColor* updateMe, GLEColor* color) {
 	updateMe->setRGBA(color->getRed(), color->getGreen(), color->getBlue(), color->getAlpha());
 	updateMe->setTransparent(color->isTransparent());

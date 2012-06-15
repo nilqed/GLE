@@ -94,6 +94,7 @@ public:
 	inline void setInt(int idx, int val) { (*this)[idx] = val; };
 	inline void setLast(int val) { (*this)[size()-1] = val; };
 	inline GLEPcodeList* getPcodeList() { return m_PCodeList; }
+	void addColor(GLEColor* color);
 	void addDoubleExpression(double val);
 	void addStringExpression(const char* val);
 	void addDouble(double val);
