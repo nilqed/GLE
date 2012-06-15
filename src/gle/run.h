@@ -42,8 +42,10 @@
 void sub_call(int idx,double *pval,char **pstr,int *npm, int *otyp) throw(ParserError);
 
 void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError);
-GLERC<GLEString> evalStr(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOther) throw(ParserError);
+GLERC<GLEString> evalString(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOther) throw(ParserError);
 GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
+double evalDouble(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
+bool evalBool(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
 GLESub* eval_subroutine_call(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
 void eval_do_object_block_call(GLEArrayImpl* stk, GLESub* sub, GLEObjectDO* obj) throw(ParserError);
 
@@ -77,6 +79,7 @@ protected:
 	GLERC<GLEArrayImpl> m_stack;
 	vector<GLELengthBlock> m_lengthBlocks;
 	bool m_AllowBeforeSize[GLE_KW_NB];
+	GLEMemoryCell m_returnValue;
 public:
 	GLERun(GLEScript* script, GLEFileLocation* outfile);
 	~GLERun();

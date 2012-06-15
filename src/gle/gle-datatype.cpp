@@ -65,6 +65,8 @@ const char* gle_object_type_to_string(GLEObjectType type) {
 		return "definition";
 	case GLEObjectTypeClassInstance:
 		return "instance";
+	case GLEObjectTypeUnknown:
+		return "unknown";
 	}
 	return "unknown";
 }
@@ -482,9 +484,18 @@ bool GLEString::equalsI(GLEString* other) {
 	return true;
 }
 
+bool GLEString::containsI(int ch) {
+	for (unsigned int i = 0; i < m_Length; ++i) {
+		if (getI(i) == ch) {
+			return true;
+		}
+	}
+	return false;
+}
+
 int GLEString::strICmp(GLEString* other) const {
-	int s1 = 0;
-	int s2 = 0;
+	unsigned int s1 = 0;
+	unsigned int s2 = 0;
 	while (true) {
 		int c1 = s1 < m_Length ? getI(s1++) : 0;
 		int c2 = s2 < other->m_Length ? other->getI(s2++) : 0;
@@ -508,10 +519,10 @@ GLEString* GLEString::concat(GLEString* other) const {
 	res->resize(size);
 	res->m_Length = size;
 	unsigned int idx = 0;
-	for (int i = 0; i < m_Length; ++i) {
+	for (unsigned int i = 0; i < m_Length; ++i) {
 		res->set(idx++, get(i));
 	}
-	for (int i = 0; i < other->m_Length; ++i) {
+	for (unsigned int i = 0; i < other->m_Length; ++i) {
 		res->set(idx++, other->get(i));
 	}
 	return res;

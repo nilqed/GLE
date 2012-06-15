@@ -170,7 +170,7 @@ void setEvalStack(GLEArrayImpl* stk, int pos, int value) {
 	stk->setDouble(pos, (double)value);
 }
 
-void setEvalStack(GLEArrayImpl* stk, int pos, GLEString* value) {
+void setEvalStack(GLEArrayImpl* stk, int pos, GLEDataObject* value) {
 	stk->ensure(pos + 1);
 	stk->setObject(pos, value);
 }
@@ -818,7 +818,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 		case 105: /* CVTGRAY(.5) */
 			{
 				GLERC<GLEColor> color(new GLEColor(getEvalStackDouble(stk, nstk)));
-				setEvalStack(stk, nstk, color->getDoubleEncoding());
+				setEvalStack(stk, nstk, color.get());
 			}
 			break;
 		case 106: /* CVTINT(2) */
@@ -846,14 +846,14 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 		case 109: /* CVTCOLOR(c$) */
 			{
 				GLERC<GLEColor> color(pass_color_var(getEvalStackString(stk, nstk)));
-				setEvalStack(stk, nstk, color->getDoubleEncoding());
+				setEvalStack(stk, nstk, color.get());
 			}
 			break;
 		case 107: /* RGB(.4,.4,.2) */
 			{
 				GLERC<GLEColor> color(new GLEColor(getEvalStackDouble(stk, nstk-2), getEvalStackDouble(stk, nstk-1), getEvalStackDouble(stk, nstk)));
 				nstk -= 2;
-				setEvalStack(stk, nstk, color->getDoubleEncoding());
+				setEvalStack(stk, nstk, color.get());
 			}
 			break;
 		case 140: /* RGB255(.4,.4,.2) */
@@ -861,14 +861,14 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 				GLERC<GLEColor> color(new GLEColor());
 				color->setRGB255(getEvalStackDouble(stk, nstk-2), getEvalStackDouble(stk, nstk-1), getEvalStackDouble(stk, nstk));
 				nstk -= 2;
-				setEvalStack(stk, nstk, color->getDoubleEncoding());
+				setEvalStack(stk, nstk, color.get());
 			}
 			break;
 		case 60+FN_RGBA:
 			{
 				GLERC<GLEColor> color(new GLEColor(getEvalStackDouble(stk, nstk-3), getEvalStackDouble(stk, nstk-2), getEvalStackDouble(stk, nstk-1), getEvalStackDouble(stk, nstk)));
 				nstk -= 3;
-				setEvalStack(stk, nstk, color->getDoubleEncoding());
+				setEvalStack(stk, nstk, color.get());
 			}
 			break;
 		case 60+FN_RGBA255:
@@ -876,7 +876,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 				GLERC<GLEColor> color(new GLEColor());
 				color->setRGBA255(getEvalStackDouble(stk, nstk-3), getEvalStackDouble(stk, nstk-2), getEvalStackDouble(stk, nstk-1), getEvalStackDouble(stk, nstk));
 				nstk -= 3;
-				setEvalStack(stk, nstk, color->getDoubleEncoding());
+				setEvalStack(stk, nstk, color.get());
 			}
 			break;
 		case 60+FN_NDATA: /* Number of datapoints in a dateset */
@@ -1022,7 +1022,21 @@ GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserE
 	return stk->get(1);
 }
 
-GLERC<GLEString> evalStr(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOther) throw(ParserError) {
+double evalDouble(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
+	evalCommon(stk, pcode, cp);
+	GLEMemoryCell* mc = stk->get(1);
+	gle_memory_cell_check(mc, GLEObjectTypeDouble);
+	return mc->Entry.DoubleVal;
+}
+
+bool evalBool(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
+	evalCommon(stk, pcode, cp);
+	GLEMemoryCell* mc = stk->get(1);
+	gle_memory_cell_check(mc, GLEObjectTypeBool);
+	return mc->Entry.BoolVal;
+}
+
+GLERC<GLEString> evalString(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOther) throw(ParserError) {
 	GLERC<GLEString> result;
 	evalCommon(stk, pcode, cp);
 	int type = stk->getType(1);
@@ -1126,7 +1140,7 @@ void gle_as_a_calculator_eval(GLEPolish& polish, const string& line) {
 	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 	try {
 		string value;
-		polish.eval_string(stk.get(), line.c_str(), &value, true);
+		polish.evalString(stk.get(), line.c_str(), &value, true);
 		cout << "  " << value << endl;
 	} catch (ParserError err) {
 		// do not use the gprint version as no GLE file is "active"

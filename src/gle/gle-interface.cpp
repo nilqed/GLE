@@ -727,7 +727,7 @@ void GLEInterface::evalString(const char* str, GLEScript* script) {
 		polish.initTokenizer();
 		string value;
 		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-		polish.eval_string(stk.get(), str, &value, true);
+		polish.evalString(stk.get(), str, &value, true);
 		g_message_first_newline(false);
 		g_message(value);
 	} catch (ParserError err) {
@@ -1707,8 +1707,8 @@ void GLEObjectDO::render() {
 		}
 		pcode.addFunction(sub->getIndex() + LOCAL_START_INDEX);
 		pcode.setInt(savelen, pcode.size() - savelen - 1);
-		GLEArrayImpl* stk = 0;
-		eval(stk, (int*)&pcode[0], &cp, &oval, NULL, &otyp);
+		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+		eval(stk.get(), (int*)&pcode[0], &cp, &oval, NULL, &otyp);
 		// g_flush() required to make sure that all line segments are output
 		g_flush();
 		measure.measureEnd();

@@ -467,6 +467,7 @@ GLERun::GLERun(GLEScript* script, GLEFileLocation* outfile) {
 	for (int i = 0; i < GLE_KW_NB; i++) {
 		m_AllowBeforeSize[i] = false;
 	}
+	GLE_MC_INIT(m_returnValue);
 	allowBeforeSize(GLE_KW_ASSIGNMENT);
 	allowBeforeSize(GLE_KW_BITMAP_INFO);
 	allowBeforeSize(GLE_KW_BLANK);
@@ -1204,14 +1205,16 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  case 21: /* ICON */
 			break;
 		  case 22: /* IF EXP */
-			readval(x);
-			readlong(jj);   /* jump to line */
-			readlong(jj2);  /* jump pcode offset */
-			if (x == 0) {
-				*pend = jj2;
-				*srclin = jj-1;
-				return;
-			}
+		  	{
+		  		bool ifValue = evalBool(getStack(), pcode, &cp);
+				readlong(jj);   /* jump to line */
+				readlong(jj2);  /* jump pcode offset */
+				if (!ifValue) {
+					*pend = jj2;
+					*srclin = jj-1;
+					return;
+				}
+		  	}
 			break;
 		  case 23: /* INCLUDE (done in pass,  already included) */
 			break;
@@ -1380,12 +1383,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  case 34: /* REGION */
 			break;
 		  case 50: /* RETURN exp */
-			readval(x);
-			if (otyp == 1) {
-				sub_set_return(x);
-			} else {
-				sub_set_return_str(ostr);
-			}
+			GLE_MC_COPY(&m_returnValue, evalGeneric(getStack(), pcode, &cp));
 			readlong(jj);   /* jump to line */
 			*srclin = jj-1;
 			break;
@@ -1620,7 +1618,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					g_throw_parser_error("pcode error in print/write");
 				}
 				readlong(t);
-				gstr = evalStr(getStack(), pcode, &cp, true);
+				gstr = evalString(getStack(), pcode, &cp, true);
 				if (!temp_str.empty()) {
 					temp_str += " ";
 				}
@@ -2042,9 +2040,9 @@ void GLERun::draw_object_static(const string& path, const string& name, int* pco
 	GLEMeasureBox measure;
 	measure.measureStart();
 	g_move(0.0, 0.0);
-	GLEArrayImpl* stk;
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 	if (mkdrobjs) {
-		GLESub* sub = eval_subroutine_call(stk, pcode, cp);
+		GLESub* sub = eval_subroutine_call(stk.get(), pcode, cp);
 		sub->setScript(getScript());
 		GLEObjectDOConstructor* cons = sub->getObjectDOConstructor();
 		GLEObjectDO objdo(cons);
@@ -2052,7 +2050,7 @@ void GLERun::draw_object_static(const string& path, const string& name, int* pco
 		GLEString* refpt = new GLEString();
 		refpt->join('.', a_path.get(), 1);
 		objdo.setRefPointString(refpt);
-		eval_do_object_block_call(stk, sub, &objdo);
+		eval_do_object_block_call(stk.get(), sub, &objdo);
 		handleNewDrawObject(&objdo, mkdrobjs, &orig);
 	} else {
 		eval(getStack(), pcode, cp, &x, NULL, &otyp);

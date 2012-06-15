@@ -194,7 +194,7 @@ void test_expression_evaluator_each(GLEPolish* polish, const std::string& expres
 			unit_test_msg(equals_rel_fine(mc->Entry.DoubleVal, expectedDouble), msg.str());
 		}
 	} else {
-		GLERC<GLEString> result(evalStr(stk.get(), (int*)&pcode[0], &cp, true));
+		GLERC<GLEString> result(evalString(stk.get(), (int*)&pcode[0], &cp, true));
 		std::string computedString(result->toUTF8());
 		msg << computedString << " == " << expectedValue;
 		unit_test_msg(expectedValue == computedString, msg.str());

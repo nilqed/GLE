@@ -350,51 +350,52 @@ Tokenizer* GLEPolish::getTokens(const string& str) {
 	return &m_tokens;
 }
 
-void GLEPolish::eval(GLEArrayImpl* stk, const char *exp, double *x) throw(ParserError) {
-	int rtype = 1, otyp = 0, cp = 0;
-	GLEPcodeList pc_list;
-	GLEPcode pcode(&pc_list);
-	polish(exp, pcode, &rtype);
-	::eval(stk, (int*)&pcode[0], &cp, x, NULL, &otyp);
-}
-
 void GLEPolish::internalEval(const char *exp, double *x) throw(ParserError) {
 	// difference with eval: no try / catch
-	int rtype = 1, otyp = 0, cp = 0;
+	int rtype = 1, cp = 0;
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
 	internalPolish(exp, pcode, &rtype);
-	GLEArrayImpl* stk = 0;
-	::eval(stk, (int*)&pcode[0], &cp, x, NULL, &otyp);
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	*x = evalDouble(stk.get(), (int*)&pcode[0], &cp);
 }
 
 void GLEPolish::internalEvalString(const char* exp, string* str) throw(ParserError) {
 	// difference with eval_string: no try / catch
-    double oval;
-	GLEString* ostr;
-	int rtype = 2, otyp = 0, cp = 0;
+	int rtype = 2, cp = 0;
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
 	internalPolish(exp, pcode, &rtype);
-	GLEArrayImpl* stk = 0;
-	::eval(stk, (int*)&pcode[0], &cp, &oval, &ostr, &otyp);
-	if (otyp == 1) {
-		stringstream str_cnv;
-		str_cnv << oval;
-		*str = str_cnv.str();
-	} else {
-		*str = ostr->toUTF8();
-	}
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	GLERC<GLEString> result(::evalString(stk.get(), (int*)&pcode[0], &cp, true));
+	*str = result->toUTF8();
 }
 
-void GLEPolish::eval_string(GLEArrayImpl* stk, const char *exp, string *str, bool allownum) throw(ParserError) {
+void GLEPolish::eval(GLEArrayImpl* stk, const char *exp, double *x) throw(ParserError) {
+	int rtype = 1, cp = 0;
+	GLEPcodeList pc_list;
+	GLEPcode pcode(&pc_list);
+	polish(exp, pcode, &rtype);
+	*x = evalDouble(stk, (int*)&pcode[0], &cp);
+}
+
+void GLEPolish::evalString(GLEArrayImpl* stk, const char *exp, string *str, bool allownum) throw(ParserError) {
 	int rtype = allownum ? 0 : 2;
 	int cp = 0;
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
 	polish(exp, pcode, &rtype);
-	GLERC<GLEString> result(evalStr(stk, (int*)&pcode[0], &cp, allownum));
+	GLERC<GLEString> result(::evalString(stk, (int*)&pcode[0], &cp, allownum));
 	*str = result->toUTF8();
+}
+
+GLEMemoryCell* GLEPolish::evalGeneric(GLEArrayImpl* stk, const char *exp) throw(ParserError) {
+	int cp = 0;
+	int rtype = 0;
+	GLEPcodeList pc_list;
+	GLEPcode pcode(&pc_list);
+	polish(exp, pcode, &rtype);
+	return ::evalGeneric(stk, (int*)&pcode[0], &cp);
 }
 
 bool valid_unquoted_string(const string& str) {
@@ -428,18 +429,16 @@ void polish(char *expr, GLEPcode& pcode, int *rtype) throw(ParserError) {
 }
 
 void eval_pcode(GLEPcode& pcode, double* x) {
-	int otyp = 0, cp = 0;
-	GLEArrayImpl* stk = 0;
-	::eval(stk, (int*)&pcode[0], &cp, x, NULL, &otyp);
+	int cp = 0;
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	*x = evalDouble(stk.get(), (int*)&pcode[0], &cp);
 }
 
 void eval_pcode_str(GLEPcode& pcode, string& x) {
-	GLEString* ostr;
-	int otyp = 1, cp = 0;
-	double value;
-	GLEArrayImpl* stk = 0;
-	::eval(stk, (int*)&pcode[0], &cp, &value, &ostr, &otyp);
-	x = ostr->toUTF8();
+	int cp = 0;
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	GLERC<GLEString> result(::evalString(stk.get(), (int*)&pcode[0], &cp, true));
+	x = result->toUTF8();
 }
 
 void polish(char *expr, char *pcode, int *plen, int *rtype) throw(ParserError) {
@@ -462,7 +461,7 @@ void polish_eval(char *exp, double *x) throw(ParserError) {
 void polish_eval_string(const char *exp, string *str, bool allownum) throw(ParserError) {
 	GLEPolish* polish = get_global_polish();
 	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-	if (polish != NULL) polish->eval_string(stk.get(), exp, str, allownum);
+	if (polish != NULL) polish->evalString(stk.get(), exp, str, allownum);
 }
 
 std::string gle_operator_to_string(int op) {

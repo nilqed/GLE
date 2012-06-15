@@ -178,6 +178,7 @@ public:
 	bool isSmallerThanI(const GLEString* s2) const;
 	bool equalsI(const char* str);
 	bool equalsI(GLEString* other);
+	bool containsI(int ch);
 	int strICmp(GLEString* other) const;
 	virtual bool equals(GLEDataObject* obj);
 	virtual void print(ostream& out) const;

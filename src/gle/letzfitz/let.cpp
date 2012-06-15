@@ -157,14 +157,14 @@ void begin_letz(int *pln, int *pcode, int *cp) throw(ParserError) {
 	int nx = (int)((xmax-xmin)/xstep + 1);
 	int ny = (int)((ymax-ymin)/ystep + 1);
 	fprintf(fp,"! nx %d ny %d xmin %g xmax %g ymin %g ymax %g \n",nx,ny,xmin,xmax,ymin,ymax);
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 	for (double y=ymin, yi=0; yi<ny ; yi++, y+=ystep) {
 		for (double x=xmin, xi=0; xi<nx; xi++, x+=xstep) {
 			var_set(xvar, x);
 			var_set(yvar, y);
 			int mcp = 0;
 			double value;
-			GLEArrayImpl* stk = 0;
-			eval(stk,evalcode,&mcp,&value,NULL,&vtype);
+			eval(stk.get(), evalcode, &mcp, &value, NULL, &vtype);
 			fprintf(fp,"%g ",value);
 		}
 		fprintf(fp,"\n");

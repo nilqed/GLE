@@ -584,6 +584,7 @@ void GLEParser::evaluate_subroutine_arguments(GLESubCallInfo* info, GLEArrayImpl
 	int np = sub->getNbParam();
 	arguments->resize(np);
 	GLEPcodeList pcodeList;
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 	for (int i = 0; i < np; i++) {
 		GLEPcode pcode(&pcodeList);
 		gen_subroutine_call_polish_arg(info, i, pcode);
@@ -591,8 +592,7 @@ void GLEParser::evaluate_subroutine_arguments(GLESubCallInfo* info, GLEArrayImpl
 		GLEString* ostr;
 		int cp = 0;
 		int otyp = sub->getParamType(i);
-		GLEArrayImpl* stk = 0;
-		::eval(stk, (int*)&pcode[0], &cp, &oval, &ostr, &otyp);
+		::eval(stk.get(), (int*)&pcode[0], &cp, &oval, &ostr, &otyp);
 		if (sub->getParamType(i) == 2) {
 			if (otyp == 1) {
 				ostringstream str_cnv;
@@ -890,6 +890,54 @@ GLERC<GLEColor> pass_color_list_or_fill(const string& color, IThrowsError* error
 	return result;
 }
 
+GLERC<GLEColor> memory_cell_to_color(GLEPolish* polish, GLEArrayImpl* stk, GLEMemoryCell* cell, IThrowsError* throwsError, int depth) {
+	if (depth >= 5) {
+		throwsError->throwError("maximum depth exceeded while parsing color expression");
+	}
+	GLERC<GLEColor> color(new GLEColor());
+	switch (gle_memory_cell_type(cell)) {
+		case GLEObjectTypeDouble:
+			color->setGray(cell->Entry.DoubleVal);
+			break;
+		case GLEObjectTypeString:
+			{
+				int result = 0;
+				std::string token(((GLEString*)cell->Entry.ObjectVal)->toUTF8());
+				if (token.empty()) {
+					throwsError->throwError("expecting color name, but found empty string");
+				} else if (pass_color_hash_value(token, &result, throwsError)) {
+					color->setHexValue(result);
+				} else if (((GLEString*)cell->Entry.ObjectVal)->containsI('(')) {
+					color = memory_cell_to_color(polish, stk, polish->evalGeneric(stk, token.c_str()), throwsError, depth + 1);
+				} else {
+					color = pass_color_list_or_fill(token, throwsError);
+				}
+				break;
+			}
+		default:
+			gle_memory_cell_check(cell, GLEObjectTypeColor);
+			color = (GLEColor*)cell->Entry.ObjectVal;
+			break;
+	}
+	return color;
+}
+
+GLERC<GLEColor> pass_color_var(const char *s) throw(ParserError) {
+	GLERC<GLEColor> color(new GLEColor());
+	string token(s);
+	int result = 0;
+	if (token.empty()) {
+		g_throw_parser_error("expecting color name, but found empty string");
+	} else if (pass_color_hash_value(token, &result, g_get_throws_error())) {
+		color->setHexValue(result);
+	} else {
+		GLEPolish* polish = get_global_polish();
+		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+		color = memory_cell_to_color(polish, stk.get(), polish->evalGeneric(stk.get(), s), g_get_throws_error(), 0);
+	}
+	return color;
+}
+
 void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
 	int vtype = 1;
 	int result = 0;
@@ -898,8 +946,8 @@ void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
 		GLEColor color;
 		color.setHexValue(result);
 		pcode.addDoubleExpression(color.getDoubleEncoding());
-    	} else if (is_float(token)) {
-        	string expr(string("CVTGRAY(") + token + ")");
+	} else if (is_float(token)) {
+        string expr(string("CVTGRAY(") + token + ")");
 		polish(expr.c_str(), pcode, &vtype);
 	} else if (str_i_str(token.c_str(), "RGB") != NULL) {
 		m_tokens.pushback_token();
@@ -916,57 +964,6 @@ void GLEParser::get_color(GLEPcode& pcode) throw (ParserError) {
 		pcode.addDoubleExpression(color->getDoubleEncoding());
 	}
 }
-
-GLERC<GLEColor> pass_color_var(const char *s) throw(ParserError) {
-	GLERC<GLEColor> color(new GLEColor());
-	int result = 0;
-	double xx = 0.0;
-	string token(s);
-	if (token.empty()) {
-		g_throw_parser_error("expecting color name, but found empty string");
-	} else if (pass_color_hash_value(token, &result, g_get_throws_error())) {
-		color->setHexValue(result);
-	} else if (is_float(token)) {
-		string expr(string("CVTGRAY(") + token + ")");
-		polish_eval((char*)expr.c_str(), &xx);
-		color->setDoubleEncoding(xx);
-	} else if (str_i_str(s, "RGB") != NULL) {
-		polish_eval((char*)s, &xx);
-		color->setDoubleEncoding(xx);
-	} else if (token.length() > 2 && token[0] == '(' && token[token.length() - 1] == ')') {
-		string expr(string("CVTGRAY") + token);
-		polish_eval((char*)expr.c_str(), &xx);
-		color->setDoubleEncoding(xx);
-	} else if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
-		string expr(string("CVTCOLOR(") + token + ")");
-		polish_eval((char*)expr.c_str(), &xx);
-		color->setDoubleEncoding(xx);
-	} else {
-		color = pass_color_list_or_fill(token, g_get_throws_error());
-	}
-	return color;
-}
-
-/*
-int pass_color_var(const char *s) throw(ParserError) {
-	if (strchr(s,'$') != NULL) {
-		int idx, typ;
-		char tmpcol[100];
-		string var_str = s;
-		str_to_uppercase(var_str);
-		var_find((char*)var_str.c_str(), &idx, &typ);
-		if (idx >= 0) {
-			var_getstr(idx, tmpcol);
-			return pass_color(tmpcol);
-		} else {
-			g_throw_parser_error("color '", s, "' not defined");
-			return 0;
-		}
-	} else {
-		return pass_color(s);
-	}
-}
-*/
 
 int get_marker_string(const string& marker, IThrowsError* error) {
 	/* if 0, maybe its a user defined marker, ie a subroutine */

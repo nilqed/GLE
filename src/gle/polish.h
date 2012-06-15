@@ -147,7 +147,8 @@ public:
     void internalEvalString(const char* exp, string* str) throw(ParserError);
 	void polish(const char *expr, GLEPcode& pcode, int *rtype) throw(ParserError);
 	void eval(GLEArrayImpl* stk, const char *exp, double *x) throw(ParserError);
-	void eval_string(GLEArrayImpl* stk, const char *exp, string *str, bool allownum = false) throw(ParserError);
+	void evalString(GLEArrayImpl* stk, const char *exp, string *str, bool allownum = false) throw(ParserError);
+	GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, const char *exp) throw(ParserError);
 	void get_params(GLEPcode& pcode, int np, int* plist, const string& name) throw(ParserError);
 	double evalTokenToDouble() throw(ParserError);
 	Tokenizer* getTokens(const string& str);

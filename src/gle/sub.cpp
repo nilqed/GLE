@@ -56,11 +56,6 @@ extern int gle_debug;
 
 GLESubMap g_Subroutines;
 
-int return_type = 1;
-double return_value = 0.0;
-GLERC<GLEString> return_value_str;
-vector<string> return_str_stack;
-
 GLESubArgNames::GLESubArgNames() {
 }
 
@@ -372,13 +367,9 @@ extern int this_line;
 /* 	Run a user defined function  */
 void GLERun::sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError) {
 	// Save current return value
-	int save_return_type = return_type;
-	double save_return_value = return_value;
-	if (return_type == 2) {
-		// Efficiency of this will be improved if RefCount objects are introduced
-		// see glearray.cpp (Jan Struyf)
-		// FIXME STACK
-	}
+	GLEMemoryCell save_return_value;
+	GLE_MC_INIT(save_return_value);
+	GLE_MC_COPY(&save_return_value, &m_returnValue);
 	GLESub* sub = sub_get(idx);
 	// Set local variable map
 	GLEVarMap* sub_map = sub->getLocalVars();
@@ -408,33 +399,18 @@ void GLERun::sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError) {
 	}
 	// FIXME: Find more elegant way to back up current line
 	this_line = oldline;
-	// Return type of subroutine
-	if (return_type == 1) {
-		// FIXME STACK
-		//*(pval + ++(*npm)) = return_value;
-		//*otyp = 1;
-	} else {
-		/*(*npm) = (*npm) + 1;
-		if (pstr[(*npm)] != NULL) myfree(pstr[(*npm)]);
-		pstr[(*npm)] = sdup((char*)return_value_str.c_str());
-		*otyp = 2;*/
-	}
-	// Restore var map
+	(*npm) = (*npm) + 1;
+	stk->set(*npm, &m_returnValue);
 	var_set_local_map(save_var_map);
-	// Get saved return values back
-	return_type = save_return_type;
-	if (return_type == 1) {
-		return_value = save_return_value;
-	} else {
-	}
+	GLE_MC_COPY(&m_returnValue, &save_return_value);
 	var_free_local();
 }
 
 /* 	Run a user defined function  */
 void GLERun::sub_call(GLESub* sub, GLEArrayImpl* arguments) throw(ParserError) {
-	// Save current return value
-	int save_return_type = return_type;
-	double save_return_value = return_value;
+	GLEMemoryCell save_return_value;
+	GLE_MC_INIT(save_return_value);
+	GLE_MC_COPY(&save_return_value, &m_returnValue);
 	// Set local variable map
 	GLEVarMap* sub_map = sub->getLocalVars();
 	GLEVarMap* save_var_map = var_swap_local_map(sub_map);
@@ -461,11 +437,8 @@ void GLERun::sub_call(GLESub* sub, GLEArrayImpl* arguments) throw(ParserError) {
 	}
 	// FIXME: Find more elegant way to back up current line
 	this_line = oldline;
-	// Restore var map
 	var_set_local_map(save_var_map);
-	// Get saved return values back
-	return_type = save_return_type;
-	return_value = save_return_value;
+	GLE_MC_COPY(&m_returnValue, &save_return_value);
 	var_free_local();
 }
 
@@ -491,8 +464,8 @@ void call_sub_byname(const string& name, double* args, int nb, const char* err_i
 			g_throw_parser_error(err.str());
 		}
 	}
-	GLEArrayImpl* stk = 0;
-	getGLERunInstance()->sub_call(idx, stk, &nb);
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	getGLERunInstance()->sub_call(idx, stk.get(), &nb);
 }
 
 void call_sub_byid(int idx, double* args, int nb, const char* err_inf) throw(ParserError) {
@@ -512,17 +485,7 @@ void call_sub_byid(int idx, double* args, int nb, const char* err_inf) throw(Par
 			g_throw_parser_error(err.str());
 		}
 	}
-	GLEArrayImpl* stk = 0;
-	getGLERunInstance()->sub_call(idx, stk, &nb);
-}
-
-void sub_set_return(double d) {
-	return_type = 1;
-	return_value = d;
-}
-
-void sub_set_return_str(GLEString* s) {
-	return_type = 2;
-	return_value_str = s;
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	getGLERunInstance()->sub_call(idx, stk.get(), &nb);
 }
 

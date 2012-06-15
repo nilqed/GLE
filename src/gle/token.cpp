@@ -134,11 +134,7 @@ void token(char *lin,TOKENS tok,int *ntok,char *outbuff)
 	if (table_loaded==false) token_init();
 	cp = lin;
 	cp = find_non_space(cp);
-//	printf("tok=%u outbuf=%u\n",tok,outbuff);
-//	printf("tok[1]=%s\n",tok[1]);
-//	for(vi=0;vi<5;vi++) printf("(token)=%d tok[%d]=%s\n",*ntok,vi,tok[vi]);
 	while (*cp!=0) {
-//	printf("lin =|%s| cp=%s ntok=%d ,i=%d ,jj=%d\n",lin,cp,*ntok,i,jj);
 		if (*cp==' ' || *cp=='	'){
 			*cp = ' ';
 			cp = find_non_space(cp);
@@ -147,26 +143,19 @@ void token(char *lin,TOKENS tok,int *ntok,char *outbuff)
 		p2 = find_term(cp);
 		jj = p2-cp+1;
 		if (jj==0) goto endofline;
-//		for(vi=1;vi<=*ntok;vi++) printf("(token)=%d tok[%d]=%s\n",*ntok,vi,tok[vi]);
-//		printf("tok[1]=%s\n",tok[1]);
 		add_tokf(cp,jj,tok,ntok,outbuff,tj);
-		//add_tok(cp,jj);
-//		for(i=1;vi<=*ntok;vi++) printf("(token)=%d tok[%d]=%s\n",*ntok,vi,tok[vi]);
 		cp = p2 + 1 ;
 		if (*ntok>280) subscript();
 	}
 endofline:;
 	if (*ntok>0)
 	{
-//		if ( (*(*tok)[*ntok])=='\n' ) (*ntok)--;
 		if (str_i_equals(tok[*ntok],"\n")) (*ntok)--;
-//		if (strcmp((*tok)[*ntok]," ")==0) (*ntok)--;
 		if (str_i_equals(tok[*ntok]," ")) (*ntok)--;
-//		if (*ntok>0) p2 =  (*tok)[*ntok] + strlen((*tok)[*ntok])  - 1;
 		if (*ntok > 0) p2 =  tok[*ntok] + strlen(tok[*ntok])  - 1;
 		if (*p2 == 10) *p2 = 0;
 	}
-//	for(vi=1;vi<=*ntok;vi++) printf("(token) tok[%d]=%s\n",vi,tok[vi]);
+	// for(int i=1;i<=*ntok;i++) printf("(token)=%d tok[%d]=%s\n",*ntok,i,tok[i]);
 }
 
 /*--------------------------------------------------------------------------*/
