@@ -187,6 +187,7 @@ double getEvalStackDouble(GLEArrayImpl* stk, int pos) {
 }
 
 char* getEvalStackString(GLEArrayImpl* stk, int pos) {
+	CUtilsAssertMessage("not implemented");
 	return (char*)"";
 }
 

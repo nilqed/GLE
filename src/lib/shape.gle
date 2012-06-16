@@ -455,36 +455,138 @@ sub set_angle_just angle
    end if
 end sub
 
-sub line_label x1 y1 x2 y2 str$ dist
+sub virtual_box x1 y1 x2 y2 name$
+   begin name name$
+      abound x1 y1
+      abound x2 y2
+   end name
+end sub
+
+sub line_label x1 y1 x2 y2 str$ dist offset
    ! Draw a label at the center of an imaginary line from (x1,y1) to (x2,y2)
    ! (x1,y1): starting point of the line
    ! (x2,y2): ending point of the line
    ! str$: label to draw
    ! dist: distance between label and line
+   default offset 0
    if dist > 0 then set just bc
    else set just tc
-   amove (x1+x2)/2 (y1+y2)/2
+   local xm = (x1+x2)/2
+   local ym = (y1+y2)/2
+   local a = y2^2-2*y1*y2+y1^2+x2^2-2*x1*x2+x1^2
+   local b = 2*(y2*ym-y1*ym-y2^2+y1*y2+x2*xm-x1*xm-x2^2+x1*x2)
+   local c = ym^2-2*y2*ym+y2^2+xm^2-2*x2*xm+x2^2-offset^2
+   local t = (-b-sgn(offset)*sqrt(abs(b^2 - 4*a*c)))/(2*a)
+   amove t*x1+(1-t)*x2 t*y1+(1-t)*y2
    begin rotate xy2angle(x2-x1,y2-y1)
       rmove 0 dist
       write str$
    end rotate
 end sub
 
-sub join_label a$ dir$ b$ label$ deltax deltay ldist
+sub join_label a$ dir$ b$ label$ deltax deltay ldist loffset offsetx offsety
    ! Similar to the join command, but also labels the arrow
+   default label ""
    default deltax 0
    default deltay 0
    default ldist 0.1
-   local x1 = ptx(a$)
-   local x2 = ptx(b$)
-   local y1 = pty(a$)
-   local y2 = pty(b$)
+   default loffset 0
+   default offsetx 0
+   default offsety 0
+   local x1 = ptx(a$) + offsetx
+   local x2 = ptx(b$) + offsetx
+   local y1 = pty(a$) + offsety
+   local y2 = pty(b$) + offsety
    amove x1+deltax y1+deltay
    if dir$ = "->" then aline x2-deltax y2-deltay arrow end
    else if dir$ = "<-" then aline x2-deltax y2-deltay arrow start
    else if dir$ = "<->" then aline x2-deltax y2-deltay arrow both
    else aline x2-deltax y2-deltay
-   line_label x1+deltax y1+deltay x2-deltax y2-deltay label$ ldist
+   if label$ <> "" then
+      line_label x1+deltax y1+deltay x2-deltax y2-deltay label$ ldist loffset
+   end if
+end sub
+
+sub join_label_rel a$ dir$ relx rely label$ deltax deltay ldist loffset offsetx offsety name$ reverse
+   default label ""
+   default deltax 0
+   default deltay 0
+   default ldist 0.1
+   default loffset 0
+   default offsetx 0
+   default offsety 0
+   default name "temp"
+   default reverse 0
+   amove ptx(a$)+relx pty(a$)+rely
+   save name$
+   if reverse = 0 then
+      join_label a$ dir$ name$ label$ deltax deltay ldist loffset offsetx offsety
+   else
+      join_label name$ dir$ a$ label$ deltax deltay ldist loffset offsetx offsety
+   end if
+end sub
+
+sub measure_line a$ dir$ b$ label$ ldist loffset offsetx offsety linelen linepos side showa showb
+   default label ""
+   default ldist 0.1
+   default loffset 0
+   default offsetx 0
+   default offsety 0
+   default linelen 1
+   default linepos 0.75
+   default side 1
+   default showa 1
+   default showb 1
+   local x1 = ptx(a$) + offsetx
+   local x2 = ptx(b$) + offsetx
+   local y1 = pty(a$) + offsety
+   local y2 = pty(b$) + offsety
+   local a = torad(90+side*180+xy2angle(x2-x1,y2-y1))
+   set lstyle 2
+   if showa = 1 then
+      amove x1 y1
+      aline x1+linelen*cos(a) y1+linelen*sin(a)
+   end if
+   if showb = 1 then
+      amove x2 y2
+      aline x2+linelen*cos(a) y2+linelen*sin(a)
+   end if
+   set lstyle 1
+   amove x1+linepos*cos(a) y1+linepos*sin(a)
+   save "p1"
+   amove x2+linepos*cos(a) y2+linepos*sin(a)
+   save "p2"
+	join_label "p1" dir$ "p2" label$ 0 0 ldist loffset offsetx offsety
+end sub
+
+sub measure_line_rel a$ dir$ relx rely label$ ldist loffset offsetx offsety linelen linepos side showa showb reverse
+   default label ""
+   default ldist 0.1
+   default loffset 0
+   default offsetx 0
+   default offsety 0
+   default linelen 1
+   default linepos 0.75
+   default side 1
+   default showa 1
+   default showb 1
+   default reverse 0
+   amove ptx(a$)+relx pty(a$)+rely
+   save "p"
+   if reverse = 0 then
+      measure_line a$ dir$ "p" label$ ldist loffset offsetx offsety linelen linepos side showa showb
+   else
+      measure_line "p" dir$ a$ label$ ldist loffset offsetx offsety linelen linepos side showa showb
+   end if
+end sub
+
+sub arrow_label xp yp label$ dist angle
+   default dist 0.75
+   default angle 90
+   amove xp yp; pmove dist angle
+   set just bc; write label$
+   amove xp yp; pmove dist-0.1 angle
+   aline xp yp arrow end
 end sub
 
 sub curly_bracket x1 y1 x2 y2 r
