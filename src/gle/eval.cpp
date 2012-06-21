@@ -191,6 +191,11 @@ char* getEvalStackString(GLEArrayImpl* stk, int pos) {
 	return (char*)"";
 }
 
+std::string getEvalStackStringStd(GLEArrayImpl* stk, int pos) {
+	stk->checkType(pos, GLEObjectTypeString);
+	return ((GLEString*)stk->getObject(pos))->toUTF8();
+}
+
 void complain_operator_type(int op, int type) {
 	std::ostringstream msg;
 	msg << "operator " << gle_operator_to_string(op) << " does not apply to type '" << gle_object_type_to_string((GLEObjectType)type) << "'";
@@ -334,6 +339,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 	double x1, y1, x2, y2;
 	double xx, yy;
 	int i, j;
+	GLERC<GLEString> strA;
 	for (int c = 0; c < plen; c++) {
 	  // cout << "pos: " << c << " pcode: " << pcode[c] << endl;
 	  switch (pcode[c]) {
@@ -381,82 +387,6 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 		case BIN_OP_MOD + BINARY_OPERATOR_OFFSET:
 		case BIN_OP_DOT + BINARY_OPERATOR_OFFSET:
 			eval_binary_operator(stk, pcode[c] - BINARY_OPERATOR_OFFSET);
-			break;
-
-		/* String Binary operators 30..49 ----------------------- */
-		case 31:  /* + */
-			nstk--;
-			{
-				char* result = NULL;
-				if (getEvalStackString(stk, nstk) != NULL && getEvalStackString(stk, nstk+1) != NULL) {
-					result = (char*)malloc((strlen(getEvalStackString(stk, nstk))+strlen(getEvalStackString(stk, nstk+1))+1)*sizeof(char));
-					strcpy(result, getEvalStackString(stk, nstk));
-					strcat(result, getEvalStackString(stk, nstk+1));
-				} else {
-					result = sdup("");
-				}
-				setEvalStack(stk, nstk, result);
-			}
-			break;
-		case 32:  /* - */
-			g_throw_parser_error("operator '-' does not apply to a string type");
-			break;
-		case 33:  /* * */
-			g_throw_parser_error("operator '*' does not apply to a string type");
-			break;
-		case 34:  /* / */
-			g_throw_parser_error("operator '/' does not apply to a string type");
-			break;
-		case 35:  /* ^ */
-			g_throw_parser_error("operator '^' does not apply to a string type");
-			break;
-		case 36:  /* = */
-			nstk--;
-			setEvalStack(stk, nstk, str_i_equals(getEvalStackString(stk, nstk), getEvalStackString(stk, nstk+1)));
-			break;
-		case 37:  /* <   */
-			nstk--;
-			setEvalStack(stk, nstk, str_i_cmp(getEvalStackString(stk, nstk), getEvalStackString(stk, nstk+1)) < 0);
-			break;
-		case 38:  /* <=  */
-			nstk--;
-			setEvalStack(stk, nstk, str_i_cmp(getEvalStackString(stk, nstk), getEvalStackString(stk, nstk+1)) <= 0);
-			break;
-		case 39:  /* >   */
-			nstk--;
-			setEvalStack(stk, nstk, str_i_cmp(getEvalStackString(stk, nstk), getEvalStackString(stk, nstk+1)) > 0);
-			break;
-		case 40:  /* >=  */
-			nstk--;
-			setEvalStack(stk, nstk, str_i_cmp(getEvalStackString(stk, nstk), getEvalStackString(stk, nstk+1)) >= 0);
-			break;
-		case 41:  /* <>  */
-			nstk--;
-			setEvalStack(stk, nstk, !str_i_equals(getEvalStackString(stk, nstk), getEvalStackString(stk, nstk+1)));
-			break;
-		case 42:  /* .AND.  */
-			g_throw_parser_error("operator 'AND' does not apply to a string type");
-			break;
-		case 43:  /* .OR.  */
-			g_throw_parser_error("operator 'OR' does not apply to a string type");
-			break;
-		case 44:  /* %  */
-			g_throw_parser_error("operator '%' does not apply to a string type");
-			break;
-		case 45:  /* . */
-			nstk--;
-			{
-				char* result = NULL;
-				if (getEvalStackString(stk, nstk) != NULL && getEvalStackString(stk, nstk+1) != NULL) {
-					result = (char*)malloc((strlen(getEvalStackString(stk, nstk))+strlen(getEvalStackString(stk, nstk+1))+2)*sizeof(char));
-					strcpy(result, getEvalStackString(stk, nstk));
-					strcat(result, ".");
-					strcat(result, getEvalStackString(stk, nstk+1));
-				} else {
-					result = sdup("");
-				}
-				setEvalStack(stk, nstk, result);
-			}
 			break;
 
 	    /* look in fn.c and start indexes with 1 */
@@ -545,6 +475,9 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, nstk, getEvalStackDouble(stk, nstk)*GLE_PI/180.0);
 			break;
 		case 60+FN_EVAL: /* eval */
+			strA.set();
+
+
 			polish_eval(getEvalStackString(stk, nstk), &xx);
 			setEvalStack(stk, nstk, xx);
 			break;
