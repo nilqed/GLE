@@ -487,13 +487,13 @@ license:
 # Don't add "strip" to the default install target:
 # This breaks creating "debug" packages on openSUSE and Fedora.
 strip:
-	-strip build/bin/gle*
-	-strip build/bin/fbuild*
-	-strip build/bin/makefmt*
-	-strip build/bin/glegs*
-	-strip $(GLE_SRC_LIB_DIR)/libgle*
-	-strip build/bin/qgle*
-	-strip build/bin/manip*
+	-@STRIP@ @STRIPALL@ build/bin/gle*
+	-@STRIP@ @STRIPALL@ build/bin/fbuild*
+	-@STRIP@ @STRIPALL@ build/bin/makefmt*
+	-@STRIP@ @STRIPALL@ build/bin/glegs*
+	-@STRIP@ @STRIPUNNEEDED@ $(GLE_SRC_LIB_DIR)/libgle*
+	-@STRIP@ @STRIPALL@ build/bin/qgle*
+	-@STRIP@ @STRIPALL@ build/bin/manip*
 
 finddeps:
 	./build/bin/gle -finddeps

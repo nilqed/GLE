@@ -822,6 +822,23 @@ if test "x$with_debug" = "xyes"; then
 fi
 
 dnl ********************************************************************************
+dnl check strip command
+dnl ********************************************************************************
+
+AC_CHECK_TOOLS(STRIP,[strip,gstrip],strip)
+echo Checking if strip is GNU strip 
+if $STRIP -V | grep GNU > /dev/null
+then
+    AC_SUBST(STRIPALL,"-s")
+    AC_SUBST(STRIPUNNEEDED, "--strip-unneeded")
+    echo "strip is GNU strip ($STRIP)"
+else
+    AC_SUBST(STRIPALL, "")
+    AC_SUBST(STRIPUNNEEDED,"-x")
+    echo "strip is not GNU Strip ($STRIP)"
+fi
+
+dnl ********************************************************************************
 dnl final substitutes
 dnl ********************************************************************************
 
