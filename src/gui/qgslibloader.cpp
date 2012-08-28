@@ -236,11 +236,20 @@ void GSLibFunctions::freeLibrary() {
 
 #include <dlfcn.h>
 
+void* dlopenImpl(const char* fname) {
+	#ifdef RTLD_DEEPBIND
+		return dlopen(fname, RTLD_NOW | RTLD_DEEPBIND);
+	#else
+		#warning "dlopen - not using RTLD_DEEPBIND"
+		return dlopen(fname, RTLD_NOW);
+	#endif
+}
+
 void GSLibFunctions::tryLocation(const char* str) {
 	if (hmodule == NULL) {
 		m_LibGSLocation = str;
 		QByteArray strdata = m_LibGSLocation.toLatin1();
-		hmodule = dlopen(strdata.constData(), RTLD_NOW);
+		hmodule = dlopenImpl(strdata.constData());
 	}
 }
 
@@ -262,10 +271,10 @@ int GSLibFunctions::loadLibrary(const QString& location, QString& last_error) {
 		#ifdef Q_WS_X11
 		#if defined(__x86_64__) || defined(__ppc64__) || defined (__s390x__) || defined (__sparc64__)
 		// try 64 bit libraries on 64 bit system
-      tryLocationLoop("/usr/lib64");
+		tryLocationLoop("/usr/lib64");
 		tryLocationLoop("/usr/local/lib64");
 		#endif // 64 bit
-      tryLocationLoop("/usr/lib");
+		tryLocationLoop("/usr/lib");
 		tryLocationLoop("/usr/local/lib");
 		#endif // Q_WS_X11
 		#ifdef Q_WS_MAC
@@ -279,7 +288,7 @@ int GSLibFunctions::loadLibrary(const QString& location, QString& last_error) {
 			libloc.append("/Ghostscript");
 		}
 		QByteArray strdata = libloc.toLatin1();
-		hmodule = dlopen(strdata.constData(), RTLD_NOW);
+		hmodule = dlopenImpl(strdata.constData());
 	}
 	/* Error message if loading fails */
 	if (hmodule == NULL) {
