@@ -1263,6 +1263,24 @@ int GLEAxis::getNbNamedPlaces() {
 	return nb;
 }
 
+double GLEAxis::getLocalAveragePlacesDistance(int i) {
+	int count = 0;
+	double distance = 0.0;
+	if (i > 0) {
+		distance += fabs(places[i] - places[i - 1]);
+		count ++;
+	}
+	if (i < getNbPlaces() - 1) {
+		distance += fabs(places[i] - places[i + 1]);
+		count ++;
+	}
+	if (count == 0) {
+		return GLE_INF;
+	} else {
+		return distance / count;
+	}
+}
+
 void GLEAxis::getLabelsFromDataSet(int ds) {
 	GLEDataSet* dataSet = dp[ds];
 	if (dataSet == NULL || dataSet->np == 0) {
@@ -1281,6 +1299,7 @@ void GLEAxis::getLabelsFromDataSet(int ds) {
 	unsigned int crpos = 0;
 	for (int i = 0; i < getNbPlaces(); i++) {
 		double fi = places[i];
+		*getNamePtr(i) = "";
 		if (fi >= min_val && fi <= max_val) {
 			// find last position with x-value smaller than fi
 			while (crpos < dataSet->np && xt[crpos] < fi) {
@@ -1297,8 +1316,15 @@ void GLEAxis::getLabelsFromDataSet(int ds) {
 					if (fabs(xt[crpos-1] - fi) < dist) sel = crpos-1;
 				}
 				if (sel >= 0 && sel < dataSet->np && !data.getM(sel)) {
-					GLERC<GLEString> str(yv->getString(sel));
-					*getNamePtr(i) = str->toUTF8();
+					bool showLabel = true;
+					dist = fabs(xt[sel] - fi);
+					if (!log && dist > getLocalAveragePlacesDistance(i) / 2.0) {
+						showLabel = false;
+					}
+					if (showLabel) {
+						GLERC<GLEString> str(yv->getString(sel));
+						*getNamePtr(i) = str->toUTF8();
+					}
 				}
 			}
 		}
