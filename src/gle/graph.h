@@ -540,7 +540,7 @@ void vinit_title_axis();
 void draw_bar(double x, double yf, double yt, double wd, bar_struct* barset, int di, GLEDataSet* toDataSet) throw(ParserError);
 void get_dataset_ranges();
 void set_bar_axis_places();
-int get_dataset_identifier(const char* ds, bool def = false) throw(ParserError);
+int get_dataset_identifier(const std::string& ds, bool def = false) throw(ParserError);
 int get_dataset_identifier(const string& ds, GLEParser* parser, bool def) throw(ParserError);
 
 double graph_bar_pos(double xpos, int bar, int set) throw(ParserError);

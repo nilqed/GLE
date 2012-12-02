@@ -3724,8 +3724,6 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 		}
 		int nstk = 1;
 		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-		colortyp colvar;
-		union {double d; int l[1];} both;
 		for (int i = img_hi-1; i >= 0; i--) {
 			int pos = 0;
 			for (int j = 0; j < img_wd; j++) {
@@ -3736,11 +3734,10 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 				}
 				setEvalStack(stk.get(), 1, zvalue);
 				getGLERunInstance()->sub_call(sub->getIndex(), stk.get(), &nstk);
-				both.d = getEvalStackDouble(stk.get(), 1);
-				colvar.l = both.l[0];
-				scanline[pos++] = colvar.b[B_R];
-				scanline[pos++] = colvar.b[B_G];
-				scanline[pos++] = colvar.b[B_B];
+				GLEColor* color = getEvalStackColor(stk.get(), 1);
+				scanline[pos++] = color->getRedI();
+				scanline[pos++] = color->getGreenI();
+				scanline[pos++] = color->getBlueI();
 			}
 			output->send(scanline, size);
 			output->endScanLine();
@@ -3826,8 +3823,6 @@ void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByte
 		}
 		int nstk = 1;
 		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-		colortyp colvar;
-		union {double d; int l[1];} both;
 		for (int i = 0; i < img_hi; i++) {
 			int pos = 0;
 			var_set(vary, ymax - (double)i*yrange/img_hi);
@@ -3844,11 +3839,10 @@ void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByte
 				}
 				setEvalStack(stk.get(), 1, zvalue);
 				getGLERunInstance()->sub_call(sub->getIndex(), stk.get(), &nstk);
-				both.d = getEvalStackDouble(stk.get(), 1);
-				colvar.l = both.l[0];
-				scanline[pos++] = colvar.b[B_R];
-				scanline[pos++] = colvar.b[B_G];
-				scanline[pos++] = colvar.b[B_B];
+				GLEColor* color = getEvalStackColor(stk.get(), 1);
+				scanline[pos++] = color->getRedI();
+				scanline[pos++] = color->getGreenI();
+				scanline[pos++] = color->getBlueI();
 			}
 			output->send(scanline, size);
 			output->endScanLine();

@@ -1091,8 +1091,7 @@ void GLEParser::get_font(GLEPcode& pcode) throw (ParserError) {
     pcode.addInt(get_font_index(token, &m_tokens));
 }
 
-int pass_font(const char *p) {
-   string token(p);
+int pass_font(const std::string& token) {
 	if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
       int result = 0;
       double xx = 0.0;

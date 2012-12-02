@@ -381,17 +381,12 @@ void GLERun::sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError) {
 		getVars()->set(var, stk->get((*npm)--));
 	}
 	// Run subroutine
-	int s_start = sub->getStart();
-	int s_end = sub->getEnd();
 	int endp = 0;
 	bool mkdrobjs = false;
 	int oldline = this_line;
-	// cout << "calling routine: " << sub->getName() << endl;
-	for (int i = s_start + 1; i < s_end; i++) {
-		// cout << "executing line " << i << " of " << getSource()->getNbLines() << endl;
+	for (int i = sub->getStart() + 1; i < sub->getEnd(); i++) {
 		GLESourceLine* line = getSource()->getLine(i - 1);
 		do_pcode(*line, &i, gpcode[i], gplen[i], &endp, mkdrobjs);
-		dbg gprint("AFTER DO_PCODE I = %d \n",i);
 	}
 	// FIXME: Find more elegant way to back up current line
 	this_line = oldline;
@@ -420,16 +415,12 @@ void GLERun::sub_call(GLESub* sub, GLEArrayImpl* arguments) throw(ParserError) {
 		}
 	}
 	// Run subroutine
-	int s_start = sub->getStart();
-	int s_end = sub->getEnd();
 	int endp = 0;
 	bool mkdrobjs = false;
 	int oldline = this_line;
-	for (int i = s_start + 1; i < s_end; i++) {
-		dbg gprint("=Call do pcode, line %d ",i);
+	for (int i = sub->getStart() + 1; i < sub->getEnd(); i++) {
 		GLESourceLine* line = getSource()->getLine(i - 1);
 		do_pcode(*line, &i, gpcode[i], gplen[i], &endp, mkdrobjs);
-		dbg gprint("AFTER DO_PCODE I = %d \n",i);
 	}
 	// FIXME: Find more elegant way to back up current line
 	this_line = oldline;

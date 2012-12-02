@@ -73,7 +73,7 @@ int df_narc(dbl r,dbl t1,dbl t2,dbl cx,dbl cy);
 int mem_total(void);
 int mem_worst(void);
 GLERC<GLEColor> pass_color_var(const char *s) throw(ParserError);
-int pass_font(const char *s);
+int pass_font(const std::string& token);
 int pass_justify(const char *s);
 int pass_marker(char *s) throw(ParserError);
 int testfree(int i);

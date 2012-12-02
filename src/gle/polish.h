@@ -78,6 +78,7 @@ void setEvalStack(GLEArrayImpl* stk, int pos, const char* value);
 void setEvalStack(GLEArrayImpl* stk, int pos, int value);
 double getEvalStackDouble(GLEArrayImpl* stk, int pos);
 char* getEvalStackString(GLEArrayImpl* stk, int pos);
+GLEColor* getEvalStackColor(GLEArrayImpl* stk, int pos);
 
 class GLEPcodeList : public RefCountObject {
 protected:

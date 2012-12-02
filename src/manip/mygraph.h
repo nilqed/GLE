@@ -58,7 +58,7 @@ int begin_text(int *pln, int32 *pcode, int *cp, double w);
 int g_set_line_styled(double x);
 int g_text(char *s);
 int g_jtext(int just);
-int g_measure(char *s, dbl *l, dbl *r, dbl *u, dbl *d);
+int g_measure(const std::string& s, dbl *l, dbl *r, dbl *u, dbl *d);
 int g_arc(dbl r,dbl t1,dbl t2,dbl cx,dbl cy);
 int g_narc(dbl r,dbl t1,dbl t2,dbl cx,dbl cy);
 int g_arcto(dbl x1,dbl y1,dbl x2,dbl y2,dbl rrr);

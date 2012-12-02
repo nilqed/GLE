@@ -1753,17 +1753,17 @@ bool is_dataset_identifier(const char* ds) {
 	return ptr != NULL && *ptr == 0 && result >= 0;
 }
 
-int get_dataset_identifier(const char* ds, bool def) throw(ParserError) {
-	int len = strlen(ds);
+int get_dataset_identifier(const std::string& ds, bool def) throw(ParserError) {
+	int len = ds.size();
 	if (len <= 1 || toupper(ds[0]) != 'D') {
-		g_throw_parser_error("illegal data set identifier '", ds, "'");
+		g_throw_parser_error("illegal data set identifier '", ds.c_str(), "'");
 	}
 	if (str_i_equals(ds, "dn")) {
 		return 0;
 	}
 	if (len > 3 && ds[1] == '[' && ds[len - 1] == ']') {
 		double id;
-		string str(ds + 2, len - 3);
+		string str(ds.c_str() + 2, len - 3);
 		polish_eval((char*)str.c_str(), &id);
 		int result = (int)floor(id + 0.5);
 		if (result < 0 || result >= MAX_NB_DATA) {
@@ -1774,15 +1774,15 @@ int get_dataset_identifier(const char* ds, bool def) throw(ParserError) {
 		return result;
 	} else {
 		char* ptr = NULL;
-		int result = strtol(ds+1, &ptr, 10);
+		int result = strtol(ds.c_str() + 1, &ptr, 10);
 		if (*ptr != 0) {
-			g_throw_parser_error("illegal data set identifier '", ds, "'");
+			g_throw_parser_error("illegal data set identifier '", ds.c_str(), "'");
 		}
 		if (result < 0 || result >= MAX_NB_DATA) {
-			g_throw_parser_error("data set identifier out of range '", ds, "'");
+			g_throw_parser_error("data set identifier out of range '", ds.c_str(), "'");
 		}
 		if (def && dp[result] == NULL) {
-			g_throw_parser_error("data set '", ds, "' not defined");
+			g_throw_parser_error("data set '", ds.c_str(), "' not defined");
 		}
 		return result;
 	}

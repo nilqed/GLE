@@ -103,10 +103,10 @@ extern int gle_debug;
 
 extern CmdLineObj g_CmdLine;
 
-double string_to_number(const char* str) {
+double string_to_number(const std::string& str) {
 // FIXME support other numeric formats
 	char* pend;
-	return strtod(str, &pend);
+	return strtod(str.c_str(), &pend);
 }
 
 std::string format_number_to_string(const std::string& format, double value);
@@ -199,6 +199,11 @@ char* getEvalStackString(GLEArrayImpl* stk, int pos) {
 GLEString* getEvalStackGLEString(GLEArrayImpl* stk, int pos) {
 	stk->checkType(pos, GLEObjectTypeString);
 	return (GLEString*)stk->getObject(pos);
+}
+
+GLEColor* getEvalStackColor(GLEArrayImpl* stk, int pos) {
+	stk->checkType(pos, GLEObjectTypeColor);
+	return (GLEColor*)stk->getObject(pos);
 }
 
 std::string getEvalStackStringStd(GLEArrayImpl* stk, int pos) {
@@ -485,9 +490,8 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 60+FN_EVAL: /* eval */
 			{
-				GLEArrayImpl localStack;
 				std::string toEval(getEvalStackStringStd(stk, nstk));
-				stk->set(nstk, get_global_polish()->evalGeneric(&localStack, toEval.c_str()));
+				stk->set(nstk, get_global_polish()->evalGeneric(stk, toEval.c_str()));
 			}
 			break;
 		case 60+FN_ARG: /* arg */
@@ -549,8 +553,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 		case 60+FN_GETENV: /* getenv */
 			{
 				string result;
-				std::cout << "getenv" << std::endl;
-				GLEGetEnv(string(getEvalStackString(stk, nstk)), result);
+				GLEGetEnv(getEvalStackStringStd(stk, nstk), result);
 				setEvalStack(stk, nstk, sdup(result.c_str()));
 			}
 			break;
@@ -606,8 +609,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			}
 			break;
 		case 72: /* len */
-			std::cout << "len" << std::endl;
-			setEvalStack(stk, nstk, (int)strlen(getEvalStackString(stk, nstk)));
+			setEvalStack(stk, nstk, (int)getEvalStackGLEString(stk, nstk)->length());
 			break;
 		case 73: /* log */
 			setEvalStack(stk, nstk, log(getEvalStackDouble(stk, nstk)));
@@ -695,15 +697,13 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, nstk, tan(getEvalStackDouble(stk, nstk)));
 			break;
 		case 89: /* tdepth */
-			std::cout << "tdepth" << std::endl;
 			g_get_xy(&xx,&yy);
-			g_measure(getEvalStackString(stk, nstk),&x1,&x2,&y2,&y1);
+			g_measure(getEvalStackStringStd(stk, nstk),&x1,&x2,&y2,&y1);
 			setEvalStack(stk, nstk, y1);
 			break;
 		case 90: /* theight */
-			std::cout << "theight" << std::endl;
 			g_get_xy(&xx,&yy);
-			g_measure(getEvalStackString(stk, nstk),&x1,&x2,&y2,&y1);
+			g_measure(getEvalStackStringStd(stk, nstk),&x1,&x2,&y2,&y1);
 			setEvalStack(stk, nstk, y2);
 			break;
 		case 91: /* time$ */
@@ -727,13 +727,11 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStackBool(stk, nstk, check_has_font(getEvalStackStringStd(stk, nstk)) != 0);
 			break;
 		case 92: /* twidth */
-			std::cout << "twidth" << std::endl;
-			g_measure(getEvalStackString(stk, nstk),&x1,&x2,&y1,&y2);
+			g_measure(getEvalStackStringStd(stk, nstk),&x1,&x2,&y1,&y2);
 			setEvalStack(stk, nstk, x2-x1);
 			break;
 		case 93: /* val */
-			std::cout << "val" << std::endl;
-			setEvalStack(stk, nstk, string_to_number(getEvalStackString(stk, nstk)));
+			setEvalStack(stk, nstk, string_to_number(getEvalStackStringStd(stk, nstk)));
 			break;
 		case 94: /* width of named object */
 			getGLERunInstance()->name_to_size(getEvalStackGLEString(stk, nstk), &x1, &y1);
@@ -782,10 +780,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, nstk, both.d);
 			break;
 		case 110: /* CVTFONT(m$) */
-			/* *** DEBUG *** */
-			//printf("\nCase 110\n");
-			std::cout << "cvtfont" << std::endl;
-			both.l[0] = pass_font(getEvalStackString(stk, nstk));
+			both.l[0] = pass_font(getEvalStackStringStd(stk, nstk));
 			both.l[1] = 0;
 			setEvalStack(stk, nstk, both.d);
 			break;
@@ -833,46 +828,34 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			}
 			break;
 		case 60+FN_NDATA: /* Number of datapoints in a dateset */
-			std::cout << "ndata" << std::endl;
-			i = atoi(getEvalStackString(stk, nstk)+1);
-			if (i <= 0 || i >= MAX_NB_DATA || dp[i] == NULL)
-				throw g_format_parser_error("dataset d%d not defined", i);
-			else
-				setEvalStack(stk, nstk, (int)dp[i]->np);
+			i = get_dataset_identifier(getEvalStackStringStd(stk, nstk), true);
+			setEvalStack(stk, nstk, (int)dp[i]->np);
 			break;
 		case 60+FN_DATAXVALUE: /* X value in a dateset */
 			nstk -= 1;
-			std::cout << "dxvalue" << std::endl;
-			i = atoi(getEvalStackString(stk, nstk)+1);
+			i = get_dataset_identifier(getEvalStackStringStd(stk, nstk), true);
 			j = (int) getEvalStackDouble(stk, nstk+1);
-			if (i <= 0 || i >= MAX_NB_DATA || dp[i] == NULL)
-				throw g_format_parser_error("dataset d%d not defined", i);
-			else
-				if (j <= 0 || j > (int)dp[i]->np) {
-					throw g_format_parser_error("index out of range: %d (1 ... %d)", j, dp[i]->np);
-				} else {
-					GLEArrayImpl* array = dp[i]->getDimData(0);
-					if (array != 0) {
-						setEvalStack(stk, nstk, array->getDouble(j-1));
-					}
+			if (j <= 0 || j > (int)dp[i]->np) {
+				throw g_format_parser_error("index out of range: %d (1 ... %d)", j, dp[i]->np);
+			} else {
+				GLEArrayImpl* array = dp[i]->getDimData(0);
+				if (array != 0) {
+					setEvalStack(stk, nstk, array->getDouble(j-1));
 				}
+			}
 			break;
 		case 60+FN_DATAYVALUE: /* Y value in a dateset */
 			nstk -= 1;
-			std::cout << "dyvalue" << std::endl;
-			i = atoi(getEvalStackString(stk, nstk)+1);
+			i = get_dataset_identifier(getEvalStackStringStd(stk, nstk), true);
 			j = (int) getEvalStackDouble(stk, nstk+1);
-			if (i <= 0 || i >= MAX_NB_DATA || dp[i] == NULL)
-				throw g_format_parser_error("dataset d%d not defined", i);
-			else
-				if (j <= 0 || j > (int)dp[i]->np) {
-					throw g_format_parser_error("index out of range: %d (1 ... %d)", j, dp[i]->np);
-				} else {
-					GLEArrayImpl* array = dp[i]->getDimData(1);
-					if (array != 0) {
-						setEvalStack(stk, nstk, array->getDouble(j-1));
-					}
+			if (j <= 0 || j > (int)dp[i]->np) {
+				throw g_format_parser_error("index out of range: %d (1 ... %d)", j, dp[i]->np);
+			} else {
+				GLEArrayImpl* array = dp[i]->getDimData(1);
+				if (array != 0) {
+					setEvalStack(stk, nstk, array->getDouble(j-1));
 				}
+			}
 			break;
 		case 60+FN_XG3D:
 			setEvalStack(stk, nstk - 2, xg3d(getEvalStackDouble(stk, nstk - 2), getEvalStackDouble(stk, nstk - 1), getEvalStackDouble(stk, nstk)));
@@ -933,7 +916,7 @@ void eval_do_object_block_call(GLEArrayImpl* stk, GLESub* sub, GLEObjectDO* obj)
 			dstr << getEvalStackDouble(stk, offset+i);
 			arr->setObject(i, new GLEString(dstr.str()));
 		} else {
-			GLEString* str_i = new GLEString(getEvalStackString(stk, offset+i));
+			GLEString* str_i = getEvalStackGLEString(stk, offset+i);
 			str_i->addQuotes();
 			arr->setObject(i, str_i);
 		}

@@ -1594,10 +1594,12 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			if (x) *srclin = jj;
 			break;
 		  case 48: /* WHILE */
-			readval(x);
-			readlong(jj);
-			jump_back = false;
-			if (!x) *srclin = jj;
+		    {
+				bool ifValue = evalBool(getStack(), pcode, &cp);
+				readlong(jj);
+				jump_back = false;
+				if (!ifValue) *srclin = jj;
+		  	}
 			break;
 		  case 32: /* PRINT */
 		  case 49: /* WRITE */
