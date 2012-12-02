@@ -1218,18 +1218,18 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  case 25: /* JOIN  str1,type,str2 */
 			{
 				readval(z);
-				ss1 = ostr->toUTF8();
+				GLERC<GLEString> s1(ostr);
 				readlong(jj);
 				readval(z);
-				ss2 = ostr->toUTF8();
+				GLERC<GLEString> s2(ostr);
 				ptr = *(pcode + cp); /* curve angle1 angle2 d1 d2 */
 				if (ptr) {
 					cp += ptr;
 					readxy(x2, y2);
 					readxy(x3, y3);
-					name_join(ss1.c_str(), ss2.c_str(), (int)jj, x2, y2, x3, y3);
+					name_join(s1.get(), s2.get(), (int)jj, x2, y2, x3, y3);
 				} else {
-					name_join(ss1.c_str(), ss2.c_str(), (int)jj, 0, 0, 0, 0);
+					name_join(s1.get(), s2.get(), (int)jj, 0, 0, 0, 0);
 				}
 			}
 			break;
@@ -1247,7 +1247,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  	{
 		  		readval(z);
 		  		GLEPoint pt;
-		  		name_to_point(ostr->toUTF8(), &pt);
+		  		name_to_point(ostr, &pt);
 		  		g_move(pt);
 		  		break;
 		  	}
@@ -1900,13 +1900,11 @@ GLEObjectRepresention* GLERun::name_to_object(GLEObjectRepresention* obj, GLEArr
 	return obj;
 }
 
-bool GLERun::is_name(const char *name) {
-	char str[80];
+bool GLERun::is_name(GLEString* name) {
 	int idx, type;
-	GLEString sname(name);
-	GLERC<GLEArrayImpl> path(sname.split('.'));
+	GLERC<GLEArrayImpl> path(name->split('.'));
 	GLEString* objname = (GLEString*)path->getObjectUnsafe(0);
-	objname->toUTF8(str);
+	std::string str(objname->toUTF8());
 	getVars()->find(str, &idx, &type);
 	if (idx != -1) {
 		GLEDataObject* obj = getVars()->getObject(idx);
@@ -1921,13 +1919,11 @@ bool GLERun::is_name(const char *name) {
 	return false;
 }
 
-GLEObjectRepresention* GLERun::name_to_object(const char *name, GLEJustify* just) throw(ParserError) {
-	char str[80];
+GLEObjectRepresention* GLERun::name_to_object(GLEString* name, GLEJustify* just) throw(ParserError) {
 	int idx, type;
-	GLEString sname(name);
-	GLERC<GLEArrayImpl> path(sname.split('.'));
+	GLERC<GLEArrayImpl> path(name->split('.'));
 	GLEString* objname = (GLEString*)path->getObjectUnsafe(0);
-	objname->toUTF8(str);
+	std::string str(objname->toUTF8());
 	getVars()->find(str, &idx, &type);
 	if (idx != -1) {
 		GLEDataObject* obj = getVars()->getObject(idx);
@@ -1950,9 +1946,9 @@ GLEObjectRepresention* GLERun::name_to_object(const char *name, GLEJustify* just
 	return NULL;
 }
 
-void GLERun::name_to_point(const std::string& name, GLEPoint* point) throw(ParserError) {
+void GLERun::name_to_point(GLEString* name, GLEPoint* point) throw(ParserError) {
 	GLEJustify just;
-	GLEObjectRepresention* obj = name_to_object(name.c_str(), &just);
+	GLEObjectRepresention* obj = name_to_object(name, &just);
 	if (obj != NULL) {
 		GLERectangle rect;
 		rect.copy(obj->getRectangle());
@@ -1963,7 +1959,7 @@ void GLERun::name_to_point(const std::string& name, GLEPoint* point) throw(Parse
 	}
 }
 
-void GLERun::name_to_size(const char *name, double *wd, double *hi) throw(ParserError) {
+void GLERun::name_to_size(GLEString* name, double *wd, double *hi) throw(ParserError) {
 	GLEJustify just;
 	GLEObjectRepresention* obj = name_to_object(name, &just);
 	if (obj != NULL) {
@@ -1977,7 +1973,7 @@ void GLERun::name_to_size(const char *name, double *wd, double *hi) throw(Parser
 	}
 }
 
-void GLERun::name_join(const char *n1, const char *n2, int marrow, double a1, double a2, double d1, double d2)  throw(ParserError) {
+void GLERun::name_join(GLEString *n1, GLEString *n2, int marrow, double a1, double a2, double d1, double d2)  throw(ParserError) {
 	GLEJustify j1, j2;
 	GLEObjectRepresention* obj1 = name_to_object(n1, &j1);
 	GLEObjectRepresention* obj2 = name_to_object(n2, &j2);
@@ -2009,8 +2005,6 @@ void GLERun::name_join(const char *n1, const char *n2, int marrow, double a1, do
 }
 
 void GLERun::draw_object_static(const string& path, const string& name, int* pcode, int* cp, bool mkdrobjs) throw (ParserError) {
-	int otyp;
-	double x;
 	int cp_backup = *cp;
 	GLEPoint orig;
 	g_get_xy(&orig);
@@ -2044,7 +2038,7 @@ void GLERun::draw_object_static(const string& path, const string& name, int* pco
 		eval_do_object_block_call(stk.get(), sub, &objdo);
 		handleNewDrawObject(&objdo, mkdrobjs, &orig);
 	} else {
-		eval(getStack(), pcode, cp, &x, NULL, &otyp);
+		evalGeneric(getStack(), pcode, cp);
 	}
 	if (hasoffs) measure.measureEndIgnore();
 	else measure.measureEnd();
@@ -2068,7 +2062,7 @@ void GLERun::draw_object_static(const string& path, const string& name, int* pco
 			g_translate(transl.getX(), transl.getY());
 			*cp = cp_backup;
 			g_move(0.0, 0.0);
-			eval(getStack(), pcode, cp, &x, NULL, &otyp);
+			evalGeneric(getStack(), pcode, cp);
 			g_grestore();
 		} else {
 			/* dummy device, just update bounds */

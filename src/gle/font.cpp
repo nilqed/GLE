@@ -230,7 +230,7 @@ int font_get_encoding(int ff) {
 	return cfont->info.encoding;
 }
 
-int check_has_font(const char* name) {
+int check_has_font(const std::string& name) {
 	if (fnt.size() == 0) {
 		/* load font.dat */
 		font_load();

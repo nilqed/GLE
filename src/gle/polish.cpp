@@ -399,6 +399,7 @@ GLEMemoryCell* GLEPolish::evalGeneric(GLEArrayImpl* stk, const char *exp) throw(
 	return ::evalGeneric(stk, (int*)&pcode[0], &cp);
 }
 
+
 bool valid_unquoted_string(const string& str) {
 	if (str.length() == 0) {
 		return false;

@@ -146,7 +146,7 @@ public:
 	void set(int var, GLEMemoryCell* value);
 	void get(int var, GLEMemoryCell* value);
 	void init(int var, int type);
-	void find(const char *name, int *idx, int *type);
+	void find(const std::string& name, int *idx, int *type);
 	void findAdd(const char *name, int *idx, int *type);
 	void clear();
 	void clearGlobal();

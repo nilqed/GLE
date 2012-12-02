@@ -801,6 +801,15 @@ int GLEArrayImpl::getType() const {
 	return GLEObjectTypeArray;
 }
 
+GLERC<GLEArrayImpl> doublesToArray(double* args, int nb) {
+	GLERC<GLEArrayImpl> result(new GLEArrayImpl());
+	result->ensure(nb);
+	for (int i = 0; i < nb; ++i) {
+		result->setDouble(i, args[i]);
+	}
+	return result;
+}
+
 GLEStringHash::GLEStringHash() : GLEArrayImpl() {
 }
 

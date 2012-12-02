@@ -460,7 +460,7 @@ void call_sub_byname(const string& name, double* args, int nb, const char* err_i
 			g_throw_parser_error(err.str());
 		}
 	}
-	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	GLERC<GLEArrayImpl> stk(doublesToArray(args, nb));
 	getGLERunInstance()->sub_call(idx, stk.get(), &nb);
 }
 
@@ -481,7 +481,7 @@ void call_sub_byid(int idx, double* args, int nb, const char* err_inf) throw(Par
 			g_throw_parser_error(err.str());
 		}
 	}
-	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	GLERC<GLEArrayImpl> stk(doublesToArray(args, nb));
 	getGLERunInstance()->sub_call(idx, stk.get(), &nb);
 }
 

@@ -405,7 +405,7 @@ void GLEVars::init(int var, int type) {
 }
 
 // First search in local vars, then in global vars
-void GLEVars::find(const char *name, int *idx, int *type) {
+void GLEVars::find(const std::string& name, int *idx, int *type) {
 	*idx = -1;
 	if (m_LocalMap != NULL) {
 		int l_idx = m_LocalMap->var_get(name);

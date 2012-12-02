@@ -98,12 +98,12 @@ public:
 	void sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError);
 	void name_set(GLEString* name, double x1, double y1, double x2, double y2);
 	static GLEObjectRepresention* name_to_object(GLEObjectRepresention* obj, GLEArrayImpl* path, GLEJustify* just, unsigned int offs) throw (ParserError);
-	GLEObjectRepresention* name_to_object(const char *name, GLEJustify* just) throw(ParserError);
+	GLEObjectRepresention* name_to_object(GLEString* name, GLEJustify* just) throw(ParserError);
 	bool is_name(GLEObjectRepresention* obj, GLEArrayImpl* path, unsigned int offs);
-	bool is_name(const char *name);
-	void name_to_point(const std::string& name, GLEPoint* point) throw(ParserError);
-	void name_to_size(const char *name, double *wd, double *hi) throw(ParserError);
-	void name_join(const char *n1, const char *n2, int marrow, double a1, double a2, double d1, double d2)  throw(ParserError);
+	bool is_name(GLEString* name);
+	void name_to_point(GLEString* name, GLEPoint* point) throw(ParserError);
+	void name_to_size(GLEString* name, double *wd, double *hi) throw(ParserError);
+	void name_join(GLEString* n1, GLEString* n2, int marrow, double a1, double a2, double d1, double d2)  throw(ParserError);
 	GLEStoredBox* last_box() throw (ParserError);
 	bool box_end() throw (ParserError);
 	void begin_length(int var);

@@ -816,9 +816,9 @@ void GLENumberFormat::nextString(string& value) {
 	incTokens();
 }
 
-void format_number_to_string(char* out, const char* format, double value) {
+std::string format_number_to_string(const std::string& format, double value) {
 	string result;
 	GLENumberFormat fmt(format);
 	fmt.format(value, &result);
-	strcpy(out, result.c_str());
+	return result;
 }

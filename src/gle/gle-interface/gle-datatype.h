@@ -256,6 +256,8 @@ private:
 	void resizeMemory(unsigned int size);
 };
 
+GLERC<GLEArrayImpl> doublesToArray(double* args, int nb);
+
 class DLLCLASS GLEArrayWithFreeList : public GLEArrayImpl {
 
 };

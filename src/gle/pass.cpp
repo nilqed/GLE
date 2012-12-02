@@ -883,8 +883,15 @@ GLERC<GLEColor> pass_color_list_or_fill(const string& color, IThrowsError* error
 			} else {
 				result->setFill(new GLEPatternFill(fillDescr));
 			}
-		} else if (error != 0) {
-			throw error->throwError("found '", color.c_str(), "', but expecting color or fill specification");
+		} else {
+			char *endp;
+			const char* colorCStr = color.c_str();
+			double dvalue = strtod(colorCStr, &endp);
+			if (colorCStr != endp && *endp == 0) {
+				result = new GLEColor(dvalue);
+			} else if (error != 0) {
+				throw error->throwError("found '", color.c_str(), "', but expecting color or fill specification");
+			}
 		}
 	}
 	return result;

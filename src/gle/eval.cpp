@@ -109,7 +109,7 @@ double string_to_number(const char* str) {
 	return strtod(str, &pend);
 }
 
-void format_number_to_string(char* out, const char* format, double value);
+std::string format_number_to_string(const std::string& format, double value);
 GLERC<GLEColor> memory_cell_to_color(GLEPolish* polish, GLEArrayImpl* stk, GLEMemoryCell* cell, IThrowsError* throwsError, int depth);
 
 unsigned char float_to_color_comp(double value) {
@@ -166,6 +166,11 @@ void setEvalStack(GLEArrayImpl* stk, int pos, const char* value) {
 	stk->setObject(pos, new GLEString(value));
 }
 
+void setEvalStack(GLEArrayImpl* stk, int pos, const std::string& value) {
+	stk->ensure(pos + 1);
+	stk->setObject(pos, new GLEString(value));
+}
+
 void setEvalStack(GLEArrayImpl* stk, int pos, int value) {
 	stk->ensure(pos + 1);
 	stk->setDouble(pos, (double)value);
@@ -189,6 +194,11 @@ double getEvalStackDouble(GLEArrayImpl* stk, int pos) {
 char* getEvalStackString(GLEArrayImpl* stk, int pos) {
 	CUtilsAssertMessage("not implemented");
 	return (char*)"";
+}
+
+GLEString* getEvalStackGLEString(GLEArrayImpl* stk, int pos) {
+	stk->checkType(pos, GLEObjectTypeString);
+	return (GLEString*)stk->getObject(pos);
 }
 
 std::string getEvalStackStringStd(GLEArrayImpl* stk, int pos) {
@@ -339,7 +349,6 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 	double x1, y1, x2, y2;
 	double xx, yy;
 	int i, j;
-	GLERC<GLEString> strA;
 	for (int c = 0; c < plen; c++) {
 	  // cout << "pos: " << c << " pcode: " << pcode[c] << endl;
 	  switch (pcode[c]) {
@@ -475,11 +484,11 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, nstk, getEvalStackDouble(stk, nstk)*GLE_PI/180.0);
 			break;
 		case 60+FN_EVAL: /* eval */
-			strA.set();
-
-
-			polish_eval(getEvalStackString(stk, nstk), &xx);
-			setEvalStack(stk, nstk, xx);
+			{
+				GLEArrayImpl localStack;
+				std::string toEval(getEvalStackStringStd(stk, nstk));
+				stk->set(nstk, get_global_polish()->evalGeneric(&localStack, toEval.c_str()));
+			}
 			break;
 		case 60+FN_ARG: /* arg */
 			setEvalStack(stk, nstk, eval_get_extra_arg_f((int)getEvalStackDouble(stk, nstk)));
@@ -517,30 +526,30 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, nstk, myatan2(getEvalStackDouble(stk, nstk), getEvalStackDouble(stk, nstk+1)));
 			break;
 		case 60+FN_ISNAME:
-			setEvalStack(stk, nstk, getGLERunInstance()->is_name(getEvalStackString(stk, nstk)) ? 1.0 : 0.0);
+			setEvalStackBool(stk, nstk, getGLERunInstance()->is_name(getEvalStackGLEString(stk, nstk)));
 			break;
 		case 137: /* pointx */
 			{
 				GLEPoint pt;
-				getGLERunInstance()->name_to_point(getEvalStackString(stk, nstk), &pt);
+				getGLERunInstance()->name_to_point(getEvalStackGLEString(stk, nstk), &pt);
 				setEvalStack(stk, nstk, pt.getX());
 			}
 			break;
 		case 138: /* pointy */
 			{
 				GLEPoint pt;
-				getGLERunInstance()->name_to_point(getEvalStackString(stk, nstk), &pt);
+				getGLERunInstance()->name_to_point(getEvalStackGLEString(stk, nstk), &pt);
 				setEvalStack(stk, nstk, pt.getY());
 			}
 			break;
 		case 139: /* format$ */
 			nstk--;
-			format_number_to_string(sbuf, getEvalStackString(stk, nstk+1), getEvalStackDouble(stk, nstk));
-			setEvalStack(stk, nstk, sdup(sbuf));
+			setEvalStack(stk, nstk, format_number_to_string(getEvalStackStringStd(stk, nstk+1), getEvalStackDouble(stk, nstk)));
 			break;
 		case 60+FN_GETENV: /* getenv */
 			{
 				string result;
+				std::cout << "getenv" << std::endl;
 				GLEGetEnv(string(getEvalStackString(stk, nstk)), result);
 				setEvalStack(stk, nstk, sdup(result.c_str()));
 			}
@@ -572,7 +581,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, nstk, floor(getEvalStackDouble(stk, nstk)));
 			break;
 		case 69: /* height of named object */
-			getGLERunInstance()->name_to_size(getEvalStackString(stk, nstk), &x1, &y1);
+			getGLERunInstance()->name_to_size(getEvalStackGLEString(stk, nstk), &x1, &y1);
 			setEvalStack(stk, nstk, y1);
 			break;
 		case 70: /* int (??int) */
@@ -597,6 +606,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			}
 			break;
 		case 72: /* len */
+			std::cout << "len" << std::endl;
 			setEvalStack(stk, nstk, (int)strlen(getEvalStackString(stk, nstk)));
 			break;
 		case 73: /* log */
@@ -625,6 +635,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, ++nstk, xx);
 			break;
 		case 80: /* pos */
+			std::cout << "pos" << std::endl;
 			i = (int) getEvalStackDouble(stk, nstk);
 			if (i<=0) i = 1;
 			ss = getEvalStackString(stk, nstk-2);
@@ -636,6 +647,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 81: /* right$ */
 			{
+				std::cout << "right$" << std::endl;
 				int i1 = (int)getEvalStackDouble(stk, nstk)-1;
 				int len = strlen(getEvalStackString(stk, nstk-1));
 				if (i1 < 0) i1 = 0;
@@ -651,6 +663,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 83: /* seg$ */
 			{
+				std::cout << "seg$" << std::endl;
 				int i1 = (int)getEvalStackDouble(stk, nstk-1)-1;
 				int len = strlen(getEvalStackString(stk, nstk-2));
 				if (i1 < 0) i1 = 0;
@@ -682,11 +695,13 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, nstk, tan(getEvalStackDouble(stk, nstk)));
 			break;
 		case 89: /* tdepth */
+			std::cout << "tdepth" << std::endl;
 			g_get_xy(&xx,&yy);
 			g_measure(getEvalStackString(stk, nstk),&x1,&x2,&y2,&y1);
 			setEvalStack(stk, nstk, y1);
 			break;
 		case 90: /* theight */
+			std::cout << "theight" << std::endl;
 			g_get_xy(&xx,&yy);
 			g_measure(getEvalStackString(stk, nstk),&x1,&x2,&y2,&y1);
 			setEvalStack(stk, nstk, y2);
@@ -709,17 +724,19 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, ++nstk, getGLERunInstance()->getScript()->getLocation()->getDirectory().c_str());
 			break;
 		case 60+FN_FONT:
-			setEvalStackBool(stk, nstk, check_has_font(getEvalStackString(stk, nstk)) != 0);
+			setEvalStackBool(stk, nstk, check_has_font(getEvalStackStringStd(stk, nstk)) != 0);
 			break;
 		case 92: /* twidth */
+			std::cout << "twidth" << std::endl;
 			g_measure(getEvalStackString(stk, nstk),&x1,&x2,&y1,&y2);
 			setEvalStack(stk, nstk, x2-x1);
 			break;
 		case 93: /* val */
+			std::cout << "val" << std::endl;
 			setEvalStack(stk, nstk, string_to_number(getEvalStackString(stk, nstk)));
 			break;
 		case 94: /* width of named object */
-			getGLERunInstance()->name_to_size(getEvalStackString(stk, nstk), &x1, &y1);
+			getGLERunInstance()->name_to_size(getEvalStackGLEString(stk, nstk), &x1, &y1);
 			setEvalStack(stk, nstk, x1);
 			break;
 		case 95: /* xend */
@@ -760,26 +777,27 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, nstk, (int) floor(getEvalStackDouble(stk, nstk)));
 			break;
 		case 108: /* CVTMARKER(m$) */
-			/* *** DEBUG *** */
-			//printf("\nCase 108\n");
-			both.l[0] = pass_marker(getEvalStackString(stk, nstk));
+			both.l[0] = get_marker_string(getEvalStackStringStd(stk, nstk), g_get_throws_error());
 			both.l[1] = 0;
 			setEvalStack(stk, nstk, both.d);
 			break;
 		case 110: /* CVTFONT(m$) */
 			/* *** DEBUG *** */
 			//printf("\nCase 110\n");
+			std::cout << "cvtfont" << std::endl;
 			both.l[0] = pass_font(getEvalStackString(stk, nstk));
 			both.l[1] = 0;
 			setEvalStack(stk, nstk, both.d);
 			break;
 		case 60+FN_JUSTIFY: /* JUSTIFY(m$) */
+			std::cout << "justify" << std::endl;
 			both.l[0] = pass_justify(getEvalStackString(stk, nstk));
 			both.l[1] = 0;
 			setEvalStack(stk, nstk, both.d);
 			break;         
 		case 109: /* CVTCOLOR(c$) */
 			{
+				std::cout << "color" << std::endl;
 				GLERC<GLEColor> color(pass_color_var(getEvalStackString(stk, nstk)));
 				setEvalStack(stk, nstk, color.get());
 			}
@@ -815,6 +833,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			}
 			break;
 		case 60+FN_NDATA: /* Number of datapoints in a dateset */
+			std::cout << "ndata" << std::endl;
 			i = atoi(getEvalStackString(stk, nstk)+1);
 			if (i <= 0 || i >= MAX_NB_DATA || dp[i] == NULL)
 				throw g_format_parser_error("dataset d%d not defined", i);
@@ -823,6 +842,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 60+FN_DATAXVALUE: /* X value in a dateset */
 			nstk -= 1;
+			std::cout << "dxvalue" << std::endl;
 			i = atoi(getEvalStackString(stk, nstk)+1);
 			j = (int) getEvalStackDouble(stk, nstk+1);
 			if (i <= 0 || i >= MAX_NB_DATA || dp[i] == NULL)
@@ -839,6 +859,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 60+FN_DATAYVALUE: /* Y value in a dateset */
 			nstk -= 1;
+			std::cout << "dyvalue" << std::endl;
 			i = atoi(getEvalStackString(stk, nstk)+1);
 			j = (int) getEvalStackDouble(stk, nstk+1);
 			if (i <= 0 || i >= MAX_NB_DATA || dp[i] == NULL)
@@ -934,7 +955,7 @@ void evalDoConstant(GLEArrayImpl* stk, int *pcode, int *cp)
 	nstk++;
 }
 
-void evalCommon(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
+GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
 	int fixed_cp;
 	if (cp == 0) {
 		fixed_cp = 0;
@@ -951,48 +972,42 @@ void evalCommon(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
 		eval_pcode_loop(stk, pcode + (*cp), plen);
 		*cp = *cp + plen;
 	}
-	if (nstk != 1) {
+	if (nstk < 1) {
 		g_throw_parser_error("pcode error: stack underflow in eval");
 	}
-	nstk = 0;
-}
-
-GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
-	evalCommon(stk, pcode, cp);
-	return stk->get(1);
+	nstk--;
+	return stk->get(nstk + 1);
 }
 
 double evalDouble(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
-	evalCommon(stk, pcode, cp);
-	GLEMemoryCell* mc = stk->get(1);
+	GLEMemoryCell* mc = evalGeneric(stk, pcode, cp);
 	gle_memory_cell_check(mc, GLEObjectTypeDouble);
 	return mc->Entry.DoubleVal;
 }
 
 bool evalBool(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
-	evalCommon(stk, pcode, cp);
-	GLEMemoryCell* mc = stk->get(1);
+	GLEMemoryCell* mc = evalGeneric(stk, pcode, cp);
 	gle_memory_cell_check(mc, GLEObjectTypeBool);
 	return mc->Entry.BoolVal;
 }
 
 GLERC<GLEColor> evalColor(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
-	evalCommon(stk, pcode, cp);
-	return memory_cell_to_color(get_global_polish(), stk, stk->get(1), g_get_throws_error(), 0);
+	GLEMemoryCell* mc = evalGeneric(stk, pcode, cp);
+	return memory_cell_to_color(get_global_polish(), stk, mc, g_get_throws_error(), 0);
 }
 
 GLERC<GLEString> evalString(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOther) throw(ParserError) {
 	GLERC<GLEString> result;
-	evalCommon(stk, pcode, cp);
-	int type = stk->getType(1);
+	GLEMemoryCell* mc = evalGeneric(stk, pcode, cp);
+	int type = gle_memory_cell_type(mc);
 	if (type == GLEObjectTypeString) {
-		result = (GLEString*)stk->getObject(1);
+		result = (GLEString*)mc->Entry.ObjectVal;
 	} else {
 		if (allowOther) {
-			result = stk->getString(1);
+			result = stk->getString(nstk + 1);
 		} else {
 			std::ostringstream msg;
-			msg << "found type '" << gle_object_type_to_string((GLEObjectType)stk->getType(1)) << "' but expected 'string'";
+			msg << "found type '" << gle_object_type_to_string((GLEObjectType)type) << "' but expected 'string'";
 			g_throw_parser_error(msg.str());
 		}
 	}
@@ -1003,14 +1018,14 @@ void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, GLEString **ostr
 	if (ostr != 0) {
 		*ostr = 0;
 	}
-	evalCommon(stk, pcode, cp);
-	int type = stk->getType(1);
+	GLEMemoryCell* mc = evalGeneric(stk, pcode, cp);
+	int type = gle_memory_cell_type(mc);
 	if (type == GLEObjectTypeString) {
 		*otyp = 2;
-		*ostr = (GLEString*)stk->getObject(1);
+		*ostr = (GLEString*)mc->Entry.ObjectVal;
 	} else {
 		*otyp = 1;
-		*oval = getEvalStackDouble(stk, 1);
+		*oval = getEvalStackDouble(stk, nstk + 1);
 	}
 }
 

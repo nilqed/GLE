@@ -148,5 +148,7 @@ void validate_open_input_stream(ifstream& input, const string& fname) throw(Pars
 FILE* validate_fopen(const string& fname, const char *mode, bool isread) throw(ParserError);
 void validate_file_name(const string& fname, bool isread) throw(ParserError);
 string fontdir(const char *s);
-int check_has_font(const char* name);
+int check_has_font(const std::string& name);
+int get_marker_string(const string& marker, IThrowsError* error);
+
 #endif
