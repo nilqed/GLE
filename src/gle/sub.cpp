@@ -431,8 +431,7 @@ void GLERun::sub_call(GLESub* sub, GLEArrayImpl* arguments) throw(ParserError) {
 
 void call_sub_byname(const string& name, double* args, int nb, const char* err_inf) throw(ParserError) {
 	GLESub* sub = sub_find(name);
-	int idx = sub != NULL ? sub->getIndex() : -1;
-	if (idx == -1)  {
+	if (sub == NULL)  {
 		stringstream err;
 		err << "subroutine '" << name << "' not found";
 		if (err_inf != NULL) err << " " << err_inf;
@@ -443,16 +442,8 @@ void call_sub_byname(const string& name, double* args, int nb, const char* err_i
 		if (err_inf != NULL) err << " " << err_inf;
 		g_throw_parser_error(err.str());
 	}
-	for (int i = 0; i < nb; i++) {
-		if (sub->getParamType(i) != 1)  {
-			stringstream err;
-			err << "all parameters of subroutine '" << name << "' should be numeric";
-			if (err_inf != NULL) err << " " << err_inf;
-			g_throw_parser_error(err.str());
-		}
-	}
 	GLERC<GLEArrayImpl> stk(doublesToArray(args, nb));
-	getGLERunInstance()->sub_call(idx, stk.get(), &nb);
+	getGLERunInstance()->sub_call(sub, stk.get());
 }
 
 void call_sub_byid(int idx, double* args, int nb, const char* err_inf) throw(ParserError) {
@@ -464,15 +455,6 @@ void call_sub_byid(int idx, double* args, int nb, const char* err_inf) throw(Par
 		if (err_inf != NULL) err << " " << err_inf;
 		g_throw_parser_error(err.str());
 	}
-	for (int i = 0; i < nb; i++) {
-		if (sub->getParamType(i) != 1)  {
-			stringstream err;
-			err << "all parameters of subroutine '" << sub->getName() << "' should be numeric";
-			if (err_inf != NULL) err << " " << err_inf;
-			g_throw_parser_error(err.str());
-		}
-	}
 	GLERC<GLEArrayImpl> stk(doublesToArray(args, nb));
-	getGLERunInstance()->sub_call(idx, stk.get(), &nb);
+	getGLERunInstance()->sub_call(sub, stk.get());
 }
-

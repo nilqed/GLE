@@ -2627,11 +2627,10 @@ void g_arrow(double dx, double dy, int can_fillpath) throw(ParserError) {
 		xy_polar(dx, dy, &radius, &angle);
 		GLEArrowProps arrow;
 		g_arrowsize_actual(&arrow, &lwd, true);
-		double args[4];
-		args[0] = 0;
-		args[1] = angle;
-		args[2] = arrow.angle;
-		args[3] = arrow.size;
+		double args[3];
+		args[0] = angle;
+		args[1] = arrow.angle;
+		args[2] = arrow.size;
 		call_sub_byid(arrow.style-GLE_ARRSTY_SUB, args, 3, "(used for defining arrow style)");
 	} else {
 		GLEArrowPoints pts;

@@ -310,6 +310,10 @@ void eval_binary_operator_bool(GLEArrayImpl* stk, int op, bool a, bool b) {
 	}
 }
 
+void bla_debug()
+{
+}
+
 void eval_binary_operator(GLEArrayImpl* stk, int op) {
 	// a OP b
 	GLEMemoryCell* a = stk->get(nstk - 1);
@@ -336,6 +340,7 @@ void eval_binary_operator(GLEArrayImpl* stk, int op) {
 		GLERC<GLEString> b_str(stk->getString(nstk));
 		eval_binary_operator_string(stk, op, a_str.get(), b_str.get());
 	} else {
+		bla_debug();
 		std::ostringstream msg;
 		msg << "operator " << gle_operator_to_string(op)
 			<< " does not apply to types '" << gle_object_type_to_string((GLEObjectType)a_type)
@@ -554,7 +559,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			{
 				string result;
 				GLEGetEnv(getEvalStackStringStd(stk, nstk), result);
-				setEvalStack(stk, nstk, sdup(result.c_str()));
+				setEvalStack(stk, nstk, result);
 			}
 			break;
 		case 66: /* date$ */
@@ -565,14 +570,12 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 				strcpy(sbuf,sbuf2);
 				strcpy(sbuf+11,sbuf2+20);
 				sbuf[strlen(sbuf)-1] = 0;
-				// FIXME STACK
-				// setdstr(&getEvalStackString(stk, ++nstk),sbuf);
+				setEvalStack(stk, ++nstk, sbuf);
 			}
 			break;
 		case 111: /* device$ */
 			g_get_type(sbuf);
-			// FIXME STACK
-			// setdstr(&getEvalStackString(stk, ++nstk),sbuf);
+			setEvalStack(stk, ++nstk, sbuf);
 			break;
 		case 115: /* feof(chan) */
 			setEvalStack(stk, nstk, f_eof((int) getEvalStackDouble(stk, nstk)));

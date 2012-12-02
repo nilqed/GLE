@@ -374,14 +374,13 @@ void draw_bar(double x, double yf, double yt, double wd, bar_struct* barset, int
 		g_box_fill(x1, y1, x2, y2);
 		g_box_stroke(x1, y1, x2, y2);
 	} else {
-		double args[7];
-		args[0] = 0;
-		args[1] = x1;
-		args[2] = y1;
-		args[3] = x2;
-		args[4] = y2;
-		args[5] = yt;
-		args[6] = di;
+		double args[6];
+		args[0] = x1;
+		args[1] = y1;
+		args[2] = x2;
+		args[3] = y2;
+		args[4] = yt;
+		args[5] = di;
 		string name = string("BAR_") + barset->style[di];
 		call_sub_byname(name, args, 6, "(used for defining bar style)");
 	}
