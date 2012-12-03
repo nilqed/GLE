@@ -150,5 +150,6 @@ void validate_file_name(const string& fname, bool isread) throw(ParserError);
 string fontdir(const char *s);
 int check_has_font(const std::string& name);
 int get_marker_string(const string& marker, IThrowsError* error);
+void gle_set_constants();
 
 #endif

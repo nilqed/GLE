@@ -721,7 +721,7 @@ void GLEInterface::evalString(const char* str, GLEScript* script) {
 			sub_clear(false);
 			clear_run();
 			f_init();
-			var_def("PI", GLE_PI);
+			gle_set_constants();
 		}
 		GLEPolish polish;
 		polish.initTokenizer();

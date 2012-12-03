@@ -1875,7 +1875,6 @@ void g_marker2(int i, double sz, double dval) throw(ParserError) {
 	static double x1,y1,x2,y2;
 	if (i<0) {
 		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-		int nstk = 2;
 		++i;
 		i = -i;
 		if (mark_subp[i] == -1) {
@@ -1894,7 +1893,7 @@ void g_marker2(int i, double sz, double dval) throw(ParserError) {
 		setEvalStack(stk.get(), 1, sz);
 		setEvalStack(stk.get(), 2, dval);
 		g_get_xy(&cx,&cy);
-		getGLERunInstance()->sub_call(mark_subp[i], stk.get(), &nstk);
+		getGLERunInstance()->sub_call(sub_get(mark_subp[i]), stk.get(), 2);
 		g_move(cx,cy);
 		return;
 	}

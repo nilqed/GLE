@@ -27,3 +27,9 @@
 "'APE' < 'ape'",false
 "'x' . 'y'",x.y
 "'5 = ' + 5",5 = 5
+"seg$('Hello', 2, 4)",ell
+"seg$('Hello', 1, -1)",Hello
+"seg$('Hello', 2, -2)",ell
+"left$('Hello', 2)",He
+"left$('Hello', 0)",
+

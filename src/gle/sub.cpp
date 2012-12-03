@@ -365,12 +365,11 @@ GLESub* sub_get(int idx) throw(ParserError) {
 extern int this_line;
 
 /* 	Run a user defined function  */
-void GLERun::sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError) {
+void GLERun::sub_call(GLESub* sub, GLEArrayImpl* stk, int npm) throw(ParserError) {
 	// Save current return value
 	GLEMemoryCell save_return_value;
 	GLE_MC_INIT(save_return_value);
 	GLE_MC_COPY(&save_return_value, &m_returnValue);
-	GLESub* sub = sub_get(idx);
 	// Set local variable map
 	GLEVarMap* sub_map = sub->getLocalVars();
 	GLEVarMap* save_var_map = var_swap_local_map(sub_map);
@@ -378,7 +377,7 @@ void GLERun::sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError) {
 	// Copy parameters to local variables
 	for (int i = sub->getNbParam()-1; i >= 0; i--) {
 		int var = i | GLE_VAR_LOCAL_BIT;
-		getVars()->set(var, stk->get((*npm)--));
+		getVars()->set(var, stk->get(npm--));
 	}
 	// Run subroutine
 	int endp = 0;
@@ -390,8 +389,8 @@ void GLERun::sub_call(int idx, GLEArrayImpl* stk, int *npm) throw(ParserError) {
 	}
 	// FIXME: Find more elegant way to back up current line
 	this_line = oldline;
-	(*npm) = (*npm) + 1;
-	stk->set(*npm, &m_returnValue);
+	npm++;
+	stk->set(npm, &m_returnValue);
 	var_set_local_map(save_var_map);
 	GLE_MC_COPY(&m_returnValue, &save_return_value);
 	var_free_local();

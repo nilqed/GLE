@@ -189,7 +189,6 @@ bool var_check(int *j);
 void var_clear_global(void);
 void var_clear_local(void);
 void var_clear();
-void var_def(const char *s, double x);
 void var_find(const char *name,int *idx,int *type);	/* Find a variable in the list */
 void var_find_dn(GLEVarSubMap* map, int *idx, int *var, int *nd);
 void var_findadd(const char *name,int *idx,int *type);	/* Add a variable to the list */
@@ -207,6 +206,7 @@ char* var_get_name(int jj);
 bool var_valid_name(const string& name);
 void var_findadd_set(const char* name, double value);
 void var_findadd_set(const char* name, const string& value);
+void var_findadd_set(const char *s, GLEMemoryCell* value);
 GLEVarSubMap* var_add_local_submap();
 void var_remove_local_submap();
 bool str_var_valid_name(const string& name);

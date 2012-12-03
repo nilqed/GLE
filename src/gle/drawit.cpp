@@ -82,18 +82,28 @@ GLERun* getGLERunInstance() {
 
 void text_load_include(GLEParser* parser, const string& fname, GLESourceLine* code, GLESourceFile* file) throw(ParserError);
 
+void gle_set_constants() {
+	GLEMemoryCell value;
+	GLE_MC_INIT(value);
+	var_findadd_set("PI", GLE_PI);
+	GLE_MC_SET_BOOL(&value, true);
+	var_findadd_set("TRUE", &value);
+	GLE_MC_SET_BOOL(&value, false);
+	var_findadd_set("FALSE", &value);
+}
+
 void do_set_vars() {
-	var_def("PI", GLE_PI);
-	var_def("XGMIN", 0.0);
-	var_def("YGMIN", 0.0);
-	var_def("XGMAX", 0.0);
-	var_def("YGMAX", 0.0);
-	var_def("X2GMIN", 0.0);
-	var_def("Y2GMIN", 0.0);
-	var_def("X2GMAX", 0.0);
-	var_def("Y2GMAX", 0.0);
-	var_def("ZGMIN", 0.0);
-	var_def("ZGMAX", 0.0);
+	gle_set_constants();
+	var_findadd_set("XGMIN", 0.0);
+	var_findadd_set("YGMIN", 0.0);
+	var_findadd_set("XGMAX", 0.0);
+	var_findadd_set("YGMAX", 0.0);
+	var_findadd_set("X2GMIN", 0.0);
+	var_findadd_set("Y2GMIN", 0.0);
+	var_findadd_set("X2GMAX", 0.0);
+	var_findadd_set("Y2GMAX", 0.0);
+	var_findadd_set("ZGMIN", 0.0);
+	var_findadd_set("ZGMAX", 0.0);
 }
 
 /*---------------------------------------------------------------------------*/

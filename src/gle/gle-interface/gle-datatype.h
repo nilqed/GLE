@@ -195,6 +195,7 @@ public:
 	void addQuotes();
 	void join(char bych, GLEArrayImpl* arr, int from = 0, int to = -1);
 	void resize(unsigned int size);
+	unsigned int toStringIndex(int value);
 	void DLLFCT setSize(unsigned int size);
 	virtual int getType() const;
 	static GLEString* getEmptyString();
@@ -230,7 +231,10 @@ public:
 	void set(unsigned int i, const GLEMemoryCell* cell);
 	inline GLEMemoryCell* get(unsigned int i) const { return &m_Data[i]; }
 	inline GLEDataObject* getObjectUnsafe(unsigned int i) { return m_Data[i].Entry.ObjectVal; }
-	inline unsigned int size() { return m_Length; }
+	inline const unsigned int size() { return m_Length; }
+	inline const unsigned int last() { return m_Length - 1; }
+	inline void decrementSize(int diff) { m_Length -= diff; }
+	inline void incrementSize(int diff) { m_Length += diff; }
 	void init(unsigned int i);
 	int getType(unsigned int i) const;
 	void checkType(unsigned int i, int expected);

@@ -152,6 +152,8 @@ void str_get_system_error(ostream& error);
 
 int gle_round_int(double val);
 
+int gle_make_zero_based(int val);
+
 #if defined(__UNIX__)
 	string str_format(const char* arg_list, ...);
 #else

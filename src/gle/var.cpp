@@ -726,12 +726,6 @@ GLEVarMap* get_local_var_map() {
 	return getVarsInstance()->getLocalMap();
 }
 
-void var_def(const char *s, double x) {
-	int idx, type=1;
-	var_findadd(s, &idx, &type);
-	var_set(idx, x);
-}
-
 void var_findadd_set(const char* name, double value) {
 	int idx, type = 1;
 	var_findadd(name, &idx, &type);
@@ -742,6 +736,12 @@ void var_findadd_set(const char* name, const string& value) {
 	int idx, type = 2;
 	var_findadd((char*)name, &idx, &type);
 	var_setstr(idx, (char*)value.c_str());
+}
+
+void var_findadd_set(const char *s, GLEMemoryCell* value) {
+	int idx, type=1;
+	var_findadd(s, &idx, &type);
+	getVarsInstance()->set(idx, value);
 }
 
 void var_add_local(const string& name, int *idx, int *type) {

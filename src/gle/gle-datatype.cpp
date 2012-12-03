@@ -623,6 +623,15 @@ void GLEString::resize(unsigned int size) {
 	}
 }
 
+unsigned int GLEString::toStringIndex(int value)
+{
+	if (value < 0) {
+		return (unsigned int)std::max<int>(0, (int)m_Length + value);
+	} else {
+		return value;
+	}
+}
+
 int GLEString::getType() const {
 	return GLEObjectTypeString;
 }
@@ -650,7 +659,7 @@ GLEArrayImpl::~GLEArrayImpl() {
 
 void GLEArrayImpl::clear() {
 	if (m_Data != NULL) {
-		for (unsigned int i = 0; i < m_Length; i++) {
+		for (unsigned int i = 0; i < m_Alloc; i++) {
 			GLE_MC_DEL_INTERN(&m_Data[i]);
 		}
 		free(m_Data);
@@ -754,10 +763,7 @@ GLERC<GLEString> GLEArrayImpl::getString(unsigned int i) {
 
 void GLEArrayImpl::ensure(unsigned int size) {
 	if (m_Alloc < size) extend(size);
-	while (m_Length < size) {
-		GLE_MC_INIT(m_Data[m_Length]);
-		m_Length++;
-	}
+	m_Length = std::max<int>(m_Length, size);
 }
 
 void GLEArrayImpl::resize(unsigned int size) {
@@ -773,6 +779,9 @@ void GLEArrayImpl::resize(unsigned int size) {
 void GLEArrayImpl::resizeMemory(unsigned int size) {
 	if (m_Alloc < size) {
 		m_Data = (GLEMemoryCell*)realloc(m_Data, size*sizeof(GLEMemoryCell));
+		for (unsigned int i = m_Alloc; i < size; ++i) {
+			GLE_MC_INIT(m_Data[i]);
+		}
 		m_Alloc = size;
 	}
 }

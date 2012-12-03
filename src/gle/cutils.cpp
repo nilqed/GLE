@@ -641,7 +641,15 @@ int f_i_sign(int *a, int* b) {
 }
 
 int gle_round_int(double val) {
-	return (int)floor(val+0.5);
+	return (int)floor(val + 0.5);
+}
+
+int gle_make_zero_based(int val) {
+	if (val >= 1) {
+		return val - 1;
+	} else {
+		return val;
+	}
 }
 
 void str_get_system_error(ostream& error) {

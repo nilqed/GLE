@@ -98,7 +98,6 @@ int stk_var[100];
 int stk_strlen[100];
 char sbuf[512];
 char sbuf2[112];
-int nstk=0;
 extern int gle_debug;
 
 extern CmdLineObj g_CmdLine;
@@ -196,6 +195,18 @@ char* getEvalStackString(GLEArrayImpl* stk, int pos) {
 	return (char*)"";
 }
 
+unsigned int getEvalStackPositiveInt(GLEArrayImpl* stk, int pos) {
+	stk->checkType(pos, GLEObjectTypeDouble);
+	int result = gle_round_int(stk->getDouble(pos));
+	if (result < 0) {
+		std::ostringstream msg;
+		msg << "expected positive integer but found " << result;
+		g_throw_parser_error(msg.str().c_str());
+	} else {
+		return (unsigned int)result;
+	}
+}
+
 GLEString* getEvalStackGLEString(GLEArrayImpl* stk, int pos) {
 	stk->checkType(pos, GLEObjectTypeString);
 	return (GLEString*)stk->getObject(pos);
@@ -220,31 +231,31 @@ void complain_operator_type(int op, int type) {
 void eval_binary_operator_string(GLEArrayImpl* stk, int op, GLEString* a, GLEString* b) {
 	switch (op) {
 		case BIN_OP_PLUS:
-			setEvalStack(stk, nstk - 1, a->concat(b));
+			setEvalStack(stk, stk->last() - 1, a->concat(b));
 			break;
 		case BIN_OP_EQUALS:
-			setEvalStackBool(stk, nstk - 1, a->equalsI(b));
+			setEvalStackBool(stk, stk->last() - 1, a->equalsI(b));
 			break;
 		case BIN_OP_LT:
-			setEvalStackBool(stk, nstk - 1, a->strICmp(b) < 0);
+			setEvalStackBool(stk, stk->last() - 1, a->strICmp(b) < 0);
 			break;
 		case BIN_OP_LE:
-			setEvalStackBool(stk, nstk - 1, a->strICmp(b) <= 0);
+			setEvalStackBool(stk, stk->last() - 1, a->strICmp(b) <= 0);
 			break;
 		case BIN_OP_GT:
-			setEvalStackBool(stk, nstk - 1, a->strICmp(b) > 0);
+			setEvalStackBool(stk, stk->last() - 1, a->strICmp(b) > 0);
 			break;
 		case BIN_OP_GE:
-			setEvalStackBool(stk, nstk - 1, a->strICmp(b) >= 0);
+			setEvalStackBool(stk, stk->last() - 1, a->strICmp(b) >= 0);
 			break;
 		case BIN_OP_NOT_EQUALS:
-			setEvalStackBool(stk, nstk - 1, !a->equalsI(b));
+			setEvalStackBool(stk, stk->last() - 1, !a->equalsI(b));
 			break;
 		case BIN_OP_DOT:
 			{
 				GLERC<GLEString> dot(new GLEString("."));
 				GLERC<GLEString> temp(a->concat(dot.get()));
-				setEvalStack(stk, nstk - 1, temp->concat(b));
+				setEvalStack(stk, stk->last() - 1, temp->concat(b));
 			}
 			break;
 	}
@@ -253,42 +264,42 @@ void eval_binary_operator_string(GLEArrayImpl* stk, int op, GLEString* a, GLEStr
 void eval_binary_operator_double(GLEArrayImpl* stk, int op, double a, double b) {
 	switch (op) {
 		case BIN_OP_PLUS:
-			setEvalStack(stk, nstk - 1, a + b);
+			setEvalStack(stk, stk->last() - 1, a + b);
 			break;
 		case BIN_OP_MINUS:
-			setEvalStack(stk, nstk - 1, a - b);
+			setEvalStack(stk, stk->last() - 1, a - b);
 			break;
 		case BIN_OP_MULTIPLY:
-			setEvalStack(stk, nstk - 1, a * b);
+			setEvalStack(stk, stk->last() - 1, a * b);
 			break;
 		case BIN_OP_DIVIDE:
 			// do not test on divide by zero, otherwise "let"
 			// cannot plot functions with divide by zero anymore
-			setEvalStack(stk, nstk - 1, a / b);
+			setEvalStack(stk, stk->last() - 1, a / b);
 			break;
 		case BIN_OP_POW:
-			setEvalStack(stk, nstk - 1, pow(a, b));
+			setEvalStack(stk, stk->last() - 1, pow(a, b));
 			break;
 		case BIN_OP_EQUALS:
-			setEvalStackBool(stk, nstk - 1, a == b);
+			setEvalStackBool(stk, stk->last() - 1, a == b);
 			break;
 		case BIN_OP_LT:
-			setEvalStackBool(stk, nstk - 1, a < b);
+			setEvalStackBool(stk, stk->last() - 1, a < b);
 			break;
 		case BIN_OP_LE:
-			setEvalStackBool(stk, nstk - 1, a <= b);
+			setEvalStackBool(stk, stk->last() - 1, a <= b);
 			break;
 		case BIN_OP_GT:
-			setEvalStackBool(stk, nstk - 1, a > b);
+			setEvalStackBool(stk, stk->last() - 1, a > b);
 			break;
 		case BIN_OP_GE:
-			setEvalStackBool(stk, nstk - 1, a >= b);
+			setEvalStackBool(stk, stk->last() - 1, a >= b);
 			break;
 		case BIN_OP_NOT_EQUALS:
-			setEvalStackBool(stk, nstk - 1, a != b);
+			setEvalStackBool(stk, stk->last() - 1, a != b);
 			break;
 		case BIN_OP_MOD:
-			setEvalStack(stk, nstk - 1, gle_round_int(a) % gle_round_int(b));
+			setEvalStack(stk, stk->last() - 1, gle_round_int(a) % gle_round_int(b));
 			break;
 		default:
 			complain_operator_type(op, GLEObjectTypeDouble);
@@ -299,10 +310,10 @@ void eval_binary_operator_double(GLEArrayImpl* stk, int op, double a, double b) 
 void eval_binary_operator_bool(GLEArrayImpl* stk, int op, bool a, bool b) {
 	switch (op) {
 		case BIN_OP_AND:
-			setEvalStackBool(stk, nstk - 1, a && b);
+			setEvalStackBool(stk, stk->last() - 1, a && b);
 			break;
 		case BIN_OP_OR:
-			setEvalStackBool(stk, nstk - 1, a || b);
+			setEvalStackBool(stk, stk->last() - 1, a || b);
 			break;
 		default:
 			complain_operator_type(op, GLEObjectTypeDouble);
@@ -310,14 +321,10 @@ void eval_binary_operator_bool(GLEArrayImpl* stk, int op, bool a, bool b) {
 	}
 }
 
-void bla_debug()
-{
-}
-
 void eval_binary_operator(GLEArrayImpl* stk, int op) {
 	// a OP b
-	GLEMemoryCell* a = stk->get(nstk - 1);
-	GLEMemoryCell* b = stk->get(nstk);
+	GLEMemoryCell* a = stk->get(stk->last() - 1);
+	GLEMemoryCell* b = stk->get(stk->last());
 	int a_type = gle_memory_cell_type(a);
 	int b_type = gle_memory_cell_type(b);
 	if (a_type == b_type) {
@@ -336,18 +343,17 @@ void eval_binary_operator(GLEArrayImpl* stk, int op) {
 				break;
 		}
 	} else if (op == BIN_OP_PLUS && (a_type == GLEObjectTypeString || b_type == GLEObjectTypeString)) {
-		GLERC<GLEString> a_str(stk->getString(nstk - 1));
-		GLERC<GLEString> b_str(stk->getString(nstk));
+		GLERC<GLEString> a_str(stk->getString(stk->last() - 1));
+		GLERC<GLEString> b_str(stk->getString(stk->last()));
 		eval_binary_operator_string(stk, op, a_str.get(), b_str.get());
 	} else {
-		bla_debug();
 		std::ostringstream msg;
 		msg << "operator " << gle_operator_to_string(op)
 			<< " does not apply to types '" << gle_object_type_to_string((GLEObjectType)a_type)
 			<< "' and '" << gle_object_type_to_string((GLEObjectType)b_type) << "'";
 		g_throw_parser_error(msg.str());
 	}
-	nstk--;
+	stk->decrementSize(1);
 }
 
 void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError) {
@@ -373,19 +379,21 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 		case 2: /* Floating point number follows */
 			both.l[0] = *(pcode+(++c));
 			both.l[1] = *(pcode+(++c));
-			setEvalStack(stk, ++nstk, both.d);
- 			dbg gprint("Got float %f %d %f \n",getEvalStackDouble(stk, nstk),nstk,*(pcode+(c)));
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), both.d);
+ 			dbg gprint("Got float %f %d %f \n",getEvalStackDouble(stk, stk->last()),stk->last(),*(pcode+(c)));
 			break;
 		case 3: /* Floating_point variable number follows */
 		case 4: /* string variable number follows */
 			i = *(pcode + (++c));
-			j = ++nstk;
-			stk->ensure(j + 1);
-			getVarsInstance()->get(i, stk->get(j));
+			stk->incrementSize(1);
+			stk->ensure(stk->size());
+			getVarsInstance()->get(i, stk->get(stk->last()));
 			break;
 		case 5: /* Null terminated string follows (int alligned) */
-			c++; nstk++;
-			setEvalStack(stk, nstk, eval_str(pcode,&c));
+			c++;
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), eval_str(pcode, &c));
 			break;
 		/*
 			Binary operators 10..29 -----------------------
@@ -414,152 +422,153 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 		case 61: /* unary plus */
 			break;
 		case 62: /* unary minus */
-			setEvalStack(stk, nstk, -getEvalStackDouble(stk, nstk));
+			setEvalStack(stk, stk->last(), -getEvalStackDouble(stk, stk->last()));
 			break;
 		case 63: /* abs */
-			setEvalStack(stk, nstk, fabs(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), fabs(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 64: /* atan */
-			setEvalStack(stk, nstk, atan(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), atan(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 113: /* ACOS 53*/
-			setEvalStack(stk, nstk, acos(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), acos(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 114: /* ASIN 54*/
-			setEvalStack(stk, nstk, asin(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), asin(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 65: /* cos 5*/
-			setEvalStack(stk, nstk, cos(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), cos(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 116: /* ACOT 56*/
-			setEvalStack(stk, nstk, 1.0/atan(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/atan(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 117: /*ASEC 57*/
-			setEvalStack(stk, nstk, 1.0/acos(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/acos(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 118: /*ACSC 58*/
-			setEvalStack(stk, nstk, 1.0/asin(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/asin(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 119: /*cot 59*/
-			setEvalStack(stk, nstk, 1.0/tan(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/tan(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 120: /*sec 60*/
-			setEvalStack(stk, nstk, 1.0/cos(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/cos(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 121: /*csc 61*/
-			setEvalStack(stk, nstk, 1.0/sin(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/sin(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 122: /* cosh 62*/
-			setEvalStack(stk, nstk, cosh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), cosh(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 123: /* sinh 63*/
-			setEvalStack(stk, nstk, sinh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), sinh(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 124: /* tanh 64*/
-			setEvalStack(stk, nstk, tanh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), tanh(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 125: /* coth 65*/
-			setEvalStack(stk, nstk, 1.0/tanh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/tanh(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 126: /* sech 66*/
-			setEvalStack(stk, nstk, 1.0/cosh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/cosh(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 127: /* csch 67*/
-			setEvalStack(stk, nstk, 1.0/sinh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/sinh(getEvalStackDouble(stk, stk->last())));
 			break;
 		#ifdef HAVE_INVERSE_HYP
 		case 128: /* acosh 68*/
-			setEvalStack(stk, nstk, acosh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), acosh(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 129: /* asinh 69*/
-			setEvalStack(stk, nstk, asinh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), asinh(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 130: /* atanh 70*/
-			setEvalStack(stk, nstk, atanh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), atanh(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 131: /* acoth 71*/
-			setEvalStack(stk, nstk, 1.0/atanh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/atanh(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 132: /* asech 72*/
-			setEvalStack(stk, nstk, 1.0/acosh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/acosh(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 133: /* acsch 73*/
-			setEvalStack(stk, nstk, 1.0/asinh(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), 1.0/asinh(getEvalStackDouble(stk, stk->last())));
 			break;
 		#endif
 		case 134: /* todeg 74*/
-			setEvalStack(stk, nstk, getEvalStackDouble(stk, nstk)*180.0/GLE_PI);
+			setEvalStack(stk, stk->last(), getEvalStackDouble(stk, stk->last())*180.0/GLE_PI);
 			break;
 		case 135: /* torad 75*/
-			setEvalStack(stk, nstk, getEvalStackDouble(stk, nstk)*GLE_PI/180.0);
+			setEvalStack(stk, stk->last(), getEvalStackDouble(stk, stk->last())*GLE_PI/180.0);
 			break;
 		case 60+FN_EVAL: /* eval */
 			{
-				std::string toEval(getEvalStackStringStd(stk, nstk));
-				stk->set(nstk, get_global_polish()->evalGeneric(stk, toEval.c_str()));
+				std::string toEval(getEvalStackStringStd(stk, stk->last()));
+				stk->set(stk->last(), get_global_polish()->evalGeneric(stk, toEval.c_str()));
 			}
 			break;
 		case 60+FN_ARG: /* arg */
-			setEvalStack(stk, nstk, eval_get_extra_arg_f((int)getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), eval_get_extra_arg_f((int)getEvalStackDouble(stk, stk->last())));
 			break;
 		case 60+FN_ARGS: /* arg$ */
-			setEvalStack(stk, nstk, sdup((char*)eval_get_extra_arg_s((int)getEvalStackDouble(stk, nstk))));
+			setEvalStack(stk, stk->last(), sdup((char*)eval_get_extra_arg_s((int)getEvalStackDouble(stk, stk->last()))));
 			break;
 		case 60+FN_NARGS: /* narg */
-			setEvalStack(stk, ++nstk, g_CmdLine.getNbExtraArgs());
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), g_CmdLine.getNbExtraArgs());
 			break;
 		case 60+FN_MIN: /* min */
-			nstk--;
-			if (getEvalStackDouble(stk, nstk+1) < getEvalStackDouble(stk, nstk)) setEvalStack(stk, nstk, getEvalStackDouble(stk, nstk+1));
+			stk->decrementSize(1);
+			if (getEvalStackDouble(stk, stk->last()+1) < getEvalStackDouble(stk, stk->last())) setEvalStack(stk, stk->last(), getEvalStackDouble(stk, stk->last()+1));
 			break;
 		case 60+FN_MAX: /* max */
-			nstk--;
-			if (getEvalStackDouble(stk, nstk+1) > getEvalStackDouble(stk, nstk)) setEvalStack(stk, nstk, getEvalStackDouble(stk, nstk+1));
+			stk->decrementSize(1);
+			if (getEvalStackDouble(stk, stk->last()+1) > getEvalStackDouble(stk, stk->last())) setEvalStack(stk, stk->last(), getEvalStackDouble(stk, stk->last()+1));
 			break;
 		case 60+FN_SDIV: /* sdiv */
-			if (getEvalStackDouble(stk, nstk) == 0.0) setEvalStack(stk, nstk-1, 0.0);
-			else setEvalStack(stk, nstk-1, getEvalStackDouble(stk, nstk-1) / getEvalStackDouble(stk, nstk));
-			nstk--;
+			if (getEvalStackDouble(stk, stk->last()) == 0.0) setEvalStack(stk, stk->last()-1, 0.0);
+			else setEvalStack(stk, stk->last()-1, getEvalStackDouble(stk, stk->last()-1) / getEvalStackDouble(stk, stk->last()));
+			stk->decrementSize(1);
 			break;
 		case 60+FN_XBAR: /* bar x position */
-			nstk -= 1;
-			setEvalStack(stk, nstk, graph_bar_pos(getEvalStackDouble(stk, nstk), gle_round_int(getEvalStackDouble(stk, nstk+1)), 1));
+			stk->decrementSize(1);
+			setEvalStack(stk, stk->last(), graph_bar_pos(getEvalStackDouble(stk, stk->last()), gle_round_int(getEvalStackDouble(stk, stk->last()+1)), 1));
 			break;
 		case 60+FN_XY2ANGLE:
-			nstk -= 1;
-			xy_polar(getEvalStackDouble(stk, nstk), getEvalStackDouble(stk, nstk+1), &x1, &y1);
-			setEvalStack(stk, nstk, y1);
+			stk->decrementSize(1);
+			xy_polar(getEvalStackDouble(stk, stk->last()), getEvalStackDouble(stk, stk->last()+1), &x1, &y1);
+			setEvalStack(stk, stk->last(), y1);
 			break;
 		case 60+FN_ATAN2:
-			nstk -= 1;
-			setEvalStack(stk, nstk, myatan2(getEvalStackDouble(stk, nstk), getEvalStackDouble(stk, nstk+1)));
+			stk->decrementSize(1);
+			setEvalStack(stk, stk->last(), myatan2(getEvalStackDouble(stk, stk->last()), getEvalStackDouble(stk, stk->last()+1)));
 			break;
 		case 60+FN_ISNAME:
-			setEvalStackBool(stk, nstk, getGLERunInstance()->is_name(getEvalStackGLEString(stk, nstk)));
+			setEvalStackBool(stk, stk->last(), getGLERunInstance()->is_name(getEvalStackGLEString(stk, stk->last())));
 			break;
 		case 137: /* pointx */
 			{
 				GLEPoint pt;
-				getGLERunInstance()->name_to_point(getEvalStackGLEString(stk, nstk), &pt);
-				setEvalStack(stk, nstk, pt.getX());
+				getGLERunInstance()->name_to_point(getEvalStackGLEString(stk, stk->last()), &pt);
+				setEvalStack(stk, stk->last(), pt.getX());
 			}
 			break;
 		case 138: /* pointy */
 			{
 				GLEPoint pt;
-				getGLERunInstance()->name_to_point(getEvalStackGLEString(stk, nstk), &pt);
-				setEvalStack(stk, nstk, pt.getY());
+				getGLERunInstance()->name_to_point(getEvalStackGLEString(stk, stk->last()), &pt);
+				setEvalStack(stk, stk->last(), pt.getY());
 			}
 			break;
 		case 139: /* format$ */
-			nstk--;
-			setEvalStack(stk, nstk, format_number_to_string(getEvalStackStringStd(stk, nstk+1), getEvalStackDouble(stk, nstk)));
+			stk->decrementSize(1);
+			setEvalStack(stk, stk->last(), format_number_to_string(getEvalStackStringStd(stk, stk->last()+1), getEvalStackDouble(stk, stk->last())));
 			break;
 		case 60+FN_GETENV: /* getenv */
 			{
 				string result;
-				GLEGetEnv(getEvalStackStringStd(stk, nstk), result);
-				setEvalStack(stk, nstk, result);
+				GLEGetEnv(getEvalStackStringStd(stk, stk->last()), result);
+				setEvalStack(stk, stk->last(), result);
 			}
 			break;
 		case 66: /* date$ */
@@ -570,181 +579,177 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 				strcpy(sbuf,sbuf2);
 				strcpy(sbuf+11,sbuf2+20);
 				sbuf[strlen(sbuf)-1] = 0;
-				setEvalStack(stk, ++nstk, sbuf);
+				stk->incrementSize(1);
+				setEvalStack(stk, stk->last(), sbuf);
 			}
 			break;
 		case 111: /* device$ */
 			g_get_type(sbuf);
-			setEvalStack(stk, ++nstk, sbuf);
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), sbuf);
 			break;
 		case 115: /* feof(chan) */
-			setEvalStack(stk, nstk, f_eof((int) getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), f_eof((int) getEvalStackDouble(stk, stk->last())));
 			break;
 		case 67: /* exp */
-			setEvalStack(stk, nstk, exp(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), exp(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 68: /* fix*/
-			setEvalStack(stk, nstk, floor(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), floor(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 69: /* height of named object */
-			getGLERunInstance()->name_to_size(getEvalStackGLEString(stk, nstk), &x1, &y1);
-			setEvalStack(stk, nstk, y1);
+			getGLERunInstance()->name_to_size(getEvalStackGLEString(stk, stk->last()), &x1, &y1);
+			setEvalStack(stk, stk->last(), y1);
 			break;
 		case 70: /* int (??int) */
-			setEvalStack(stk, nstk, floor(fabs(getEvalStackDouble(stk, nstk)))
-				*( (getEvalStackDouble(stk, nstk)>=0)?1:-1 ) );
+			setEvalStack(stk, stk->last(), floor(fabs(getEvalStackDouble(stk, stk->last())))
+				*( (getEvalStackDouble(stk, stk->last())>=0)?1:-1 ) );
 			break;
 		case 112: /* CHR$() */
-			sprintf(sbuf,"%c",(int) getEvalStackDouble(stk, nstk));
+			sprintf(sbuf,"%c",(int) getEvalStackDouble(stk, stk->last()));
 			// FIXME STACK
-			// setdstr(&getEvalStackString(stk, nstk),sbuf);
+			// setdstr(&getEvalStackString(stk, stk->last()),sbuf);
 			break;
 		case 71: /* left$ */
 			{
-				/*int i1 = (int)getEvalStackDouble(stk, nstk);
-				int len = strlen(getEvalStackString(stk, nstk-1));
-				if (i1 < 0) i1 = 0;
-				if (i1 > len) i1 = len;
-				char* result = (char*)malloc((i1+1)*sizeof(char));*/
-				// FIXME STACK
-				// ncpy(result, getEvalStackString(stk, nstk-1), i1);
-				// setsstr(&getEvalStackString(stk, --nstk), result);
+				int number = getEvalStackPositiveInt(stk, stk->last());
+				GLEString* str = getEvalStackGLEString(stk, stk->last() - 1);
+				stk->decrementSize(1);
+				setEvalStack(stk, stk->last(), str->substring(0, number - 1));
 			}
 			break;
 		case 72: /* len */
-			setEvalStack(stk, nstk, (int)getEvalStackGLEString(stk, nstk)->length());
+			setEvalStack(stk, stk->last(), (int)getEvalStackGLEString(stk, stk->last())->length());
 			break;
 		case 73: /* log */
-			setEvalStack(stk, nstk, log(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), log(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 74: /* log10 */
-			setEvalStack(stk, nstk, log10(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), log10(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 75: /* not */
-			setEvalStack(stk, nstk, !(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), !(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 76: /* num$ */
-			sprintf(sbuf,"%g",getEvalStackDouble(stk, nstk));
-			setEvalStack(stk, nstk, sdup(sbuf));
+			sprintf(sbuf,"%g",getEvalStackDouble(stk, stk->last()));
+			setEvalStack(stk, stk->last(), sdup(sbuf));
 			break;
 		case 77: /* num1$ */
-			sprintf(sbuf,"%g ",getEvalStackDouble(stk, nstk));
-			setEvalStack(stk, nstk, sdup(sbuf));
+			sprintf(sbuf,"%g ",getEvalStackDouble(stk, stk->last()));
+			setEvalStack(stk, stk->last(), sdup(sbuf));
 			break;
 		case 78: /* pageheight */
 			g_get_usersize(&xx, &yy);
-			setEvalStack(stk, ++nstk, yy);
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), yy);
 			break;
 		case 79: /* pagewidth */
 			g_get_usersize(&xx, &yy);
-			setEvalStack(stk, ++nstk, xx);
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), xx);
 			break;
 		case 80: /* pos */
 			std::cout << "pos" << std::endl;
-			i = (int) getEvalStackDouble(stk, nstk);
+			i = (int) getEvalStackDouble(stk, stk->last());
 			if (i<=0) i = 1;
-			ss = getEvalStackString(stk, nstk-2);
-			ss2 = str_i_str(ss+i-1,getEvalStackString(stk, nstk-1));
+			ss = getEvalStackString(stk, stk->last()-2);
+			ss2 = str_i_str(ss+i-1,getEvalStackString(stk, stk->last()-1));
 			if (ss2!=NULL) 	i = ss2-ss+1;
 			else 		i = 0;
-			nstk -= 2;
-			setEvalStack(stk, nstk, i);
+			stk->decrementSize(1);
+			setEvalStack(stk, stk->last(), i);
 			break;
 		case 81: /* right$ */
 			{
 				std::cout << "right$" << std::endl;
-				int i1 = (int)getEvalStackDouble(stk, nstk)-1;
-				int len = strlen(getEvalStackString(stk, nstk-1));
+				int i1 = (int)getEvalStackDouble(stk, stk->last())-1;
+				int len = strlen(getEvalStackString(stk, stk->last()-1));
 				if (i1 < 0) i1 = 0;
 				if (i1 > len) i1 = len;
 				char* result = (char*)malloc((len-i1+1)*sizeof(char));
-				strcpy(result, getEvalStackString(stk, nstk-1)+i1);
+				strcpy(result, getEvalStackString(stk, stk->last()-1)+i1);
 				// FIXME STACK
-				// setsstr(&getEvalStackString(stk, --nstk), result);
+				// setsstr(&getEvalStackString(stk, --stk->last()), result);
 			}
 			break;
 		case 82: /* rnd */
-			setEvalStack(stk, nstk, ((double) rand()/(double)RAND_MAX)*getEvalStackDouble(stk, nstk));
+			setEvalStack(stk, stk->last(), ((double) rand()/(double)RAND_MAX)*getEvalStackDouble(stk, stk->last()));
 			break;
 		case 83: /* seg$ */
 			{
-				std::cout << "seg$" << std::endl;
-				int i1 = (int)getEvalStackDouble(stk, nstk-1)-1;
-				int len = strlen(getEvalStackString(stk, nstk-2));
-				if (i1 < 0) i1 = 0;
-				if (i1 > len) i1 = len;
-				int n1 = (int)getEvalStackDouble(stk, nstk)-i1;
-				if (i1+n1 > len) n1 = len-i1;
-				if (n1 < 0) n1 = 0;
-				char* result = (char*)malloc((n1+1)*sizeof(char));
-				ncpy(result, getEvalStackString(stk, nstk-2)+i1, n1);
-				nstk -= 2;
-				// FIXME STACK
-				// setsstr(&getEvalStackString(stk, nstk), result);
+				int from = gle_make_zero_based(gle_round_int(getEvalStackDouble(stk, stk->last() - 1)));
+				int to = gle_make_zero_based(gle_round_int(getEvalStackDouble(stk, stk->last())));
+				GLEString* str = getEvalStackGLEString(stk, stk->last() - 2);
+				stk->decrementSize(2);
+				setEvalStack(stk, stk->last(), str->substring(str->toStringIndex(from), str->toStringIndex(to)));
 			}
 			break;
 		case 84: /* sgn */
-			if (getEvalStackDouble(stk, nstk)>=0) setEvalStack(stk, nstk, 1);
-			else setEvalStack(stk, nstk, -1);
+			if (getEvalStackDouble(stk, stk->last())>=0) setEvalStack(stk, stk->last(), 1);
+			else setEvalStack(stk, stk->last(), -1);
 			break;
 		case 85: /* sin */
-			setEvalStack(stk, nstk, sin(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), sin(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 86: /* sqr */
-			setEvalStack(stk, nstk, getEvalStackDouble(stk, nstk) * getEvalStackDouble(stk, nstk));
+			setEvalStack(stk, stk->last(), getEvalStackDouble(stk, stk->last()) * getEvalStackDouble(stk, stk->last()));
 			break;
 		case 87: /* sqrt */
-			setEvalStack(stk, nstk, sqrt(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), sqrt(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 88: /* tan */
-			setEvalStack(stk, nstk, tan(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), tan(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 89: /* tdepth */
 			g_get_xy(&xx,&yy);
-			g_measure(getEvalStackStringStd(stk, nstk),&x1,&x2,&y2,&y1);
-			setEvalStack(stk, nstk, y1);
+			g_measure(getEvalStackStringStd(stk, stk->last()),&x1,&x2,&y2,&y1);
+			setEvalStack(stk, stk->last(), y1);
 			break;
 		case 90: /* theight */
 			g_get_xy(&xx,&yy);
-			g_measure(getEvalStackStringStd(stk, nstk),&x1,&x2,&y2,&y1);
-			setEvalStack(stk, nstk, y2);
+			g_measure(getEvalStackStringStd(stk, stk->last()),&x1,&x2,&y2,&y1);
+			setEvalStack(stk, stk->last(), y2);
 			break;
 		case 91: /* time$ */
 			{
 				time_t today;
 				time(&today);
 				ncpy(sbuf,ctime(&today)+11,9);
-				setEvalStack(stk, ++nstk, sbuf);
+				stk->incrementSize(1);
+				setEvalStack(stk, stk->last(), sbuf);
 			}
 			break;
 		case 60+FN_FILE: /* file$ */
 			{
 				string tmp_s = getGLERunInstance()->getScript()->getLocation()->getMainName();
-				setEvalStack(stk, ++nstk, tmp_s.c_str());
+				stk->incrementSize(1);
+				setEvalStack(stk, stk->last(), tmp_s.c_str());
 			}
 			break;
 		case 60+FN_PATH: /* path$ */
-			setEvalStack(stk, ++nstk, getGLERunInstance()->getScript()->getLocation()->getDirectory().c_str());
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), getGLERunInstance()->getScript()->getLocation()->getDirectory().c_str());
 			break;
 		case 60+FN_FONT:
-			setEvalStackBool(stk, nstk, check_has_font(getEvalStackStringStd(stk, nstk)) != 0);
+			setEvalStackBool(stk, stk->last(), check_has_font(getEvalStackStringStd(stk, stk->last())) != 0);
 			break;
 		case 92: /* twidth */
-			g_measure(getEvalStackStringStd(stk, nstk),&x1,&x2,&y1,&y2);
-			setEvalStack(stk, nstk, x2-x1);
+			g_measure(getEvalStackStringStd(stk, stk->last()),&x1,&x2,&y1,&y2);
+			setEvalStack(stk, stk->last(), x2-x1);
 			break;
 		case 93: /* val */
-			setEvalStack(stk, nstk, string_to_number(getEvalStackStringStd(stk, nstk)));
+			setEvalStack(stk, stk->last(), string_to_number(getEvalStackStringStd(stk, stk->last())));
 			break;
 		case 94: /* width of named object */
-			getGLERunInstance()->name_to_size(getEvalStackGLEString(stk, nstk), &x1, &y1);
-			setEvalStack(stk, nstk, x1);
+			getGLERunInstance()->name_to_size(getEvalStackGLEString(stk, stk->last()), &x1, &y1);
+			setEvalStack(stk, stk->last(), x1);
 			break;
 		case 95: /* xend */
-			setEvalStack(stk, ++nstk, tex_xend());
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), tex_xend());
 			break;
 		case 96: /* xgraph */
-			setEvalStack(stk, nstk, graph_xgraph(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), graph_xgraph(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 97: /* xmax */
 			break;
@@ -752,13 +757,15 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 99: /* xpos */
 			g_get_xy(&xx,&yy);
-			setEvalStack(stk, ++nstk, xx);
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), xx);
 			break;
 		case 100: /* yend */
-			setEvalStack(stk, ++nstk, tex_yend());
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), tex_yend());
 			break;
 		case 101: /* ygraph */
-			setEvalStack(stk, nstk, graph_ygraph(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), graph_ygraph(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 102: /* ymax */
 			break;
@@ -766,107 +773,108 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 104: /* ypos */
 			g_get_xy(&xx,&yy);
-			setEvalStack(stk, ++nstk, yy);
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), yy);
 			break;
 		case 105: /* CVTGRAY(.5) */
 			{
-				GLERC<GLEColor> color(new GLEColor(getEvalStackDouble(stk, nstk)));
-				setEvalStack(stk, nstk, color.get());
+				GLERC<GLEColor> color(new GLEColor(getEvalStackDouble(stk, stk->last())));
+				setEvalStack(stk, stk->last(), color.get());
 			}
 			break;
 		case 106: /* CVTINT(2) */
-			setEvalStack(stk, nstk, (int) floor(getEvalStackDouble(stk, nstk)));
+			setEvalStack(stk, stk->last(), (int) floor(getEvalStackDouble(stk, stk->last())));
 			break;
 		case 108: /* CVTMARKER(m$) */
-			both.l[0] = get_marker_string(getEvalStackStringStd(stk, nstk), g_get_throws_error());
+			both.l[0] = get_marker_string(getEvalStackStringStd(stk, stk->last()), g_get_throws_error());
 			both.l[1] = 0;
-			setEvalStack(stk, nstk, both.d);
+			setEvalStack(stk, stk->last(), both.d);
 			break;
 		case 110: /* CVTFONT(m$) */
-			both.l[0] = pass_font(getEvalStackStringStd(stk, nstk));
+			both.l[0] = pass_font(getEvalStackStringStd(stk, stk->last()));
 			both.l[1] = 0;
-			setEvalStack(stk, nstk, both.d);
+			setEvalStack(stk, stk->last(), both.d);
 			break;
 		case 60+FN_JUSTIFY: /* JUSTIFY(m$) */
 			std::cout << "justify" << std::endl;
-			both.l[0] = pass_justify(getEvalStackString(stk, nstk));
+			both.l[0] = pass_justify(getEvalStackString(stk, stk->last()));
 			both.l[1] = 0;
-			setEvalStack(stk, nstk, both.d);
+			setEvalStack(stk, stk->last(), both.d);
 			break;         
 		case 109: /* CVTCOLOR(c$) */
 			{
 				std::cout << "color" << std::endl;
-				GLERC<GLEColor> color(pass_color_var(getEvalStackString(stk, nstk)));
-				setEvalStack(stk, nstk, color.get());
+				GLERC<GLEColor> color(pass_color_var(getEvalStackString(stk, stk->last())));
+				setEvalStack(stk, stk->last(), color.get());
 			}
 			break;
 		case 107: /* RGB(.4,.4,.2) */
 			{
-				GLERC<GLEColor> color(new GLEColor(getEvalStackDouble(stk, nstk-2), getEvalStackDouble(stk, nstk-1), getEvalStackDouble(stk, nstk)));
-				nstk -= 2;
-				setEvalStack(stk, nstk, color.get());
+				GLERC<GLEColor> color(new GLEColor(getEvalStackDouble(stk, stk->last()-2), getEvalStackDouble(stk, stk->last()-1), getEvalStackDouble(stk, stk->last())));
+				stk->decrementSize(2);
+				setEvalStack(stk, stk->last(), color.get());
 			}
 			break;
 		case 140: /* RGB255(.4,.4,.2) */
 			{
 				GLERC<GLEColor> color(new GLEColor());
-				color->setRGB255(getEvalStackDouble(stk, nstk-2), getEvalStackDouble(stk, nstk-1), getEvalStackDouble(stk, nstk));
-				nstk -= 2;
-				setEvalStack(stk, nstk, color.get());
+				color->setRGB255(getEvalStackDouble(stk, stk->last()-2), getEvalStackDouble(stk, stk->last()-1), getEvalStackDouble(stk, stk->last()));
+				stk->decrementSize(2);
+				setEvalStack(stk, stk->last(), color.get());
 			}
 			break;
 		case 60+FN_RGBA:
 			{
-				GLERC<GLEColor> color(new GLEColor(getEvalStackDouble(stk, nstk-3), getEvalStackDouble(stk, nstk-2), getEvalStackDouble(stk, nstk-1), getEvalStackDouble(stk, nstk)));
-				nstk -= 3;
-				setEvalStack(stk, nstk, color.get());
+				GLERC<GLEColor> color(new GLEColor(getEvalStackDouble(stk, stk->last()-3), getEvalStackDouble(stk, stk->last()-2), getEvalStackDouble(stk, stk->last()-1), getEvalStackDouble(stk, stk->last())));
+				stk->decrementSize(3);
+				setEvalStack(stk, stk->last(), color.get());
 			}
 			break;
 		case 60+FN_RGBA255:
 			{
 				GLERC<GLEColor> color(new GLEColor());
-				color->setRGBA255(getEvalStackDouble(stk, nstk-3), getEvalStackDouble(stk, nstk-2), getEvalStackDouble(stk, nstk-1), getEvalStackDouble(stk, nstk));
-				nstk -= 3;
-				setEvalStack(stk, nstk, color.get());
+				color->setRGBA255(getEvalStackDouble(stk, stk->last()-3), getEvalStackDouble(stk, stk->last()-2), getEvalStackDouble(stk, stk->last()-1), getEvalStackDouble(stk, stk->last()));
+				stk->decrementSize(3);
+				setEvalStack(stk, stk->last(), color.get());
 			}
 			break;
 		case 60+FN_NDATA: /* Number of datapoints in a dateset */
-			i = get_dataset_identifier(getEvalStackStringStd(stk, nstk), true);
-			setEvalStack(stk, nstk, (int)dp[i]->np);
+			i = get_dataset_identifier(getEvalStackStringStd(stk, stk->last()), true);
+			setEvalStack(stk, stk->last(), (int)dp[i]->np);
 			break;
 		case 60+FN_DATAXVALUE: /* X value in a dateset */
-			nstk -= 1;
-			i = get_dataset_identifier(getEvalStackStringStd(stk, nstk), true);
-			j = (int) getEvalStackDouble(stk, nstk+1);
+			stk->decrementSize(1);
+			i = get_dataset_identifier(getEvalStackStringStd(stk, stk->last()), true);
+			j = (int) getEvalStackDouble(stk, stk->last()+1);
 			if (j <= 0 || j > (int)dp[i]->np) {
 				throw g_format_parser_error("index out of range: %d (1 ... %d)", j, dp[i]->np);
 			} else {
 				GLEArrayImpl* array = dp[i]->getDimData(0);
 				if (array != 0) {
-					setEvalStack(stk, nstk, array->getDouble(j-1));
+					setEvalStack(stk, stk->last(), array->getDouble(j-1));
 				}
 			}
 			break;
 		case 60+FN_DATAYVALUE: /* Y value in a dateset */
-			nstk -= 1;
-			i = get_dataset_identifier(getEvalStackStringStd(stk, nstk), true);
-			j = (int) getEvalStackDouble(stk, nstk+1);
+			stk->decrementSize(1);
+			i = get_dataset_identifier(getEvalStackStringStd(stk, stk->last()), true);
+			j = (int) getEvalStackDouble(stk, stk->last()+1);
 			if (j <= 0 || j > (int)dp[i]->np) {
 				throw g_format_parser_error("index out of range: %d (1 ... %d)", j, dp[i]->np);
 			} else {
 				GLEArrayImpl* array = dp[i]->getDimData(1);
 				if (array != 0) {
-					setEvalStack(stk, nstk, array->getDouble(j-1));
+					setEvalStack(stk, stk->last(), array->getDouble(j-1));
 				}
 			}
 			break;
 		case 60+FN_XG3D:
-			setEvalStack(stk, nstk - 2, xg3d(getEvalStackDouble(stk, nstk - 2), getEvalStackDouble(stk, nstk - 1), getEvalStackDouble(stk, nstk)));
-            nstk -= 2;
+			setEvalStack(stk, stk->last() - 2, xg3d(getEvalStackDouble(stk, stk->last() - 2), getEvalStackDouble(stk, stk->last() - 1), getEvalStackDouble(stk, stk->last())));
+			stk->decrementSize(2);
 			break;
 		case 60+FN_YG3D:
-			setEvalStack(stk, nstk - 2, yg3d(getEvalStackDouble(stk, nstk - 2), getEvalStackDouble(stk, nstk - 1), getEvalStackDouble(stk, nstk)));
-            nstk -= 2;
+			setEvalStack(stk, stk->last() - 2, yg3d(getEvalStackDouble(stk, stk->last() - 2), getEvalStackDouble(stk, stk->last() - 1), getEvalStackDouble(stk, stk->last())));
+			stk->decrementSize(2);
 			break;
 		default:  /* User function, LOCAL_START_INDEX..nnn , or error */
 			/* Is it a user defined function */
@@ -875,7 +883,9 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 				pass the address of some numbers
 				pass address of variables if possible
 				*/
-				getGLERunInstance()->sub_call(*(pcode+c)-LOCAL_START_INDEX, stk, &nstk);
+				GLESub* sub = sub_get(*(pcode + c) - LOCAL_START_INDEX);
+				getGLERunInstance()->sub_call(sub, stk, stk->last());
+				stk->decrementSize(sub->getNbParam() - 1);
 			} else {
 				g_throw_parser_error("unrecognized byte code expression");
 			}
@@ -906,7 +916,7 @@ void eval_do_object_block_call(GLEArrayImpl* stk, GLESub* sub, GLEObjectDO* obj)
 	obj->makePropertyStore();
 	GLEArrayImpl* arr = obj->getProperties()->getArray();
 	int first = 0;
-	int offset = nstk - sub->getNbParam() + 1;
+	int offset = stk->last() - sub->getNbParam() + 1;
 	if (cons->isSupportScale()) {
 		// First two arguments are width and height
 		arr->setDouble(0, getEvalStackDouble(stk, offset+0));
@@ -924,11 +934,8 @@ void eval_do_object_block_call(GLEArrayImpl* stk, GLESub* sub, GLEObjectDO* obj)
 			arr->setObject(i, str_i);
 		}
 	}
-	getGLERunInstance()->sub_call(sub->getIndex(), stk, &nstk);
-	nstk--;
-	if (nstk < 0) {
-		nstk = 0;
-	}
+	getGLERunInstance()->sub_call(sub, stk, stk->last());
+	stk->decrementSize(sub->getNbParam() - 1);
 }
 
 void evalDoConstant(GLEArrayImpl* stk, int *pcode, int *cp)
@@ -936,9 +943,9 @@ void evalDoConstant(GLEArrayImpl* stk, int *pcode, int *cp)
 	union {double d; int l[2];} both;
 	both.l[0] = *(pcode+ ++(*cp));
 	both.l[1] = 0;
-	stk->ensure(1);
-	stk->setDouble(1, both.d);
-	nstk++;
+	stk->incrementSize(1);
+	stk->ensure(stk->last());
+	stk->setDouble(stk->last(), both.d);
 }
 
 GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
@@ -958,11 +965,11 @@ GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserE
 		eval_pcode_loop(stk, pcode + (*cp), plen);
 		*cp = *cp + plen;
 	}
-	if (nstk < 1) {
+	if (stk->size() < 1) {
 		g_throw_parser_error("pcode error: stack underflow in eval");
 	}
-	nstk--;
-	return stk->get(nstk + 1);
+	stk->decrementSize(1);
+	return stk->get(stk->last() + 1);
 }
 
 double evalDouble(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
@@ -990,7 +997,7 @@ GLERC<GLEString> evalString(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOt
 		result = (GLEString*)mc->Entry.ObjectVal;
 	} else {
 		if (allowOther) {
-			result = stk->getString(nstk + 1);
+			result = stk->getString(stk->last() + 1);
 		} else {
 			std::ostringstream msg;
 			msg << "found type '" << gle_object_type_to_string((GLEObjectType)type) << "' but expected 'string'";
@@ -1011,7 +1018,7 @@ void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, GLEString **ostr
 		*ostr = (GLEString*)mc->Entry.ObjectVal;
 	} else {
 		*otyp = 1;
-		*oval = getEvalStackDouble(stk, nstk + 1);
+		*oval = getEvalStackDouble(stk, stk->last() + 1);
 	}
 }
 
@@ -1030,7 +1037,7 @@ void debug_polish(int *pcode,int *zcp)
 	if (plen>1000) gprint("Expession is suspiciously int %d \n",plen);
 	for (c=(*cp)+1;(c-*cp)<=plen;c++) {
 	  cde = *(pcode+c);
-	gprint("Code=%d ",cde);
+	  gprint("Code=%d ",cde);
 		if (cde==0) {
 			gprint("# ZERO \n");
 		} else if (cde==1) {
@@ -1100,7 +1107,7 @@ void gle_as_a_calculator(vector<string>* exprs) {
 	sub_clear(false);
 	clear_run();
 	f_init();
-	var_def("PI", GLE_PI);
+	gle_set_constants();
 	GLEPolish polish;
 	polish.initTokenizer();
 	string line;

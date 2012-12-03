@@ -3721,7 +3721,6 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 			err << "palette subroutine '" << m_map->getPaletteFunction() << "' should take one argument";
 			g_throw_parser_error(err.str());
 		}
-		int nstk = 1;
 		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 		for (int i = img_hi-1; i >= 0; i--) {
 			int pos = 0;
@@ -3732,7 +3731,7 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 					zvalue = (ipol.ipol(j,i) - zmin) / scale;
 				}
 				setEvalStack(stk.get(), 1, zvalue);
-				getGLERunInstance()->sub_call(sub->getIndex(), stk.get(), &nstk);
+				getGLERunInstance()->sub_call(sub, stk.get(), 1);
 				GLEColor* color = getEvalStackColor(stk.get(), 1);
 				scanline[pos++] = color->getRedI();
 				scanline[pos++] = color->getGreenI();
@@ -3820,7 +3819,6 @@ void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByte
 			err << "palette subroutine '" << m_map->getPaletteFunction() << "' should take one argument";
 			g_throw_parser_error(err.str());
 		}
-		int nstk = 1;
 		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 		for (int i = 0; i < img_hi; i++) {
 			int pos = 0;
@@ -3837,7 +3835,7 @@ void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByte
 					zvalue = scale * (zvalue - delta);
 				}
 				setEvalStack(stk.get(), 1, zvalue);
-				getGLERunInstance()->sub_call(sub->getIndex(), stk.get(), &nstk);
+				getGLERunInstance()->sub_call(sub, stk.get(), 1);
 				GLEColor* color = getEvalStackColor(stk.get(), 1);
 				scanline[pos++] = color->getRedI();
 				scanline[pos++] = color->getGreenI();
