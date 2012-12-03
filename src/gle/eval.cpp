@@ -202,6 +202,7 @@ unsigned int getEvalStackPositiveInt(GLEArrayImpl* stk, int pos) {
 		std::ostringstream msg;
 		msg << "expected positive integer but found " << result;
 		g_throw_parser_error(msg.str().c_str());
+		return 0;
 	} else {
 		return (unsigned int)result;
 	}
@@ -606,16 +607,15 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 				*( (getEvalStackDouble(stk, stk->last())>=0)?1:-1 ) );
 			break;
 		case 112: /* CHR$() */
-			sprintf(sbuf,"%c",(int) getEvalStackDouble(stk, stk->last()));
-			// FIXME STACK
-			// setdstr(&getEvalStackString(stk, stk->last()),sbuf);
+			sprintf(sbuf, "%c", gle_round_int(getEvalStackDouble(stk, stk->last())));
+			setEvalStack(stk, stk->last(), sbuf);
 			break;
 		case 71: /* left$ */
 			{
 				int number = getEvalStackPositiveInt(stk, stk->last());
 				GLEString* str = getEvalStackGLEString(stk, stk->last() - 1);
 				stk->decrementSize(1);
-				setEvalStack(stk, stk->last(), str->substring(0, number - 1));
+				setEvalStack(stk, stk->last(), str->substringWithLength(0, number));
 			}
 			break;
 		case 72: /* len */
@@ -661,15 +661,10 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 81: /* right$ */
 			{
-				std::cout << "right$" << std::endl;
-				int i1 = (int)getEvalStackDouble(stk, stk->last())-1;
-				int len = strlen(getEvalStackString(stk, stk->last()-1));
-				if (i1 < 0) i1 = 0;
-				if (i1 > len) i1 = len;
-				char* result = (char*)malloc((len-i1+1)*sizeof(char));
-				strcpy(result, getEvalStackString(stk, stk->last()-1)+i1);
-				// FIXME STACK
-				// setsstr(&getEvalStackString(stk, --stk->last()), result);
+				int number = getEvalStackPositiveInt(stk, stk->last());
+				GLEString* str = getEvalStackGLEString(stk, stk->last() - 1);
+				stk->decrementSize(1);
+				setEvalStack(stk, stk->last(), str->substringWithLength(str->toStringIndex(-number), number));
 			}
 			break;
 		case 82: /* rnd */
@@ -796,15 +791,13 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, stk->last(), both.d);
 			break;
 		case 60+FN_JUSTIFY: /* JUSTIFY(m$) */
-			std::cout << "justify" << std::endl;
-			both.l[0] = pass_justify(getEvalStackString(stk, stk->last()));
+			both.l[0] = pass_justify(getEvalStackStringStd(stk, stk->last()));
 			both.l[1] = 0;
 			setEvalStack(stk, stk->last(), both.d);
 			break;         
 		case 109: /* CVTCOLOR(c$) */
 			{
-				std::cout << "color" << std::endl;
-				GLERC<GLEColor> color(pass_color_var(getEvalStackString(stk, stk->last())));
+				GLERC<GLEColor> color(pass_color_var(getEvalStackStringStd(stk, stk->last())));
 				setEvalStack(stk, stk->last(), color.get());
 			}
 			break;

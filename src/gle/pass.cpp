@@ -929,9 +929,8 @@ GLERC<GLEColor> memory_cell_to_color(GLEPolish* polish, GLEArrayImpl* stk, GLEMe
 	return color;
 }
 
-GLERC<GLEColor> pass_color_var(const char *s) throw(ParserError) {
+GLERC<GLEColor> pass_color_var(const std::string& token) throw(ParserError) {
 	GLERC<GLEColor> color(new GLEColor());
-	string token(s);
 	int result = 0;
 	if (token.empty()) {
 		g_throw_parser_error("expecting color name, but found empty string");
@@ -940,7 +939,7 @@ GLERC<GLEColor> pass_color_var(const char *s) throw(ParserError) {
 	} else {
 		GLEPolish* polish = get_global_polish();
 		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-		color = memory_cell_to_color(polish, stk.get(), polish->evalGeneric(stk.get(), s), g_get_throws_error(), 0);
+		color = memory_cell_to_color(polish, stk.get(), polish->evalGeneric(stk.get(), token.c_str()), g_get_throws_error(), 0);
 	}
 	return color;
 }
@@ -1129,8 +1128,7 @@ void GLEParser::get_justify(GLEPcode& pcode) throw (ParserError) {
 	pcode.addInt(get_first(token, op_justify));
 }
 
-int pass_justify(const char *s) {
-   string token(s);
+int pass_justify(const std::string& token) {
 	if (str_starts_with(token, "\"") || str_var_valid_name(token)) {
 		int result = 0;
       	double xx = 0.0;
@@ -1139,7 +1137,7 @@ int pass_justify(const char *s) {
 		memcpy(&result, &xx, sizeof(int));
 		return result;
 	}
-	return gt_firstval(op_justify, s);
+	return gt_firstval(op_justify, token.c_str());
 }
 
 void GLEParser::get_join(GLEPcode& pcode) throw (ParserError) {

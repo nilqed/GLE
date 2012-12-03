@@ -528,6 +528,14 @@ GLEString* GLEString::concat(GLEString* other) const {
 	return res;
 }
 
+GLEString* GLEString::substringWithLength(unsigned int from, unsigned int size) const {
+	if (size == 0) {
+		return new GLEString();
+	} else {
+		return substring(from, from + size - 1);
+	}
+}
+
 GLEString* GLEString::substring(unsigned int from, unsigned int to) const {
 	if (m_Length == 0) {
 		return new GLEString();

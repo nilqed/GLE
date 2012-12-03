@@ -32,4 +32,7 @@
 "seg$('Hello', 2, -2)",ell
 "left$('Hello', 2)",He
 "left$('Hello', 0)",
+"right$('Hello', 0)",
+"right$('Hello', 3)",llo
+chr$(65),A
 

@@ -190,6 +190,7 @@ public:
 	void toUTF8(char* out) const;
 	string toUTF8() const;
 	GLEString* concat(GLEString* other) const;
+	GLEString* substringWithLength(unsigned int from, unsigned int size) const;
 	GLEString* substring(unsigned int from, unsigned int to) const;
 	GLEArrayImpl* split(char bych) const;
 	void addQuotes();
