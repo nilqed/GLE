@@ -35,4 +35,10 @@
 "right$('Hello', 0)",
 "right$('Hello', 3)",llo
 chr$(65),A
+"pos('HelloWorldHello', 'Hel', 4)", 11
+"pos('HelloWorldHello', 'Hel', 11)", 11
+"pos('HelloWorldHello', 'Hel', 12)", 0
+"pos('HelloWorldHello', 'Hel', 1)", 1
+"pos('HelloWorldHello', 'Hel', -5)", 11
+
 

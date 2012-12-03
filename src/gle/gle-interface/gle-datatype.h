@@ -192,6 +192,7 @@ public:
 	GLEString* concat(GLEString* other) const;
 	GLEString* substringWithLength(unsigned int from, unsigned int size) const;
 	GLEString* substring(unsigned int from, unsigned int to) const;
+	int find(GLEString* needle, unsigned int from);
 	GLEArrayImpl* split(char bych) const;
 	void addQuotes();
 	void join(char bych, GLEArrayImpl* arr, int from = 0, int to = -1);

@@ -557,6 +557,30 @@ GLEString* GLEString::substring(unsigned int from, unsigned int to) const {
 	}
 }
 
+int GLEString::find(GLEString* needle, unsigned int from) {
+	int endPattern = (int)m_Length - needle->length() + 1;
+	if (endPattern < 0) {
+		return -1;
+	}
+	if (needle->length() <= 0) {
+		return 0;
+	}
+	unsigned int patternChar0 = needle->getI(0);
+	for (unsigned int ctrSrc = from; ctrSrc <= endPattern; ctrSrc++) {
+		if (getI(ctrSrc) != patternChar0) {
+			continue;
+		}
+		int ctrPat;
+		for (ctrPat = 1; ctrPat < needle->length() && getI(ctrSrc + ctrPat) == needle->getI(ctrPat); ctrPat++) {
+			; // just loop
+		}
+		if (ctrPat == needle->length()) {
+			return ctrSrc;
+		}
+	}
+	return -1;
+}
+
 GLEArrayImpl* GLEString::split(char bych) const {
 	GLEArrayImpl* res = new GLEArrayImpl();
 	unsigned int pos = 0;
@@ -635,8 +659,10 @@ unsigned int GLEString::toStringIndex(int value)
 {
 	if (value < 0) {
 		return (unsigned int)std::max<int>(0, (int)m_Length + value);
+	} else if (value > 0) {
+		return value - 1;
 	} else {
-		return value;
+		return 0;
 	}
 }
 

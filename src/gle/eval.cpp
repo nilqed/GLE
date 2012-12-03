@@ -190,22 +190,9 @@ double getEvalStackDouble(GLEArrayImpl* stk, int pos) {
 	return stk->getDouble(pos);
 }
 
-char* getEvalStackString(GLEArrayImpl* stk, int pos) {
-	CUtilsAssertMessage("not implemented");
-	return (char*)"";
-}
-
-unsigned int getEvalStackPositiveInt(GLEArrayImpl* stk, int pos) {
+int getEvalStackInt(GLEArrayImpl* stk, int pos) {
 	stk->checkType(pos, GLEObjectTypeDouble);
-	int result = gle_round_int(stk->getDouble(pos));
-	if (result < 0) {
-		std::ostringstream msg;
-		msg << "expected positive integer but found " << result;
-		g_throw_parser_error(msg.str().c_str());
-		return 0;
-	} else {
-		return (unsigned int)result;
-	}
+	return gle_round_int(stk->getDouble(pos));
 }
 
 GLEString* getEvalStackGLEString(GLEArrayImpl* stk, int pos) {
@@ -221,6 +208,22 @@ GLEColor* getEvalStackColor(GLEArrayImpl* stk, int pos) {
 std::string getEvalStackStringStd(GLEArrayImpl* stk, int pos) {
 	stk->checkType(pos, GLEObjectTypeString);
 	return ((GLEString*)stk->getObject(pos))->toUTF8();
+}
+
+void validateIntRange(int value, int from, int to) {
+	if (value < from || value > to) {
+		std::ostringstream msg;
+		msg << "value " << value << " not in range " << from << ", ..., " << to;
+		g_throw_parser_error(msg.str());
+	}
+}
+
+void validateArrayIndexRange(int value, int from, int to) {
+	if (value >= 0) {
+		validateIntRange(value, from, to);
+	} else {
+		validateIntRange(value, -to, -from);
+	}
 }
 
 void complain_operator_type(int op, int type) {
@@ -258,6 +261,9 @@ void eval_binary_operator_string(GLEArrayImpl* stk, int op, GLEString* a, GLEStr
 				GLERC<GLEString> temp(a->concat(dot.get()));
 				setEvalStack(stk, stk->last() - 1, temp->concat(b));
 			}
+			break;
+		default:
+			complain_operator_type(op, GLEObjectTypeString);
 			break;
 	}
 }
@@ -362,7 +368,6 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 		gprint("Expression is suspiciously long %d \n",plen);
 	}
 	union {double d; int l[2];} both;
-	char *ss2, *ss;
 	double x1, y1, x2, y2;
 	double xx, yy;
 	int i, j;
@@ -533,7 +538,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 60+FN_XBAR: /* bar x position */
 			stk->decrementSize(1);
-			setEvalStack(stk, stk->last(), graph_bar_pos(getEvalStackDouble(stk, stk->last()), gle_round_int(getEvalStackDouble(stk, stk->last()+1)), 1));
+			setEvalStack(stk, stk->last(), graph_bar_pos(getEvalStackDouble(stk, stk->last()), getEvalStackInt(stk, stk->last() + 1), 1));
 			break;
 		case 60+FN_XY2ANGLE:
 			stk->decrementSize(1);
@@ -607,13 +612,18 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 				*( (getEvalStackDouble(stk, stk->last())>=0)?1:-1 ) );
 			break;
 		case 112: /* CHR$() */
-			sprintf(sbuf, "%c", gle_round_int(getEvalStackDouble(stk, stk->last())));
-			setEvalStack(stk, stk->last(), sbuf);
+			{
+				GLERC<GLEString> str(new GLEString());
+				str->setSize(1);
+				str->set(0, getEvalStackInt(stk, stk->last()));
+				setEvalStack(stk, stk->last(), str.get());
+			}
 			break;
 		case 71: /* left$ */
 			{
-				int number = getEvalStackPositiveInt(stk, stk->last());
+				int number = getEvalStackInt(stk, stk->last());
 				GLEString* str = getEvalStackGLEString(stk, stk->last() - 1);
+				validateIntRange(number, 0, str->length());
 				stk->decrementSize(1);
 				setEvalStack(stk, stk->last(), str->substringWithLength(0, number));
 			}
@@ -649,20 +659,20 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			setEvalStack(stk, stk->last(), xx);
 			break;
 		case 80: /* pos */
-			std::cout << "pos" << std::endl;
-			i = (int) getEvalStackDouble(stk, stk->last());
-			if (i<=0) i = 1;
-			ss = getEvalStackString(stk, stk->last()-2);
-			ss2 = str_i_str(ss+i-1,getEvalStackString(stk, stk->last()-1));
-			if (ss2!=NULL) 	i = ss2-ss+1;
-			else 		i = 0;
-			stk->decrementSize(1);
-			setEvalStack(stk, stk->last(), i);
+			{
+				int from = getEvalStackInt(stk, stk->last());
+				GLERC<GLEString> needle(getEvalStackGLEString(stk, stk->last() - 1));
+				GLEString* hayStack(getEvalStackGLEString(stk, stk->last() - 2));
+				validateArrayIndexRange(from, 1, hayStack->length());
+				stk->decrementSize(1);
+				setEvalStack(stk, stk->last(), hayStack->find(needle.get(), hayStack->toStringIndex(from)) + 1);
+			}
 			break;
 		case 81: /* right$ */
 			{
-				int number = getEvalStackPositiveInt(stk, stk->last());
+				int number = getEvalStackInt(stk, stk->last());
 				GLEString* str = getEvalStackGLEString(stk, stk->last() - 1);
+				validateIntRange(number, 0, str->length());
 				stk->decrementSize(1);
 				setEvalStack(stk, stk->last(), str->substringWithLength(str->toStringIndex(-number), number));
 			}
@@ -672,9 +682,11 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 83: /* seg$ */
 			{
-				int from = gle_make_zero_based(gle_round_int(getEvalStackDouble(stk, stk->last() - 1)));
-				int to = gle_make_zero_based(gle_round_int(getEvalStackDouble(stk, stk->last())));
+				int from = getEvalStackInt(stk, stk->last() - 1);
+				int to = getEvalStackInt(stk, stk->last());
 				GLEString* str = getEvalStackGLEString(stk, stk->last() - 2);
+				validateArrayIndexRange(from, 1, str->length());
+				validateArrayIndexRange(to, 1, str->length());
 				stk->decrementSize(2);
 				setEvalStack(stk, stk->last(), str->substring(str->toStringIndex(from), str->toStringIndex(to)));
 			}
