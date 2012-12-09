@@ -570,39 +570,24 @@ BicubicIpolData::~BicubicIpolData() {
 }
 
 BicubicIpolDoubleMatrix::BicubicIpolDoubleMatrix(double* data, int wd, int hi) {
-	m_X0 = m_Y0 = 0;
-	m_DW = m_Width = wd;
-	m_DH = m_Height = hi;
+	m_Width = wd;
+	m_Height = hi;
 	m_Data = data;
 }
 
 BicubicIpolDoubleMatrix::~BicubicIpolDoubleMatrix() {
 }
 
-void BicubicIpolDoubleMatrix::setWindow(int x0, int y0, int x1, int y1) {
-	m_X0 = x0; m_Y0 = y0;
-	m_Width = x1 - x0 + 1;
-	m_Height = y1 - y0 + 1;
-}
-
 double BicubicIpolDoubleMatrix::getValue(int x, int y) {
-	x += m_X0;
-	y += m_Y0;
 	if (x < 0) x = 0;
-	if (x >= m_DW) x = m_DW-1;
+	if (x >= m_Width) x = m_Width - 1;
 	if (y < 0) y = 0;
-	if (y >= m_DH) y = m_DH-1;
-	return m_Data[y*m_DW + x];
+	if (y >= m_Height) y = m_Height - 1;
+	return m_Data[y * m_Width + x];
 }
 
-BicubicIpol::BicubicIpol(BicubicIpolData* data, int sw, int sh) {
+BicubicIpol::BicubicIpol(BicubicIpolData* data) {
 	m_Data = data;
-	m_SWidth = sw;
-	m_SHeight = sh;
-	m_Width = data->getWidth();
-	m_Height = data->getHeight();
-	m_SX = (double)m_Width / m_SWidth;
-	m_SY = (double)m_Height / m_SHeight;
 }
 
 double BicubicIpol::R(double x) {
@@ -618,9 +603,9 @@ double BicubicIpol::R(double x) {
 	return sum/6.0;
 }
 
-double BicubicIpol::ipol(int xp, int yp) {
-	double x = xp * m_SX;
-	double y = yp * m_SY;
+double BicubicIpol::ipol(double xp, double yp) {
+	double x = xp * m_Data->getWidth();
+	double y = yp * m_Data->getHeight();
 	int i = (int)floor(x);
 	int j = (int)floor(y);
 	double dx = x - i;

@@ -110,9 +110,7 @@ GLEDataSet* getDataset(int di, const char* descr = 0) {
 	}
 }
 
-double fnx(double value, GLEDataSet* dataSet) {
-	GLEAxis* axis = dataSet->getAxis(GLE_DIM_X);
-	GLERange* range = dataSet->getDim(GLE_DIM_X)->getRange();
+double fnx(double value, GLEAxis* axis, GLERange* range) {
 	double wmin = range->getMin();
 	double wmax = range->getMax();
 	if (axis->negate) {
@@ -125,9 +123,7 @@ double fnx(double value, GLEDataSet* dataSet) {
 	}
 }
 
-double fny(double value, GLEDataSet* dataSet) {
-	GLEAxis* axis = dataSet->getAxis(GLE_DIM_Y);
-	GLERange* range = dataSet->getDim(GLE_DIM_Y)->getRange();
+double fny(double value, GLEAxis* axis, GLERange* range) {
 	double wmin = range->getMin();
 	double wmax = range->getMax();
 	if (axis->negate) {
@@ -138,6 +134,62 @@ double fny(double value, GLEDataSet* dataSet) {
 	} else {
 		return (((value - wmin)/(wmax - wmin)) * ylength + ybl);
 	}
+}
+
+double fnx(double value, GLEDataSet* dataSet) {
+	return fnx(value, dataSet->getAxis(GLE_DIM_X), dataSet->getDim(GLE_DIM_X)->getRange());
+}
+
+double fny(double value, GLEDataSet* dataSet) {
+	return fny(value, dataSet->getAxis(GLE_DIM_Y), dataSet->getDim(GLE_DIM_Y)->getRange());
+}
+
+double fnx(double value, GLEAxis* axis) {
+	return fnx(value, axis, axis->getRange());
+}
+
+double fny(double value, GLEAxis* axis) {
+	return fny(value, axis, axis->getRange());
+}
+
+double fnxInv(double value, GLEAxis* axis, GLERange* range) {
+	double wmin = range->getMin();
+	double wmax = range->getMax();
+	double result = 0.0;
+	if (axis->log) {
+		result = pow10((value - ybl) / xlength * (log10(wmax) - log10(wmin)) + log10(wmin));
+	} else {
+		result = (value - xbl) / xlength * (wmax - wmin) + wmin;
+	}
+	if (axis->negate) {
+		return wmax + wmin - result;
+	} else {
+		return result;
+	}
+}
+
+double fnyInv(double value, GLEAxis* axis, GLERange* range) {
+	double wmin = range->getMin();
+	double wmax = range->getMax();
+	double result = 0.0;
+	if (axis->log) {
+		result = pow10((value - ybl) / xlength * (log10(wmax) - log10(wmin)) + log10(wmin));
+	} else {
+		result = (value - ybl) / ylength * (wmax - wmin) + wmin;
+	}
+	if (axis->negate) {
+		return wmax + wmin - result;
+	} else {
+		return result;
+	}
+}
+
+double fnxInv(double value, GLEAxis* axis) {
+	return fnxInv(value, axis, axis->getRange());
+}
+
+double fnyInv(double value, GLEAxis* axis) {
+	return fnyInv(value, axis, axis->getRange());
 }
 
 GLEPoint fnXY(double x, double y, GLEDataSet* dataSet) {
@@ -3620,10 +3672,15 @@ class GLEColorMapBitmap : public GLEBitmap {
 protected:
 	GLEZData* m_Data;
 	GLEColorMap* m_map;
+	GLEPoint m_origin;
+	GLEPoint m_size;
 	double m_ZMin;
 	double m_ZMax;
+	GLESub* m_sub;
+	GLEBYTE* m_pal;
+	GLEBYTE* m_scanLine;
 public:
-	GLEColorMapBitmap(GLEColorMap* map, GLEZData* data = NULL);
+	GLEColorMapBitmap(GLEColorMap* map, const GLEPoint& origin, const GLEPoint& size, GLEZData* data = NULL);
 	virtual ~GLEColorMapBitmap();
 	GLEBYTE* createColorPalette();
 	virtual int readHeader();
@@ -3635,13 +3692,24 @@ public:
 	inline double getZMax() { return m_ZMax; }
 	inline bool isFunction() { return m_Data == NULL; }
 	inline GLEZData* getData() { return m_Data; }
+private:
+	void updateScanLine(int* pos, double zvalue);
+	void init();
+	void cleanUp();
 };
 
-GLEColorMapBitmap::GLEColorMapBitmap(GLEColorMap* map, GLEZData* data) : GLEBitmap() {
-	m_map = map;
-	m_ZMin = 0.0;
-	m_ZMax = 0.0;
-	m_Data = data;
+GLEColorMapBitmap::GLEColorMapBitmap(GLEColorMap* map, const GLEPoint& origin, const GLEPoint& size, GLEZData* data):
+	GLEBitmap(),
+	m_Data(data),
+	m_map(map),
+	m_origin(origin),
+	m_size(size),
+	m_ZMin(GLE_INF),
+	m_ZMax(-GLE_INF),
+	m_sub(0),
+	m_pal(0),
+	m_scanLine(0)
+{
 }
 
 GLEColorMapBitmap::~GLEColorMapBitmap() {
@@ -3667,119 +3735,97 @@ int fixRange(int v, int min, int max) {
 	return v;
 }
 
-void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
-	double zvalue;
-	double zmin = zdata->getZMin();
-	double zmax = zdata->getZMax();
-	if (m_map->hasZMin()) zmin = m_map->getZMin();
-	if (m_map->hasZMax()) zmax = m_map->getZMax();
-	BicubicIpolDoubleMatrix ipd(zdata->getData(), zdata->getNX(), zdata->getNY());
-	GLERectangle* bounds = zdata->getBounds();
-	int wx1 = (int)floor((m_map->getXMin()-bounds->getXMin())/bounds->getWidth()*(zdata->getNX()-1));
-	int wx2 = (int)ceil((m_map->getXMax()-bounds->getXMin())/bounds->getWidth()*(zdata->getNX()-1));
-	int wy1 = (int)floor((m_map->getYMin()-bounds->getYMin())/bounds->getHeight()*(zdata->getNY()-1));
-	int wy2 = (int)ceil((m_map->getYMax()-bounds->getYMin())/bounds->getHeight()*(zdata->getNY()-1));
-	wx1 = fixRange(wx1, 0, zdata->getNX()-1);
-	wx2 = fixRange(wx2, 0, zdata->getNX()-1);
-	wy1 = fixRange(wy1, 0, zdata->getNY()-1);
-	wy2 = fixRange(wy2, 0, zdata->getNY()-1);
-	ipd.setWindow(wx1, wy1, wx2, wy2);
-	int size = getScanlineSize();
-	GLEBYTE* scanline = new GLEBYTE[size];
-	int img_hi = getHeight();
-	int img_wd = getWidth();
-	double scale = zmax - zmin;
-	BicubicIpol ipol(&ipd, img_wd, img_hi);
+void GLEColorMapBitmap::init() {
+	cleanUp();
 	if (m_map->isColor()) {
-		GLEBYTE* pal = GLEBitmapCreateColorPalette(32761);
-		for (int i = img_hi-1; i >= 0; i--) {
-			int pos = 0;
-			for (int j = 0; j < img_wd; j++) {
-				if (m_map->isInverted()) {
-					zvalue = (zmax - ipol.ipol(j,i)) / scale;
-				} else {
-					zvalue = (ipol.ipol(j,i) - zmin) / scale;
-				}
-				int color = (int)floor(zvalue*32760+0.5);
-				if (color > 32760) color = 32760;
-				if (color < 0) color = 0;
-				scanline[pos++] = pal[color*3];
-				scanline[pos++] = pal[color*3+1];
-				scanline[pos++] = pal[color*3+2];
-			}
-			output->send(scanline, size);
-			output->endScanLine();
-		}
-		delete[] pal;
+		m_pal = GLEBitmapCreateColorPalette(32761);
 	} else if (m_map->hasPalette()) {
-		GLESub* sub = sub_find(m_map->getPaletteFunction().c_str());
-		if (sub == NULL)  {
+		m_sub = sub_find(m_map->getPaletteFunction().c_str());
+		if (m_sub == NULL)  {
 			stringstream err;
 			err << "palette subroutine '" << m_map->getPaletteFunction() << "' not found";
 			g_throw_parser_error(err.str());
-		} else if (sub->getNbParam() != 1) {
+		} else if (m_sub->getNbParam() != 1) {
 			stringstream err;
 			err << "palette subroutine '" << m_map->getPaletteFunction() << "' should take one argument";
 			g_throw_parser_error(err.str());
 		}
+	}
+	m_scanLine = new GLEBYTE[getScanlineSize()];
+}
+
+void GLEColorMapBitmap::cleanUp() {
+	delete[] m_pal;
+	delete[] m_scanLine;
+}
+
+void GLEColorMapBitmap::updateScanLine(int* pos, double zvalue) {
+	if (m_map->isColor()) {
+		int color = (int)floor(zvalue*32760+0.5);
+		if (color > 32760) color = 32760;
+		if (color < 0) color = 0;
+		m_scanLine[(*pos)++] = m_pal[color*3];
+		m_scanLine[(*pos)++] = m_pal[color*3+1];
+		m_scanLine[(*pos)++] = m_pal[color*3+2];
+	} else if (m_map->hasPalette()) {
 		int otype;
 		int nstk = 1;
 		char *stk_str[6];
 		double stk[6];
 		colortyp colvar;
 		union {double d; int l[1];} both;
-		for (int i = img_hi-1; i >= 0; i--) {
-			int pos = 0;
-			for (int j = 0; j < img_wd; j++) {
-				if (m_map->isInverted()) {
-					zvalue = (zmax - ipol.ipol(j,i)) / scale;
-				} else {
-					zvalue = (ipol.ipol(j,i) - zmin) / scale;
-				}
-				stk[1] = zvalue;
-				getGLERunInstance()->sub_call(sub->getIndex(), (double *)&stk, (char **)&stk_str, &nstk, &otype);
-				both.d = stk[1];
-				colvar.l = both.l[0];
-				scanline[pos++] = colvar.b[B_R];
-				scanline[pos++] = colvar.b[B_G];
-				scanline[pos++] = colvar.b[B_B];
-			}
-			output->send(scanline, size);
-			output->endScanLine();
-		}
+		stk[1] = zvalue;
+		getGLERunInstance()->sub_call(m_sub->getIndex(), (double *)&stk, (char **)&stk_str, &nstk, &otype);
+		both.d = stk[1];
+		colvar.l = both.l[0];
+		m_scanLine[(*pos)++] = colvar.b[B_R];
+		m_scanLine[(*pos)++] = colvar.b[B_G];
+		m_scanLine[(*pos)++] = colvar.b[B_B];
 	} else {
-		for (int i = img_hi-1; i >= 0; i--) {
-			int pos = 0;
-			for (int j = 0; j < img_wd; j++) {
-				if (m_map->isInverted()) {
-					zvalue = (zmax - ipol.ipol(j,i)) / scale;
-				} else {
-					zvalue = (ipol.ipol(j,i) - zmin) / scale;
-				}
-				double grey = floor(zvalue*255+0.5);
-				if (grey > 255) grey = 255;
-				if (grey < 0) grey = 0;
-				scanline[pos++] = (int)grey;
+		double grey = floor(zvalue*255+0.5);
+		if (grey > 255) grey = 255;
+		if (grey < 0) grey = 0;
+		m_scanLine[(*pos)++] = (int)grey;
+	}
+}
+
+void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
+	double zmin = zdata->getZMin();
+	double zmax = zdata->getZMax();
+	if (m_map->hasZMin()) zmin = m_map->getZMin();
+	if (m_map->hasZMax()) zmax = m_map->getZMax();
+	BicubicIpolDoubleMatrix ipd(zdata->getData(), zdata->getNX(), zdata->getNY());
+	BicubicIpol ipol(&ipd);
+	double scale = zmax - zmin;
+	GLERectangle* bounds = zdata->getBounds();
+	for (int i = getHeight() - 1; i >= 0; i--) {
+		double ypos = fnyInv(m_origin.getY() + m_size.getY() * i / getHeight(), &xx[GLE_AXIS_Y]);
+		ypos = gle_limit_range((ypos - bounds->getYMin()) / bounds->getHeight(), 0.0, 1.0);
+		int pos = 0;
+		for (int j = 0; j < getWidth(); j++) {
+			double xpos = fnxInv(m_origin.getX() + m_size.getX() * j / getWidth(), &xx[GLE_AXIS_X]);
+			xpos = gle_limit_range((xpos - bounds->getXMin()) / bounds->getWidth(), 0.0, 1.0);
+			double zvalue = 0.0;
+			if (m_map->isInverted()) {
+				zvalue = (zmax - ipol.ipol(xpos, ypos)) / scale;
+			} else {
+				zvalue = (ipol.ipol(xpos, ypos) - zmin) / scale;
 			}
-			output->send(scanline, size);
-			output->endScanLine();
+			updateScanLine(&pos, zvalue);
 		}
+		output->send(m_scanLine, getScanlineSize());
+		output->endScanLine();
 	}
 	setZRange(zmin, zmax);
-	delete[] scanline;
 }
 
 void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByteStream* output) {
-	int size = getScanlineSize();
-	GLEBYTE* scanline = new GLEBYTE[size];
-	int img_hi = getHeight();
-	int img_wd = getWidth();
-	double xmin = m_map->getXMin();
-	double ymax = m_map->getYMax();
+    double xmin = m_map->getXMin();
+    double ymax = m_map->getYMax();
 	double xrange = m_map->getXMax() - xmin;
 	double yrange = ymax - m_map->getYMin();
-	double zmax = 0.0;
-	double zmin = 1.0;
+	double zmax = -GLE_INF;
+	double zmin = GLE_INF;
 	double scale = 1.0;
 	double delta = 0.0;
 	double set_zmax = 1.0;
@@ -3788,104 +3834,30 @@ void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByte
 		delta = m_map->getZMin();
 		set_zmax = m_map->getZMax();
 	}
-	if (m_map->isColor()) {
-		GLEBYTE* pal = GLEBitmapCreateColorPalette(32761);
-		for (int i = 0; i < img_hi; i++) {
-			int pos = 0;
-			var_set(vary, ymax - (double)i*yrange/img_hi);
-			for (int j = 0; j < img_wd; j++) {
-				double zvalue;
-				var_set(varx, xmin + (double)j*xrange/img_wd);
-				eval_pcode(code, &zvalue);
-				if (zvalue > zmax) zmax = zvalue;
-				if (zvalue < zmin) zmin = zvalue;
-				if (m_map->isInverted()) {
-					zvalue = scale * (set_zmax - zvalue);
-				} else {
-					zvalue = scale * (zvalue - delta);
-				}
-				int color = (int)floor(zvalue*32760+0.5);
-				if (color > 32760) color = 32760;
-				if (color < 0) color = 0;
-				scanline[pos++] = pal[color*3];
-				scanline[pos++] = pal[color*3+1];
-				scanline[pos++] = pal[color*3+2];
+	for (int i = 0; i < getHeight(); i++) {
+		int pos = 0;
+		var_set(vary, ymax - (double)i*yrange/getHeight());
+		for (int j = 0; j < getWidth(); j++) {
+			double zvalue;
+			var_set(varx, xmin + (double)j*xrange/getWidth());
+			eval_pcode(code, &zvalue);
+			if (zvalue > zmax) zmax = zvalue;
+			if (zvalue < zmin) zmin = zvalue;
+			if (m_map->isInverted()) {
+				zvalue = scale * (set_zmax - zvalue);
+			} else {
+				zvalue = scale * (zvalue - delta);
 			}
-			output->send(scanline, size);
-			output->endScanLine();
+			updateScanLine(&pos, zvalue);
 		}
-		delete[] pal;
-	} else if (m_map->hasPalette()) {
-		GLESub* sub = sub_find(m_map->getPaletteFunction().c_str());
-		if (sub == NULL)  {
-			stringstream err;
-			err << "palette subroutine '" << m_map->getPaletteFunction() << "' not found";
-			g_throw_parser_error(err.str());
-		} else if (sub->getNbParam() != 1) {
-			stringstream err;
-			err << "palette subroutine '" << m_map->getPaletteFunction() << "' should take one argument";
-			g_throw_parser_error(err.str());
-		}
-		int otype;
-		int nstk = 1;
-		char *stk_str[6];
-		double stk[6];
-		colortyp colvar;
-		union {double d; int l[1];} both;
-		for (int i = 0; i < img_hi; i++) {
-			int pos = 0;
-			var_set(vary, ymax - (double)i*yrange/img_hi);
-			for (int j = 0; j < img_wd; j++) {
-				double zvalue;
-				var_set(varx, xmin + (double)j*xrange/img_wd);
-				eval_pcode(code, &zvalue);
-				if (zvalue > zmax) zmax = zvalue;
-				if (zvalue < zmin) zmin = zvalue;
-				if (m_map->isInverted()) {
-					zvalue = scale * (set_zmax - zvalue);
-				} else {
-					zvalue = scale * (zvalue - delta);
-				}
-				stk[1] = zvalue;
-				getGLERunInstance()->sub_call(sub->getIndex(), (double *)&stk, (char **)&stk_str, &nstk, &otype);
-				both.d = stk[1];
-				colvar.l = both.l[0];
-				scanline[pos++] = colvar.b[B_R];
-				scanline[pos++] = colvar.b[B_G];
-				scanline[pos++] = colvar.b[B_B];
-			}
-			output->send(scanline, size);
-			output->endScanLine();
-		}
-	} else {
-		for (int i = 0; i < img_hi; i++) {
-			int pos = 0;
-			var_set(vary, ymax - (double)i*yrange/img_hi);
-			for (int j = 0; j < img_wd; j++) {
-				double zvalue;
-				var_set(varx, xmin + (double)j*xrange/img_wd);
-				eval_pcode(code, &zvalue);
-				if (zvalue > zmax) zmax = zvalue;
-				if (zvalue < zmin) zmin = zvalue;
-				if (m_map->isInverted()) {
-					zvalue = scale * (set_zmax - zvalue);
-				} else {
-					zvalue = scale * (zvalue - delta);
-				}
-				double grey = floor(zvalue*255+0.5);
-				if (grey > 255) grey = 255;
-				if (grey < 0) grey = 0;
-				scanline[pos++] = (int)grey;
-			}
-			output->send(scanline, size);
-			output->endScanLine();
-		}
+		output->send(m_scanLine, getScanlineSize());
+		output->endScanLine();
 	}
 	setZRange(zmin, zmax);
-	delete[] scanline;
 }
 
 int GLEColorMapBitmap::decode(GLEByteStream* output) {
+	init();
 	if (isFunction()) {
 		int varx, vary;
 		int vartype = 1;
@@ -3901,6 +3873,7 @@ int GLEColorMapBitmap::decode(GLEByteStream* output) {
 	} else {
 		plotData(getData(), output);
 	}
+	cleanUp();
 	var_findadd_set("ZGMIN", getZMin());
 	var_findadd_set("ZGMAX", getZMax());
 	return GLE_IMAGE_ERROR_NONE;
@@ -3960,27 +3933,23 @@ void GLEColorMap::draw(double x0, double y0, double wd, double hi) {
 	if (zdata != NULL) {
 		/* figure out position of bitmap */
 		GLERectangle* bounds = zdata->getBounds();
-		double xrange = getXMax() - getXMin();
-		double yrange = getYMax() - getYMin();
-		double xmin = (bounds->getXMin()-getXMin())/xrange*wd;
-		if (xmin > wd) return;
-		if (xmin < 0) xmin = 0;
-		double ymin = (bounds->getYMin()-getYMin())/yrange*hi;
-		if (ymin > hi) return;
-		if (ymin < 0) ymin = 0;
-		double xmax = (bounds->getXMax()-getXMin())/xrange*wd;
-		if (xmax < 0) return;
-		if (xmax > wd) xmax = wd;
-		double ymax = (bounds->getYMax()-getYMin())/yrange*hi;
-		if (ymax < 0) return;
-		if (ymax > hi) ymax = hi;
-		/* draw bitmap */
-		g_move(x0 + xmin, y0 + ymin);
-		GLEColorMapBitmap bitmap(this, zdata);
-		g_bitmap(&bitmap, xmax-xmin, ymax-ymin, BITMAP_TYPE_USER);
+		GLERectangle screenBounds;
+		screenBounds.initRange();
+		screenBounds.updateRange(fnx(bounds->getXMin(), &xx[GLE_AXIS_X]), fny(bounds->getYMin(), &xx[GLE_AXIS_Y]));
+		screenBounds.updateRange(fnx(bounds->getXMax(), &xx[GLE_AXIS_X]), fny(bounds->getYMax(), &xx[GLE_AXIS_Y]));
+		double xMin = std::max<double>(x0, screenBounds.getXMin());
+		double yMin = std::max<double>(y0, screenBounds.getYMin());
+		double xMax = std::min<double>(x0 + wd, screenBounds.getXMax());
+		double yMax = std::min<double>(y0 + hi, screenBounds.getYMax());
+		if (xMin > xMax || yMin > yMax) {
+			return;
+		}
+		g_move(xMin, yMin);
+		GLEColorMapBitmap bitmap(this, GLEPoint(xMin, yMin), GLEPoint(xMax - xMin, yMax - yMin), zdata);
+		g_bitmap(&bitmap, xMax - xMin, yMax - yMin, BITMAP_TYPE_USER);
 	} else {
 		g_move(x0, y0);
-		GLEColorMapBitmap bitmap(this);
+		GLEColorMapBitmap bitmap(this, GLEPoint(x0, y0), GLEPoint(wd, hi));
 		g_bitmap(&bitmap, wd, hi, BITMAP_TYPE_USER);
 	}
 }

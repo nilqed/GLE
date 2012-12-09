@@ -779,3 +779,8 @@ void CUtilsAssertImpl(const char* expr, const char* file, int line, const char* 
 	cerr << "Internal error: '" << expr << "' in file '" << file << "' function: '" << function << "' line: " << line << endl;
 	exit(1);
 }
+
+double gle_limit_range(double value, double minValue, double maxValue)
+{
+	return std::min<double>(std::max<double>(value, minValue), maxValue);
+}

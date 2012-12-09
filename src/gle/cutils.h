@@ -182,3 +182,4 @@ void CUtilsAssertImpl(const char* expr, const char* file, int line, const char* 
 
 #endif
 
+double gle_limit_range(double value, double minValue, double maxValue);

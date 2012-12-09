@@ -391,10 +391,8 @@ public:
 class BicubicIpolDoubleMatrix : public BicubicIpolData {
 protected:
 	double* m_Data;
-	int m_X0, m_Y0, m_DW, m_DH;
 public:
 	BicubicIpolDoubleMatrix(double* data, int wd, int hi);
-	void setWindow(int x0, int y0, int x1, int y1);
 	virtual ~BicubicIpolDoubleMatrix();
 	virtual double getValue(int x, int y);
 };
@@ -402,19 +400,10 @@ public:
 class BicubicIpol {
 protected:
 	BicubicIpolData* m_Data;
-	int m_SWidth;
-	int m_SHeight;
-	int m_Width;
-	int m_Height;
-	double m_SX, m_SY;
 public:
-	BicubicIpol(BicubicIpolData* data, int sw, int sh);
-	double ipol(int xp, int yp);
+	BicubicIpol(BicubicIpolData* data);
+	double ipol(double xp, double yp);
 	double R(double x);
-	inline int getScaleW() { return m_SWidth; }
-	inline int getScaleH() { return m_SHeight; }
-	inline int getWidth() { return m_Width; }
-	inline int getHeight() { return m_Height; }
 };
 
 void GLEBitmapSetPalette(GLEBYTE* pal, int offs, double red, double green, double blue);
