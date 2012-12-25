@@ -591,7 +591,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			break;
 		case 111: /* device$ */
 			stk->incrementSize(1);
-			setEvalStack(stk, stk->last(), g_get_type();
+			setEvalStack(stk, stk->last(), g_get_type());
 			break;
 		case 115: /* feof(chan) */
 			setEvalStack(stk, stk->last(), f_eof((int) getEvalStackDouble(stk, stk->last())));

@@ -3760,7 +3760,7 @@ void GLEColorMapBitmap::cleanUp() {
 
 void GLEColorMapBitmap::updateScanLine(int* pos, double zvalue) {
 	if (m_map->isColor()) {
-		int color = (int)floor(zvalue*32760+0.5);
+		int color = (int)floor(zvalue * 32760 + 0.5);
 		if (color > 32760) color = 32760;
 		if (color < 0) color = 0;
 		m_scanLine[(*pos)++] = m_pal[color*3];
@@ -3771,9 +3771,9 @@ void GLEColorMapBitmap::updateScanLine(int* pos, double zvalue) {
 		setEvalStack(stk.get(), 1, zvalue);
 		getGLERunInstance()->sub_call(m_sub, stk.get(), 1);
 		GLEColor* color = getEvalStackColor(stk.get(), 1);
-		scanline[pos++] = color->getRedI();
-		scanline[pos++] = color->getGreenI();
-		scanline[pos++] = color->getBlueI();
+		m_scanLine[(*pos)++] = color->getRedI();
+		m_scanLine[(*pos)++] = color->getGreenI();
+		m_scanLine[(*pos)++] = color->getBlueI();
 	} else {
 		double grey = floor(zvalue*255+0.5);
 		if (grey > 255) grey = 255;
