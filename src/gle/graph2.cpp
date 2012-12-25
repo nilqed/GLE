@@ -3667,6 +3667,81 @@ void do_bigfile_compatibility() throw(ParserError) {
 	}
 }
 
+class GLEToView {
+public:
+	GLEToView();
+	virtual ~GLEToView();
+	virtual GLEPoint fnXY(const GLEPoint& xy) = 0;
+	virtual GLEPoint fnXYInv(const GLEPoint& xy) = 0;
+};
+
+class GLEToGraphView: public GLEToView {
+public:
+	GLEToGraphView(GLEAxis* xAxis, GLEAxis* yAxis);
+	virtual ~GLEToGraphView();
+	virtual GLEPoint fnXY(const GLEPoint& xy);
+	virtual GLEPoint fnXYInv(const GLEPoint& xy);
+private:
+	GLEAxis* m_xAxis;
+	GLEAxis* m_yAxis;
+};
+
+class GLEToRectangularView: public GLEToView {
+public:
+	GLEToRectangularView();
+	virtual ~GLEToRectangularView();
+	virtual GLEPoint fnXY(const GLEPoint& xy);
+	virtual GLEPoint fnXYInv(const GLEPoint& xy);
+	GLERange* getXRange() { return &m_xRange; }
+	GLERange* getYRange() { return &m_yRange; }
+	void setSize(int width, int height) { m_Width = width; m_Height = height; }
+private:
+	GLERange m_xRange;
+	GLERange m_yRange;
+	int m_Width;
+	int m_Height;
+};
+
+GLEToView::GLEToView() {
+}
+
+GLEToView::~GLEToView() {
+}
+
+GLEToGraphView::GLEToGraphView(GLEAxis* xAxis, GLEAxis* yAxis):
+	m_xAxis(xAxis),
+	m_yAxis(yAxis)
+{
+}
+
+GLEToGraphView::~GLEToGraphView() {
+}
+
+GLEPoint GLEToGraphView::fnXY(const GLEPoint& xy) {
+	return GLEPoint(fnx(xy.getX(), m_xAxis, m_xAxis->getRange()), fny(xy.getY(), m_yAxis, m_yAxis->getRange()));
+}
+
+GLEPoint GLEToGraphView::fnXYInv(const GLEPoint& xy) {
+	return GLEPoint(fnxInv(xy.getX(), m_xAxis, m_xAxis->getRange()), fnyInv(xy.getY(), m_yAxis, m_yAxis->getRange()));
+}
+
+GLEToRectangularView::GLEToRectangularView():
+	m_Width(0),
+	m_Height(0)
+{
+}
+
+GLEToRectangularView::~GLEToRectangularView() {
+}
+
+GLEPoint GLEToRectangularView::fnXY(const GLEPoint& xy) {
+	return xy;
+}
+
+GLEPoint GLEToRectangularView::fnXYInv(const GLEPoint& xy) {
+	return xy;
+}
+
 class GLEColorMapBitmap : public GLEBitmap {
 protected:
 	GLEZData* m_Data;
