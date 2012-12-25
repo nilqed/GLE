@@ -425,6 +425,29 @@ void str_to_uppercase(string& output) {
 	}
 }
 
+std::vector<std::string> strs_to_uppercase(const std::vector<std::string>& input) {
+	std::vector<std::string> result;
+	result.reserve(input.size());
+	for (std::vector<std::string>::size_type i(0); i != input.size(); ++i) {
+		std::string value(input[i]);
+		str_to_uppercase(value);
+		result.push_back(value);
+	}
+	return result;
+}
+
+std::string str_join(const std::vector<std::string>& input, const char* joinStr) {
+	std::ostringstream strm;
+	for (std::vector<std::string>::size_type i(0); i != input.size(); ++i) {
+		if (i != 0) {
+			strm << joinStr;
+		}
+		strm << input[i];
+	}
+	return strm.str();
+}
+
+
 void str_uppercase_initial_capital(string& str) {
 	if (str.length() >= 1) str[0] = toupper(str[0]);
 }
@@ -763,4 +786,9 @@ void split_into_lines(const std::vector<unsigned char>* input, std::vector<std::
 void CUtilsAssertImpl(const char* expr, const char* file, int line, const char* function) {
 	cerr << "Internal error: '" << expr << "' in file '" << file << "' function: '" << function << "' line: " << line << endl;
 	exit(1);
+}
+
+double gle_limit_range(double value, double minValue, double maxValue)
+{
+	return std::min<double>(std::max<double>(value, minValue), maxValue);
 }

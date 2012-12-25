@@ -397,7 +397,7 @@ void g_get_line_style(char *s);
 void g_get_line_styled(double *w);
 void g_get_line_width(double *w);
 void g_get_path(int *pathonoff);
-void g_get_type(char *t);
+std::string g_get_type();
 void g_get_usersize(dbl *x,dbl *y);
 void g_get_pagesize(dbl *x,dbl *y,int *type);
 void g_get_pagesize(dbl *x,dbl *y);
@@ -452,5 +452,6 @@ void my_char(int ff, int cc);
 int g_device_to_bitmap_type(int device);
 bool g_bitmap_supports_type(int type);
 int g_font_fallback(int font);
+std::vector<std::string> g_create_device_string();
 
 #endif

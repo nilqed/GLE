@@ -375,6 +375,16 @@ bool CmdLineArgSet::hasOnlyValue(int id) {
 	return true;
 }
 
+vector<string> CmdLineArgSet::getValues() {
+	vector<string> result;
+	for (vector<int>::size_type i = 0; i < m_Values.size(); i++) {
+		if (m_HasValue[i] == CMDLINE_YES) {
+			result.push_back(m_Values[i]);
+		}
+	}
+	return result;
+}
+
 CmdLineOption::CmdLineOption(const char* name) {
 	addAlias(name);
 	initialize();

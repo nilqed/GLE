@@ -146,7 +146,7 @@ public:
 	~GLEAxis();
 	void init(int i);
 	string* getNamePtr(int i);
-	void setName(int i, const char* name);
+	void setName(int i, const std::string& name);
 	void setPlace(int i, double place);
 	void clearNoTicks();
 	void addNoTick(double pos);
@@ -207,6 +207,8 @@ public:
 	inline bool shouldPerformQuantileScale() { return !m_QuantileScale.isNull(); }
 	inline GLEAxisQuantileScale* getQuantileScale() { return m_QuantileScale.get(); }
 	inline void setQuantileScale(GLEAxisQuantileScale* scale)  { m_QuantileScale = scale; }
+private:
+	double getLocalAveragePlacesDistance(int i);
 };
 
 void init_measure_by_axis(GLEAxis* ax, double ox, double oy, double llen);

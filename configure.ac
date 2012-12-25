@@ -36,7 +36,7 @@
 #                                                                      #
 ########################################################################
 
-m4_define([gle_cr_version], [4.2.4c])
+m4_define([gle_cr_version], [4.2.4d])
 
 AC_INIT(gle-graphics, [gle_cr_version], glx-general@lists.sourceforge.net)
 AC_CONFIG_HEADER(src/config.h)
@@ -819,6 +819,23 @@ fi
 
 if test "x$with_debug" = "xyes"; then
    QT_CONFIG="CONFIG += debug"
+fi
+
+dnl ********************************************************************************
+dnl check strip command
+dnl ********************************************************************************
+
+AC_CHECK_TOOLS(STRIP,[strip,gstrip],strip)
+echo Checking if strip is GNU strip 
+if $STRIP -V | grep GNU > /dev/null
+then
+    AC_SUBST(STRIPALL,"-s")
+    AC_SUBST(STRIPUNNEEDED, "--strip-unneeded")
+    echo "strip is GNU strip ($STRIP)"
+else
+    AC_SUBST(STRIPALL, "")
+    AC_SUBST(STRIPUNNEEDED,"-x")
+    echo "strip is not GNU Strip ($STRIP)"
 fi
 
 dnl ********************************************************************************

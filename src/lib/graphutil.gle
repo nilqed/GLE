@@ -406,3 +406,16 @@ sub graph_shaded_background from to pixels
    local hi = yg(ygmax)-yg(ygmin)
    colormap y 0 0 from to 1 pixels wd hi
 end sub
+
+sub autocolor dn
+   if dn = 1 then return "red"
+   else if dn = 2 then return "blue"
+   else if dn = 3 then return "green"
+   else if dn = 4 then return "purple"
+   else if dn = 5 then return "black"
+   else if dn = 6 then return "darkorange"
+   else if dn = 7 then return "teal"
+   else if dn = 8 then return "brown"
+   else if dn = 9 then return "lawngreen"
+   else return "gold"
+end sub

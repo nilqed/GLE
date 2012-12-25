@@ -44,7 +44,7 @@ sub color_range_horizontal zmin zmax zstep palette$ width height format$ pixels
 ! draws a horizontal color range
    default zstep   1
    default palette "color"
-   default width   xg(xgmax)-xg(xgmin)
+   default width   abs(xg(xgmax)-xg(xgmin))
    default height  0.25
    default format  "fix 0"
    default pixels  -1
@@ -74,7 +74,7 @@ sub color_range_vertical zmin zmax zstep palette$ width height format$ pixels
    default zstep   1
    default palette "color"
    default width   0.25
-   default height  yg(ygmax)-yg(ygmin)
+   default height  abs(yg(ygmax)-yg(ygmin))
    default format  "fix 0"
    default pixels  -1
    if pixels = -1 then

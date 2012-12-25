@@ -590,9 +590,8 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			}
 			break;
 		case 111: /* device$ */
-			g_get_type(sbuf);
 			stk->incrementSize(1);
-			setEvalStack(stk, stk->last(), sbuf);
+			setEvalStack(stk, stk->last(), g_get_type();
 			break;
 		case 115: /* feof(chan) */
 			setEvalStack(stk, stk->last(), f_eof((int) getEvalStackDouble(stk, stk->last())));
@@ -1086,6 +1085,12 @@ void setdstr(char **s, const char *in)
 {
 	if (*s != NULL) myfree(*s);
 	*s = sdup(in);
+}
+
+void setdstr(char **s, const std::string& in)
+{
+	if (*s != NULL) myfree(*s);
+	*s = sdup(in.c_str());
 }
 
 void setsstr(char **s, const char *in)

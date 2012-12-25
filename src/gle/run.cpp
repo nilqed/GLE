@@ -242,11 +242,10 @@ void byte_code_error(int err) throw(ParserError) {
 }
 
 void clear_run() {
-	char ss[500];
 	npath = 0;
 	done_open = false;
-	g_get_type(ss);
-	if (strstr(ss,"FILLPATH")!=NULL) can_fillpath = true;
+	std::string ss(g_get_type());
+	if (strstr(ss.c_str(), "FILLPATH")!=NULL) can_fillpath = true;
 	else can_fillpath = false;
 	g_drobj.clear();
 }

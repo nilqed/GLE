@@ -207,6 +207,32 @@ std::vector<double> getLogSubPlaces(double pos, double gmin, double gmax, int lg
    return result;
 }
 
+std::string g_format_label(double value, double dticks, GLENumberFormat* format) {
+	std::string result;
+	double absValue = fabs(value);
+	if (absValue < 0.00001 * dticks) {
+		// otherwise place for "zero" may be -8.2556e-25 or some other small number
+		value = 0;
+	}
+	if (format != NULL) {
+		format->format(value, &result);
+	} else {
+		char cbuff[100];
+		char* num_trim_str = NULL;
+		if (value == 0 || (absValue > 1e-5 && absValue < 1e6)) {
+			sprintf(cbuff, "%f", value);
+		} else {
+			sprintf(cbuff, "%e", value);
+		}
+		numtrim(&num_trim_str, cbuff, dticks);
+		if (num_trim_str != NULL) {
+			result = num_trim_str;
+			myfree(num_trim_str);
+		}
+	}
+	return result;
+}
+
 void draw_axis(GLEAxis *ax, GLERectangle* box, DrawAxisPart drawPart) {
 	double x,y,gmin,gmax,dticks,tick1,tickn;
 	int savecap;
@@ -497,11 +523,11 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, DrawAxisPart drawPart) {
 		char cbuff[100];
 		GLENumberFormat* format = ax->format == "" ? NULL : new GLENumberFormat(ax->format);
 		if (ax->log) {
-         int subplace_cnt = 0;
+			int subplace_cnt = 0;
 			for (int i = 0; i < ax->getNbPlaces(); i++) {
 				double fi = ax->places[i];
 				int n = (int) floor(.0001 + fi/pow(10.0,floor(log10(fi))));
-            if (!axis_is_pos_perc(fi, &subplace_cnt, 1e-6, subplaces)) {
+				if (!axis_is_pos_perc(fi, &subplace_cnt, 1e-6, subplaces)) {
 					n = (int) floor(log10(fi)+0.5);
 					if (format != NULL) {
 						format->format(pow(10.0, n), ax->getNamePtr(i));
@@ -534,24 +560,7 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, DrawAxisPart drawPart) {
 				ax->getLabelsFromDataSet(ax->getNamesDataSet());
 			} else {
 				for (int i = 0; i < ax->getNbPlaces(); i++) {
-					double fi = ax->places[i]; x = fabs(fi);
-					if (fabs(x) < 0.00001*dticks) {
-						// otherwise place for "zero" may be -8.2556e-25 or some other small number
-						fi = 0;
-					}
-					if (format != NULL) {
-						format->format(fi, ax->getNamePtr(i));
-					} else {
-						x = fabs(fi);
-						char* num_trim_str = NULL;
-						if (fi == 0 || (x > 1e-5 && x < 1e6)) sprintf(cbuff, "%f", fi);
-						else sprintf(cbuff, "%e", fi);
-						numtrim(&num_trim_str, cbuff, dticks);
-						if (num_trim_str != NULL) {
-							ax->setName(i, num_trim_str);
-							myfree(num_trim_str);
-						}
-					}
+					ax->setName(i, g_format_label(ax->places[i], dticks, format));
 				}
 			}
 		}
@@ -1185,7 +1194,7 @@ string* GLEAxis::getNamePtr(int i) {
 	return &names[i];
 }
 
-void GLEAxis::setName(int i, const char* name) {
+void GLEAxis::setName(int i, const std::string& name) {
 	while ((int)names.size() <= i) names.push_back(string());
 	names[i] = name;
 }
@@ -1254,6 +1263,24 @@ int GLEAxis::getNbNamedPlaces() {
 	return nb;
 }
 
+double GLEAxis::getLocalAveragePlacesDistance(int i) {
+	int count = 0;
+	double distance = 0.0;
+	if (i > 0) {
+		distance += fabs(places[i] - places[i - 1]);
+		count ++;
+	}
+	if (i < getNbPlaces() - 1) {
+		distance += fabs(places[i] - places[i + 1]);
+		count ++;
+	}
+	if (count == 0) {
+		return GLE_INF;
+	} else {
+		return distance / count;
+	}
+}
+
 void GLEAxis::getLabelsFromDataSet(int ds) {
 	GLEDataSet* dataSet = dp[ds];
 	if (dataSet == NULL || dataSet->np == 0) {
@@ -1272,6 +1299,7 @@ void GLEAxis::getLabelsFromDataSet(int ds) {
 	unsigned int crpos = 0;
 	for (int i = 0; i < getNbPlaces(); i++) {
 		double fi = places[i];
+		*getNamePtr(i) = "";
 		if (fi >= min_val && fi <= max_val) {
 			// find last position with x-value smaller than fi
 			while (crpos < dataSet->np && xt[crpos] < fi) {
@@ -1288,8 +1316,15 @@ void GLEAxis::getLabelsFromDataSet(int ds) {
 					if (fabs(xt[crpos-1] - fi) < dist) sel = crpos-1;
 				}
 				if (sel >= 0 && sel < dataSet->np && !data.getM(sel)) {
-					GLERC<GLEString> str(yv->getString(sel));
-					*getNamePtr(i) = str->toUTF8();
+					bool showLabel = true;
+					dist = fabs(xt[sel] - fi);
+					if (!log && dist > getLocalAveragePlacesDistance(i) / 2.0) {
+						showLabel = false;
+					}
+					if (showLabel) {
+						GLERC<GLEString> str(yv->getString(sel));
+						*getNamePtr(i) = str->toUTF8();
+					}
 				}
 			}
 		}

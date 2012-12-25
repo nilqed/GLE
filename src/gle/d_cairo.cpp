@@ -503,8 +503,11 @@ void GLECairoDevice::flush(void) {
 	}
 }
 
-void GLECairoDevice::get_type(char *t) {
-	strcpy(t,"CAIRO FILLPATH");
+std::string GLECairoDevice::get_type() {
+	std::vector<std::string> temp(g_create_device_string());
+	temp.push_back("FILLPATH");
+	temp.push_back("CAIRO");
+	return str_join(temp);
 }
 
 void GLECairoDevice::line(double zx,double zy) {

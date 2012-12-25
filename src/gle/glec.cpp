@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 	int result = GLEMain(argc, argv);
-	// dlclose(lib);
+	dlclose(lib);
 #endif
 #ifdef __WIN32__
 	string lib_name = exe_name;

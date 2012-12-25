@@ -93,6 +93,10 @@ void str_to_uppercase(const string& input, string& output);
 
 void str_to_uppercase(string& output);
 
+std::vector<std::string> strs_to_uppercase(const std::vector<std::string>& input);
+
+std::string str_join(const std::vector<std::string>& input, const char* joinStr = ", ");
+
 void str_uppercase_initial_capital(string& str);
 
 bool str_only_space(const string& str);
@@ -180,3 +184,4 @@ void CUtilsAssertImpl(const char* expr, const char* file, int line, const char* 
 
 #endif
 
+double gle_limit_range(double value, double minValue, double maxValue);
