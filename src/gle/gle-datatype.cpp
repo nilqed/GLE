@@ -566,15 +566,15 @@ int GLEString::find(GLEString* needle, unsigned int from) {
 		return 0;
 	}
 	unsigned int patternChar0 = needle->getI(0);
-	for (unsigned int ctrSrc = from; ctrSrc <= endPattern; ctrSrc++) {
+	for (int ctrSrc = from; ctrSrc <= endPattern; ctrSrc++) {
 		if (getI(ctrSrc) != patternChar0) {
 			continue;
 		}
 		int ctrPat;
-		for (ctrPat = 1; ctrPat < needle->length() && getI(ctrSrc + ctrPat) == needle->getI(ctrPat); ctrPat++) {
+		for (ctrPat = 1; ctrPat < int(needle->length()) && getI(ctrSrc + ctrPat) == needle->getI(ctrPat); ctrPat++) {
 			; // just loop
 		}
-		if (ctrPat == needle->length()) {
+		if (ctrPat == int(needle->length())) {
 			return ctrSrc;
 		}
 	}

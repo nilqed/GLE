@@ -231,7 +231,7 @@ void GLEKeyBlockInstance::executeLine(GLESourceLine& sline)	{
 			else kw("TEXTCOLOR") entry->textcolor = next_color;
 			else kw("FILL") {
 				GLERC<GLEColor> fillColor(next_fill);
-				update_color_foreground(entry->fill.get(), fillColor.get());
+				update_color_foreground_and_pattern(entry->fill.get(), fillColor.get());
 			} else kw("PATTERN") {
 				GLERC<GLEColor> fillPattern(next_fill);
 				if (fillPattern->isFill() && fillPattern->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {

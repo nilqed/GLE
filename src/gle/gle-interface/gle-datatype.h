@@ -233,8 +233,8 @@ public:
 	void set(unsigned int i, const GLEMemoryCell* cell);
 	inline GLEMemoryCell* get(unsigned int i) const { return &m_Data[i]; }
 	inline GLEDataObject* getObjectUnsafe(unsigned int i) { return m_Data[i].Entry.ObjectVal; }
-	inline const unsigned int size() { return m_Length; }
-	inline const unsigned int last() { return m_Length - 1; }
+	inline unsigned int size() const { return m_Length; }
+	inline unsigned int last() const { return m_Length - 1; }
 	inline void decrementSize(int diff) { m_Length -= diff; }
 	inline void incrementSize(int diff) { m_Length += diff; }
 	void init(unsigned int i);

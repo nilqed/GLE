@@ -1290,7 +1290,7 @@ void do_set_bar_color(const char* tk, bar_struct* bar, int type) {
 				break;
 			case BAR_SET_FILL:
 				ensure_fill_created(bar, fi);
-				update_color_foreground(bar->fill[fi].get(), color.get());
+				update_color_foreground_and_pattern(bar->fill[fi].get(), color.get());
 				update_key_fill(bar, fi);
 				break;
 			case BAR_SET_TOP:

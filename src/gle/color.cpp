@@ -402,6 +402,13 @@ void update_color_foreground(GLEColor* updateMe, GLEColor* color) {
 	updateMe->setName(color->getNameS());
 }
 
+void update_color_foreground_and_pattern(GLEColor* updateMe, GLEColor* color) {
+	update_color_foreground(updateMe, color);
+	if (color->isFill() && color->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
+		update_color_fill_pattern(updateMe, static_cast<GLEPatternFill*>(color->getFill()));
+	}
+}
+
 void update_color_fill_pattern(GLEColor* updateMe, GLEPatternFill* fill) {
 	if (updateMe->isFill() && updateMe->getFill()->getFillType() == GLE_FILL_TYPE_PATTERN) {
 		GLEPatternFill* myFill = static_cast<GLEPatternFill*>(updateMe->getFill());

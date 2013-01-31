@@ -460,6 +460,7 @@ public:
 
 GLERC<GLEColor> color_or_fill_from_int(int hexValue);
 void update_color_foreground(GLEColor* updateMe, GLEColor* color);
+void update_color_foreground_and_pattern(GLEColor* updateMe, GLEColor* color);
 void update_color_fill_pattern(GLEColor* updateMe, GLEPatternFill* fill);
 void update_color_fill_background(GLEColor* updateMe, GLEColor* color);
 GLERC<GLEColor> get_fill_background(GLEColor* fill);
