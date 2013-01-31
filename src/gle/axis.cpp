@@ -629,6 +629,10 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, DrawAxisPart drawPart) {
 								g_move(ox-llen-maxd, oy+fi+ax->shift);
 								g_rotate(90);
 								g_jtext(JUST_CENTRE);
+							} else if (angle == -90.0) {
+								g_move(ox-llen-maxh+maxd, oy+fi+ax->shift);
+								g_rotate(-90);
+								g_jtext(JUST_CENTRE);
 							} else {
 								g_move(ox-llen, oy+fi+ax->shift);
 								g_rotate(angle);
@@ -653,8 +657,27 @@ void draw_axis(GLEAxis *ax, GLERectangle* box, DrawAxisPart drawPart) {
 						}
 						break;
 					case GLE_AXIS_Y2:
-						g_move(ox+llen, oy+fi+ax->shift);
-						g_jtext(JUST_LC);
+						if (angle == 0.0) {
+							g_move(ox+llen, oy+fi+ax->shift);
+							g_jtext(JUST_LC);
+						} else {
+							g_gsave();
+							if (angle == 90.0) {
+								g_move(ox+llen+maxh-maxd, oy+fi+ax->shift);
+								g_rotate(90);
+								g_jtext(JUST_CENTRE);
+							} else if (angle == -90.0) {
+								g_move(ox+llen, oy+fi+ax->shift);
+								g_rotate(-90);
+								g_jtext(JUST_CENTRE);
+							} else {
+								g_move(ox+llen, oy+fi+ax->shift);
+								g_rotate(angle);
+								if (angle > 0.0) g_jtext(JUST_TL);
+								else g_jtext(JUST_BL);
+							}
+							g_grestore();
+						}
 						break;
 				}
 			}
