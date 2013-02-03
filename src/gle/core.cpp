@@ -2073,7 +2073,7 @@ void g_postscript(char *fname, double wx, double wy) throw(ParserError) {
 	}
 	/* non-Postscript device? */
 	std::string inbuff(g_get_type());
-	if (str_i_str(inbuff, "POSTSCRIPT") == NULL) {
+	if (str_i_str(inbuff, "POSTSCRIPT") == 0) {
 		input.close();
 		g_get_xy(&cx,&cy);
 		g_box_stroke(cx,cy,cx+wx,cy+wy);
@@ -3246,6 +3246,18 @@ void GLEPoint::swap(GLEPoint& other) {
 ostream& GLEPoint::write(ostream& os) const {
 	os << m_X << ":" << m_Y;
 	return os;
+}
+
+GLELineSegment::GLELineSegment(const GLEPoint& p1, const GLEPoint& p2):
+	m_p1(p1),
+	m_p2(p2)
+{
+}
+
+GLELineSegment::GLELineSegment(double x1, double y1, double x2, double y2):
+	m_p1(x1, y1),
+	m_p2(x2, y2)
+{
 }
 
 GLEPoint3D::GLEPoint3D() {

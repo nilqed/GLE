@@ -392,10 +392,10 @@ public:
 	void noLogZero(bool xlog, bool ylog);
 	vector<double>* getDimension(unsigned int i);
 	double getMinXInterval();
-	inline unsigned int size() { return m_X.size(); }
-	inline double getX(int i) { return m_X[i]; }
-	inline double getY(int i) { return m_Y[i]; }
-	inline int getM(int i) { return m_M[i]; }
+	inline unsigned int size() const { return m_X.size(); }
+	inline double getX(int i) const { return m_X[i]; }
+	inline double getY(int i) const { return m_Y[i]; }
+	inline int getM(int i) const { return m_M[i]; }
 	inline double* getX() { return &m_X[0]; }
 	inline double* getY() { return &m_Y[0]; }
 	inline int* getM() { return &m_M[0]; }
@@ -465,6 +465,7 @@ public:
 	GLEAxis* getAxis(int i);
 	void clip(double *x, double *y);
 	bool contains(double x, double y);
+	bool contains(const GLEPoint& p);
 	void checkRanges() throw(ParserError);
 	void copyRangeIfRequired(int dimension);
 	vector<int> getMissingValues();

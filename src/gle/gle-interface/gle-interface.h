@@ -339,6 +339,18 @@ public:
 	inline double getB() const { return m_B; }
 };
 
+class DLLCLASS GLELineSegment {
+private:
+	GLEPoint m_p1;
+	GLEPoint m_p2;
+
+public:
+	GLELineSegment(const GLEPoint& p1, const GLEPoint& p2);
+	GLELineSegment(double x1, double y1, double x2, double y2);
+	const GLEPoint& getP1() const { return m_p1; }
+	const GLEPoint& getP2() const { return m_p2; }
+};
+
 #include "gle-datatype.h"
 
 enum GLEFontStyle {

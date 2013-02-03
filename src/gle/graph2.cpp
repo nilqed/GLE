@@ -793,41 +793,53 @@ void setupdown(const string& s, bool *enable, int *dataset, bool *percentage, do
 /* 	d3 errup 10% errdown d2		*/
 /* 	d3 err d1 errwidth .2		*/
 
-void draw_errbar(double x, double y, double eup, double ewid, GLEDataSet* ds) {
-	if (ds->contains(x, y)) {
-		double y2 = y + eup;
+void draw_errbar(const GLELineSegment& segment, double ewid, GLEDataSet* ds) {
+	if (ds->contains(segment.getP1())) {
+		double x = segment.getP1().getX();
+		double y = segment.getP1().getY();
+		double y2 = segment.getP2().getY();
 		draw_vec(x, y, x, y2, ds);
-		if (ds->contains(x, y + eup)) {
+		if (ds->contains(x, y2)) {
 			g_move(fnx(x, ds) - ewid/2, fny(y2, ds));
 			g_line(fnx(x, ds) + ewid/2, fny(y2, ds));
 		}
 	}
 }
 
-void draw_herrbar(double x, double y, double eup, double ewid, GLEDataSet* ds) {
-	if (ds->contains(x, y)) {
-		double x2 = x - eup;
+void draw_herrbar(const GLELineSegment& segment, double ewid, GLEDataSet* ds) {
+	if (ds->contains(segment.getP1())) {
+		double x = segment.getP1().getX();
+		double y = segment.getP1().getY();
+		double x2 = segment.getP2().getX();
 		draw_vec(x, y, x2, y, ds);
-		if (ds->contains(x - eup, y)) {
-			g_move(fnx(x2, ds), -ewid/2 + fny(y, ds));
-			g_line(fnx(x2, ds), ewid/2 + fny(y, ds));
+		if (ds->contains(x2, y)) {
+			g_move(fnx(x2, ds), fny(y, ds) - ewid/2);
+			g_line(fnx(x2, ds), fny(y, ds) + ewid/2);
 		}
 	}
 }
 
-void draw_err(GLEDataSet* dataSet, const string& errdescr, bool isUp, bool isHoriz, double errwd, const char* descr) {
-	dataSet->checkRanges();
-	if (errwd == 0) {
-		double hei;
-		g_get_hei(&hei);
-		errwd = hei/3;
+void helperGetErrorBarData(GLEDataSet* dataSet, const GLEDataPairs& pairs, int i, double error, bool isHoriz, std::vector<GLELineSegment>* result) {
+	if (isHoriz) {
+		double x2 = pairs.getX(i) - error;
+		if (dataSet->getAxis(GLE_DIM_X)->log && x2 <= 0.0) {
+			x2 = 0.0;
+		}
+		result->push_back(GLELineSegment(pairs.getX(i), pairs.getY(i), x2, pairs.getY(i)));
+	} else {
+		double y2 = pairs.getY(i) + error;
+		if (dataSet->getAxis(GLE_DIM_Y)->log && y2 <= 0.0) {
+			y2 = 0.0;
+		}
+		result->push_back(GLELineSegment(pairs.getX(i), pairs.getY(i), pairs.getX(i), y2));
 	}
+}
+
+std::vector<GLELineSegment> getErrorBarData(GLEDataSet* dataSet, const string& errdescr, bool isUp, bool isHoriz, const char* descr) {
 	int errID;
 	double value;
 	bool enable, percentage;
 	setupdown(errdescr, &enable, &errID, &percentage, &value);
-	g_set_color(dataSet->color);
-	g_set_line_width(dataSet->lwidth);
 	GLEDataPairs pairs(dataSet);
 	GLEDataPairs errPairs;
 	if (errID != 0) {
@@ -835,6 +847,7 @@ void draw_err(GLEDataSet* dataSet, const string& errdescr, bool isUp, bool isHor
 		errPairs.copyDimension(errDataset, 1);
 		errDataset->validateNbPoints(dataSet->np, descr);
 	}
+	std::vector<GLELineSegment> result;
 	vector<double>* errDimension = pairs.getDimension(isHoriz ? 0 : 1);
 	for (unsigned int i = 0; i < dataSet->np; i++) {
 		int miss = false;
@@ -850,12 +863,59 @@ void draw_err(GLEDataSet* dataSet, const string& errdescr, bool isUp, bool isHor
 			if (!isUp) {
 				error = error * -1;
 			}
-			if (isHoriz) {
-				draw_herrbar(pairs.getX(i), pairs.getY(i), error, errwd, dataSet);
-			} else {
-				draw_errbar(pairs.getX(i), pairs.getY(i), error, errwd, dataSet);
-			}
+			helperGetErrorBarData(dataSet, pairs, i, error, isHoriz, &result);
 		}
+	}
+	return result;
+}
+
+void draw_err(GLEDataSet* dataSet, const string& errdescr, bool isUp, bool isHoriz, double errwd, const char* descr) {
+	dataSet->checkRanges();
+	if (errwd == 0) {
+		double hei;
+		g_get_hei(&hei);
+		errwd = hei/3;
+	}
+	g_set_color(dataSet->color);
+	g_set_line_width(dataSet->lwidth);
+	std::vector<GLELineSegment> errData(getErrorBarData(dataSet, errdescr, isUp, isHoriz, descr));
+	for (unsigned int i = 0; i < errData.size(); i++) {
+		if (isHoriz) {
+			draw_herrbar(errData[i], errwd, dataSet);
+		} else {
+			draw_errbar(errData[i], errwd, dataSet);
+		}
+	}
+}
+
+void doMinMaxScaleErrorBars(GLEDataSet* dataSet, int dimensionIndex, const string& errdescr, bool isUp, bool isHoriz, const char* descr, GLERange* range)
+{
+	std::vector<GLELineSegment> errData(getErrorBarData(dataSet, errdescr, isUp, isHoriz, descr));
+	for (unsigned int i = 0; i < errData.size(); i++) {
+		GLELineSegment segment(errData[i]);
+		if (dimensionIndex == 0) {
+			range->updateRange(segment.getP1().getX(), false);
+			range->updateRange(segment.getP2().getX(), false);
+		} else {
+			range->updateRange(segment.getP1().getY(), false);
+			range->updateRange(segment.getP2().getY(), false);
+		}
+	}
+}
+
+void doMinMaxScaleErrorBars(GLEDataSet* dataSet, int dimensionIndex, GLERange* range)
+{
+	if (dataSet->errup.size() != 0) {
+		doMinMaxScaleErrorBars(dataSet, dimensionIndex, dataSet->errup, true, false, "error up", range);
+	}
+	if (dataSet->errdown.size() != 0) {
+		doMinMaxScaleErrorBars(dataSet, dimensionIndex, dataSet->errdown, false, false, "error down", range);
+	}
+	if (dataSet->herrup.size() != 0) {
+		doMinMaxScaleErrorBars(dataSet, dimensionIndex, dataSet->herrup, true, true, "error right", range);
+	}
+	if (dataSet->herrdown.size() != 0) {
+		doMinMaxScaleErrorBars(dataSet, dimensionIndex, dataSet->herrdown, false, true, "error left", range);
 	}
 }
 
@@ -3462,6 +3522,7 @@ void min_max_scale(GLEAxis* ax) {
 			for (unsigned int i = 0; i < pairs.size(); i++) {
 				range->updateRange(values->at(i), pairs.getM(i));
 			}
+			doMinMaxScaleErrorBars(dataset, ax->getDim(dim)->getDataDimensionIndex(), range);
 		}
 	}
 }
@@ -4136,6 +4197,10 @@ void GLEDataSet::clip(double *x, double *y) {
 bool GLEDataSet::contains(double x, double y) {
 	return getDim(GLE_DIM_X)->getRange()->contains(x)
 		   && getDim(GLE_DIM_Y)->getRange()->contains(y);
+}
+
+bool GLEDataSet::contains(const GLEPoint& p) {
+	return contains(p.getX(), p.getY());
 }
 
 void GLEDataSet::copyRangeIfRequired(int dimension) {
