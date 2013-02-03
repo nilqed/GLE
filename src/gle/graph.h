@@ -559,14 +559,48 @@ string dimension2String(unsigned int dimension);
 
 class GLEZData;
 
+class GLEToView {
+public:
+	GLEToView();
+	virtual ~GLEToView();
+	virtual GLEPoint fnXY(const GLEPoint& xy) = 0;
+	virtual GLEPoint fnXYInv(const GLEPoint& xy) = 0;
+};
+
+class GLEToRectangularView: public GLEToView {
+public:
+	GLEToRectangularView();
+	virtual ~GLEToRectangularView();
+	virtual GLEPoint fnXY(const GLEPoint& xy);
+	virtual GLEPoint fnXYInv(const GLEPoint& xy);
+	void setXRange(double from, double to) { m_xRange.setMinMax(from, to); }
+	void setYRange(double from, double to) { m_yRange.setMinMax(from, to); }
+	void setOrigin(const GLEPoint& origin) { m_origin.set(origin); }
+	void setSize(const GLEPoint& size) { m_size.set(size); }
+private:
+	GLERange m_xRange;
+	GLERange m_yRange;
+	GLEPoint m_origin;
+	GLEPoint m_size;
+};
+
+class GLEToGraphView: public GLEToView {
+public:
+	GLEToGraphView(GLEAxis* xAxis, GLEAxis* yAxis);
+	virtual ~GLEToGraphView();
+	virtual GLEPoint fnXY(const GLEPoint& xy);
+	virtual GLEPoint fnXYInv(const GLEPoint& xy);
+private:
+	GLEAxis* m_xAxis;
+	GLEAxis* m_yAxis;
+};
+
 class GLEColorMap {
 public:
 	string m_function;
 	string m_palette;
 	int m_wd, m_hi;
 	bool m_color;
-	double m_xmin, m_xmax;
-	double m_ymin, m_ymax;
 	double m_zmin, m_zmax;
 	bool m_has_zmin;
 	bool m_has_zmax;
@@ -576,9 +610,7 @@ public:
 public:
 	GLEColorMap();
 	~GLEColorMap();
-	void draw(double x0, double y0, double wd, double hi);
-	void setXRange(double min, double max);
-	void setYRange(double min, double max);
+	void draw(GLEToView* toView, double x0, double y0, double wd, double hi);
 	void setZMin(double val);
 	void setZMax(double val);
 	void setPalette(const string& pal);
@@ -593,10 +625,6 @@ public:
 	inline const string& getFunction() { return m_function; }
 	inline int getWidth() { return m_wd; }
 	inline int getHeight() { return m_hi; }
-	inline double getXMin() { return m_xmin; }
-	inline double getXMax() { return m_xmax; }
-	inline double getYMin() { return m_ymin; }
-	inline double getYMax() { return m_ymax; }
 	inline bool isColor() { return m_color; }
 	inline void setColor(bool color) { m_color = color; }
 	inline void setInvert(bool inv) { m_invert = inv; }

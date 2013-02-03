@@ -1339,12 +1339,13 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  case GLE_KW_COLORMAP:
 		  	{
 				GLEColorMap map;
+				GLEToRectangularView view;
 				readval(x);
 				map.setFunction(ostr->toUTF8());
 				readxy(x1, y1);
-				map.setXRange(x1, y1);
+				view.setXRange(x1, y1);
 				readxy(x1, y1);
-				map.setYRange(x1, y1);
+				view.setYRange(x1, y1);
 				readxy(x1, y1);
 				map.setWidth((int)floor(x1+0.5));
 				map.setHeight((int)floor(y1+0.5));
@@ -1362,7 +1363,9 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					map.setPalette(temp_str.c_str());
 				}
 				g_get_xy(&ox,&oy);
-				map.draw(ox, oy, x1, y1);
+				view.setOrigin(GLEPoint(ox, oy));
+				view.setSize(GLEPoint(x1, y1));
+				map.draw(&view, ox, oy, x1, y1);
 			}
 			break;
 		  case 33: /* RBEZIER */

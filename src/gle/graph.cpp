@@ -1646,9 +1646,8 @@ void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (Pars
 	}
 
 	if (g_colormap != NULL) {
-		g_colormap->setXRange(xx[1].getMin(), xx[1].getMax());
-		g_colormap->setYRange(xx[2].getMin(), xx[2].getMax());
-		g_colormap->draw(graph_x1, graph_y1, xlength, ylength);
+		GLEToGraphView view(&xx[GLE_AXIS_X], &xx[GLE_AXIS_Y]);
+		g_colormap->draw(&view, graph_x1, graph_y1, xlength, ylength);
 		delete g_colormap;
 		g_colormap = NULL;
 	}

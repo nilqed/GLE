@@ -3667,41 +3667,6 @@ void do_bigfile_compatibility() throw(ParserError) {
 	}
 }
 
-class GLEToView {
-public:
-	GLEToView();
-	virtual ~GLEToView();
-	virtual GLEPoint fnXY(const GLEPoint& xy) = 0;
-	virtual GLEPoint fnXYInv(const GLEPoint& xy) = 0;
-};
-
-class GLEToGraphView: public GLEToView {
-public:
-	GLEToGraphView(GLEAxis* xAxis, GLEAxis* yAxis);
-	virtual ~GLEToGraphView();
-	virtual GLEPoint fnXY(const GLEPoint& xy);
-	virtual GLEPoint fnXYInv(const GLEPoint& xy);
-private:
-	GLEAxis* m_xAxis;
-	GLEAxis* m_yAxis;
-};
-
-class GLEToRectangularView: public GLEToView {
-public:
-	GLEToRectangularView();
-	virtual ~GLEToRectangularView();
-	virtual GLEPoint fnXY(const GLEPoint& xy);
-	virtual GLEPoint fnXYInv(const GLEPoint& xy);
-	GLERange* getXRange() { return &m_xRange; }
-	GLERange* getYRange() { return &m_yRange; }
-	void setSize(int width, int height) { m_Width = width; m_Height = height; }
-private:
-	GLERange m_xRange;
-	GLERange m_yRange;
-	int m_Width;
-	int m_Height;
-};
-
 GLEToView::GLEToView() {
 }
 
@@ -3725,9 +3690,7 @@ GLEPoint GLEToGraphView::fnXYInv(const GLEPoint& xy) {
 	return GLEPoint(fnxInv(xy.getX(), m_xAxis, m_xAxis->getRange()), fnyInv(xy.getY(), m_yAxis, m_yAxis->getRange()));
 }
 
-GLEToRectangularView::GLEToRectangularView():
-	m_Width(0),
-	m_Height(0)
+GLEToRectangularView::GLEToRectangularView()
 {
 }
 
@@ -3735,11 +3698,14 @@ GLEToRectangularView::~GLEToRectangularView() {
 }
 
 GLEPoint GLEToRectangularView::fnXY(const GLEPoint& xy) {
+	CUtilsAssert(false);
 	return xy;
 }
 
 GLEPoint GLEToRectangularView::fnXYInv(const GLEPoint& xy) {
-	return xy;
+	double xpos = (xy.getX() - m_origin.getX())/ m_size.getX() * m_xRange.getWidth() + m_xRange.getMin();
+	double ypos = (xy.getY() - m_origin.getY())/ m_size.getY() * m_yRange.getWidth() + m_yRange.getMin();
+	return GLEPoint(xpos, ypos);
 }
 
 class GLEColorMapBitmap : public GLEBitmap {
@@ -3753,8 +3719,9 @@ protected:
 	GLESub* m_sub;
 	GLEBYTE* m_pal;
 	GLEBYTE* m_scanLine;
+	GLEToView* m_toView;
 public:
-	GLEColorMapBitmap(GLEColorMap* map, const GLEPoint& origin, const GLEPoint& size, GLEZData* data = NULL);
+	GLEColorMapBitmap(GLEToView* toView, GLEColorMap* map, const GLEPoint& origin, const GLEPoint& size, GLEZData* data = NULL);
 	virtual ~GLEColorMapBitmap();
 	GLEBYTE* createColorPalette();
 	virtual int readHeader();
@@ -3772,7 +3739,7 @@ private:
 	void cleanUp();
 };
 
-GLEColorMapBitmap::GLEColorMapBitmap(GLEColorMap* map, const GLEPoint& origin, const GLEPoint& size, GLEZData* data):
+GLEColorMapBitmap::GLEColorMapBitmap(GLEToView* toView, GLEColorMap* map, const GLEPoint& origin, const GLEPoint& size, GLEZData* data):
 	GLEBitmap(),
 	m_Data(data),
 	m_map(map),
@@ -3782,7 +3749,8 @@ GLEColorMapBitmap::GLEColorMapBitmap(GLEColorMap* map, const GLEPoint& origin, c
 	m_ZMax(-GLE_INF),
 	m_sub(0),
 	m_pal(0),
-	m_scanLine(0)
+	m_scanLine(0),
+	m_toView(toView)
 {
 }
 
@@ -3867,12 +3835,13 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 	double scale = zmax - zmin;
 	GLERectangle* bounds = zdata->getBounds();
 	for (int i = getHeight() - 1; i >= 0; i--) {
-		double ypos = fnyInv(m_origin.getY() + m_size.getY() * i / getHeight(), &xx[GLE_AXIS_Y]);
-		ypos = gle_limit_range((ypos - bounds->getYMin()) / bounds->getHeight(), 0.0, 1.0);
 		int pos = 0;
+		double yView = m_origin.getY() + m_size.getY() * i / getHeight();
 		for (int j = 0; j < getWidth(); j++) {
-			double xpos = fnxInv(m_origin.getX() + m_size.getX() * j / getWidth(), &xx[GLE_AXIS_X]);
-			xpos = gle_limit_range((xpos - bounds->getXMin()) / bounds->getWidth(), 0.0, 1.0);
+			double xView = m_origin.getX() + m_size.getX() * j / getWidth();
+			GLEPoint xy(m_toView->fnXYInv(GLEPoint(xView, yView)));
+			double xpos = gle_limit_range((xy.getX() - bounds->getXMin()) / bounds->getWidth(), 0.0, 1.0);
+			double ypos = gle_limit_range((xy.getY() - bounds->getYMin()) / bounds->getHeight(), 0.0, 1.0);
 			double zvalue = 0.0;
 			if (m_map->isInverted()) {
 				zvalue = (zmax - ipol.ipol(xpos, ypos)) / scale;
@@ -3888,10 +3857,6 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 }
 
 void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByteStream* output) {
-    double xmin = m_map->getXMin();
-    double ymax = m_map->getYMax();
-	double xrange = m_map->getXMax() - xmin;
-	double yrange = ymax - m_map->getYMin();
 	double zmax = -GLE_INF;
 	double zmin = GLE_INF;
 	double scale = 1.0;
@@ -3902,12 +3867,15 @@ void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByte
 		delta = m_map->getZMin();
 		set_zmax = m_map->getZMax();
 	}
-	for (int i = 0; i < getHeight(); i++) {
+	for (int i = getHeight() - 1; i >= 0; i--) {
 		int pos = 0;
-		var_set(vary, ymax - (double)i*yrange/getHeight());
+		double yView = m_origin.getY() + m_size.getY() * i / getHeight();
 		for (int j = 0; j < getWidth(); j++) {
+			double xView = m_origin.getX() + m_size.getX() * j / getWidth();
+			GLEPoint xy(m_toView->fnXYInv(GLEPoint(xView, yView)));
+			var_set(varx, xy.getX());
+			var_set(vary, xy.getY());
 			double zvalue;
-			var_set(varx, xmin + (double)j*xrange/getWidth());
 			eval_pcode(code, &zvalue);
 			if (zvalue > zmax) zmax = zvalue;
 			if (zvalue < zmin) zmin = zvalue;
@@ -3950,8 +3918,6 @@ int GLEColorMapBitmap::decode(GLEByteStream* output) {
 GLEColorMap::GLEColorMap() {
 	m_color = false;
 	m_wd = 50; m_hi = 50;
-	m_xmin = 0.0; m_xmax = 1.0;
-	m_ymin = 0.0; m_ymax = 1.0;
 	m_zmin = 0.0; m_zmax = 1.0;
 	m_has_zmin = false;
 	m_has_zmax = false;
@@ -3978,14 +3944,6 @@ void GLEColorMap::setPalette(const string& pal) {
 	m_haspal = true;
 }
 
-void GLEColorMap::setXRange(double min, double max) {
-	m_xmin = min; m_xmax = max;
-}
-
-void GLEColorMap::setYRange(double min, double max) {
-	m_ymin = min; m_ymax = max;
-}
-
 void GLEColorMap::setZMin(double val) {
 	m_has_zmin = true;
 	m_zmin = val;
@@ -3996,7 +3954,7 @@ void GLEColorMap::setZMax(double val) {
 	m_zmax = val;
 }
 
-void GLEColorMap::draw(double x0, double y0, double wd, double hi) {
+void GLEColorMap::draw(GLEToView* toView, double x0, double y0, double wd, double hi) {
 	GLEZData* zdata = getData();
 	if (zdata != NULL) {
 		/* figure out position of bitmap */
@@ -4013,11 +3971,11 @@ void GLEColorMap::draw(double x0, double y0, double wd, double hi) {
 			return;
 		}
 		g_move(xMin, yMin);
-		GLEColorMapBitmap bitmap(this, GLEPoint(xMin, yMin), GLEPoint(xMax - xMin, yMax - yMin), zdata);
+		GLEColorMapBitmap bitmap(toView, this, GLEPoint(xMin, yMin), GLEPoint(xMax - xMin, yMax - yMin), zdata);
 		g_bitmap(&bitmap, xMax - xMin, yMax - yMin, BITMAP_TYPE_USER);
 	} else {
 		g_move(x0, y0);
-		GLEColorMapBitmap bitmap(this, GLEPoint(x0, y0), GLEPoint(wd, hi));
+		GLEColorMapBitmap bitmap(toView, this, GLEPoint(x0, y0), GLEPoint(wd, hi));
 		g_bitmap(&bitmap, wd, hi, BITMAP_TYPE_USER);
 	}
 }
