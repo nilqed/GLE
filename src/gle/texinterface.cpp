@@ -482,6 +482,9 @@ void TeXInterface::createTeX(bool usegeom) {
 		}
 		string tex_name = m_MainOutputName.getFullPath();
 		tex_name += ".tex";
+		if (GLEFileExists(tex_name)) {
+			g_throw_parser_error("GLE needs to create a temporary file '", tex_name.c_str(), "', but this file already exists");
+		}
 		ofstream tex_file(tex_name.c_str());
 		createPreamble(tex_file);
 		tex_file << "\\usepackage{color}" << endl;
