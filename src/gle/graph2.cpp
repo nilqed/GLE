@@ -659,7 +659,9 @@ void GLEGraphPartFills::drawLayerObject(int layer, GLEMemoryCell* object) {
 		int index = classObj->getArray()->getInt(0);
 		if (shouldDraw(index) && fd[index]->layer == layer) {
 			g_gsave();
+			int origMaxVector = setMaxPSVector(-1);
 			drawFill(index);
+			setMaxPSVector(origMaxVector);
 			g_grestore();
 		}
 	}

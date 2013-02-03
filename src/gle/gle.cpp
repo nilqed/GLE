@@ -61,7 +61,6 @@
 //
 // -- these globals are needed. they are called in other source files using extern...
 //
-int MAX_VECTOR=MAXIMUM_PS_VECTOR;
 int gle_debug;
 bool control_d = true;
 extern int trace_on;
@@ -355,8 +354,7 @@ void process_option_args(CmdLineObj& cmdline, GLEOptions& options) {
 	options.ASK_DEBUG = cmdline.hasOption(GLE_OPT_DEBUG);
 	control_d = !cmdline.hasOption(GLE_OPT_NO_CTRL_D);
 	if (cmdline.hasOption(GLE_OPT_NO_MAXPATH)) {
-		/* Huh - what does this do? */
-		MAX_VECTOR = 10*MAXIMUM_PS_VECTOR;
+		setMaxPSVector(-1);
 	}
 	if (cmdline.hasOption(GLE_OPT_BBTWEAK)) g_psbbtweak();
 	GS_PREVIEW = cmdline.hasOption(GLE_OPT_GSPREVIEW);

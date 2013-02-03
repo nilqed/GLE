@@ -45,6 +45,8 @@
 class GLEBitmap;
 class GLEPoint;
 
+int setMaxPSVector(int newMax);
+
 class GLEDevice {
 protected:
 	bool m_recording;

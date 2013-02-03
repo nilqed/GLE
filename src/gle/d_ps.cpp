@@ -50,6 +50,7 @@
 #include "op_def.h"
 #include "cmdline.h"
 #include "config.h"
+#include "mem_limits.h"
 #ifdef __WIN32__
 #include <time.h>
 #endif
@@ -100,13 +101,19 @@ static char ellipse_fcn[] = "\
 //
 // -- global variables can we get rid of these?
 //
-extern int MAX_VECTOR; /* Cant send POSTSCRIPT too complex a path */
 extern bool control_d;
 extern struct gmodel g;
 extern bool GS_PREVIEW;
 extern int gle_debug;
-
 extern ConfigCollection g_Config;
+
+int MAX_VECTOR = MAXIMUM_PS_VECTOR; /* Cant send POSTSCRIPT too complex a path */
+
+int setMaxPSVector(int newMax) {
+	int oldValue = MAX_VECTOR;
+	MAX_VECTOR = newMax;
+	return oldValue;
+}
 
 //
 // -- function prototypes
@@ -597,7 +604,7 @@ void PSGLEDevice::line(double zx,double zy) {
 		move(g.curx,g.cury);
 	}
 	ps_nvec++;
-	if (ps_nvec>MAX_VECTOR) {
+	if (MAX_VECTOR != -1 && ps_nvec > MAX_VECTOR) {
 		//gprint("Warning, complex path, if filling fails then try /nomaxpath \n");
 		ps_nvec = 0; g_flush(); move(g.curx,g.cury);
 	}
