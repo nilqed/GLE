@@ -795,19 +795,23 @@ void setupdown(const string& s, bool *enable, int *dataset, bool *percentage, do
 
 void draw_errbar(double x, double y, double eup, double ewid, GLEDataSet* ds) {
 	if (ds->contains(x, y)) {
-		g_move(fnXY(x, y, ds));
-		g_line(fnXY(x, y + eup, ds));
-		g_move(fnx(x, ds) - ewid/2, fny(y + eup, ds));
-		g_line(fnx(x, ds) + ewid/2, fny(y + eup, ds));
+		double y2 = y + eup;
+		draw_vec(x, y, x, y2, ds);
+		if (ds->contains(x, y + eup)) {
+			g_move(fnx(x, ds) - ewid/2, fny(y2, ds));
+			g_line(fnx(x, ds) + ewid/2, fny(y2, ds));
+		}
 	}
 }
 
 void draw_herrbar(double x, double y, double eup, double ewid, GLEDataSet* ds) {
 	if (ds->contains(x, y)) {
-		g_move(fnXY(x, y, ds));
-		g_line(fnXY(x - eup, y, ds));
-		g_move(fnx(x - eup, ds), -ewid/2 + fny(y, ds));
-		g_line(fnx(x - eup, ds), ewid/2 + fny(y, ds));
+		double x2 = x - eup;
+		draw_vec(x, y, x2, y, ds);
+		if (ds->contains(x - eup, y)) {
+			g_move(fnx(x2, ds), -ewid/2 + fny(y, ds));
+			g_line(fnx(x2, ds), ewid/2 + fny(y, ds));
+		}
 	}
 }
 
