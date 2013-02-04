@@ -15,3 +15,14 @@ sub test_string_comparison switch1$ switch2$
   end if
   return 'err'
 end sub
+
+sub test_or_in_boolean_expression
+   a$ = "5"
+   b$ = "6"
+   c = 3
+   d = 5
+   if (a$ = "3") or (d = 5) then
+     return 1
+   end if
+   return 0
+end sub

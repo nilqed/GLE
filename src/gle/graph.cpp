@@ -1770,6 +1770,9 @@ int get_dataset_identifier(const std::string& ds, bool def) throw(ParserError) {
 			err << "data set identifier out of range: '" << result << "'";
 			g_throw_parser_error(err.str());
 		}
+		if (def && dp[result] == NULL) {
+			g_throw_parser_error("data set '", ds.c_str(), "' not defined");
+		}
 		return result;
 	} else {
 		char* ptr = NULL;
