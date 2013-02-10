@@ -124,6 +124,15 @@ public:
 	inline int size() { return values.size(); }
 };
 
+namespace nameMode
+{
+	enum Enum {
+		DETECT,
+		RETRIEVE,
+		NAME
+	};
+};
+
 class GLEVars {
 protected:
 	GLEVarMap m_GlobalMap;
@@ -133,7 +142,7 @@ protected:
 	GLELocalVars* local_var;
 	vector<GLELocalVars*> local_var_stack;
 	int local_var_stack_level;
-	bool m_detectDataSets;
+	nameMode::Enum m_nameMode;
 public:
 	GLEVars();
 	~GLEVars();
@@ -172,8 +181,8 @@ public:
 	inline GLEVarMap* getGlobalMap() { return &m_GlobalMap; }
 	inline void setLocalMap(GLEVarMap* map) { m_LocalMap = map; }
 	inline void expandGlobalVars(int max) { m_Global.ensure(max+1); }
-	inline void setDetectDataSets(bool detect) { m_detectDataSets = detect; }
-	inline bool isDetectDataSets() const { return m_detectDataSets; }
+	inline void setNameMode(nameMode::Enum mode) { m_nameMode = mode; }
+	inline nameMode::Enum getNameMode() const { return m_nameMode; }
 };
 
 GLEVars* getVarsInstance();

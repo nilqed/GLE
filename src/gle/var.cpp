@@ -293,7 +293,7 @@ GLEVars::GLEVars() {
 	m_LocalMap = NULL;
 	local_var = NULL;
 	local_var_stack_level = 0;
-	m_detectDataSets = false;
+	m_nameMode = nameMode::NAME;
 }
 
 GLEVars::~GLEVars() {

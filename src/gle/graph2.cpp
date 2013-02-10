@@ -2601,9 +2601,12 @@ void GLELet::doLet() throw(ParserError) {
 	}
 	/* Find data sets used as d[i] */
 	GLEVars* vars = getVarsInstance();
-	vars->setDetectDataSets(true);
+	vars->setNameMode(nameMode::DETECT);
 	fill.selectXValueNoIPol(0.0);
-	vars->setDetectDataSets(false);
+	if (!m_Where.isNull()) {
+		m_Where->evalDouble();
+	}
+	vars->setNameMode(nameMode::RETRIEVE);
 	/* Find data set variables */
 	int ndn = 0;
 	int dn_idx[11], dn_var[11];
@@ -2679,6 +2682,7 @@ void GLELet::doLet() throw(ParserError) {
 	}
 	/* done, transfer to target dataset */
 	fill.toDataset(dp[dset_id]);
+	vars->setNameMode(nameMode::NAME);
 }
 
 void GLELet::parseFitFunction(const string& fct, GLEParser* parser) throw(ParserError) {

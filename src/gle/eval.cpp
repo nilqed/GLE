@@ -880,16 +880,20 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			{
 				sprintf(sbuf, "D%d", getEvalStackInt(stk, stk->last()));
 				GLEVars* vars = getVarsInstance();
-				if (vars->isDetectDataSets()) {
-					vars->findAdd(sbuf, &i, &j);
-					vars->setDouble(i, 0.0);
-				} else {
-					vars->find(sbuf, &i, &j);
-				}
-				if (i == -1) {
-					setEvalStack(stk, stk->last(), sbuf);
-				} else {
+				if (vars->getNameMode() == nameMode::DETECT || vars->getNameMode() == nameMode::RETRIEVE) {
+					if (vars->getNameMode() == nameMode::DETECT) {
+						vars->findAdd(sbuf, &i, &j);
+						vars->setDouble(i, 0.0);
+					} else {
+						vars->find(sbuf, &i, &j);
+					}
+					if (i == -1) {
+						g_throw_parser_error("no value found for data set ", sbuf, "");
+					}
 					vars->get(i, stk->get(stk->last()));
+				} else {
+					CUtilsAssert(vars->getNameMode() == nameMode::NAME);
+					setEvalStack(stk, stk->last(), sbuf);
 				}
 			}
 			break;
