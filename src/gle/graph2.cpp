@@ -3936,14 +3936,15 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByteStream* output) {
 	double zmax = -GLE_INF;
 	double zmin = GLE_INF;
-	double scale = 1.0;
-	double delta = 0.0;
+	double set_zmin = 0.0;
 	double set_zmax = 1.0;
-	if (m_map->hasZMin() && m_map->hasZMax()) {
-		scale = m_map->getZMax() - m_map->getZMin();
-		delta = m_map->getZMin();
+	if (m_map->hasZMin()) {
+		set_zmin = m_map->getZMin();
+	}
+	if (m_map->hasZMax()) {
 		set_zmax = m_map->getZMax();
 	}
+	double scale = set_zmax - set_zmin;
 	for (int i = getHeight() - 1; i >= 0; i--) {
 		int pos = 0;
 		double yView = m_origin.getY() + m_size.getY() * i / getHeight();
@@ -3957,9 +3958,9 @@ void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByte
 			if (zvalue > zmax) zmax = zvalue;
 			if (zvalue < zmin) zmin = zvalue;
 			if (m_map->isInverted()) {
-				zvalue = scale * (set_zmax - zvalue);
+				zvalue = (set_zmax - zvalue) / scale;
 			} else {
-				zvalue = scale * (zvalue - delta);
+				zvalue = (zvalue - set_zmin) / scale;
 			}
 			updateScanLine(&pos, zvalue);
 		}
