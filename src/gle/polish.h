@@ -152,6 +152,7 @@ public:
 	void evalString(GLEArrayImpl* stk, const char *exp, string *str, bool allownum = false) throw(ParserError);
 	GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, const char *exp) throw(ParserError);
 	void get_params(GLEPcode& pcode, int np, int* plist, const string& name) throw(ParserError);
+	void get_array_index(GLEPcode& pcode) throw(ParserError);
 	double evalTokenToDouble() throw(ParserError);
 	Tokenizer* getTokens(const string& str);
 	void initTokenizer();

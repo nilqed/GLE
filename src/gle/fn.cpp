@@ -113,6 +113,7 @@ struct keyw { const char *word; int index; int ret,np,p[5]; } keywfn[] = {
 	{ "MIN",         FN_MIN,        1,2, { 1,1,0,0,0 } },
 	{ "NARGS",       FN_NARGS,      1,0, { 0,0,0,0,0 } },
 	{ "NDATA",       FN_NDATA,      1,1, { 2,0,0,0,0 } },
+	{ "NDATASETS",   FN_NDATASETS,  1,0, { 0,0,0,0,0 } },
 	{ "NOT",         15,            1,1, { 1,0,0,0,0 } },
 	{ "NUM$",        16,            2,1, { 1,0,0,0,0 } },
 	{ "NUM1$",       17,            2,1, { 1,0,0,0,0 } },

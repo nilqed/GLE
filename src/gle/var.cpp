@@ -95,6 +95,12 @@ GLEVarSubMap::GLEVarSubMap(GLEVarMap* parent) {
 GLEVarSubMap::~GLEVarSubMap() {
 }
 
+void GLEVarSubMap::list() {
+	for (StringIntHash::const_iterator i(m_Map.begin()); i != m_Map.end(); ++i) {
+		std::cout << i->first << std::endl;
+	}
+}
+
 void GLEVarSubMap::clear() {
 	m_Map.clear();
 	m_Idxs.clear();

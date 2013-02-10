@@ -92,6 +92,12 @@ void GLEPolish::initTokenizer() {
 	m_tokens.select_language(0);
 }
 
+void GLEPolish::get_array_index(GLEPcode& pcode) throw(ParserError) {
+	int vtype = 1;
+	internalPolish(pcode, &vtype);
+	m_tokens.ensure_next_token("]");
+}
+
 void GLEPolish::get_params(GLEPcode& pcode, int np, int* plist, const string& name) throw(ParserError) {
 	int nb_param = 0;
 	if (!m_tokens.is_next_token(")")) {
@@ -156,14 +162,14 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 		char first_char = token_len > 0 ? token[0] : ' ';
 		// cout << "Token: '" << token << "'" << endl;
 		// end of stream, or found ',' or ')'
-		if (token_len == 0 || (token_len == 1 && (first_char == ',' || (first_char == ')' && curpri == 0)))) {
+		if (token_len == 0 || (token_len == 1 && (first_char == ',' || (first_char == ')' && curpri == 0) || (first_char == ']' && curpri == 0)))) {
 			if (token_len != 0) {
 				m_tokens.pushback_token();
 			}
 			*rtype = 0;
 			dbg gprint("Found END OF EXPRESSION \n");
 			if (curpri != 0) {
-				throw error("unexpected end of expression, missing closing ')'");
+				throw error("unexpected end of expression, missing closing ')' or ']'");
 			}
 			/* Pop everything off the stack */
 			for (int i = nstk; i > 0; i--) {
@@ -243,11 +249,17 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 				unary = 2;
 				break;
 			}
+			if ((first_char == 'd' || first_char == 'D') && token_len == 1 && m_tokens.is_next_token("[")) {
+				get_array_index(pcode);
+				pcode.addFunction(FN_DI + FN_BUILTIN_MAGIC);
+				unary = 2;
+				break;
+			}
 			if (first_char == '(' && token_len == 1) {
 				curpri = curpri + 100;
 				break;
 			}
-			if (first_char == ')' && token_len == 1) {
+			if ((first_char == ')' || first_char == ')') && token_len == 1) {
 				throw error("constant, function, or unary operator expected");
 			}
 			if (m_tokens.is_next_token("(")) {

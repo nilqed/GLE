@@ -56,6 +56,7 @@ protected:
 public:
 	GLEVarSubMap(GLEVarMap* parent);
 	~GLEVarSubMap();
+	void list();
 	void clear();
 	void removeFromParent();
 	void addToParent(GLEVarMap* parent);

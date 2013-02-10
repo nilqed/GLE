@@ -1105,14 +1105,11 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					readlong(t);
 					if (t!=49) gprint("WRITE, PCODE ERROR, %d  cp %d plen %d\n",t,cp,plen);
 					readlong(t);
-					if (t==1) {
-						readval(x);
-						sprintf(ss,"%g ",x);
-						temp_str += ss;
-					} else {
-						readval(x);
-						temp_str += ostr->toUTF8();
+					gstr = evalString(getStack(), pcode, &cp, true);
+					if (!temp_str.empty()) {
+						temp_str += " ";
 					}
+					temp_str += gstr->toUTF8();
 				}
 				if (p==64) temp_str += "\n";
 				fprintf(file->getOutput(),"%s",temp_str.c_str());

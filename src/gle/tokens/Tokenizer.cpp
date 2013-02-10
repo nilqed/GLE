@@ -830,7 +830,7 @@ void Tokenizer::multi_level_do_multi(char open) throw(ParserError) {
 			if ((token_ch == '\"' || token_ch == '\'') && m_language->getParseStrings()) {
 				copy_string(token_ch);
 			} else if (multi->isOpenToken(token_ch)) {
-				m_open_token.push_back(open);
+				m_open_token.push_back(token_ch);
 			} else if (multi->isCloseToken(token_ch)) {
 				if (m_open_token.size() == 0) {
 					throw error(token_stream_pos(), string("illegal closing '")+token_ch+"'");
