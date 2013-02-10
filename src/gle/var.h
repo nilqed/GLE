@@ -133,6 +133,7 @@ protected:
 	GLELocalVars* local_var;
 	vector<GLELocalVars*> local_var_stack;
 	int local_var_stack_level;
+	bool m_detectDataSets;
 public:
 	GLEVars();
 	~GLEVars();
@@ -171,6 +172,8 @@ public:
 	inline GLEVarMap* getGlobalMap() { return &m_GlobalMap; }
 	inline void setLocalMap(GLEVarMap* map) { m_LocalMap = map; }
 	inline void expandGlobalVars(int max) { m_Global.ensure(max+1); }
+	inline void setDetectDataSets(bool detect) { m_detectDataSets = detect; }
+	inline bool isDetectDataSets() const { return m_detectDataSets; }
 };
 
 GLEVars* getVarsInstance();

@@ -2573,12 +2573,6 @@ void GLELet::complainAboutNoFunctions(GLEVectorAutoDelete<GLELetDataSet>& datase
 }
 
 void GLELet::doLet() throw(ParserError) {
-	double logstep = 1.0;
-	int ndn = 0;
-	int dn_idx[11], dn_var[11];
-	if (!m_SubMap.isNull()) {
-		var_find_dn(m_SubMap.get(), dn_idx, dn_var, &ndn);
-	}
 	if (m_LetTo <= m_LetFrom) {
 		stringstream ss;
 		ss << "illegal range for let expression: ";
@@ -2586,15 +2580,6 @@ void GLELet::doLet() throw(ParserError) {
 		letRange.setMinMax(m_LetFrom, m_LetTo);
 		letRange.printRange(ss);
 		g_throw_parser_error(ss.str());
-	}
-	if (ndn == 0 && xx[1].log) {
-		if (m_LetStep < 2) {
-			stringstream ss;
-			ss << "with a LOG xaxis scale STEP is taken as the number of steps n," << endl;
-			ss << "which should be at least 2, but found: " << m_LetStep;
-			g_throw_parser_error(ss.str());
-		}
-		logstep = pow(m_LetTo/m_LetFrom, 1.0/(m_LetStep-1));
 	}
 	int dset_id = getDataSet();
 	if (ndata < dset_id) ndata = dset_id;
@@ -2613,6 +2598,27 @@ void GLELet::doLet() throw(ParserError) {
 		fill.addDataDimension(dim_f);
 		bool log = xx[dp[dset_id]->getDim(dim)->getAxis()].log;
 		dim_f->setRange(dp[dset_id]->getDim(dim)->getRange(), log);
+	}
+	/* Find data sets used as d[i] */
+	GLEVars* vars = getVarsInstance();
+	vars->setDetectDataSets(true);
+	fill.selectXValueNoIPol(0.0);
+	vars->setDetectDataSets(false);
+	/* Find data set variables */
+	int ndn = 0;
+	int dn_idx[11], dn_var[11];
+	if (!m_SubMap.isNull()) {
+		var_find_dn(m_SubMap.get(), dn_idx, dn_var, &ndn);
+	}
+	double logstep = 1.0;
+	if (ndn == 0 && xx[1].log) {
+		if (m_LetStep < 2) {
+			stringstream ss;
+			ss << "with a LOG xaxis scale STEP is taken as the number of steps n," << endl;
+			ss << "which should be at least 2, but found: " << m_LetStep;
+			g_throw_parser_error(ss.str());
+		}
+		logstep = pow(m_LetTo/m_LetFrom, 1.0/(m_LetStep-1));
 	}
 	/* was "range" option given? */
 	set<int>& rangeDS = getXRangeDS();

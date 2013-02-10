@@ -880,7 +880,12 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 			{
 				sprintf(sbuf, "D%d", getEvalStackInt(stk, stk->last()));
 				GLEVars* vars = getVarsInstance();
-				vars->find(sbuf, &i, &j);
+				if (vars->isDetectDataSets()) {
+					vars->findAdd(sbuf, &i, &j);
+					vars->setDouble(i, 0.0);
+				} else {
+					vars->find(sbuf, &i, &j);
+				}
 				if (i == -1) {
 					setEvalStack(stk, stk->last(), sbuf);
 				} else {
