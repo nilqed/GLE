@@ -284,7 +284,7 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 				}
 				break;
 			}
-			dbg printf("Unquoted string (%s) \n",token.c_str());
+			// std::cout << "Unquoted string '" << token << "'" << std::endl;
 			pcode.addString(token);
 			if (!valid_unquoted_string(token)) {
 				throw error(token_col, "invalid unquoted string '"+token+"'");

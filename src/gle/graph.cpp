@@ -829,15 +829,16 @@ void do_colormap(int& ct) {
 	ct++;
 	while (ct <= ntk) {
 		kw("COLOR") g_colormap->setColor(true);
-		kw("INVERT") g_colormap->setInvert(true);
-		kw("ZMIN") g_colormap->setZMin(next_exp);
-		kw("ZMAX") g_colormap->setZMax(next_exp);
-		kw("PALETTE") {
+		else kw("INVERT") g_colormap->setInvert(true);
+		else kw("ZMIN") g_colormap->setZMin(next_exp);
+		else kw("ZMAX") g_colormap->setZMax(next_exp);
+		else kw("PALETTE") {
 			string tmp;
 			next_str_cpp(tmp);
 			str_to_uppercase(tmp);
 			g_colormap->setPalette(tmp);
 		}
+		else g_throw_parser_error("expecting colormap sub command, not '", tk[ct], "'");
 		ct++;
 	}
 	g_colormap->readData();

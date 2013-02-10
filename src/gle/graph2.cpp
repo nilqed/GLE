@@ -4010,13 +4010,28 @@ GLEColorMap::~GLEColorMap() {
 
 void GLEColorMap::readData() {
 	string fname;
+	int varx, vary;
+	int vartype = 1;
+	GLEVars* vars = getVarsInstance();
+	GLERC<GLEVarSubMap> submap(vars->addLocalSubMap());
+	var_findadd("X", &varx, &vartype);
+	var_findadd("Y", &vary, &vartype);
 	polish_eval_string(getFunction().c_str(), &fname, true);
-	if (str_i_ends_with(fname, ".Z")) {
+	vars->removeLocalSubMap();
+	if (str_i_ends_with(fname, ".Z") || str_i_ends_with(fname, ".GZ")) {
 		m_Data = new GLEZData();
 		m_Data->read(fname);
 	}
 }
-
+/*
+Thanks for pointing this out! Indeed, if you use a function (not
+a .z file), then the range of the function should be 0 - 1.
+Normally, it should be possible to specify the range with zmin
+and zmax, but this does not work correctly. The function is
+multiplied by (zmax - zmin) and not by 1/(zmax - zmin). I have
+now corrected this behaviour. The fix is in the current
+development version and will be included in the next release.
+*/
 void GLEColorMap::setPalette(const string& pal) {
 	m_palette = pal;
 	m_haspal = true;

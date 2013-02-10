@@ -54,6 +54,10 @@
    #include <zlib.h>
 #endif
 
+#include <memory>
+
+bool GLEReadFileBinaryGZIP(const string& name, std::vector<GLEBYTE>* contents);
+
 RefCountObject::RefCountObject() {
 	owner_count = 0;
 }
@@ -205,36 +209,48 @@ GLEZData::~GLEZData() {
 }
 
 void GLEZData::read(const string& fname) throw(ParserError) {
-	TokenizerLanguage lang;
-	StreamTokenizer tokens(&lang);
 	string expanded(GLEExpandEnvironmentVariables(fname));
 	validate_file_name(expanded, false);
-	tokens.open_tokens(expanded.c_str());
+	TokenizerLanguage lang;
+	std::auto_ptr<Tokenizer> tokens;
+	std::vector<GLEBYTE> contents;
+	if (str_i_ends_with(expanded, ".gz")) {
+		if (GLEReadFileBinaryGZIP(expanded, &contents)) {
+			contents.push_back(0);
+			tokens.reset(new StringTokenizer((const char*)&contents[0], &lang));
+		} else {
+			g_throw_parser_error("can't open: '", expanded.c_str(), "'");
+		}
+	} else {
+		StreamTokenizer* streamTokens = new StreamTokenizer(&lang);
+		tokens.reset(streamTokens);
+		streamTokens->open_tokens(expanded.c_str());
+	}
 	lang.setSpaceTokens(" \t\r,");
 	lang.setSingleCharTokens("\n!");
 	// Read the header of the z file
 	GLERectangle* bounds = getBounds();
-	tokens.ensure_next_token("!");
-	while (tokens.has_more_tokens()) {
-		string& token = tokens.next_token();
+	tokens->ensure_next_token("!");
+	while (tokens->has_more_tokens()) {
+		string& token = tokens->next_token();
 		if (token == "\n") {
 			break;
 		} else if (str_i_equals(token, "NX")) {
-			m_NX = tokens.next_integer();
+			m_NX = tokens->next_integer();
 		} else if (str_i_equals(token, "NY")) {
-			m_NY = tokens.next_integer();
+			m_NY = tokens->next_integer();
 		} else if (str_i_equals(token, "XMIN")) {
-			bounds->setXMin(tokens.next_double());
+			bounds->setXMin(tokens->next_double());
 		} else if (str_i_equals(token, "XMAX")) {
-			bounds->setXMax(tokens.next_double());
+			bounds->setXMax(tokens->next_double());
 		} else if (str_i_equals(token, "YMIN")) {
-			bounds->setYMin(tokens.next_double());
+			bounds->setYMin(tokens->next_double());
 		} else if (str_i_equals(token, "YMAX")) {
-			bounds->setYMax(tokens.next_double());
+			bounds->setYMax(tokens->next_double());
 		} else {
 			stringstream str;
 			str << "unknown .z header token '" << token << "'";
-			throw tokens.error(str.str());
+			throw tokens->error(str.str());
 		}
 	}
 	lang.setLineCommentTokens("!");
@@ -242,12 +258,12 @@ void GLEZData::read(const string& fname) throw(ParserError) {
 	lang.setSpaceTokens(" \t\n\r,");
 	// Allocate data
 	if (m_NX == 0 || m_NY == 0) {
-		throw tokens.error("data file header should contain valid NX and NY parameters");
+		throw tokens->error("data file header should contain valid NX and NY parameters");
 	}
 	m_Data = new double[m_NX * m_NY];
 	for (int y = 0; y < m_NY; y++) {
 		for (int x = 0; x < m_NX; x++) {
-			double v = tokens.next_double();
+			double v = tokens->next_double();
 			if (v < m_ZMin) m_ZMin = v;
 			if (v > m_ZMax) m_ZMax = v;
 			m_Data[x + y * m_NX] = v;
