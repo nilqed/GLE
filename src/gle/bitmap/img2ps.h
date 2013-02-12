@@ -377,34 +377,55 @@ private:
 	void cleanUp();
 };
 
-class BicubicIpolData {
+enum IpolType
+{
+	IPOL_TYPE_BICUBIC,
+	IPOL_TYPE_NEAREST
+};
+
+class IpolData {
 protected:
 	int m_Width;
 	int m_Height;
 public:
-	BicubicIpolData();
-	virtual ~BicubicIpolData();
+	IpolData();
+	virtual ~IpolData();
 	inline int getWidth() { return m_Width; }
 	inline int getHeight() { return m_Height; }
 	virtual double getValue(int x, int y) = 0;
 };
 
-class BicubicIpolDoubleMatrix : public BicubicIpolData {
+class IpolDoubleMatrix: public IpolData {
 protected:
 	double* m_Data;
 public:
-	BicubicIpolDoubleMatrix(double* data, int wd, int hi);
-	virtual ~BicubicIpolDoubleMatrix();
+	IpolDoubleMatrix(double* data, int wd, int hi);
+	virtual ~IpolDoubleMatrix();
 	virtual double getValue(int x, int y);
 };
 
-class BicubicIpol {
-protected:
-	BicubicIpolData* m_Data;
+class Ipol {
 public:
-	BicubicIpol(BicubicIpolData* data);
-	double ipol(double xp, double yp);
+	Ipol();
+	virtual ~Ipol();
+	virtual double ipol(double xp, double yp) = 0;
+};
+
+class BicubicIpol: public Ipol {
+protected:
+	IpolData* m_Data;
+public:
+	BicubicIpol(IpolData* data);
+	virtual double ipol(double xp, double yp);
 	double R(double x);
+};
+
+class NearestIpol: public Ipol {
+protected:
+	IpolData* m_Data;
+public:
+	NearestIpol(IpolData* data);
+	virtual double ipol(double xp, double yp);
 };
 
 void GLEBitmapSetPalette(GLEBYTE* pal, int offs, double red, double green, double blue);

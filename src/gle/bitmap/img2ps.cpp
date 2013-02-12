@@ -44,6 +44,7 @@
 #include "../basicconf.h"
 #include "../gprint.h"
 #include "../file_io.h"
+#include "../cutils.h"
 #include "img2ps.h"
 
 GLEBitmap::GLEBitmap() {
@@ -565,22 +566,22 @@ int GLEAlphaRemovalByteStream::endScanLine() {
 	return GLEPipedByteStream::endScanLine();
 }
 
-BicubicIpolData::BicubicIpolData() {
+IpolData::IpolData() {
 }
 
-BicubicIpolData::~BicubicIpolData() {
+IpolData::~IpolData() {
 }
 
-BicubicIpolDoubleMatrix::BicubicIpolDoubleMatrix(double* data, int wd, int hi) {
+IpolDoubleMatrix::IpolDoubleMatrix(double* data, int wd, int hi) {
 	m_Width = wd;
 	m_Height = hi;
 	m_Data = data;
 }
 
-BicubicIpolDoubleMatrix::~BicubicIpolDoubleMatrix() {
+IpolDoubleMatrix::~IpolDoubleMatrix() {
 }
 
-double BicubicIpolDoubleMatrix::getValue(int x, int y) {
+double IpolDoubleMatrix::getValue(int x, int y) {
 	if (x < 0) x = 0;
 	if (x >= m_Width) x = m_Width - 1;
 	if (y < 0) y = 0;
@@ -588,7 +589,15 @@ double BicubicIpolDoubleMatrix::getValue(int x, int y) {
 	return m_Data[y * m_Width + x];
 }
 
-BicubicIpol::BicubicIpol(BicubicIpolData* data) {
+Ipol::Ipol()
+{
+}
+
+Ipol::~Ipol()
+{
+}
+
+BicubicIpol::BicubicIpol(IpolData* data) {
 	m_Data = data;
 }
 
@@ -622,6 +631,15 @@ double BicubicIpol::ipol(double xp, double yp) {
 		}
 	}
 	return value;
+}
+
+NearestIpol::NearestIpol(IpolData* data):
+	m_Data(data)
+{
+}
+
+double NearestIpol::ipol(double xp, double yp) {
+	return m_Data->getValue(gle_round_int(xp * m_Data->getWidth()), gle_round_int(yp * m_Data->getHeight()));
 }
 
 void GLEBitmapSetPalette(GLEBYTE* pal, int offs, double red, double green, double blue) {

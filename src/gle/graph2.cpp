@@ -67,6 +67,8 @@
 #include "sub.h"
 #include "numberformat.h"
 
+#include <memory>
+
 #define DEFAULT_STEPS 100
 
 extern int g_nbar;
@@ -3907,8 +3909,13 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 	double zmax = zdata->getZMax();
 	if (m_map->hasZMin()) zmin = m_map->getZMin();
 	if (m_map->hasZMax()) zmax = m_map->getZMax();
-	BicubicIpolDoubleMatrix ipd(zdata->getData(), zdata->getNX(), zdata->getNY());
-	BicubicIpol ipol(&ipd);
+	IpolDoubleMatrix ipd(zdata->getData(), zdata->getNX(), zdata->getNY());
+	std::auto_ptr<Ipol> ipol;
+	if (m_map->getIpolType() == IPOL_TYPE_BICUBIC) {
+		ipol.reset(new BicubicIpol(&ipd));
+	} else {
+		ipol.reset(new NearestIpol(&ipd));
+	}
 	double scale = zmax - zmin;
 	GLERectangle* bounds = zdata->getBounds();
 	for (int i = getHeight() - 1; i >= 0; i--) {
@@ -3921,9 +3928,9 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 			double ypos = gle_limit_range((xy.getY() - bounds->getYMin()) / bounds->getHeight(), 0.0, 1.0);
 			double zvalue = 0.0;
 			if (m_map->isInverted()) {
-				zvalue = (zmax - ipol.ipol(xpos, ypos)) / scale;
+				zvalue = (zmax - ipol->ipol(xpos, ypos)) / scale;
 			} else {
-				zvalue = (ipol.ipol(xpos, ypos) - zmin) / scale;
+				zvalue = (ipol->ipol(xpos, ypos) - zmin) / scale;
 			}
 			updateScanLine(&pos, zvalue);
 		}
@@ -4002,6 +4009,7 @@ GLEColorMap::GLEColorMap() {
 	m_invert = false;
 	m_haspal = false;
 	m_Data = NULL;
+	m_ipolType = IPOL_TYPE_BICUBIC;
 }
 
 GLEColorMap::~GLEColorMap() {

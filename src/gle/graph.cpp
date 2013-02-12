@@ -832,6 +832,19 @@ void do_colormap(int& ct) {
 		else kw("INVERT") g_colormap->setInvert(true);
 		else kw("ZMIN") g_colormap->setZMin(next_exp);
 		else kw("ZMAX") g_colormap->setZMax(next_exp);
+		else kw("INTERPOLATE") {
+			string tmp;
+			next_str_cpp(tmp);
+			IpolType ipolType;
+			if (str_i_equals(tmp, "BICUBIC")) {
+				ipolType = IPOL_TYPE_BICUBIC;
+			} else if (str_i_equals(tmp, "NEAREST")) {
+				ipolType = IPOL_TYPE_NEAREST;
+			} else {
+				g_throw_parser_error("unknown interpolation type '", tmp.c_str(), "'");
+			}
+			g_colormap->setIpolType(ipolType);
+		}
 		else kw("PALETTE") {
 			string tmp;
 			next_str_cpp(tmp);

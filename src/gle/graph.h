@@ -38,6 +38,8 @@
 
 #include "gle-block.h"
 #include "axis.h"
+#include "file_io.h"
+#include "bitmap/img2ps.h"
 
 class GLEGraphBlockBase;
 class GLEGraphDrawCommand;
@@ -607,6 +609,7 @@ public:
 	bool m_has_zmax;
 	bool m_invert;
 	bool m_haspal;
+	IpolType m_ipolType;
 	GLEZData* m_Data;
 public:
 	GLEColorMap();
@@ -633,6 +636,8 @@ public:
 	inline bool hasPalette() { return m_haspal; }
 	inline const string& getPaletteFunction() { return m_palette; }
 	inline GLEZData* getData() { return m_Data; }
+	inline void setIpolType(IpolType type) { m_ipolType = type; }
+	inline IpolType getIpolType() const { return m_ipolType; }
 };
 
 
