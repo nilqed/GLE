@@ -3920,9 +3920,9 @@ void GLEColorMapBitmap::plotData(GLEZData* zdata, GLEByteStream* output) {
 	GLERectangle* bounds = zdata->getBounds();
 	for (int i = getHeight() - 1; i >= 0; i--) {
 		int pos = 0;
-		double yView = m_origin.getY() + m_size.getY() * i / getHeight();
+		double yView = m_origin.getY() + m_size.getY() * (i + 0.5) / getHeight();
 		for (int j = 0; j < getWidth(); j++) {
-			double xView = m_origin.getX() + m_size.getX() * j / getWidth();
+			double xView = m_origin.getX() + m_size.getX() * (j + 0.5) / getWidth();
 			GLEPoint xy(m_toView->fnXYInv(GLEPoint(xView, yView)));
 			double xpos = gle_limit_range((xy.getX() - bounds->getXMin()) / bounds->getWidth(), 0.0, 1.0);
 			double ypos = gle_limit_range((xy.getY() - bounds->getYMin()) / bounds->getHeight(), 0.0, 1.0);
@@ -3954,9 +3954,9 @@ void GLEColorMapBitmap::plotFunction(GLEPcode& code, int varx, int vary, GLEByte
 	double scale = set_zmax - set_zmin;
 	for (int i = getHeight() - 1; i >= 0; i--) {
 		int pos = 0;
-		double yView = m_origin.getY() + m_size.getY() * i / getHeight();
+		double yView = m_origin.getY() + m_size.getY() * (i + 0.5) / getHeight();
 		for (int j = 0; j < getWidth(); j++) {
-			double xView = m_origin.getX() + m_size.getX() * j / getWidth();
+			double xView = m_origin.getX() + m_size.getX() * (j + 0.5) / getWidth();
 			GLEPoint xy(m_toView->fnXYInv(GLEPoint(xView, yView)));
 			var_set(varx, xy.getX());
 			var_set(vary, xy.getY());
