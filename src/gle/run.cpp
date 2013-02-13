@@ -502,6 +502,7 @@ GLERun::GLERun(GLEScript* script, GLEFileLocation* outfile) {
 	allowBeforeSize(GLE_KW_SUB);
 	allowBeforeSize(GLE_KW_UNTIL);
 	allowBeforeSize(GLE_KW_WHILE);
+	allowBeforeSize(GLE_KW_END);
 }
 
 GLERun::~GLERun() {
