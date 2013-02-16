@@ -1478,7 +1478,7 @@ double get_next_exp(TOKENS tk,int ntok,int *curtok) {
 		/* this is added for optional parameters on smoothing. They must be at end for this to work*/
 		dbg gprint("zero length expression in get expression no polish called\n");
 		x=0;
-	}else{
+	} else {
 		polish_eval(tk[*curtok],&x);
 	}
 	return x;

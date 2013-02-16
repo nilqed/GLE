@@ -377,7 +377,7 @@ void GLERun::sub_call(GLESub* sub, GLEArrayImpl* stk, int npm) throw(ParserError
 	// Copy parameters to local variables
 	for (int i = sub->getNbParam()-1; i >= 0; i--) {
 		int var = i | GLE_VAR_LOCAL_BIT;
-		getVars()->set(var, stk->get(npm--));
+		getVars()->set(var, stk->get(--npm));
 	}
 	// Run subroutine
 	int endp = 0;
@@ -389,7 +389,8 @@ void GLERun::sub_call(GLESub* sub, GLEArrayImpl* stk, int npm) throw(ParserError
 	}
 	// FIXME: Find more elegant way to back up current line
 	this_line = oldline;
-	npm++;
+	stk->decrementSize(sub->getNbParam() - 1);
+	stk->ensure(npm + 1);
 	stk->set(npm, &m_returnValue);
 	var_set_local_map(save_var_map);
 	GLE_MC_COPY(&m_returnValue, &save_return_value);

@@ -913,8 +913,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 				pass address of variables if possible
 				*/
 				GLESub* sub = sub_get(*(pcode + c) - LOCAL_START_INDEX);
-				getGLERunInstance()->sub_call(sub, stk, stk->last());
-				stk->decrementSize(sub->getNbParam() - 1);
+				getGLERunInstance()->sub_call(sub, stk, stk->size());
 			} else {
 				g_throw_parser_error("unrecognized byte code expression");
 			}
