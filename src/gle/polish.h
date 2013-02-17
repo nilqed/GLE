@@ -167,7 +167,6 @@ public:
 
 void polish_eval(char *exp, double *x) throw(ParserError);
 void polish_eval_string(const char *exp, string *str, bool allownum = false) throw(ParserError);
-void polish(char *expr, char *pcode, int *plen, int *rtype) throw(ParserError);
 void polish(char *expr, GLEPcode& pcode, int *rtype) throw(ParserError);
 void eval_pcode(GLEPcode& pcode, double* x);
 void eval_pcode_str(GLEPcode& pcode, string& x);

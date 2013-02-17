@@ -234,29 +234,19 @@ public:
 	inline GLEGlobalSource* getSource() { return m_Script->getSource(); }
 };
 
-int gt_first(OPKEY lkey, int *curtok, TOKENS tk, int *ntok, int *pcode, int *plen);
 int gt_firstval(OPKEY lkey, const char *s);
 bool gt_firstval_err(OPKEY lkey, const char *s, int* result);
 int gt_index(OPKEY lkey,char *s);
-int gt_optional(OPKEY lkey, int *curtok, TOKENS tk, int *ntok, int *pcode, int *plen);
 int pass_justify(const std::string& s);
 int pass_marker(char *s) throw(ParserError);
-void get_color(TOKENS tk,int *ntok,int *curtok,int *pcode,int *plen);
-void get_fill(TOKENS tk,int *ntok,int *curtok,int *pcode,int *plen);
-void get_font(TOKENS tk,int *ntok,int *curtok,int *pcode,int *plen);
-void get_justify(TOKENS tk,int *ntok,int *curtok,int *pcode,int *plen);
-void get_marker(TOKENS tk,int *ntok,int *curtok,int *pcode,int *plen);
-void gt_xy(int *curtok, TOKENS tk, int *ntok,	int *pcode, int *plen);
 void mark_clear(void);
 void pass_checkmode(void);
-//void passt(_itGLESource sc_line_it,TOKENS tk,int *ntok,int *pcode,int *plen);
 void spop(int v);
 void spush(int v);
 void scheck(int v);
 //
 // used in utils
 //
-int zpolish(TOKENS tk,int *ntok,int *curtok,char *pcode,int *plen,int *rtype);
 
 void set_global_parser(GLEParser* parser);
 GLEParser* get_global_parser();

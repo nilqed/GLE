@@ -411,7 +411,6 @@ GLEMemoryCell* GLEPolish::evalGeneric(GLEArrayImpl* stk, const char *exp) throw(
 	return ::evalGeneric(stk, (int*)&pcode[0], &cp);
 }
 
-
 bool valid_unquoted_string(const string& str) {
 	if (str.length() == 0) {
 		return false;
@@ -453,17 +452,6 @@ void eval_pcode_str(GLEPcode& pcode, string& x) {
 	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 	GLERC<GLEString> result(::evalString(stk.get(), (int*)&pcode[0], &cp, true));
 	x = result->toUTF8();
-}
-
-void polish(char *expr, char *pcode, int *plen, int *rtype) throw(ParserError) {
-	GLEPolish* polish = get_global_polish();
-	if (polish != NULL) {
-		GLEPcodeList pc_list;
-		GLEPcode my_pcode(&pc_list);
-		polish->polish(expr, my_pcode, rtype);
-		*plen = my_pcode.size();
-		memcpy(pcode,&my_pcode[0],my_pcode.size()*sizeof(int));
-	}
 }
 
 void polish_eval(char *exp, double *x) throw(ParserError) {

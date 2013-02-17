@@ -1490,42 +1490,6 @@ void font_get_parskip(double *ls,double *gap) {
 #define get_exps(ss) polish(ss,(char *) pcode,plen,&etype)
 #define tok(n)  tk[n]
 
-void get_font(TOKENS tk,int *ntok,int *curtok,int *pcode,int *plen) {
-	int etype=1;
-	char vv[80];
-	char *p;
-	if (fnt.size() == 0) font_load();
-	if ( (*tok(*curtok) == '"' ) ||  (strchr(tok(*curtok),'$') != NULL) ) {
-		strcpy(vv,"cvtfont(");
-		strcat(vv,tok(*curtok)); strcat(vv,")");
-		get_exps(vv);
-		(*curtok)++;
-		return;
-	}
-	p = tk[*curtok];
-	(*curtok)++;
-	*(pcode+(*plen)++) = 8;
-	for (unsigned int i = 1; i < fnt.size(); i++) {
-		if (fnt[i]->name != NULL && str_i_equals(fnt[i]->name,p)) {
-			*(pcode+(*plen)++) = i; /* font number */
-			return;
-		}
-	}
-	ostringstream err;
-	err << "invalid font name: '" << p << "', expecting one of:";
-	for (unsigned int i = 1; i < fnt.size(); i++) {
-		if ((i-1) % 5 == 0) {
-			err << endl << "       ";
-		} else {
-			err << " ";
-		}
-		err << fnt[i]->name;
-	}
-	gprint(err.str().c_str());
-	/* default font number */
-	*(pcode+(*plen)++) = 1;
-}
-
 const char* get_font_name(int idx) {
 	GLECoreFont* cfont = get_core_font(idx);
 	return cfont->name;

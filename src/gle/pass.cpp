@@ -298,8 +298,6 @@ void GLEParser::checkValidName(const string& name, const char* type, int pos) th
 
 double GLEParser::evalTokenToDouble() throw(ParserError) {
 	double x = 0.0;
-	GLEPcodeList pc_list;
-	GLEPcode pcode(&pc_list);
 	Tokenizer* tokens = getTokens();
 	string& expr = tokens->next_multilevel_token();
 	int pos = tokens->token_pos_col();
@@ -313,8 +311,6 @@ double GLEParser::evalTokenToDouble() throw(ParserError) {
 }
 
 void GLEParser::evalTokenToString(string* str) throw(ParserError) {
-	GLEPcodeList pc_list;
-	GLEPcode pcode(&pc_list);
 	Tokenizer* tokens = getTokens();
 	string& expr = tokens->next_multilevel_token();
 	int pos = tokens->token_pos_col();
@@ -580,6 +576,7 @@ void GLEParser::gen_subroutine_call_polish_arg(GLESubCallInfo* info, int i, GLEP
 }
 
 void GLEParser::evaluate_subroutine_arguments(GLESubCallInfo* info, GLEArrayImpl* arguments) {
+	// FIXME NEWEVAL
 	GLESub* sub = info->getSub();
 	int np = sub->getNbParam();
 	arguments->resize(np);
@@ -2218,20 +2215,6 @@ const char* GLESourceBlockName(int type) {
 		case GLE_SRCBLK_ELSE:  return "else";
 		default: return "unknown";
 	}
-}
-
-void gt_xy(int *curtok, TOKENS tk, int *ntok, int *pcode, int *plen) {
-	int etype;
-	etype = 1;
-	if (*ntok < *curtok) {
-		gprint("Expecting x expression on end of line\n");
-	}
-	polish(tok((*curtok)++),(char *) pcode,plen,&etype);
-	etype = 1;
-	if (*ntok < *curtok) {
-		gprint("Expecting y expression on end of line\n");
-	}
-	polish(tok((*curtok)++),(char *) pcode,plen,&etype);
 }
 
 void gt_find_error(const char* found, OPKEY lkey, int nk) {
