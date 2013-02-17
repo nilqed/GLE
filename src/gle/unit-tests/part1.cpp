@@ -184,7 +184,7 @@ void test_expression_evaluator_each(GLEPolish* polish, const std::string& expres
 	std::ostringstream msg;
 	msg << expression << ": ";
 	if (is_float(expectedValue)) {
-		GLEMemoryCell* mc = evalGeneric(stk.get(), (int*)&pcode[0], &cp);
+		GLEMemoryCell* mc = evalGeneric(stk.get(), &pc_list, (int*)&pcode[0], &cp);
 		gle_memory_cell_check(mc, GLEObjectTypeDouble);
 		double expectedDouble = tokenizer_string_to_double(expectedValue.c_str());
 		msg << mc->Entry.DoubleVal << " == " << expectedValue;
@@ -194,7 +194,7 @@ void test_expression_evaluator_each(GLEPolish* polish, const std::string& expres
 			unit_test_msg(equals_rel_fine(mc->Entry.DoubleVal, expectedDouble), msg.str());
 		}
 	} else {
-		GLERC<GLEString> result(evalString(stk.get(), (int*)&pcode[0], &cp, true));
+		GLERC<GLEString> result(evalString(stk.get(), &pc_list, (int*)&pcode[0], &cp, true));
 		std::string computedString(result->toUTF8());
 		msg << computedString << " == " << expectedValue;
 		unit_test_msg(expectedValue == computedString, msg.str());

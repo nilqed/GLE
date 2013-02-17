@@ -80,6 +80,7 @@
 #define GLE_ARRTIP_SHARP 1
 
 class GLEBitmap;
+class GLEPcodeList;
 
 class GLEArrowProps {
 public:
@@ -370,7 +371,7 @@ void g_clear(void);
 void g_clip(void);
 void g_close(void);
 void g_closepath(void);
-void g_curve(int *pcode);
+void g_curve(GLEPcodeList* pclist, int *pcode);
 void g_dbezier(dbl x1,dbl y1,dbl x2,dbl y2,dbl x3,dbl y3);
 void g_dev(double x, double y,double *xd,double *yd);
 void g_devcmd(const char *s);

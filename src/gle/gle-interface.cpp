@@ -1048,7 +1048,7 @@ GLEScript* GLEObjectDOConstructor::getScript() {
 }
 
 void output_error(ParserError& err);
-void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError);
+void eval(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError);
 
 GLEObjectDO* GLEObjectDOConstructor::constructObject() {
 	GLEObjectDO* obj = new GLEObjectDO(this);
@@ -1683,8 +1683,7 @@ void GLEObjectDO::render() {
 		GLEMeasureBox measure;
 		measure.measureStart();
 		g_move(0.0, 0.0);
-		double oval = 0.0;
-		int otyp = 0, cp = 0;
+		int cp = 0;
 		GLEPcodeList pc_list;
 		GLEPcode pcode(&pc_list);
 		pcode.addInt(PCODE_EXPR);    /* Expression follows */
@@ -1708,7 +1707,7 @@ void GLEObjectDO::render() {
 		pcode.addFunction(sub->getIndex() + LOCAL_START_INDEX);
 		pcode.setInt(savelen, pcode.size() - savelen - 1);
 		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-		eval(stk.get(), (int*)&pcode[0], &cp, &oval, NULL, &otyp);
+		evalGeneric(stk.get(), &pc_list, (int*)&pcode[0], &cp);
 		// g_flush() required to make sure that all line segments are output
 		g_flush();
 		measure.measureEnd();

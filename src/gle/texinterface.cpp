@@ -1526,16 +1526,14 @@ void begin_tex(GLERun* run, int *pln, int *pcode, int *cp) {
 	double add = 0.0, x;
 	int ptr = *(pcode + (*cp)); /* add */
 	if (ptr) {
-		int zzcp = 0, otyp;
-		eval(run->getStack(), pcode + (*cp) + ptr, &zzcp, &add, NULL, &otyp);
+		int zzcp = 0;
+		add = evalDouble(run->getStack(), run->getPcodeList(), pcode + (*cp) + ptr, &zzcp);
 	}
 	(*cp) = (*cp) + 1;
 	ptr = *(pcode + (*cp)); /* name */
 	if (ptr) {
-		int zzcp = 0, otyp;
-		GLEString* ostr = NULL;
-		eval(run->getStack(), pcode + (*cp) + ptr, &zzcp, &x, &ostr, &otyp);
-		name = ostr;
+		int zzcp = 0;
+		name = evalString(run->getStack(), run->getPcodeList(), pcode + (*cp) + ptr, &zzcp, true);
 	}
 	// Start with pcode from the next line
 	(*pln)++;

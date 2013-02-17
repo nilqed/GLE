@@ -338,7 +338,7 @@ void DrawIt(GLEScript* script, GLEFileLocation* outfile, CmdLineObj* cmdline, bo
 		output_error(err);
 	}
 	// Create GLERun
-	GLERun* run = new GLERun(script, outfile);
+	GLERun* run = new GLERun(script, outfile, pcode);
 	run->setBlockTypes(parser->getBlockTypes());
 	script->setRun(run);
 	g_GLERun = run;

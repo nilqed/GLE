@@ -82,7 +82,7 @@ void begin_config(const std::string& block, int *pln, int *pcode, int *cp);
 void begin_tex_preamble(int *pln, int *pcode, int *cp);
 void begin_tex(GLERun* run, int *pln, int *pcode, int *cp);
 void begin_surface(int *pln, int *pcode, int *cp) throw(ParserError);
-void begin_letz(int *pln, int *pcode, int *cp) throw(ParserError);
+void begin_letz(int *pln, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError);
 void begin_fitz(int *pln, int *pcode, int *cp) throw(ParserError);
 void begin_contour(int *pln, int *pcode, int *cp) throw(ParserError);
 // void begin_fitls(int *pln, int *pcode, int *cp) throw(ParserError);
@@ -224,11 +224,11 @@ extern int gle_debug;
 int can_fillpath = false;
 vector<int> g_drobj;
 
-#define readval(x) eval(getStack(),pcode,&cp,&x,&ostr,&otyp)
-#define readxy(x,y) {eval(getStack(),pcode,&cp,&x,&ostr,&otyp);eval(getStack(),pcode,&cp,&y,&ostr,&otyp);}
-#define readstr(s) {eval(getStack(),pcode,&cp,&x,&ostr,&otyp); s = ostr->toUTF8();}
+#define readval(x) eval(getStack(),getPcodeList(),pcode,&cp,&x,&ostr,&otyp)
+#define readxy(x,y) {eval(getStack(),getPcodeList(),pcode,&cp,&x,&ostr,&otyp);eval(getStack(),getPcodeList(),pcode,&cp,&y,&ostr,&otyp);}
+#define readstr(s) {eval(getStack(),getPcodeList(),pcode,&cp,&x,&ostr,&otyp); s = ostr->toUTF8();}
 #define readlong(i) i = *(pcode+cp++)
-#define readvalp(x,p) {zzcp=0; eval(getStack(),p,&zzcp,&x,&ostr,&otyp);}
+#define readvalp(x,p) {zzcp=0; eval(getStack(),getPcodeList(),p,&zzcp,&x,&ostr,&otyp);}
 
 #define PCODE_UNKNOWN_COMMAND 1
 
@@ -456,13 +456,14 @@ void handleNewDrawObject(GLEDrawObject* obj, bool mkdrobjs, GLEPoint* orig = NUL
 	}
 }
 
-GLERun::GLERun(GLEScript* script, GLEFileLocation* outfile) {
+GLERun::GLERun(GLEScript* script, GLEFileLocation* outfile, GLEPcodeIndexed* pcode) {
 	m_Script = script;
 	m_OutFile = outfile;
 	m_Vars = getVarsInstance();
 	m_CrObj = new GLEObjectRepresention();
 	m_stack = new GLEArrayImpl();
 	m_blockTypes = 0;
+	m_pcode = pcode;
 	for (int i = 0; i < GLE_KW_NB; i++) {
 		m_AllowBeforeSize[i] = false;
 	}
@@ -506,6 +507,10 @@ GLERun::GLERun(GLEScript* script, GLEFileLocation* outfile) {
 }
 
 GLERun::~GLERun() {
+}
+
+GLEPcodeList* GLERun::getPcodeList() {
+	return m_pcode->getPcodeList();
 }
 
 void GLERun::setDeviceIsOpen(bool open) {
@@ -647,7 +652,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			break;
 		  case 51: /* Assignment  var=exp */
 			readlong(jj);
-			getVars()->set(jj, evalGeneric(getStack(), pcode, &cp));
+			getVars()->set(jj, evalGeneric(getStack(), getPcodeList(), pcode, &cp));
 			break;
 		  case 5:  /* BEGIN box | path | scale | rotate | EXTERNAL */
 			g_flush();
@@ -666,7 +671,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 						path_fill[npath] = g_get_fill_clear();
 					}
 					if (ptr) {
-						path_fill[npath] = evalColor(getStack(), pcode + cp + ptr, 0);
+						path_fill[npath] = evalColor(getStack(), getPcodeList(), pcode + cp + ptr, 0);
 					}
 					cp++;
 					g_set_path(true);
@@ -683,7 +688,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 						}
 						ptr = *(pcode + ++cp);
 						if (ptr) {
-							box->setFill(evalColor(getStack(), pcode + cp + ptr, 0));
+							box->setFill(evalColor(getStack(), getPcodeList(), pcode + cp + ptr, 0));
 						}
 						if (*(pcode + ++cp)) {
 							box->setStroke(false);
@@ -784,7 +789,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					begin_tex_preamble(srclin,pcode,&cp);
 					break;
 				case 25: /* letz */
-					begin_letz(srclin,pcode,&cp);
+					begin_letz(srclin, getPcodeList(), pcode, &cp);
 					break;
 				case 26: /* fitz */
 					begin_fitz(srclin,pcode,&cp);
@@ -844,7 +849,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				}
 				ptr = *(pcode + ++cp);
 				if (ptr) {
-					box.setFill(evalColor(getStack(), pcode + cp + ptr, 0));
+					box.setFill(evalColor(getStack(), getPcodeList(), pcode + cp + ptr, 0));
 				}
 				if (*(pcode + ++cp)) {
 					box.setStroke(false);
@@ -866,7 +871,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			}
 			break;
 		  case 52:  /* CALL or @ */
-			evalGeneric(getStack(), pcode, &cp);
+			evalGeneric(getStack(), getPcodeList(), pcode, &cp);
 			break;
 		  case 8:  /* CIRCLE */
 			readval(r);
@@ -882,7 +887,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			colorBackup = g_get_fill();
 			ptr_fill = *(pcode + cp);
 			if (ptr_fill) {
-				g_set_fill(evalColor(getStack(), pcode + cp + ptr_fill, 0));
+				g_set_fill(evalColor(getStack(), getPcodeList(), pcode + cp + ptr_fill, 0));
 			}
 			if (mkdrobjs) {
 				GLEEllipseDO drawobj(ox, oy, r);
@@ -909,7 +914,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			mask_nostroke = *(pcode + cp++);
 			ptr_fill = *(pcode + cp);
 			if (ptr_fill) {
-				g_set_fill(evalColor(getStack(), pcode + cp + ptr_fill, 0));
+				g_set_fill(evalColor(getStack(), getPcodeList(), pcode + cp + ptr_fill, 0));
 			}
 			if (mkdrobjs) {
 				GLEEllipseDO drawobj(ox, oy, rx, ry);
@@ -969,7 +974,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			g_closepath();
 			break;
 		  case 10: /* CURVE  x y x y ...  change to BEGIN CURVE ... END CURVE */
-			g_curve(pcode+cp);
+			g_curve(getPcodeList(), pcode + cp);
 			break;
 		  case 11: /* DEFINE  MARKER name  subname */
 			break;
@@ -1106,7 +1111,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					readlong(t);
 					if (t!=49) gprint("WRITE, PCODE ERROR, %d  cp %d plen %d\n",t,cp,plen);
 					readlong(t);
-					gstr = evalString(getStack(), pcode, &cp, true);
+					gstr = evalString(getStack(), getPcodeList(), pcode, &cp, true);
 					if (!temp_str.empty()) {
 						temp_str += " ";
 					}
@@ -1198,7 +1203,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			break;
 		  case 22: /* IF EXP */
 		  	{
-		  		bool ifValue = evalBool(getStack(), pcode, &cp);
+		  		bool ifValue = evalBool(getStack(), getPcodeList(), pcode, &cp);
 				readlong(jj);   /* jump to line */
 				readlong(jj2);  /* jump pcode offset */
 				if (!ifValue) {
@@ -1378,7 +1383,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  case 34: /* REGION */
 			break;
 		  case 50: /* RETURN exp */
-			GLE_MC_COPY(&m_returnValue, evalGeneric(getStack(), pcode, &cp));
+			GLE_MC_COPY(&m_returnValue, evalGeneric(getStack(), getPcodeList(), pcode, &cp));
 			readlong(jj);   /* jump to line */
 			*srclin = jj-1;
 			break;
@@ -1443,16 +1448,16 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					g_set_just(both.l);
 					break;
 				  case 4: /* color */
-					g_set_color(evalColor(getStack(), pcode, &cp));
+					g_set_color(evalColor(getStack(), getPcodeList(), pcode, &cp));
 					break;
 				  case OP_SET_BACKGROUND: /* background */
-					g_set_background(evalColor(getStack(), pcode, &cp));
+					g_set_background(evalColor(getStack(), getPcodeList(), pcode, &cp));
 					break;
 				  case OP_SET_FILL: /* fill */
-					g_set_fill(evalColor(getStack(), pcode, &cp));
+					g_set_fill(evalColor(getStack(), getPcodeList(), pcode, &cp));
 					break;
 				  case OP_SET_FILL_PATTERN: /* fill pattern */
-					g_set_fill_pattern(evalColor(getStack(), pcode, &cp));
+					g_set_fill_pattern(evalColor(getStack(), getPcodeList(), pcode, &cp));
 					break;
 				  case 5: /* dashlen */
 					readval(x);
@@ -1595,7 +1600,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			break;
 		  case 48: /* WHILE */
 		    {
-				bool ifValue = evalBool(getStack(), pcode, &cp);
+				bool ifValue = evalBool(getStack(), getPcodeList(), pcode, &cp);
 				readlong(jj);
 				jump_back = false;
 				if (!ifValue) *srclin = jj;
@@ -1611,7 +1616,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					g_throw_parser_error("pcode error in print/write");
 				}
 				readlong(t);
-				gstr = evalString(getStack(), pcode, &cp, true);
+				gstr = evalString(getStack(), getPcodeList(), pcode, &cp, true);
 				if (!temp_str.empty()) {
 					temp_str += " ";
 				}
@@ -2040,7 +2045,7 @@ void GLERun::draw_object_static(const string& path, const string& name, int* pco
 		eval_do_object_block_call(stk.get(), sub, &objdo);
 		handleNewDrawObject(&objdo, mkdrobjs, &orig);
 	} else {
-		evalGeneric(getStack(), pcode, cp);
+		evalGeneric(getStack(), getPcodeList(), pcode, cp);
 	}
 	if (hasoffs) measure.measureEndIgnore();
 	else measure.measureEnd();
@@ -2064,7 +2069,7 @@ void GLERun::draw_object_static(const string& path, const string& name, int* pco
 			g_translate(transl.getX(), transl.getY());
 			*cp = cp_backup;
 			g_move(0.0, 0.0);
-			evalGeneric(getStack(), pcode, cp);
+			evalGeneric(getStack(), getPcodeList(), pcode, cp);
 			g_grestore();
 		} else {
 			/* dummy device, just update bounds */

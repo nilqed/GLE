@@ -106,7 +106,7 @@ void get_from_to_step(TOKENS tk, int ntok, int *curtok, double* from, double* to
 	}
 }
 
-void begin_letz(int *pln, int *pcode, int *cp) throw(ParserError) {
+void begin_letz(int *pln, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError) {
 	// Variables
 	double xmin = 10, xmax = 10, xstep = 1;
 	double ymin = 10, ymax = 10, ystep = 1;
@@ -148,8 +148,10 @@ void begin_letz(int *pln, int *pcode, int *cp) throw(ParserError) {
 	var_findadd("Y", &yvar, &vtype);
 	token_space();
 	/* Polish our equation */
-	int evalcode[400], plen = 0;
-	polish((char*)equation.c_str(),(char *)evalcode, &plen, &vtype);
+	int rtype = 1;
+	GLEPcodeList pc_list;
+	GLEPcode evalPcode(&pc_list);
+	get_global_polish()->polish(equation.c_str(), evalPcode, &rtype);
 	if (get_nb_errors()!=0) {
 		return;
 	}
@@ -162,9 +164,8 @@ void begin_letz(int *pln, int *pcode, int *cp) throw(ParserError) {
 		for (double x=xmin, xi=0; xi<nx; xi++, x+=xstep) {
 			var_set(xvar, x);
 			var_set(yvar, y);
-			int mcp = 0;
-			double value;
-			eval(stk.get(), evalcode, &mcp, &value, NULL, &vtype);
+			int cp = 0;
+			double value = evalDouble(stk.get(), pclist, (int*)&evalPcode[0], &cp);
 			fprintf(fp,"%g ",value);
 		}
 		fprintf(fp,"\n");

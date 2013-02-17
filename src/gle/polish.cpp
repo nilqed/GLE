@@ -370,7 +370,7 @@ void GLEPolish::internalEval(const char *exp, double *x) throw(ParserError) {
 	GLEPcode pcode(&pc_list);
 	internalPolish(exp, pcode, &rtype);
 	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-	*x = evalDouble(stk.get(), (int*)&pcode[0], &cp);
+	*x = evalDouble(stk.get(), &pc_list, (int*)&pcode[0], &cp);
 }
 
 void GLEPolish::internalEvalString(const char* exp, string* str) throw(ParserError) {
@@ -380,7 +380,7 @@ void GLEPolish::internalEvalString(const char* exp, string* str) throw(ParserErr
 	GLEPcode pcode(&pc_list);
 	internalPolish(exp, pcode, &rtype);
 	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-	GLERC<GLEString> result(::evalString(stk.get(), (int*)&pcode[0], &cp, true));
+	GLERC<GLEString> result(::evalString(stk.get(), &pc_list, (int*)&pcode[0], &cp, true));
 	*str = result->toUTF8();
 }
 
@@ -389,7 +389,7 @@ void GLEPolish::eval(GLEArrayImpl* stk, const char *exp, double *x) throw(Parser
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
 	polish(exp, pcode, &rtype);
-	*x = evalDouble(stk, (int*)&pcode[0], &cp);
+	*x = evalDouble(stk, &pc_list, (int*)&pcode[0], &cp);
 }
 
 void GLEPolish::evalString(GLEArrayImpl* stk, const char *exp, string *str, bool allownum) throw(ParserError) {
@@ -398,7 +398,7 @@ void GLEPolish::evalString(GLEArrayImpl* stk, const char *exp, string *str, bool
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
 	polish(exp, pcode, &rtype);
-	GLERC<GLEString> result(::evalString(stk, (int*)&pcode[0], &cp, allownum));
+	GLERC<GLEString> result(::evalString(stk, &pc_list, (int*)&pcode[0], &cp, allownum));
 	*str = result->toUTF8();
 }
 
@@ -408,7 +408,7 @@ GLEMemoryCell* GLEPolish::evalGeneric(GLEArrayImpl* stk, const char *exp) throw(
 	GLEPcodeList pc_list;
 	GLEPcode pcode(&pc_list);
 	polish(exp, pcode, &rtype);
-	return ::evalGeneric(stk, (int*)&pcode[0], &cp);
+	return ::evalGeneric(stk, &pc_list, (int*)&pcode[0], &cp);
 }
 
 bool valid_unquoted_string(const string& str) {
@@ -444,13 +444,13 @@ void polish(char *expr, GLEPcode& pcode, int *rtype) throw(ParserError) {
 void eval_pcode(GLEPcode& pcode, double* x) {
 	int cp = 0;
 	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-	*x = evalDouble(stk.get(), (int*)&pcode[0], &cp);
+	*x = evalDouble(stk.get(), pcode.getPcodeList(), (int*)&pcode[0], &cp);
 }
 
 void eval_pcode_str(GLEPcode& pcode, string& x) {
 	int cp = 0;
 	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-	GLERC<GLEString> result(::evalString(stk.get(), (int*)&pcode[0], &cp, true));
+	GLERC<GLEString> result(::evalString(stk.get(), pcode.getPcodeList(), (int*)&pcode[0], &cp, true));
 	x = result->toUTF8();
 }
 

@@ -39,14 +39,16 @@
 #ifndef __GLE_RUN__
 #define __GLE_RUN__
 
+class GLEPcodeList;
+
 void sub_call(int idx,double *pval,char **pstr,int *npm, int *otyp) throw(ParserError);
 
-void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError);
-GLERC<GLEString> evalString(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOther) throw(ParserError);
-GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
-double evalDouble(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
-bool evalBool(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
-GLERC<GLEColor> evalColor(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
+void eval(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError);
+GLERC<GLEString> evalString(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp, bool allowOther) throw(ParserError);
+GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError);
+double evalDouble(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError);
+bool evalBool(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError);
+GLERC<GLEColor> evalColor(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError);
 GLESub* eval_subroutine_call(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError);
 void eval_do_object_block_call(GLEArrayImpl* stk, GLESub* sub, GLEObjectDO* obj) throw(ParserError);
 
@@ -81,8 +83,9 @@ protected:
 	vector<GLELengthBlock> m_lengthBlocks;
 	bool m_AllowBeforeSize[GLE_KW_NB];
 	GLEMemoryCell m_returnValue;
+	GLEPcodeIndexed* m_pcode;
 public:
-	GLERun(GLEScript* script, GLEFileLocation* outfile);
+	GLERun(GLEScript* script, GLEFileLocation* outfile, GLEPcodeIndexed* pcode);
 	~GLERun();
 	void setBlockTypes(GLEBlocks* blocks);
 	GLEBlocks* getBlockTypes();
@@ -118,6 +121,7 @@ public:
 	inline GLEFileLocation* getOutput() { return m_OutFile; }
 	inline void allowBeforeSize(int which) { m_AllowBeforeSize[which] = true; }
 	inline bool isAllowedBeforeSize(int which) { return m_AllowBeforeSize[which]; }
+	GLEPcodeList* getPcodeList();
 };
 
 GLERun* getGLERunInstance();

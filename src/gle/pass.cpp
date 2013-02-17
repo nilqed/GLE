@@ -60,7 +60,6 @@
 GLEParser* g_parser;
 
 extern GLESubMap g_Subroutines;
-extern int **gpcode;   /* gpcode is a pointer to an array of poiter to int */
 
 void get_cap(TOKENS tk,int *ntok,int *curtok,int *pcode,int *plen);
 void get_join(TOKENS tk,int *ntok,int *curtok,int *pcode,int *plen);
@@ -576,7 +575,6 @@ void GLEParser::gen_subroutine_call_polish_arg(GLESubCallInfo* info, int i, GLEP
 }
 
 void GLEParser::evaluate_subroutine_arguments(GLESubCallInfo* info, GLEArrayImpl* arguments) {
-	// FIXME NEWEVAL
 	GLESub* sub = info->getSub();
 	int np = sub->getNbParam();
 	arguments->resize(np);
@@ -585,22 +583,8 @@ void GLEParser::evaluate_subroutine_arguments(GLESubCallInfo* info, GLEArrayImpl
 	for (int i = 0; i < np; i++) {
 		GLEPcode pcode(&pcodeList);
 		gen_subroutine_call_polish_arg(info, i, pcode);
-		double oval;
-		GLEString* ostr;
 		int cp = 0;
-		int otyp = sub->getParamType(i);
-		::eval(stk.get(), (int*)&pcode[0], &cp, &oval, &ostr, &otyp);
-		if (sub->getParamType(i) == 2) {
-			if (otyp == 1) {
-				ostringstream str_cnv;
-				str_cnv << oval;
-				arguments->setObject(i, new GLEString(str_cnv.str()));
-			} else {
-				arguments->setObject(i, ostr);
-			}
-		} else {
-			arguments->setDouble(i, oval);
-		}
+		arguments->set(i, evalGeneric(stk.get(), &pcodeList, (int*)&pcode[0], &cp));
 	}
 }
 

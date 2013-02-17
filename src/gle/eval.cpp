@@ -976,7 +976,7 @@ void evalDoConstant(GLEArrayImpl* stk, int *pcode, int *cp)
 	stk->setDouble(stk->last(), both.d);
 }
 
-GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
+GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, GLEPcodeList* /*pclist*/, int *pcode, int *cp) throw(ParserError) {
 	int fixed_cp;
 	if (cp == 0) {
 		fixed_cp = 0;
@@ -1000,26 +1000,26 @@ GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserE
 	return stk->get(stk->last() + 1);
 }
 
-double evalDouble(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
-	GLEMemoryCell* mc = evalGeneric(stk, pcode, cp);
+double evalDouble(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError) {
+	GLEMemoryCell* mc = evalGeneric(stk, pclist, pcode, cp);
 	gle_memory_cell_check(mc, GLEObjectTypeDouble);
 	return mc->Entry.DoubleVal;
 }
 
-bool evalBool(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
-	GLEMemoryCell* mc = evalGeneric(stk, pcode, cp);
+bool evalBool(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError) {
+	GLEMemoryCell* mc = evalGeneric(stk, pclist, pcode, cp);
 	gle_memory_cell_check(mc, GLEObjectTypeBool);
 	return mc->Entry.BoolVal;
 }
 
-GLERC<GLEColor> evalColor(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
-	GLEMemoryCell* mc = evalGeneric(stk, pcode, cp);
+GLERC<GLEColor> evalColor(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError) {
+	GLEMemoryCell* mc = evalGeneric(stk, pclist, pcode, cp);
 	return memory_cell_to_color(get_global_polish(), stk, mc, g_get_throws_error(), 0);
 }
 
-GLERC<GLEString> evalString(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOther) throw(ParserError) {
+GLERC<GLEString> evalString(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp, bool allowOther) throw(ParserError) {
 	GLERC<GLEString> result;
-	GLEMemoryCell* mc = evalGeneric(stk, pcode, cp);
+	GLEMemoryCell* mc = evalGeneric(stk, pclist, pcode, cp);
 	int type = gle_memory_cell_type(mc);
 	if (type == GLEObjectTypeString) {
 		result = (GLEString*)mc->Entry.ObjectVal;
@@ -1035,11 +1035,11 @@ GLERC<GLEString> evalString(GLEArrayImpl* stk, int *pcode, int *cp, bool allowOt
 	return result;
 }
 
-void eval(GLEArrayImpl* stk, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError) {
+void eval(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError) {
 	if (ostr != 0) {
 		*ostr = 0;
 	}
-	GLEMemoryCell* mc = evalGeneric(stk, pcode, cp);
+	GLEMemoryCell* mc = evalGeneric(stk, pclist, pcode, cp);
 	int type = gle_memory_cell_type(mc);
 	if (type == GLEObjectTypeString) {
 		*otyp = 2;

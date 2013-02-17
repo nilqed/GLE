@@ -44,16 +44,15 @@
 #include "run.h"
 
 int ncvec=0;
-void cvec_list(int *pcode);
+void cvec_list(GLEPcodeList* pclist, int *pcode);
 double cvecx[30],cvecy[30];
 double dcvecx[30],dcvecy[30];
 void rbezier(double x1, double y1, double x2, double y2, double x3, double y3);
 
-void g_curve(int *pcode) {
+void g_curve(GLEPcodeList* pclist, int *pcode) {
 	double dx1,dy1;
-
 	ncvec = 0;
-	cvec_list(pcode);
+	cvec_list(pclist, pcode);
 	dx1 = cvecx[1] - cvecx[0];
 	dy1 = cvecy[1] - cvecy[0];
 	dcvecx[0] = cvecx[ncvec] - cvecx[ncvec-1];
@@ -82,9 +81,9 @@ void rbezier(double x1, double y1, double x2, double y2, double x3, double y3) {
 	g_bezier(x1+cx, y1+cy, x3-x2, y3-y2, x3, y3);
 }
 
-void cvec_list(int *pcode) {
-	int cp=0,otyp;
-	double cx,cy,x1,y1;
+void cvec_list(GLEPcodeList* pclist, int *pcode) {
+	int cp=0;
+	double cx,cy;
 	g_get_xy(&cx,&cy);
 	ncvec = 0;
 	cvecx[0] = cx;
@@ -92,8 +91,8 @@ void cvec_list(int *pcode) {
 	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 	while ( *(pcode + cp++)==111) {
 		if (ncvec>27) {gprint("Too many param in curve\n"); return; }
-		eval(stk.get(),pcode,&cp,&x1,NULL,&otyp);
-		eval(stk.get(),pcode,&cp,&y1,NULL,&otyp);
+		double x1 = evalDouble(stk.get(), pclist, pcode, &cp);
+		double y1 = evalDouble(stk.get(), pclist, pcode, &cp);
 		cvecx[++ncvec] = x1;
 		cvecx[ncvec] = cvecx[ncvec] + cvecx[ncvec-1];
 		cvecy[ncvec] = y1;
