@@ -58,6 +58,22 @@ sub polar fct$ from to tstep color$ fill$ lwidth
    grestore
 end sub
 
+sub polar_segment fct$ from to tstep color$ lwidth
+   default tstep  0.025
+   default color  black
+   default lwidth 0.02
+   t = from
+   r = eval(fct$)
+   gsave
+   set color color$ lwidth lwidth
+   amove xg(r*cos(t)) yg(r*sin(t))
+   for t = from+tstep to to step tstep
+      r = eval(fct$)
+      aline xg(r*cos(t)) yg(r*sin(t))
+   next t
+   grestore
+end sub
+
 sub polar_data ds$ color$ fill$ lwidth type$ 
    default color  black
    default fill   clear
