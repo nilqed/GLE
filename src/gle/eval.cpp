@@ -913,7 +913,7 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 				pass address of variables if possible
 				*/
 				GLESub* sub = sub_get(*(pcode + c) - LOCAL_START_INDEX);
-				getGLERunInstance()->sub_call(sub, stk, stk->size());
+				getGLERunInstance()->sub_call_stack(sub, stk);
 			} else {
 				g_throw_parser_error("unrecognized byte code expression");
 			}
@@ -962,8 +962,7 @@ void eval_do_object_block_call(GLEArrayImpl* stk, GLESub* sub, GLEObjectDO* obj)
 			arr->setObject(i, str_i);
 		}
 	}
-	getGLERunInstance()->sub_call(sub, stk, stk->last());
-	stk->decrementSize(sub->getNbParam() - 1);
+	getGLERunInstance()->sub_call_stack(sub, stk);
 }
 
 void evalDoConstant(GLEArrayImpl* stk, int *pcode, int *cp)

@@ -364,8 +364,15 @@ GLESub* sub_get(int idx) throw(ParserError) {
 
 extern int this_line;
 
+/*
+int pos = --npm;
+std::cerr << "param: " << i << " from stack pos: " << pos << " = ";
+gle_memory_cell_print(stk->get(pos), std::cerr);
+std::cerr << std::endl;
+*/
+
 /* 	Run a user defined function  */
-void GLERun::sub_call(GLESub* sub, GLEArrayImpl* stk, int npm) throw(ParserError) {
+void GLERun::sub_call_stack(GLESub* sub, GLEArrayImpl* stk) throw(ParserError) {
 	// Save current return value
 	GLEMemoryCell save_return_value;
 	GLE_MC_INIT(save_return_value);
@@ -375,9 +382,9 @@ void GLERun::sub_call(GLESub* sub, GLEArrayImpl* stk, int npm) throw(ParserError
 	GLEVarMap* save_var_map = var_swap_local_map(sub_map);
 	var_alloc_local(sub_map);
 	// Copy parameters to local variables
+	int npm = stk->size();
 	for (int i = sub->getNbParam()-1; i >= 0; i--) {
-		int var = i | GLE_VAR_LOCAL_BIT;
-		getVars()->set(var, stk->get(--npm));
+		getVars()->set(i | GLE_VAR_LOCAL_BIT, stk->get(--npm));
 	}
 	// Run subroutine
 	int endp = 0;
@@ -409,9 +416,8 @@ void GLERun::sub_call(GLESub* sub, GLEArrayImpl* arguments) throw(ParserError) {
 	// Copy parameters to local variables
 	if (arguments != 0) {
 		CUtilsAssert(sub->getNbParam() == (int)arguments->size());
-		for (int i = sub->getNbParam()-1; i >= 0; i--) {
-			int var = i | GLE_VAR_LOCAL_BIT;
-			getVars()->set(var, arguments->get(i));
+		for (int i = 0; i < sub->getNbParam(); ++i) {
+			getVars()->set(i | GLE_VAR_LOCAL_BIT, arguments->get(i));
 		}
 	}
 	// Run subroutine

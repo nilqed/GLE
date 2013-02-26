@@ -3890,9 +3890,9 @@ void GLEColorMapBitmap::updateScanLine(int* pos, double zvalue) {
 		m_scanLine[(*pos)++] = m_pal[color*3+2];
 	} else if (m_map->hasPalette()) {
 		GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
-		setEvalStack(stk.get(), 1, zvalue);
-		getGLERunInstance()->sub_call(m_sub, stk.get(), 1);
-		GLEColor* color = getEvalStackColor(stk.get(), 1);
+		setEvalStack(stk.get(), 0, zvalue);
+		getGLERunInstance()->sub_call_stack(m_sub, stk.get());
+		GLEColor* color = getEvalStackColor(stk.get(), 0);
 		m_scanLine[(*pos)++] = color->getRedI();
 		m_scanLine[(*pos)++] = color->getGreenI();
 		m_scanLine[(*pos)++] = color->getBlueI();

@@ -1890,10 +1890,10 @@ void g_marker2(int i, double sz, double dval) throw(ParserError) {
 				g_throw_parser_error(err.str());
 			}
 		}
-		setEvalStack(stk.get(), 1, sz);
-		setEvalStack(stk.get(), 2, dval);
+		setEvalStack(stk.get(), 0, sz);
+		setEvalStack(stk.get(), 1, dval);
 		g_get_xy(&cx,&cy);
-		getGLERunInstance()->sub_call(sub_get(mark_subp[i]), stk.get(), 2);
+		getGLERunInstance()->sub_call(sub_get(mark_subp[i]), stk.get());
 		g_move(cx,cy);
 		return;
 	}

@@ -98,7 +98,7 @@ public:
 	void draw_object_dynamic(int idx, GLEObjectRepresention* newobj, GLEArrayImpl* path, GLEPoint* orig) throw (ParserError);
 	void draw_object(const string& name, const char* newname) throw (ParserError);
 	void sub_call(GLESub* sub, GLEArrayImpl* arguments = 0) throw(ParserError);
-	void sub_call(GLESub* sub, GLEArrayImpl* stk, int npm) throw(ParserError);
+	void sub_call_stack(GLESub* sub, GLEArrayImpl* stk) throw(ParserError);
 	void name_set(GLEString* name, double x1, double y1, double x2, double y2);
 	static GLEObjectRepresention* name_to_object(GLEObjectRepresention* obj, GLEArrayImpl* path, GLEJustify* just, unsigned int offs) throw (ParserError);
 	GLEObjectRepresention* name_to_object(GLEString* name, GLEJustify* just) throw(ParserError);
