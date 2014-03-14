@@ -1675,12 +1675,13 @@ void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (Pars
 		g_endclip();
 		g_grestore();
 	}
-	draw_key_after_measure(keyinfo);
 
-	g_move(ox,oy);
 	g_grestore();
 	g_init_bounds();
 	g_set_bounds(&box);
+
+	draw_key_after_measure(keyinfo);
+	g_move(ox,oy);
 	return;
 }
 
