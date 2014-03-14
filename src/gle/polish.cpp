@@ -516,10 +516,10 @@ void GLEPcode::addColor(GLEColor* color) {
 	addInt(PCODE_EXPR);
 	int savelen = size(); /* Used to set acutal length at end */
 	addInt(0);	          /* Length of expression */
-	addDoubleExpression(color->getRed());
-	addDoubleExpression(color->getGreen());
-	addDoubleExpression(color->getBlue());
-	addFunction(FN_RGB + FN_BUILTIN_MAGIC);
+	addInt(PCODE_OBJECT);
+	int pos = getPcodeList()->size();
+	getPcodeList()->push_back(color);
+	addInt(pos);
 	setInt(savelen, size() - savelen - 1);
 }
 
@@ -665,4 +665,10 @@ double GLEFunctionParserPcode::evalDouble() {
 	double value;
 	eval_pcode(m_Pcode, &value);
 	return value;
+}
+
+bool GLEFunctionParserPcode::evalBool() {
+	int cp = 0;
+	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
+	return ::evalBool(stk.get(), m_Pcode.getPcodeList(), (int*)&m_Pcode[0], &cp);
 }

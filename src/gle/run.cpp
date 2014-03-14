@@ -2034,7 +2034,7 @@ void GLERun::draw_object_static(const string& path, const string& name, int* pco
 	g_move(0.0, 0.0);
 	GLERC<GLEArrayImpl> stk(new GLEArrayImpl());
 	if (mkdrobjs) {
-		GLESub* sub = eval_subroutine_call(stk.get(), pcode, cp);
+		GLESub* sub = eval_subroutine_call(stk.get(), getPcodeList(), pcode, cp);
 		sub->setScript(getScript());
 		GLEObjectDOConstructor* cons = sub->getObjectDOConstructor();
 		GLEObjectDO objdo(cons);

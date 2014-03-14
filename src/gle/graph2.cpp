@@ -1931,12 +1931,12 @@ void DataFill::addPoint(double x) {
 			return;
 		}
 		if (m_Where != NULL) {
-			double wval = m_Where->evalDouble();
-			if (m_CrEnable && wval == 0.0) {
+			bool wval = m_Where->evalBool();
+			if (m_CrEnable && !wval) {
 				// disable from now on -> emit missing value
 				addMissingLR(x, lr);
 			}
-			m_CrEnable = (wval != 0.0);
+			m_CrEnable = wval;
 		}
 		if (m_CrEnable) addPoint();
 		if (more) {
@@ -2046,14 +2046,14 @@ void DataFill::addPointIPol(double x) {
 			return;
 		}
 		if (m_Where != NULL) {
-			double wval = m_Where->evalDouble();
-			if (m_CrEnable && wval == 0.0) {
+			bool wval = m_Where->evalBool();
+			if (m_CrEnable && !wval) {
 				// disable from now on -> emit missing value
 				addMissingLR(x, lr);
 				m_PrevPoint = false;
 				m_PrevInvalid = false;
 			}
-			m_CrEnable = (wval != 0.0);
+			m_CrEnable = wval;
 		}
 		if (m_CrEnable) {
 			if (m_FineTune) {
@@ -2510,7 +2510,7 @@ void GLELet::transformIdenticalRangeDatasets(GLEVectorAutoDelete<GLELetDataSet>&
 			// this method sets the x value and computes the values for all dimensions
 			fill->selectXValueNoIPol(ds0Pairs.getX(j));
 			if (!m_Where.isNull()) {
-				if (m_Where->evalDouble() != 0.0) {
+				if (m_Where->evalBool()) {
 					fill->addPoint();
 				} else {
 					fill->addMissing();
@@ -2606,7 +2606,7 @@ void GLELet::doLet() throw(ParserError) {
 	vars->setNameMode(nameMode::DETECT);
 	fill.selectXValueNoIPol(0.0);
 	if (!m_Where.isNull()) {
-		m_Where->evalDouble();
+		m_Where->evalBool();
 	}
 	vars->setNameMode(nameMode::RETRIEVE);
 	/* Find data set variables */

@@ -835,7 +835,7 @@ void do_colormap(int& ct) {
 		else kw("INTERPOLATE") {
 			string tmp;
 			next_str_cpp(tmp);
-			IpolType ipolType;
+			IpolType ipolType(IPOL_TYPE_BICUBIC);
 			if (str_i_equals(tmp, "BICUBIC")) {
 				ipolType = IPOL_TYPE_BICUBIC;
 			} else if (str_i_equals(tmp, "NEAREST")) {

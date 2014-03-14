@@ -44,7 +44,7 @@
 #define PCODE_VAR 3
 #define PCODE_STRVAR 4
 #define PCODE_STRING 5
-#define PCODE_MORE 6
+#define PCODE_OBJECT 6
 #define PCODE_NEXT_CMD 7
 
 class GLESub;
@@ -81,8 +81,13 @@ char* getEvalStackString(GLEArrayImpl* stk, int pos);
 GLEColor* getEvalStackColor(GLEArrayImpl* stk, int pos);
 
 class GLEPcodeList : public RefCountObject {
+public:
+	inline int size() const { return m_ConstObjects.size(); }
+	inline GLEDataObject* get(int i) { return m_ConstObjects[i].get(); }
+	inline void push_back(GLEDataObject* obj) { m_ConstObjects.push_back(obj); }
+
 protected:
-	RefCountVector<GLEObject> m_ConstObjects;
+	RefCountVector<GLEDataObject> m_ConstObjects;
 };
 
 class GLEPcode : public vector<int> {
@@ -132,6 +137,7 @@ public:
 	void polishPos(const char* fct, int pos, StringIntHash* vars = NULL) throw(ParserError);
 	void polishX() throw(ParserError);
 	double evalDouble();
+	bool evalBool();
 	inline GLEPcode* getCode() { return &m_Pcode; }
 };
 

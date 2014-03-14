@@ -363,7 +363,7 @@ void eval_binary_operator(GLEArrayImpl* stk, int op) {
 	stk->decrementSize(1);
 }
 
-void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError) {
+void eval_pcode_loop(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int plen) throw(ParserError) {
 	if (plen > 1000) {
 		gprint("Expression is suspiciously long %d \n",plen);
 	}
@@ -379,27 +379,32 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 		Special commands 1..9  -------------------------------
 		..
 		*/
-		case 1:	/* Start of another expression (function param) */
+		case PCODE_EXPR:	/* Start of another expression (function param) */
 			c++;	/* skip over exp length */
 			break;
-		case 2: /* Floating point number follows */
+		case PCODE_DOUBLE: /* Floating point number follows */
 			both.l[0] = *(pcode+(++c));
 			both.l[1] = *(pcode+(++c));
 			stk->incrementSize(1);
 			setEvalStack(stk, stk->last(), both.d);
  			dbg gprint("Got float %f %d %f \n",getEvalStackDouble(stk, stk->last()),stk->last(),*(pcode+(c)));
 			break;
-		case 3: /* Floating_point variable number follows */
-		case 4: /* string variable number follows */
+		case PCODE_VAR: /* Floating_point variable number follows */
+		case PCODE_STRVAR: /* string variable number follows */
 			i = *(pcode + (++c));
 			stk->incrementSize(1);
 			stk->ensure(stk->size());
 			getVarsInstance()->get(i, stk->get(stk->last()));
 			break;
-		case 5: /* Null terminated string follows (int alligned) */
+		case PCODE_STRING: /* Null terminated string follows (int alligned) */
 			c++;
 			stk->incrementSize(1);
 			setEvalStack(stk, stk->last(), eval_str(pcode, &c));
+			break;
+		case PCODE_OBJECT:
+			i = *(pcode+(++c));
+			stk->incrementSize(1);
+			setEvalStack(stk, stk->last(), pclist->get(i));
 			break;
 		/*
 			Binary operators 10..29 -----------------------
@@ -922,14 +927,14 @@ void eval_pcode_loop(GLEArrayImpl* stk, int *pcode, int plen) throw(ParserError)
 	}
 }
 
-GLESub* eval_subroutine_call(GLEArrayImpl* stk, int *pcode, int *cp) throw(ParserError) {
+GLESub* eval_subroutine_call(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError) {
 	if (*(pcode+(*cp)++) != 1) {
 		(*cp)--;
 		gprint("PCODE, Expecting expression, v=%ld cp=%d \n", *(pcode + (*cp)), *cp);
 		return NULL;
 	}
 	int plen = pcode[(*cp)++];
-	eval_pcode_loop(stk, pcode + (*cp), plen-1);
+	eval_pcode_loop(stk, pclist, pcode + (*cp), plen-1);
 	int sub_code = pcode[(*cp) + plen - 1];
 	GLESub* result = NULL;
 	if (sub_code >= LOCAL_START_INDEX) {
@@ -975,7 +980,7 @@ void evalDoConstant(GLEArrayImpl* stk, int *pcode, int *cp)
 	stk->setDouble(stk->last(), both.d);
 }
 
-GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, GLEPcodeList* /*pclist*/, int *pcode, int *cp) throw(ParserError) {
+GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError) {
 	int fixed_cp;
 	if (cp == 0) {
 		fixed_cp = 0;
@@ -989,7 +994,7 @@ GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, GLEPcodeList* /*pclist*/, int *pco
 			g_throw_parser_error("pcode error: expected expression");
 		}
 		int plen = pcode[(*cp)++];
-		eval_pcode_loop(stk, pcode + (*cp), plen);
+		eval_pcode_loop(stk, pclist, pcode + (*cp), plen);
 		*cp = *cp + plen;
 	}
 	if (stk->size() < 1) {

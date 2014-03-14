@@ -1523,7 +1523,7 @@ void begin_tex_preamble(int *pln, int *pcode, int *cp) {
 void begin_tex(GLERun* run, int *pln, int *pcode, int *cp) {
 	// Get optional params
 	GLERC<GLEString> name;
-	double add = 0.0, x;
+	double add = 0.0;
 	int ptr = *(pcode + (*cp)); /* add */
 	if (ptr) {
 		int zzcp = 0;
