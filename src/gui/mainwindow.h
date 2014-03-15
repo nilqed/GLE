@@ -539,6 +539,7 @@ public:
 	void updateEnableActions(bool enable);
 
 	void executeToDos();
+	void addFilesToMonitor();
 
 	//! Show console window if there is output
 	void shouldAutoShowConsole();

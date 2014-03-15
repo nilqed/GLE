@@ -1583,7 +1583,21 @@ void GLEMainWindow::renderComplete(QImage image)
 
 	updateWindowTitle();
 
+	addFilesToMonitor();
 	executeToDos();
+}
+
+void GLEMainWindow::addFilesToMonitor()
+{
+	GLEFileInfo* currFile = getCurrentFile();
+	currFile->clearFilesToMonitor();
+	GLEInterface* iface = getGLEInterface();
+	vector<GLEFileLocation> infos = iface->getFileInfos();
+	for (unsigned int i = 0; i < infos.size(); i++) {
+		GLEFileLocation& info = infos[i];
+		QString fullpath = QString::fromUtf8(info.getFullPath().c_str());
+		currFile->addFileToMonitor(fullpath);
+	}
 }
 
 //! Execute this after opening a file

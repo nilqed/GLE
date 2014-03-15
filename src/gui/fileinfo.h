@@ -24,6 +24,13 @@
 
 #include <QtGui>
 
+class GLEFileData
+{
+public:
+	QString fname;
+	QDateTime lastModified;
+};
+
 //! Class used to describe the open file
 class GLEFileInfo
 {
@@ -40,6 +47,8 @@ private:
 	QDateTime lastModified;
 	//! Flag noting whether we have a file name
 	bool hasFileNameFlag;
+	//! Additional files to monitor
+	QList<GLEFileData> filesToMonitor;
 
 public:
 	//! Constructor: initialise variables
@@ -81,6 +90,8 @@ public:
 	void clear();
 	//! Copy relevant information from other GLEFileInfo object
 	void copyFrom(GLEFileInfo* other);
+	void clearFilesToMonitor();
+	void addFileToMonitor(const QString& str);
 };
 
 #endif

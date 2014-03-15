@@ -104,28 +104,40 @@ bool GLEFileInfo::isEPS()
 bool GLEFileInfo::hasChanged()
 {
 	QFileInfo fi;
-	QDateTime modifiedTime;
-	QString mainFile = primaryFile();
-	if (mainFile.isEmpty())
-	{
-		// cout << "main file is empty" << endl;
+	QString mainFile(primaryFile());
+	if (mainFile.isEmpty())	{
 		return false;
 	}
-
 	fi.setFile(mainFile);
-
-	if (!fi.isReadable())
-	{
-		// cout << "main file not readable: " << mainFile.toUtf8().data() << endl;
+	if (!fi.isReadable()) {
 		return false;
 	}
-
-	modifiedTime = fi.lastModified();
-
-	if (modifiedTime > lastModified)
+	QDateTime modifiedTime(fi.lastModified());
+	if (modifiedTime > lastModified) {
 		return true;
-	else
+	} else {
+		for (int i = 0; i < filesToMonitor.size(); ++i) {
+			GLEFileData data(filesToMonitor.at(i));
+			fi.setFile(data.fname);
+			if (fi.isReadable() && fi.lastModified() > data.lastModified) {
+				return true;
+			}
+		}
 		return false;
+	}
 }
 
+void GLEFileInfo::clearFilesToMonitor()
+{
+	filesToMonitor.clear();
+}
 
+void GLEFileInfo::addFileToMonitor(const QString& str)
+{
+	QFileInfo fi;
+	GLEFileData data;
+	fi.setFile(str);
+	data.fname = str;
+	data.lastModified = fi.lastModified();
+	filesToMonitor.append(data);
+}
