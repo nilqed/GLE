@@ -301,7 +301,7 @@ void DrawIt(GLEScript* script, GLEFileLocation* outfile, CmdLineObj* cmdline, bo
 			parser->setString(code->getCodeCStr());
 			try {
 				parser->passt(*code, *pcode);
-			} catch (ParserError err) {
+			} catch (ParserError& err) {
 				output_error(err);
 			}
 			bool add_pcode = true;
@@ -334,7 +334,7 @@ void DrawIt(GLEScript* script, GLEFileLocation* outfile, CmdLineObj* cmdline, bo
 			gplen[i+1] = pcode->getSize(i);
 			gpcode[i+1] = &(*pcode)[0] + pcode->getIndex(i);
 		}
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		output_error(err);
 	}
 	// Create GLERun
@@ -367,7 +367,7 @@ void DrawIt(GLEScript* script, GLEFileLocation* outfile, CmdLineObj* cmdline, bo
 			GLESourceLine* code = glecode->getLine(i-1);
 			run->do_pcode(*code,&i,gpcode[i],gplen[i],&endp,mkdrobjs);
 		}
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		output_error(err);
 	}
 	if (!gle_is_open()) {

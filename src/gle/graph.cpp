@@ -1542,6 +1542,14 @@ void prepare_graph_key_and_clip(double ox, double oy, KeyInfo* keyinfo) {
 	}
 }
 
+void key_update_bounds(double ox, double oy, KeyInfo* keyinfo) {
+	if (!keyinfo->hasHei()) keyinfo->setHei(g_fontsz);
+	measure_key(keyinfo);
+	if (keyinfo->getNbEntries() > 0 && !keyinfo->isDisabled()) {
+		g_update_bounds(keyinfo->getRect());
+	}
+}
+
 void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (ParserError) {
 	GLERectangle box;
 	double ox,oy;
@@ -1609,6 +1617,7 @@ void draw_graph(KeyInfo* keyinfo, GLEGraphBlockInstance* graphBlock) throw (Pars
 		measure.measureStart();
 		graphBlock->getAxis()->setBox(&dummy);
 		graphBlock->getAxis()->drawLayer(GLE_GRAPH_LAYER_UNDEFINED);
+		key_update_bounds(ox, oy, keyinfo);
 		measure.measureEnd();
 		g_restore_device(old_device);
 		if (g_auto_s_h) {

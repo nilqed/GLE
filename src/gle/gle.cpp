@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
 
 		/* Process optional arguments */
 		process_option_args(g_CmdLine, g_Options);
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		ostringstream err_str;
 		err_str << "Error: ";
 		err.write(err_str);
@@ -1281,7 +1281,7 @@ void load_one_file(const char* name, CmdLineObj& cmdline, size_t* exit_code) {
 	try {
 		GLERC<GLEScript> script = load_gle_code_sub(name, cmdline);
 		load_one_file_sub(script.get(), cmdline, exit_code);
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		string err_str;
 		err.toString(err_str);
 		str_uppercase_initial_capital(err_str);
@@ -1294,7 +1294,7 @@ void load_one_file_stdin(CmdLineObj& cmdline, size_t* exit_code) {
 	try {
 		GLERC<GLEScript> script = load_gle_code_sub_stdin(cmdline);
 		load_one_file_sub(script.get(), cmdline, exit_code);
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		string err_str;
 		err.toString(err_str);
 		str_uppercase_initial_capital(err_str);

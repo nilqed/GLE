@@ -127,7 +127,7 @@ void GLEPolish::get_params(GLEPcode& pcode, int np, int* plist, const string& na
 void GLEPolish::polish(const char *expr, GLEPcode& pcode, int *rtype) throw(ParserError) {
 	try {
 		internalPolish(expr, pcode, rtype);
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		err.setParserString(expr);
 		throw err;
 	}
@@ -650,7 +650,7 @@ void GLEFunctionParserPcode::polishPos(const char* fct, int pos, StringIntHash* 
 			polish->setExprVars(vars);
 			polish->internalPolish(fct, m_Pcode, &rtype);
 			polish->setExprVars(NULL);
-		} catch (ParserError err) {
+		} catch (ParserError& err) {
 			err.incColumn(pos-1);
 			throw err;
 		}

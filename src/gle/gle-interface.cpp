@@ -195,7 +195,7 @@ bool GLEInterface::initializeGLE(const char* appname, int argc, char **argv) {
 		init_config(&g_Config);
 		init_option_args(g_CmdLine);
 		return do_load_config(appname, argv, g_CmdLine, g_Config);
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		string err_str;
 		err.toString(err_str);
 		str_uppercase_initial_capital(err_str);
@@ -242,7 +242,7 @@ GLERC<GLEScript> GLEInterface::newGLEFile(const char* glecode, const char* tmpfi
 		}
 		file->trim(1);
 		script->getSource()->initFromMain();
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		string err_str;
 		err.toString(err_str);
 		str_uppercase_initial_capital(err_str);
@@ -256,7 +256,7 @@ GLERC<GLEScript> GLEInterface::loadGLEFile(const char* glefile) {
 		if (m_FileInfoMap != NULL) m_FileInfoMap->clear();
 		g_set_compatibility(GLE_COMPAT_MOST_RECENT);
 		return load_gle_code_sub(glefile, g_CmdLine);
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		string err_str;
 		err.toString(err_str);
 		str_uppercase_initial_capital(err_str);
@@ -316,7 +316,7 @@ void GLEInterface::renderGLE(GLEScript* script, const char* outfile, int device,
 		if (isMakeDrawObjects()) script->clear();
 		load_one_file_sub(script, g_CmdLine, &exit_code);
 		m_Output->setExitCode(get_nb_errors());
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		string err_str;
 		err.toString(err_str);
 		str_uppercase_initial_capital(err_str);
@@ -401,7 +401,7 @@ void GLEInterface::commitChangesGLE(GLEScript* script) {
 		g_restore_device(old_device);
 		setMakeDrawObjects(false);
 		setCommitMode(false);
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		string err_str;
 		err.toString(err_str);
 		str_uppercase_initial_capital(err_str);
@@ -730,7 +730,7 @@ void GLEInterface::evalString(const char* str, GLEScript* script) {
 		polish.evalString(stk.get(), str, &value, true);
 		g_message_first_newline(false);
 		g_message(value);
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		output_error(err);
 	}
 }
@@ -1719,7 +1719,7 @@ void GLEObjectDO::render() {
 		// Return the resulting PostScript code
 		dev->getRecordedBytes(getPostScriptPtr());
 		saved_state.restore();
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		newobj->getRectangle()->setXMin(-1.0);
 		output_error(err);
 	}
@@ -1741,7 +1741,7 @@ void GLEObjectDO::computeReferencePoint(GLEPoint* pt) {
 		} else {
 			pt->setXY(0, 0);
 		}
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		output_error(err);
 	}
 }

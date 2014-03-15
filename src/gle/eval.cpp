@@ -1115,7 +1115,7 @@ void gle_as_a_calculator_eval(GLEPolish& polish, const string& line) {
 		string value;
 		polish.evalString(stk.get(), line.c_str(), &value, true);
 		cout << "  " << value << endl;
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		// do not use the gprint version as no GLE file is "active"
 		output_error_cerr(err);
 	}

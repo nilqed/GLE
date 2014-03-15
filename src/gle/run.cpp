@@ -302,7 +302,7 @@ bool tryHandleChangedPropertiesPrevSet(GLEGlobalSource* source, vector<GLEProper
 				ss << " " << set_opt << " " << set_value;
 			}
 		}
-	} catch (ParserError err) {
+	} catch (ParserError& err) {
 		return false;
 	}
 	for (vector<GLEProperty*>::size_type i = 0; i < changed.size(); i++) {
