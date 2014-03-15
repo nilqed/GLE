@@ -43,7 +43,7 @@ class GLEPcodeList;
 
 void sub_call(int idx,double *pval,char **pstr,int *npm, int *otyp) throw(ParserError);
 
-void eval(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError);
+GLEString* evalStringPtr(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError);
 GLERC<GLEString> evalString(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp, bool allowOther) throw(ParserError);
 GLEMemoryCell* evalGeneric(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError);
 double evalDouble(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError);

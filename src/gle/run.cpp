@@ -224,11 +224,12 @@ extern int gle_debug;
 int can_fillpath = false;
 vector<int> g_drobj;
 
-#define readval(x) eval(getStack(),getPcodeList(),pcode,&cp,&x,&ostr,&otyp)
-#define readxy(x,y) {eval(getStack(),getPcodeList(),pcode,&cp,&x,&ostr,&otyp);eval(getStack(),getPcodeList(),pcode,&cp,&y,&ostr,&otyp);}
-#define readstr(s) {eval(getStack(),getPcodeList(),pcode,&cp,&x,&ostr,&otyp); s = ostr->toUTF8();}
+#define readval(x) x=evalDouble(getStack(),getPcodeList(),pcode,&cp)
+#define readxy(x,y) {x=evalDouble(getStack(),getPcodeList(),pcode,&cp); y=evalDouble(getStack(),getPcodeList(),pcode,&cp);}
+#define readstr(s) {ostr=evalStringPtr(getStack(),getPcodeList(),pcode,&cp); s=ostr->toUTF8();}
 #define readlong(i) i = *(pcode+cp++)
-#define readvalp(x,p) {zzcp=0; eval(getStack(),getPcodeList(),p,&zzcp,&x,&ostr,&otyp);}
+#define readvalp(x,p) {zzcp=0; x=evalDouble(getStack(),getPcodeList(),p,&zzcp);}
+#define readstrp(p) {zzcp=0; ostr=evalStringPtr(getStack(),getPcodeList(),p,&zzcp);}
 
 #define PCODE_UNKNOWN_COMMAND 1
 
@@ -530,7 +531,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 /* pcode =  a pointer to the pcode output buffer */
 /* plne =   a pointer to the length of the pcode output */
 	union {double d; int l; int ll[2];} both;
-	int otyp,cp=*pend,i,zzcp;
+	int cp=*pend,i,zzcp;
 	GLEString* ostr;
 	GLERC<GLEString> gstr;
 	string temp_str;
@@ -700,7 +701,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 						}
 						ptr = *(pcode + ++cp);
 						if (ptr) {
-							readvalp(z,pcode+cp+ptr);
+							readstrp(pcode+cp+ptr);
 							box->setName(ostr);
 						}
 						if (box->isFilled() && !g_is_dummy_device()) {
@@ -741,8 +742,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					{
 						GLEStoredBox* box = box_start();
 						box->setStroke(false);
-						readval(z);
-						box->setName(ostr);
+						box->setName(evalStringPtr(getStack(), getPcodeList(), pcode, &cp));
 						ptr = *(pcode + cp);
 						if (ptr) {
 							readvalp(z, pcode+cp+ptr);
@@ -782,7 +782,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					g_move(0.0,0.0);
 					break;
 				case 22: /* config */
-					readval(z);
+					ostr = evalStringPtr(getStack(), getPcodeList(), pcode, &cp);
 					begin_config(ostr->toUTF8(), srclin, pcode, &cp);
 					break;
 				case 23: /* tex preamble */
@@ -812,7 +812,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 							done_open = true;
 						}
 						readlong(jj);
-						readval(z);
+						ostr = evalStringPtr(getStack(), getPcodeList(), pcode, &cp);
 						begin_object(ostr->toUTF8(), getSubroutines()->get(jj));
 					} else {
 						/* statical object - identical to sub */
@@ -864,7 +864,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				}
 				ptr = *(pcode + ++cp);
 				if (ptr) {
-					readvalp(z,pcode+cp+ptr);
+					readstrp(pcode+cp+ptr);
 					box.setName(ostr);
 				}
 				box.draw(this, ox, oy, x, y);
@@ -979,7 +979,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  case 11: /* DEFINE  MARKER name  subname */
 			break;
 		  case 12: /* DFONT */
-			readval(x);
+			ostr = evalStringPtr(getStack(), getPcodeList(), pcode, &cp);
 			g_dfont(ostr->toUTF8());
 			break;
 		  case 14: /* END */
@@ -1141,11 +1141,11 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				if (chn == -1) break;
 				GLEFile* file = g_Files[chn];
 				file->resetLang();
-				readval(x);
+				ostr = evalStringPtr(getStack(), getPcodeList(), pcode, &cp);
 				file->setCommentChars(ostr->toUTF8());
-				readval(x);
+				ostr = evalStringPtr(getStack(), getPcodeList(), pcode, &cp);
 				file->setSpaceTokens(ostr->toUTF8());
-				readval(x);
+				ostr = evalStringPtr(getStack(), getPcodeList(), pcode, &cp);
 				file->setSingleCharTokens(ostr->toUTF8());
 			} break;
 		  case 77: /* papersize */
@@ -1219,11 +1219,9 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  	break;
 		  case 25: /* JOIN  str1,type,str2 */
 			{
-				readval(z);
-				GLERC<GLEString> s1(ostr);
+				GLERC<GLEString> s1(evalStringPtr(getStack(), getPcodeList(), pcode, &cp));
 				readlong(jj);
-				readval(z);
-				GLERC<GLEString> s2(ostr);
+				GLERC<GLEString> s2(evalStringPtr(getStack(), getPcodeList(), pcode, &cp));
 				ptr = *(pcode + cp); /* curve angle1 angle2 d1 d2 */
 				if (ptr) {
 					cp += ptr;
@@ -1247,8 +1245,8 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			break;
 		  case 27: /* MOVE  name */
 		  	{
-		  		readval(z);
 		  		GLEPoint pt;
+		  		ostr = evalStringPtr(getStack(), getPcodeList(), pcode, &cp);
 		  		name_to_point(ostr, &pt);
 		  		g_move(pt);
 		  		break;
@@ -1320,7 +1318,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				int bm_type = 0;
 				ptr = *(pcode + cp); /* type */
 				if (ptr) {
-					readvalp(z, pcode + cp + ptr);
+					readstrp(pcode + cp + ptr);
 					bm_type = g_bitmap_string_to_type(ostr->toUTF8());
 				}
 				g_bitmap(temp_str, x1, y1, bm_type);
@@ -1333,7 +1331,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				int bm_type = 0;
 				ptr = *(pcode + cp); /* type */
 				if (ptr) {
-					readvalp(z, pcode + cp + ptr);
+					readstrp(pcode + cp + ptr);
 					bm_type = g_bitmap_string_to_type(ostr->toUTF8());
 				}
 				g_bitmap_info(temp_str, jj, jj2, bm_type);
@@ -1343,7 +1341,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  	{
 				GLEColorMap map;
 				GLEToRectangularView view;
-				readval(x);
+				ostr = evalStringPtr(getStack(), getPcodeList(), pcode, &cp);
 				map.setFunction(ostr->toUTF8());
 				readxy(x1, y1);
 				view.setXRange(x1, y1);
@@ -1359,7 +1357,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				}
 				ptr = *(pcode + ++cp); /* palette */
 				if (ptr) {
-					readvalp(z, pcode + cp + ptr);
+					readstrp(pcode + cp + ptr);
 					temp_str = ostr->toUTF8();
 					// because palette can be subroutine name!
 					str_to_uppercase(temp_str);
@@ -1420,7 +1418,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			break;
 		  case 39: /* SAVE  name */
 			g_get_xy(&x,&y);
-			readval(z);
+			ostr = evalStringPtr(getStack(), getPcodeList(), pcode, &cp);
 			name_set(ostr,x,y,x,y);
 			break;
 		  case 40: /* SCALE */
@@ -1486,18 +1484,15 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					g_set_line_cap(jj);
 					break;
 				  case OP_SET_FILL_METHOD:
-					readval(x);
-					ss1 = ostr->toUTF8();
+					readstr(ss1);
 				  	g_set_fill_method(ss1.c_str());
 				  	break;
 				  case OP_SET_ARROW_STYLE:
-					readval(x);
-					ss1 = ostr->toUTF8();
+					readstr(ss1);
 				  	g_set_arrow_style(ss1.c_str());
 				  	break;
 				  case OP_SET_ARROW_TIP:
-					readval(x);
-					ss1 = ostr->toUTF8();
+					readstr(ss1);
 					g_set_arrow_tip(ss1.c_str());
 					break;
 				  case OP_SET_ARROW_SIZE:
@@ -1509,13 +1504,11 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 					g_set_arrow_angle(x);
 					break;
 				  case OP_SET_IMAGE_FORMAT:
-					readval(x);
-					ss1 = ostr->toUTF8();
+					readstr(ss1);
 					g_set_pdf_image_format(ss1.c_str());
 					break;
 				  case OP_SET_TEX_SCALE:
-					readval(x);
-					ss1 = ostr->toUTF8();
+					readstr(ss1);
 					g_set_tex_scale(ss1.c_str());
 					break;
 				  case OP_SET_TEX_LABELS:
@@ -1565,18 +1558,17 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 			readlong(jj);
 			if (jj == 0) {
 				// draw static object
-				readval(z);
-				string path = ostr->toUTF8();
-				readval(z);
-				string name = ostr->toUTF8();
+				string path;
+				string name;
+				readstr(path);
+				readstr(name);
 				draw_object_static(path, name, pcode, &cp, mkdrobjs);
 			} else {
 				// draw dynamic object (as before?)
-				readval(z);
-				temp_str = ostr->toUTF8();
+				readstr(temp_str);
 				ptr = *(pcode + ++cp); /* name */
 				if (ptr) {
-					readvalp(z, pcode + cp + ptr);
+					readstrp(pcode + cp + ptr);
 					string obj_name = ostr->toUTF8();
 					draw_object(temp_str, obj_name.c_str());
 				} else {
@@ -1643,8 +1635,8 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 		  case 74: /* TeX */
 			{
 				x = 0.0;
-				readval(z);
 				GLERectangle box;
+				ostr = evalStringPtr(getStack(), getPcodeList(), pcode, &cp);
 				TeXInterface::getInstance()->draw(ostr->toUTF8(), &box);
 				ptr = *(pcode + cp); /* add */
 				if (ptr) {
@@ -1652,7 +1644,7 @@ void GLERun::do_pcode(GLESourceLine &sline, int *srclin, int *pcode, int plen, i
 				}
 				ptr = *(pcode + ++cp); /* name */
 				if (ptr) {
-					readvalp(z, pcode + cp + ptr);
+					readstrp(pcode + cp + ptr);
 					box.getDimensions(&x1,&y1,&x2,&y2);
 					x1 -= x; x2 += x; y1 -= x; y2 += x;
 					name_set(ostr,x1,y1,x2,y2);

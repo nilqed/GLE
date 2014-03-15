@@ -1016,6 +1016,12 @@ bool evalBool(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) thro
 	return mc->Entry.BoolVal;
 }
 
+GLEString* evalStringPtr(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError) {
+	GLEMemoryCell* mc = evalGeneric(stk, pclist, pcode, cp);
+	gle_memory_cell_check(mc, GLEObjectTypeString);
+	return (GLEString*)mc->Entry.ObjectVal;
+}
+
 GLERC<GLEColor> evalColor(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp) throw(ParserError) {
 	GLEMemoryCell* mc = evalGeneric(stk, pclist, pcode, cp);
 	return memory_cell_to_color(get_global_polish(), stk, mc, g_get_throws_error(), 0);
@@ -1037,21 +1043,6 @@ GLERC<GLEString> evalString(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode,
 		}
 	}
 	return result;
-}
-
-void eval(GLEArrayImpl* stk, GLEPcodeList* pclist, int *pcode, int *cp, double *oval, GLEString **ostr, int *otyp) throw(ParserError) {
-	if (ostr != 0) {
-		*ostr = 0;
-	}
-	GLEMemoryCell* mc = evalGeneric(stk, pclist, pcode, cp);
-	int type = gle_memory_cell_type(mc);
-	if (type == GLEObjectTypeString) {
-		*otyp = 2;
-		*ostr = (GLEString*)mc->Entry.ObjectVal;
-	} else {
-		*otyp = 1;
-		*oval = getEvalStackDouble(stk, stk->last() + 1);
-	}
 }
 
 void debug_polish(int *pcode,int *zcp)
