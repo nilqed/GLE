@@ -123,11 +123,11 @@ void set_parskip(double v);
 void set_lineskip(double v);
 int ncat(char *a,char *b,int n);
 void pp_fntchar(int f, int c,int *out, int *lout);
-void cmd_token(uchar **in,char *cmdstr);
+void cmd_token(uchar **in, uchar *cmdstr);
 void set_base_size(void);
 int find_primcmd(char *cmd);
 void text_box(const string& s,double width,int *tbuff, int *rplen);
-uchar* cmdParam(uchar **inp, char** pm, int* pmlen, int npm);
+uchar* cmdParam(uchar **inp, uchar **pm, int* pmlen, int npm);
 void text_tomacro(const string& in, uchar *out);
 void texint(char *s, int *i);
 void texint(const string& s, int *i);
@@ -171,7 +171,7 @@ typedef struct def_table_struct deftable;
 
 bool tex_def(const char *name, const char *defn,int npm);
 int tex_mathdef(const char *name, int defn);
-int *tex_findmathdef(const char *s);
+int* tex_findmathdef(const char *s);
 void tex_chardef(int c, const char *defn);
 char *tex_findchardef(int c);
 deftable *tex_finddef(const char *s) ;
@@ -391,19 +391,19 @@ norm_again:
 	}
 }
 
-uchar* cmdParam(uchar **inp, char** pm, int* pmlen, int npm) {
+uchar* cmdParam(uchar **inp, uchar **pm, int* pmlen, int npm) {
 	int gcnt=0,i;
-	uchar *save_inp = *inp; /* need this to look ahead but not move ahaead */
-	char *in = (char*)*inp;
+	uchar* save_inp = *inp; /* need this to look ahead but not move ahaead */
+	uchar* in = *inp;
 	gcnt = 0;
 	for (i=0;i<npm;i++) {
 		pm[i] = in;
 		pmlen[i] = 0;
-		if (chr_code[(unsigned int)*in]==7) { /* begin group */
+		if (chr_code[*in]==7) { /* begin group */
 			pm[i] = ++in;
 			for (;*in!=0;in++) {
-				if (chr_code[(unsigned int)*in]==7) gcnt++;
-				if (chr_code[(unsigned int)*in]==8) {
+				if (chr_code[*in]==7) gcnt++;
+				if (chr_code[*in]==8) {
 					if (gcnt==0) break;
 					gcnt--;
 				}
@@ -411,7 +411,7 @@ uchar* cmdParam(uchar **inp, char** pm, int* pmlen, int npm) {
 			pmlen[i] = in - pm[i];
 			in++;
 		} else {
-			if (chr_code[(unsigned int)*in]==6) { /* backslash look for non-alpha */
+			if (chr_code[*in]==6) { /* backslash look for non-alpha */
 				pm[i] = ++in;
 				if (isalpha(*pm[i])) {
 					for (;*in!=0;in++) {
@@ -587,54 +587,54 @@ void p_unichar(const string& str, int *out, int *lout) {
 }
 
 void TexArgStrs::cmdParam1(uchar **in) {
-	char *s[2];
+	uchar *s[2];
 	int pmlen[2];
 	cmdParam(in, s, pmlen, 1);
-	str1.assign(s[0], pmlen[0]);
+	str1.assign((char*)s[0], pmlen[0]);
 }
 
 void TexArgStrs::cmdParam12(uchar **in) {
-	char *s[2];
+	uchar *s[2];
 	int pmlen[2];
 	cmdParam(in, s, pmlen, 1);
-	str2.assign(s[0],pmlen[0]);
+	str2.assign((char*)s[0],pmlen[0]);
 }
 
 void TexArgStrs::cmdParam2(uchar **in) {
-	char *s[3];
+	uchar *s[3];
 	int pmlen[3];
 	cmdParam(in, s, pmlen, 2);
-	str1.assign(s[0],pmlen[0]);
-	str2.assign(s[1],pmlen[1]);
+	str1.assign((char*)s[0],pmlen[0]);
+	str2.assign((char*)s[1],pmlen[1]);
 }
 
 void TexArgStrs::cmdParam3(uchar **in) {
-	char *s[4];
+	uchar *s[4];
 	int pmlen[4];
 	cmdParam(in, s, pmlen, 3);
-	str1.assign(s[0],pmlen[0]);
-	str2.assign(s[1],pmlen[1]);
-	str3.assign(s[2],pmlen[2]);
+	str1.assign((char*)s[0],pmlen[0]);
+	str2.assign((char*)s[1],pmlen[1]);
+	str3.assign((char*)s[2],pmlen[2]);
 }
 
 void TexArgStrs::cmdParam4(uchar **in) {
-	char *s[5];
+	uchar *s[5];
 	int pmlen[5];
 	cmdParam(in, s, pmlen, 4);
-	str1.assign(s[0],pmlen[0]);
-	str2.assign(s[1],pmlen[1]);
-	str3.assign(s[2],pmlen[2]);
-	str4.assign(s[3],pmlen[3]);
+	str1.assign((char*)s[0],pmlen[0]);
+	str2.assign((char*)s[1],pmlen[1]);
+	str3.assign((char*)s[2],pmlen[2]);
+	str4.assign((char*)s[3],pmlen[3]);
 }
 
 void TexArgStrs::cmdParam4_swap34(uchar **in) {
-	char *s[5];
+	uchar *s[5];
 	int pmlen[5];
 	cmdParam(in, s, pmlen, 4);
-	str1.assign(s[0],pmlen[0]);
-	str2.assign(s[1],pmlen[1]);
-	str4.assign(s[2],pmlen[2]);
-	str3.assign(s[3],pmlen[3]);
+	str1.assign((char*)s[0],pmlen[0]);
+	str2.assign((char*)s[1],pmlen[1]);
+	str4.assign((char*)s[2],pmlen[2]);
+	str3.assign((char*)s[3],pmlen[3]);
 }
 
 void tex_get_char_code(uchar** in, int* code) {
@@ -744,21 +744,21 @@ int select_font_encoding(int font, int encoding, const char* defaultFont) {
 void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 	int ci;
 	int ix;
-	char cmdstr[20];
+	uchar cmdstr[20];
 	double lef,wid,hei,dep,savehei;
 	int *pbuff=0;
 	int plen;
-	char *pmu[10];
+	uchar *pmu[10];
 	int pmlen[10];
 	int *m,i,k,n,npm;
 
 	k = 0;
 
 	cmd_token(in,cmdstr);   /* finds command name and parameters */
-	ci = find_primcmd(cmdstr);
+	ci = find_primcmd((char*)cmdstr);
 
 	if (ci==0) { /* then maybe its a mathchar */
-		m = tex_findmathdef(cmdstr);
+		m = tex_findmathdef((char*)cmdstr);
 		if (m!=0) {
 			p_mathchar(*m);
 		} else {
@@ -773,7 +773,7 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 		cmdParam(in,pmu,pmlen,1);
 		savehei = p_hei;
 		p_hei = p_hei * .7;
-		topcode(pmu[0],pmlen[0],0.0,&pbuff,&plen,&lef,&wid,&hei,&dep);
+		topcode((char*)pmu[0],pmlen[0],0.0,&pbuff,&plen,&lef,&wid,&hei,&dep);
 		/*g_measure(pm.s[0],&lef,&wid,&hei,&dep);
 		fftext_block(UC pm.s[0],0.0,0);
 		g_get_bounds(&lef,&wid,&hei,&dep);*/
@@ -782,13 +782,13 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 		p_pcode(pbuff,plen);
 		/*printf("this P=[%s]\n",pm.s[0]);*/
 		p_move(0,-0.8*p_hei);
-		find_primcmd(cmdstr);
+		find_primcmd((char*)cmdstr);
 
 		/* do a look ahead to see if there is a superscript */
 		/* but keep in pointing to current spot */
 		*in = cmdParam(in,pmu,pmlen,1);
 		/* check to see if subscript is next */
-		if(strncmp(pmu[0],"sub ",4)==0) {
+		if(strncmp((char*)pmu[0],"sub ",4)==0) {
 			/* move back to starting point */
 			/*p_move(-wid,0);
 			printf("subscript next P=[%s]\n",pm.s[0]);
@@ -802,7 +802,7 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 		cmdParam(in,pmu,pmlen,1);
 		savehei = p_hei;
 		p_hei = p_hei * .7;
-		topcode(pmu[0],pmlen[0],0.0,&pbuff,&plen,&lef,&wid,&hei,&dep);
+		topcode((char*)pmu[0],pmlen[0],0.0,&pbuff,&plen,&lef,&wid,&hei,&dep);
 		/*printf("lef=%g wid=%g hei=%g dep=%g\n",lef,wid,hei,dep);*/
 		p_move(0.0,-0.3*p_hei);
 		p_pcode(pbuff,plen);
@@ -813,7 +813,7 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 		/* but keep in pointing to current spot */
 		*in = cmdParam(in,pmu,pmlen,1);
 		/* check to see if superscript is next */
-		if(strncmp(pmu[0],"sup ",4)==0) {
+		if(strncmp((char*)pmu[0],"sup ",4)==0) {
 			/* move back to starting point */
 			/*p_move(-wid,0);*/
 			/*printf("supescript next B=[%s]\n",pm.s[0]);*/
@@ -909,12 +909,12 @@ void do_prim(uchar **in, int *out, int *lout, TexArgStrs* params) {
 	  case tp_mathcode:
 		params->cmdParam2(in);
 		texint(params->str2,&ix);
-		chr_mathcode[(unsigned int)params->str1[0]] = ix;
+		chr_mathcode[(unsigned char)params->str1[0]] = ix;
 		break;
 	  case tp_delcode:
 		params->cmdParam2(in);
 		texint(params->str2,&ix);
-		chr_mathcode[(unsigned int)params->str1[0]] = ix;
+		chr_mathcode[(unsigned char)params->str1[0]] = ix;
 		break;
 	  case tp_setfont:
 		params->cmdParam1(in);
@@ -1565,8 +1565,9 @@ void tex_chardef(int c, const char *defn) {
 	cdeftable[c] = sdup(defn);
 }
 
-char *tex_findchardef(int c) {
-	return cdeftable[c];
+char* tex_findchardef(int c) {
+	if (c < 0 || c > 255) return "";
+	else return cdeftable[c];
 }
 
 /*----------------------------------------------------------------------*/
@@ -1628,9 +1629,8 @@ typedef struct mdef_table_struct mdeftable;
 
 static mdeftable  *mdef_hashtab[HASHSIZE];
 
-int *tex_findmathdef(const char *s) {
-	mdeftable  *np;
-
+int* tex_findmathdef(const char *s) {
+	mdeftable* np;
 	for (np = mdef_hashtab[hash_str(s)]; np != NULL; np = np->next)
 		if (strcmp(s, np->name)==0) {
 			return &np->defn;
@@ -1783,7 +1783,7 @@ void fftext_block(const string& s,double width,int justify) {
 	g_set_hei(p_hei);
 }
 
-void cmd_token(uchar **in,char *cmdstr) {
+void cmd_token(uchar **in, uchar *cmdstr) {
 	int i = 0;
 	if ( (!isalpha(**in)) && (**in != 0)) {
 		if ((*in)[0] == '\'' && (*in)[1] == '\'') {
@@ -1800,7 +1800,7 @@ void cmd_token(uchar **in,char *cmdstr) {
 	}
 	*cmdstr = 0;
 	cmdstr -= 1;
-	if (chr_code[(unsigned int)*cmdstr]==1) {
+	if (chr_code[*cmdstr]==1) {
 		// if last character is alpha, then eat all subsequent space
 		// (chr_code alpha = 1, space = 2)
 		for (;(**in != 0) && (chr_code[**in]==2);) (*in)++;
@@ -1809,12 +1809,12 @@ void cmd_token(uchar **in,char *cmdstr) {
 
 void  text_tomacro(const string& in, uchar *out) {
 	/* find /cmdname  or defined characters */
-	char macroname[30];
+	uchar macroname[30];
 	uchar *s,*dfn,*r,*saves;
 	int dlen;
 	int nrep;
 	deftable  *np;
-	char *pmu[10];
+	uchar* pmu[10];
 	int pmlen[10];
 	nrep = 0;
 	strcpy(SC out,SC in.c_str());
@@ -1827,7 +1827,7 @@ void  text_tomacro(const string& in, uchar *out) {
 			s++;
 			cmd_token(&s,macroname);
 			// cout << "macro: " << macroname << endl;
-			np = tex_finddef(macroname);
+			np = tex_finddef((char*)macroname);
 			if (np != NULL) {
 				// cout << "found!" << endl;
 				nrep++;
@@ -1835,7 +1835,7 @@ void  text_tomacro(const string& in, uchar *out) {
 				dbg printf("Found macro {%s} = {%s} \n",macroname,dfn);
 				cmdParam(&s,pmu,pmlen,np->npm);
 				dlen = s-saves;
-				r = UC tex_replace(SC dfn,pmu,pmlen,np->npm);
+				r = UC tex_replace(SC dfn,(char**)pmu,pmlen,np->npm);
 				s = saves;
 				memmove(SC s+strlen(SC r),SC s+dlen,strlen(SC s)+1);
 				strncpy(SC s,SC r,strlen(SC r));
@@ -1843,17 +1843,17 @@ void  text_tomacro(const string& in, uchar *out) {
 				s--;
 			}
 			s = saves;
-			if (strcmp(macroname, "tex")==0) {
+			if (strcmp((char*)macroname, "tex")==0) {
 				// do not expand macros inside \tex{} expression
 				s = UC str_skip_brackets((char*)s, '{', '}');
 			}
-			if (strcmp(macroname, "unicode")==0) {
+			if (strcmp((char*)macroname, "unicode")==0) {
 				// do not expand macros inside \unicode{}{} expression
 				s = UC str_skip_brackets((char*)s, '{', '}');
 				if (s[0] == '}') s++;
 				s = UC str_skip_brackets((char*)s, '{', '}');
 			}
-			if (strcmp(macroname, "def")==0) {
+			if (strcmp((char*)macroname, "def")==0) {
 				// make sure not to expand macro's in macro name
 				// otherwise, during a second pass, the name will be replaced by the value
 				// e.g., \def\a{b} will trun into: \defb{b{}
