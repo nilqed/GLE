@@ -256,6 +256,8 @@ LONG WINAPI MyUnhandledExceptionFilter(EXCEPTION_POINTERS *info) {
 #endif
 
 int main(int argc, char *argv[]) {
+	QLocale curLocale("C");
+	QLocale::setDefault(curLocale);
 	QApplication app(argc,argv);
 	Q_INIT_RESOURCE(qgle);
 	// setlocale is required to make sure that GLE uses decimal a point instead of a comma
@@ -278,5 +280,6 @@ int main(int argc, char *argv[]) {
 	#endif
 	GLEMainWindow mainWin(argc,argv);
 	mainWin.show();
+	setlocale(LC_NUMERIC, "C");
 	return app.exec();
 }
