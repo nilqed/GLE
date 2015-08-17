@@ -115,7 +115,7 @@ Section "MainSection" SEC01
   SetOverwrite try
   File "gle.exe.manifest"
   File /oname=qgle.exe.manifest "gle.exe.manifest"
-  File "..\..\..\build\bin\*.*"
+  File /x gle-unit-test.exe "..\..\..\build\bin\*.*"
   File "C:\cygwin\mingw\bin\mingwm10.dll"
   File "C:\cygwin\mingw\bin\libgcc_s_dw2-1.dll"
   File "C:\cygwin\mingw\bin\libstdc++-6.dll"
