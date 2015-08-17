@@ -2181,12 +2181,10 @@ void GLERun::draw_object_dynamic(int idx, GLEObjectRepresention* newobj, GLEArra
 		}
 		g_move(0.0, 0.0);
 		g_set_partial_state(oldstate);
-		int s_start = sub->getStart();
-		int s_end = sub->getEnd();
 		int endp = 0;
 		bool mkdrobjs = false;
-		for (int i = s_start + 1; i < s_end; i++) {
-			GLESourceLine* line = getSource()->getLine(i);
+		for (int i = sub->getStart() + 1; i < sub->getEnd(); i++) {
+			GLESourceLine* line = getSource()->getLine(i - 1);
 			do_pcode(*line, &i, gpcode[i], gplen[i], &endp, mkdrobjs);
 		}
 		if (local_vars != NULL) {
