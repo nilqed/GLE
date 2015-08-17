@@ -51,9 +51,14 @@ CPPFLAGS=@CPPFLAGS@
 
 LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
+ELIBS=
 
 ifeq (@HAVE_LIBGLE_CPPFLAGS@,1)
 	EXTRA_OBJS := ../gle/cutils.static.$(OBJ_SUFF) ../gle/file_io.static.$(OBJ_SUFF)
+endif
+
+ifeq (@HAVE_WIN32@,1)
+	ELIBS := -lwsock32
 endif
 
 CPPFLAGS := $(strip $(CPPFLAGS))
@@ -64,7 +69,7 @@ $(OBJECTS): %.o: %.cpp $(INCLUDES)
 	$(CXX) $(CPPFLAGS) -c $< -o $@
 
 $(PROJECT_BINDIR)/bin/$(PROGRAM)$(EXE_SUFF): $(OBJECTS) $(EXTRA_OBJS) $(INCLUDES) $(PROGRAM).cpp
-	$(CXX) $(CPPFLAGS) $(PROGRAM).cpp $(OBJECTS) $(EXTRA_OBJS) -o $(PROJECT_BINDIR)/bin/$(PROGRAM)$(EXE_SUFF)
+	$(CXX) $(CPPFLAGS) $(PROGRAM).cpp $(OBJECTS) $(EXTRA_OBJS) $(ELIBS) -o $(PROJECT_BINDIR)/bin/$(PROGRAM)$(EXE_SUFF)
 
 clean:
 	-$(RM) $(OBJECTS) $(PROJECT_BINDIR)/bin/$(PROGRAM)$(EXE_SUFF) $(PROGRAM).$(OBJ_SUFF)
