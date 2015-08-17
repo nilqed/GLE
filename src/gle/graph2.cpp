@@ -159,7 +159,7 @@ double fnxInv(double value, GLEAxis* axis, GLERange* range) {
 	double wmax = range->getMax();
 	double result = 0.0;
 	if (axis->log) {
-		result = pow10((value - ybl) / xlength * (log10(wmax) - log10(wmin)) + log10(wmin));
+		result = pow(10, (value - ybl) / xlength * (log10(wmax) - log10(wmin)) + log10(wmin));
 	} else {
 		result = (value - xbl) / xlength * (wmax - wmin) + wmin;
 	}
@@ -175,7 +175,7 @@ double fnyInv(double value, GLEAxis* axis, GLERange* range) {
 	double wmax = range->getMax();
 	double result = 0.0;
 	if (axis->log) {
-		result = pow10((value - ybl) / xlength * (log10(wmax) - log10(wmin)) + log10(wmin));
+		result = pow(10, (value - ybl) / xlength * (log10(wmax) - log10(wmin)) + log10(wmin));
 	} else {
 		result = (value - ybl) / ylength * (wmax - wmin) + wmin;
 	}
