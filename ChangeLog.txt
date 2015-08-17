@@ -1,3 +1,44 @@
+4.2.5 (August 2015)
+
+Bug Fixes
+    Force locale to "C" in QGLE
+    Apply patch by Chris Ward to make GLE build with GCC5
+    Fixed #53 Segfault when non-ASCII characters and Tex labels enabled
+    Take key (outside graph) into account when doing "scale auto"
+    Fixed "end if" not allowed before size command
+    Fixed rounding error in colormap command
+    Fixed bug in zmin/zmax arguments for colormap with a function
+    Fixed bug #50: GLE axis auto scaling does not take error bars into account
+    Fixed bug #52: Error bars should be clipped to the graph window
+    Fixed filling problem (-nomaxpath no longer needed for fills)
+    Fixed bug #54: GLE overwrites .tex file
+    Fixed Rotated y2labels does not work (reported by Viachara Amirdayl)
+    Fixed 'shade' fill option does not work (reported by Ben Lobo)
+    Fixed "xnames from di": don't show labels twice
+    Bug 3494736: QGLE terminates trying to create new file
+    Implemented patch to use RTLD_DEEPBIND for dlopen
+    Fixed all compiler warnings (gcc 4.7.0)
+    Corrected formatting of 3D axis labels (bug reported by Nick Pomponio)
+    Strip should use --strip-unneeded for library (Reported by Christian T. Steigies)
+    Attempt to fix: Bug 669161: gle-graphics: FTBFS on sparc
+
+New Features
+    Dynamic typing and type checking in the expression evaluator
+    Allow d[i] in let expression
+    Added ndatasets() function
+    Support for .gz data files in colormap command
+    Added colormap option "interpolate nearest" (based on patch by Brandon Aubie)
+    Made colormap take into account x/yaxis options such as log and negate
+    Added barcode.gle (by Jan Soubusta)
+    Added autocolor function to graphutil.gle
+    Added polar_segment to polar.gle
+    Improvements to the device$() function (suggested by Elrond)
+    Bitmap caching in the Cairo device (suggested by Alexis Letessier)
+    Added "-inverse" option to inverse black / white colors (based on patch by Brandon Aubie)
+    Adds "percent" number formatting option (patch by Brandon Aubie)
+    Adds "textcolor" to the key block (patch by Brandon Aubie)
+    QGLE monitors include and data files and updates preview if these change
+
 4.2.4c (March, 2012)
 
 Bug Fixes
