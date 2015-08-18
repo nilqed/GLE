@@ -259,7 +259,7 @@ void GLEPolish::internalPolish(GLEPcode& pcode, int *rtype) throw(ParserError) {
 				curpri = curpri + 100;
 				break;
 			}
-			if ((first_char == ')' || first_char == ')') && token_len == 1) {
+			if ((first_char == ')' || first_char == ']') && token_len == 1) {
 				throw error("constant, function, or unary operator expected");
 			}
 			if (m_tokens.is_next_token("(")) {
