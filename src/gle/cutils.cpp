@@ -214,7 +214,7 @@ bool str_i_equals(const char* s1, const char* s2) {
 
 bool str_ni_equals(const char* s1, const char* s2, int max) {
 	int i = 0;
-	while (s1[i] != 0 && s2[i] != 0 && i < max) {
+	while (i < max && s1[i] != 0 && s2[i] != 0) {
 		if (toupper(s1[i]) != toupper(s2[i])) return false;
 		i++;
 	}
