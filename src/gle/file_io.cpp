@@ -1354,7 +1354,7 @@ bool GetExeName(const char* appname, char **argv, string& exe_name) {
 		return true;
 	}
 #endif
-#if defined(__UNIX__) && !defined(__MACOS__) && !defined(__FREEBSD__)
+#if defined(__linux__)
 	/* try to read location from the /proc/self/exe file */
 	char path[PATH_MAX];
 	struct stat stat_buf;
