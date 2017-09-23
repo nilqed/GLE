@@ -41,6 +41,7 @@
 # for compilation with MS vc++ .net
 #
 #
+!include ..\..\..\config.i
 !include ..\..\..\config.vc
 #
 !include files.txt
@@ -50,4 +51,4 @@ all: $(OBJECTS)
 $(OBJECTS): $(INCLUDES)
 
 clean:
-	-erase $(OBJECTS)
+	-$(RM) $(OBJECTS)

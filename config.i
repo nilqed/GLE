@@ -41,27 +41,27 @@
 #
 #  this sets the global version number for all programs
 #
-MODULE_NAME		=gle40
-BASE_NAME		=GLE
+MODULE_NAME				=gle40
+BASE_NAME				=GLE
 MAJOR_VERSION_NUMBER 	=4
 MINOR_VERSION_NUMBER 	=2
-BUILD_NUMBER    	=5
-VERSION_NUMBER  	=$(MAJOR_VERSION_NUMBER).$(MINOR_VERSION_NUMBER)
-VERSION_INFO		=-DGLEVN="\"$(VERSION_NUMBER).$(BUILD_NUMBER)\""
-TAG 			=$(MODULE_NAME)_R_$(MAJOR_VERSION_NUMBER)_$(MINOR_VERSION_NUMBER)_$(BUILD_NUMBER)
+BUILD_NUMBER    		=5
+VERSION_NUMBER  		=$(MAJOR_VERSION_NUMBER).$(MINOR_VERSION_NUMBER)
+VERSION_INFO			=-DGLEVN="\"$(VERSION_NUMBER).$(BUILD_NUMBER)\""
+TAG 					=$(MODULE_NAME)_R_$(MAJOR_VERSION_NUMBER)_$(MINOR_VERSION_NUMBER)_$(BUILD_NUMBER)
 GLE_SRC_DIRS            =src/gle src/makefmt src/fbuild src/manip src/gui
 
 #
 # -- optional packages (ignored if one uses ./configure)
 #
 
-HAVE_LIBTIFF = 0
+HAVE_LIBTIFF = 1
 # libtiff at www.libtiff.org is needed for inclusion of
 # tiff files.  if you dont have it comment out the line above
 # if you have it you must set the environment variable
 # LIBTIFFDIR to point to the location of libtiff
 
-HAVE_LIBPNG = 0
+HAVE_LIBPNG = 1
 # libpng at www.libpng.org is needed for inclusion of
 # PNG files.  if you dont have it comment out the line above
 # you will also need zlib
@@ -69,4 +69,8 @@ HAVE_LIBPNG = 0
 # LIBPNGDIR to point to the location of libpng
 # ZLIBDIR to point to the location of zlib
 
+HAVE_LIBJPEG = 1
 # For JPEG and GIF images, no extra libs are required!
+
+HAVE_CAIRO			=1
+HAVE_EXTRA_FONTS	=1

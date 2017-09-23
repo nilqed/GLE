@@ -112,7 +112,7 @@ void gle_cat_csv(vector<string>* files) {
 	}
 }
 
-#if defined(HAVE_LIBGLE) && !defined(HAVE_LIBGLE_STATIC)
+#if defined(HAVE_LIBGLE) || defined(HAVE_LIBGLE_STATIC)
 int GLEMain(int argc, char **argv) {
 #else
 int main(int argc, char **argv) {
@@ -511,7 +511,7 @@ void init_option_args(CmdLineObj& cmdline) {
 	option = new CmdLineOption("nosave");
 	option->setHelp("Don't write output file to disk (dry-run)");
 	cmdline.addOption(option, GLE_OPT_NOSAVE);
-#if defined(__WIN32__) and defined(HAVE_CAIRO)
+#if defined(__WIN32__) && defined(HAVE_CAIRO)
 	option = new CmdLineOption("copy");
 	option->setHelp("Copy resulting figure to clipboard (only EMF)");
 	cmdline.addOption(option, GLE_OPT_COPY);

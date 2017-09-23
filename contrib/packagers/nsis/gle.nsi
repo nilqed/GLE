@@ -113,6 +113,7 @@ Section "MainSection" SEC01
   GLENotExists:
   SetOutPath "$INSTDIR\bin"
   SetOverwrite try
+  !ifndef MSVC
   File "gle.exe.manifest"
   File /oname=qgle.exe.manifest "gle.exe.manifest"
   File /x gle-unit-test.exe "..\..\..\build\bin\*.*"
@@ -120,6 +121,12 @@ Section "MainSection" SEC01
   File "C:\cygwin\mingw\bin\libgcc_s_dw2-1.dll"
   File "C:\cygwin\mingw\bin\libstdc++-6.dll"
   File "C:\Program Files\Debugging Tools for Windows (x86)\dbghelp.dll"
+  !else
+  FILE "..\..\..\build\bin\gle.exe"
+  FILE "..\..\..\build\bin\qgle.exe"
+  FILE "..\..\..\build\bin\fbuild.exe"
+  FILE "..\..\..\build\bin\makefmt.exe"
+  !endif
   SetOutPath "$INSTDIR\font"
   File /r "..\..\..\build\font\*.*"
   SetOutPath "$INSTDIR\doc"

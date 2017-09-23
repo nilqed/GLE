@@ -42,54 +42,61 @@
 #
 !include "config.vc"
 
-ZIP_SRC_NAME = $(BASE_NAME)_$(VERSION_NUMBER).$(BUILD_NUMBER)_src.zip
-TAR_SRC_NAME = $(BASE_NAME)_$(VERSION_NUMBER).$(BUILD_NUMBER)_src.tar
-ZIP_EXE_NAME = $(BASE_NAME)_$(VERSION_NUMBER).$(BUILD_NUMBER)_exe_win32.zip
-INSTALL_NAME = GLE-$(VERSION_NUMBER).$(BUILD_NUMBER)-exe-win32.exe
-RELEASE_DIR = .\release
-NSIS_SCRIPT_DIR = .\contrib\packagers\nsis
+ZIP_SRC_NAME	=$(BASE_NAME)_$(VERSION_NUMBER).$(BUILD_NUMBER)_src.zip
+TAR_SRC_NAME	=$(BASE_NAME)_$(VERSION_NUMBER).$(BUILD_NUMBER)_src.tar
+ZIP_EXE_NAME	=$(BASE_NAME)_$(VERSION_NUMBER).$(BUILD_NUMBER)_exe_win32.zip
+INSTALL_NAME	=GLE-$(VERSION_NUMBER).$(BUILD_NUMBER)-win-x86-vc141.exe
+RELEASE_DIR		=.\release
+NSIS_SCRIPT_DIR =.\contrib\packagers\nsis
+_NMAKE			=nmake -f makefile.vc /nologo
 
 SRC_FILES = gle4/Makefile* gle4/config* gle4/README gle4/src/gle/* gle4/src/fonts/* gle4/src/makefmt/* gle4/src/fbuild/* gle4/src/samples/* gle4/src/TeX/*
 EXE_FILES = gle4/README gle4/bin/*.exe gle4/bin/font.dat gle4/bin/inittex.ini gle4/bin/font/*
 
-all:
-	-mkdir build
-	-mkdir build\bin
-	cd src\gle\bitmap & nmake -f makefile.vc /nologo
-	cd src\gle\surface & nmake -f makefile.vc /nologo
-	cd src\gle\letzfitz & nmake -f makefile.vc /nologo
-	cd src\gle\tokens & nmake -f makefile.vc /nologo
-	cd src\gle & nmake -f makefile.vc /nologo
-	cd src\fbuild & nmake -f makefile.vc /nologo
-	cd src\makefmt & nmake -f makefile.vc /nologo
-	cd src\fonts & nmake -f makefile.vc /nologo
-	cd src\tex & nmake -f makefile.vc /nologo
-	cd src\samples & nmake -f makefile.vc /nologo
+all: src\config.h
+	-mkdir /Ne build
+	-mkdir /Ne build\bin
+	-mkdir /Ne build\lib
+	-mkdir /Ne build\gleinc
+	cd src\gle\bitmap & $(_NMAKE)
+	cd src\gle\surface & $(_NMAKE)
+	cd src\gle\letzfitz & $(_NMAKE)
+	cd src\gle\tokens & $(_NMAKE)
+	cd src\gle & $(_NMAKE)
+	cd src\gui & $(_NMAKE)
+	cd src\fbuild & $(_NMAKE)
+	cd src\makefmt & $(_NMAKE)
+	cd src\fonts & $(_NMAKE)
+	cd src\lib & $(_NMAKE)
+	cd src\tex & $(_NMAKE)
+	cd src\samples & $(_NMAKE)
+	cd gle-refman & $(_NMAKE)
 
 clean:
-	cd src\gle\bitmap & nmake -f makefile.vc /nologo clean
-	cd src\gle\surface & nmake -f makefile.vc /nologo clean
-	cd src\gle\letzfitz & nmake -f makefile.vc /nologo clean
-	cd src\gle\tokens & nmake -f makefile.vc /nologo clean
-	cd src\gle & nmake -f makefile.vc /nologo clean
-	cd src\fbuild & nmake -f makefile.vc /nologo clean
-	cd src\makefmt & nmake -f makefile.vc /nologo clean
-	cd src\fonts & nmake -f makefile.vc /nologo clean
-	cd src\tex & nmake -f makefile.vc /nologo clean
-	cd src\samples & nmake -f makefile.vc /nologo clean
-	-rmdir /S /Q build
-	-rmdir /S /Q build\bin
+	cd src\gle\bitmap & $(_NMAKE) clean
+	cd src\gle\surface & $(_NMAKE) clean
+	cd src\gle\letzfitz & $(_NMAKE) clean
+	cd src\gle\tokens & $(_NMAKE) clean
+	cd src\gle & $(_NMAKE) clean
+	cd src\gui & $(_NMAKE) clean
+	cd src\fbuild & $(_NMAKE) clean
+	cd src\makefmt & $(_NMAKE) clean
+	cd src\fonts & $(_NMAKE) clean
+	cd src\lib & $(_NMAKE) clean
+	cd src\tex & $(_NMAKE) clean
+	cd src\samples & $(_NMAKE) clean
+	cd gle-refman & $(_NMAKE) clean
+	-erase /QE $(RELEASE_DIR)\$(INSTALL_NAME) src\config.h
+	-rmdir /SQ /Ne build\bin
+	-rmdir /SQ /Ne build\lib
+	-rmdir /SQ /Ne build\gleinc
+	-rmdir /SQ /Ne build
+	-rmdir /SQ /Ne $(RELEASE_DIR)
+
+src\config.h: src\config.h.vc
+	copy /QE $** $@
 
 full: clean all zipsrc tarsrc zipexe
-
-commit:
-	cvs commit -m "commit via nmake working on version $(TAG)"
-#
-# to tag a release
-#
-tagall:
-	cvs rtag $(TAG) $(MODULE_NAME) $(DEPENDANT_MODULES)
-
 #
 # for testing not a true install
 #
@@ -115,18 +122,24 @@ zipexe:
 
 #compress the executables
 upx:
-	upx -9 --force build\bin\*.exe
+	-upx --best --compress-icons=0 build\bin\qgle.exe
+	-upx --best build\bin\gle.exe
 
 
 NSIS_VERSIONS = /DGLE_VERSION=$(MAJOR_VERSION_NUMBER).$(MINOR_VERSION_NUMBER).$(BUILD_NUMBER)
 
 installer:
 	-mkdir $(RELEASE_DIR)
-	-del $(RELEASE_DIR)\$(INSTALL_NAME)
-	-makensis /V1 $(NSIS_VERSIONS) /DOUTPUT_FILENAME=$(INSTALL_NAME) $(NSIS_SCRIPT_DIR)\gle.nsi
+	-erase /QE $(RELEASE_DIR)\$(INSTALL_NAME)
+	-makensis /V1 $(NSIS_VERSIONS) /DMSVC /DOUTPUT_FILENAME=$(INSTALL_NAME) $(NSIS_SCRIPT_DIR)\gle.nsi
 	-move $(NSIS_SCRIPT_DIR)\$(INSTALL_NAME) $(RELEASE_DIR)
 
 
-
+# needs 4nt take command
+timer-test:
+	timer gle .\src\samples\sho_wavefunction.gle
+	timer .\build\bin\gle .\src\samples\sho_wavefunction.gle
+	timer gle --cairo .\src\samples\sho_wavefunction.gle
+	timer .\build\bin\gle --cairo .\src\samples\sho_wavefunction.gle
 
 

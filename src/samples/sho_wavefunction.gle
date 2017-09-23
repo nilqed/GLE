@@ -1,0 +1,87 @@
+!
+! -- SHO wave functions
+!
+pi				=3.1415926535897931159979634
+electron_mass	=9.10938215E-31
+electron_charge	=1.602176487E-19
+proton_mass		=1.6726219E-27
+neutron_mass	=1.674927471e-27
+hbar			=1.054571628E-34
+epsilon_o		=8.854187817E-12  ! F/m
+speed_of_light	=299792458.0
+
+sub sho_energy n omega
+	return	(n + 0.5) * hbar * omega
+end sub
+
+sub sho_turning_point n omega m 
+	! classical turning point
+	xmax = sqrt(2.0*sho_energy(n,omega)/(m*omega^2))
+	xmin = -1.0*xmax
+	return xmax
+end sub
+
+sub sho_cpd n x omega m 
+	! classical probaiblity density
+	tp = sho_turning_point(n,omega,m)
+	return 1.0/(pi*sqrt(tp^2 - x^2))
+end sub
+
+sub hermite n x
+!  Recursion:
+!
+!    H(0,X) = 1,
+!    H(1,X) = 2*X,
+!    H(N,X) = 2*X * H(N-1,X) - 2*(N-1) * H(N-2,X)
+	ret = 0
+	if n < 0 then
+		ret = 0
+	else if n = 0 then
+		ret = 1
+	else if n = 1 then
+		ret = 2*x
+	else
+		ret = 2 * x * hermite(n-1,x) - 2 * (n-1) * hermite(n-2,x)
+	end if
+	return ret
+end sub
+
+sub factorial n
+	ret = 1
+	if n > 0 then
+		for i = 1 to n step 1
+			ret = ret*i
+		next i
+	end if
+	return ret
+end sub
+
+sub sho_wave_function n x omega m
+	return ( 1.0 / (2^n * factorial(n) ) )*( ( m * omega ) / ( pi * hbar ) )^0.25*exp( - 1.0 * m * omega * x * x / ( 2.0 * hbar ) )*hermite(n , ( m * omega / hbar )^0.5 * x )
+end sub
+
+sub sho_qpd n x omega m 
+	! quantum probaiblity density
+	return (sho_wave_function(n,x,omega,m))^2
+end sub
+
+
+size 10 10
+set font texcmss
+set hei 0.5
+m		=electron_mass
+omega	=1e10
+tp		=1.0e-9 ! 1 nm turning point fo
+omega	=2*(0.0+0.5)*hbar/(m*tp*tp)
+n		=12! careful not too high
+xlim	=sho_turning_point(n,omega,m)*2
+amove 0 0
+begin graph
+	scale auto
+	let d2=sho_qpd(n,x,omega,m) from -xlim to xlim step xlim/1000
+	d2 line color blue lwidth 0.06
+	x2axis off
+	ytitle "Ampltiude"
+	xtitle "Position"
+end graph
+

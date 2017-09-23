@@ -100,12 +100,20 @@ void GLEFindRelPath(const string& p1, const string& p2, string* result, int* nb)
 	*nb = nb_back;
 }
 
-int do_setrelpath(char** argv) {
-	string bin    = argv[0];
-	string lib    = argv[1];
-	string data   = argv[2];
-	string doc    = argv[3];
-	string config = argv[4];
+int do_setrelpath(char** argv, int num_args) {
+	string bin    = "";
+	string lib    = "";
+	string data   = "";
+	string doc    = "";
+	string config = "";
+
+
+	if(num_args >= 1) bin = argv[0];
+	if(num_args >= 2) lib = argv[1];
+	if(num_args >= 3) data = argv[2];
+	if(num_args >= 4) doc = argv[3];
+	if(num_args >= 5) config = argv[4];
+
 	cout << "GLE will be installed as follows:" << endl;
 	cout << "Binary:   \"" << bin << "\"" << endl;
 	cout << "Library:  \"" << lib << "\"" << endl;
@@ -164,10 +172,13 @@ int do_setrelpath(char** argv) {
 	return 0;
 }
 
-int do_latexdef(char** argv) {
-	string fname = argv[0];
-	string def = argv[1];
-	string value = argv[2];
+int do_latexdef(char** argv, int num_args) {
+	string fname = "";
+	if(num_args >= 1) fname = argv[0];
+	string def = "";
+	if(num_args >= 2) def = argv[1];
+	string value = "";
+	if(num_args >= 3) value = argv[2];
 	ofstream ofile(fname.c_str());
 	ofile << "\\newcommand{\\" << def << "}[1]{";
 	if (value == "1") {
@@ -178,8 +189,10 @@ int do_latexdef(char** argv) {
 	return 0;
 }
 
-int do_latex_gle_version(char** argv) {
-	string fname = argv[0];
+int do_latex_gle_version(char** argv, int num_args) {
+	string fname = "";
+	if(num_args >= 1) fname = argv[0];
+	if(fname == "") return 0;
 	ofstream ofile(fname.c_str(), ios::app);
 	ofile << "\\newcommand{\\gleversion}{" << GLEVN << "}" << std::endl;
 	ofile.close();
@@ -188,16 +201,17 @@ int do_latex_gle_version(char** argv) {
 
 int main(int argc, char** argv) {
 	string option = argv[1];
+	cout << option;
 	if (option == "-setrelpath") {
 #ifndef __WIN32__
-		return do_setrelpath(argv + 2);
+		return do_setrelpath(argv + 2, argc-2);
 #else
 		return 0;
 #endif
 	} else if (option == "-latexdef") {
-		return do_latexdef(argv + 2);
+		return do_latexdef(argv + 2,argc-2);
 	} else if (option == "-latexversion") {
-		return do_latex_gle_version(argv + 2);
+		return do_latex_gle_version(argv + 2,argc-2);
 	}
 	return -1;
 }

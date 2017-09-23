@@ -25,7 +25,11 @@
 
 using namespace std;
 
-ConsoleWindow::ConsoleWindow(QWidget* parent, QSplitter* splitter) : QTextEdit(parent), output() {
+ConsoleWindow::ConsoleWindow(QWidget* parent, QSplitter* splitter) : 
+	QTextEdit(parent), 
+	output(),
+	autoShowSize(0)
+{
 	QFont font;
 	font.setFamily("Courier");
 	font.setFixedPitch(true);

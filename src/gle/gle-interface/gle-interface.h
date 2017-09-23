@@ -48,15 +48,21 @@
 #endif
 #endif
 
-#ifdef Q_WS_WIN
+#if defined(Q_WS_WIN) && !defined(_MSC_VER)
 #define INCLUDE_GLE_DLL
 #endif
 
-#if defined(__WIN32__) && (defined(HAVE_LIBGLE) || defined(INCLUDE_GLE_DLL))
+#if defined(__WIN32__) && defined(INCLUDE_GLE_DLL)
 	#define DLLEXPORT __declspec( dllexport )
 	#define DLLIMPORT __declspec( dllimport )
+	#ifndef _MSC_VER
 	#define DLLCLASSEXPORT __attribute__ ((dllexport))
 	#define DLLCLASSIMPORT __attribute__ ((dllimport))
+	#else
+	// msvc does not have __attribute__
+	#define DLLCLASSEXPORT __declspec( dllexport )
+	#define DLLCLASSIMPORT __declspec( dllimport )
+	#endif
 #else
 	#define DLLEXPORT
 	#define DLLIMPORT
@@ -65,10 +71,20 @@
 #endif
 
 #ifdef INCLUDE_GLE_DLL
+#ifndef _MSC_VER
 #define DLLFCT DLLIMPORT
+#else
+// in msvc  class function delcared as ddlimport or export do not need to be declared dllepxort or dllimport
+#define DLLFCT
+#endif
 #define DLLCLASS DLLCLASSIMPORT
 #else
+#ifndef _MSC_VER
 #define DLLFCT DLLEXPORT
+#else
+// in msvc  class function delcared as ddlimport or export do not need to be declared dllepxort or dllimport
+#define DLLFCT
+#endif
 #define DLLCLASS DLLCLASSEXPORT
 #endif
 

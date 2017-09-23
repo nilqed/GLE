@@ -50,4 +50,4 @@ all: $(OBJECTS)
 $(OBJECTS): $(INCLUDES)
 
 clean:
-	-erase $(OBJECTS)
+	-$(RM) $(OBJECTS)

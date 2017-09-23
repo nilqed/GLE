@@ -36,118 +36,41 @@
 #                                                                      #
 ########################################################################
 
-#
-# files list for GLE to be included by the makefiles
-#
+#!/usr/bin/perl
+use strict;
+use warnings;
+#my $gle = "gle";
+my $gle = "../../build/bin/gle";
+#if ($ENV{"RUNBUILD"} == 1) {
 
-INCLUDES = \
-all.h \
-axis.h \
-begin.h \
-color.h \
-core.h \
-font.h \
-glepro.h \
-op_def.h \
-graph.h \
-justify.h \
-key.h \
-d_interface.h \
-pass.h \
-polish.h \
-tex.h \
-gprint.h \
-token.h \
-cutils.h \
-var.h \
-config.h \
-cmdline.h \
-glearray.h \
-gle-block.h \
-numberformat.h \
-builtin-double.h \
-gle-poppler.h \
-gle-interface$(PATH_SEP)gle-shapemath.h \
-gle-interface$(PATH_SEP)gle-base.h \
-gle-interface$(PATH_SEP)gle-datatype.h
+#} 
 
-OBJECTS = \
-axis.$(OBJ_SUFF) \
-b_tab.$(OBJ_SUFF) \
-b_text.$(OBJ_SUFF) \
-begin.$(OBJ_SUFF) \
-core.$(OBJ_SUFF) \
-curve.$(OBJ_SUFF) \
-color.$(OBJ_SUFF) \
-drawit.$(OBJ_SUFF) \
-eval.$(OBJ_SUFF) \
-file_io.$(OBJ_SUFF) \
-fitbez.$(OBJ_SUFF) \
-fitcf.$(OBJ_SUFF) \
-fn.$(OBJ_SUFF) \
-font.$(OBJ_SUFF) \
-general.$(OBJ_SUFF) \
-op_def.$(OBJ_SUFF) \
-gprint.$(OBJ_SUFF) \
-graph.$(OBJ_SUFF) \
-graph2.$(OBJ_SUFF) \
-key.$(OBJ_SUFF) \
-keyword.$(OBJ_SUFF) \
-leastsq.$(OBJ_SUFF) \
-memory.$(OBJ_SUFF) \
-mychar.$(OBJ_SUFF) \
-pass.$(OBJ_SUFF) \
-polish.$(OBJ_SUFF) \
-run.$(OBJ_SUFF) \
-savgol.$(OBJ_SUFF) \
-sub.$(OBJ_SUFF) \
-tex.$(OBJ_SUFF) \
-token.$(OBJ_SUFF) \
-var.$(OBJ_SUFF) \
-cutils.$(OBJ_SUFF) \
-texinterface.$(OBJ_SUFF) \
-d_ps.$(OBJ_SUFF) \
-d_svg.$(OBJ_SUFF) \
-d_x.$(OBJ_SUFF) \
-d_dummy.$(OBJ_SUFF) \
-d_cairo.$(OBJ_SUFF) \
-config.$(OBJ_SUFF) \
-numberformat.$(OBJ_SUFF) \
-glearray.$(OBJ_SUFF) \
-cmdline.$(OBJ_SUFF) \
-gle-block.$(OBJ_SUFF) \
-gle-sourcefile.$(OBJ_SUFF) \
-gle-interface.$(OBJ_SUFF) \
-gle-base.$(OBJ_SUFF) \
-gle-datatype.$(OBJ_SUFF) \
-gle-poppler.$(OBJ_SUFF) \
-builtin-double.$(OBJ_SUFF)
+my $clean = 0;
+if(@ARGV >= 1){
+	if(uc($ARGV[0]) eq "CLEAN"){
+		$clean = 1;
+	}
+}
 
-GLE_CPP =gle.cpp
+open(IN, "fonts.csv");
+while (my $line = <IN>) {
+	chop($line);
+	if ($line =~ /^([0-9]+)\,([^\,]+)\,/) {
+		my $id = $1; 
+		my $name = $2;
+		if($clean == 0){
+			if (!(-f "$id.pdf")) {
+				open(OUT, ">$name.gle");
+				print OUT "size 7.75 7\n";
+				print OUT "include \"font-table.gle\"\n";
+				print OUT "\@show_table \"$name\" \"$id\"\n";
+				close(OUT);
+				system("$gle -d pdf -o $name.pdf font-table.gle $name");
+			}
+		}else{
+			system("erase /QE $name.gle $name.eps $name.pdf");
+		}
 
-LINKOBJS = \
-bitmap$(PATH_SEP)img2ps.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)lzwencode.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glegif.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glejpeg.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)gletiff.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glepng.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)ascii85.$(OBJ_SUFF) \
-surface$(PATH_SEP)gsurface.$(OBJ_SUFF) \
-surface$(PATH_SEP)hide.$(OBJ_SUFF) \
-surface$(PATH_SEP)fcontour.$(OBJ_SUFF) \
-surface$(PATH_SEP)ffitcontour.$(OBJ_SUFF) \
-surface$(PATH_SEP)gcontour.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)let.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)fit.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)ffit.$(OBJ_SUFF) \
-tokens$(PATH_SEP)Tokenizer.$(OBJ_SUFF) \
-tokens$(PATH_SEP)StringKeyHash.$(OBJ_SUFF) \
-tokens$(PATH_SEP)BinIO.$(OBJ_SUFF)
-
-SVGOBJS =
-
-PNGOBJS =
-
-JPEGOBJS =
-
+	}
+}
+close(IN);

@@ -44,12 +44,9 @@
 
 !include ..\..\config.vc
 
-RM = del
-
 ADOBE35 = Adobe-Core35_AFMs-314
 
-FVE = \
-	glemark.fve plba.fve plcc.fve plcg.fve plci.fve \
+FVE = glemark.fve plba.fve plcc.fve plcg.fve plci.fve \
 	plcr.fve plcs.fve pldr.fve plge.fve \
 	plgg.fve plgi.fve plsa.fve plsg.fve \
 	plsr.fve plss.fve plsym1.fve plsym2.fve \
@@ -58,8 +55,7 @@ FVE = \
 	texcmssb.fve texcmssi.fve texcmsy.fve texcmti.fve \
 	texcmtt.fve
 
-FMT = 	\
-	glemark.fmt \
+FMT = glemark.fmt \
 	texcmb.fmt texcmex.fmt texcmitt.fmt texcmmi.fmt texcmr.fmt \
 	texcmsl.fmt texcmssb.fmt texcmss.fmt texcmssi.fmt texcmsy.fmt \
 	texcmti.fmt texcmtt.fmt \
@@ -75,128 +71,129 @@ FMT = 	\
 
 all: $(FVE) $(FMT) movefonts
 
+MAKEFMT =$(PROJECT_BINDIR)\bin\makefmt
+
 .SUFFIXES: .fve .fmt .afm .gle
 
-psagb.fmt: $(ADOBE35)/ITCAvantGarde-Book.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psagb.fmt: $(ADOBE35)\ITCAvantGarde-Book.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psagbo.fmt: $(ADOBE35)/ITCAvantGarde-BookOblique.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psagbo.fmt: $(ADOBE35)\ITCAvantGarde-BookOblique.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psagd.fmt: $(ADOBE35)/ITCAvantGarde-Demi.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psagd.fmt: $(ADOBE35)\ITCAvantGarde-Demi.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psagdo.fmt: $(ADOBE35)/ITCAvantGarde-DemiOblique.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psagdo.fmt: $(ADOBE35)\ITCAvantGarde-DemiOblique.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psbd.fmt: $(ADOBE35)/ITCBookman-Demi.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psbd.fmt: $(ADOBE35)\ITCBookman-Demi.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psbdi.fmt: $(ADOBE35)/ITCBookman-DemiItalic.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psbdi.fmt: $(ADOBE35)\ITCBookman-DemiItalic.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psbli.fmt: $(ADOBE35)/ITCBookman-LightItalic.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psbli.fmt: $(ADOBE35)\ITCBookman-LightItalic.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psbl.fmt: $(ADOBE35)/ITCBookman-Light.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psbl.fmt: $(ADOBE35)\ITCBookman-Light.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psc.fmt: $(ADOBE35)/Courier.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psc.fmt: $(ADOBE35)\Courier.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pscb.fmt: $(ADOBE35)/Courier-Bold.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pscb.fmt: $(ADOBE35)\Courier-Bold.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pscbo.fmt: $(ADOBE35)/Courier-BoldOblique.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pscbo.fmt: $(ADOBE35)\Courier-BoldOblique.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psco.fmt: $(ADOBE35)/Courier-Oblique.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psco.fmt: $(ADOBE35)\Courier-Oblique.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psh.fmt: $(ADOBE35)/Helvetica.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psh.fmt: $(ADOBE35)\Helvetica.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pshb.fmt: $(ADOBE35)/Helvetica-Bold.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pshb.fmt: $(ADOBE35)\Helvetica-Bold.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pshbo.fmt: $(ADOBE35)/Helvetica-BoldOblique.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pshbo.fmt: $(ADOBE35)\Helvetica-BoldOblique.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pshn.fmt: $(ADOBE35)/Helvetica-Narrow.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pshn.fmt: $(ADOBE35)\Helvetica-Narrow.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pshnb.fmt: $(ADOBE35)/Helvetica-NarrowBold.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pshnb.fmt: $(ADOBE35)\Helvetica-NarrowBold.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pshnbo.fmt: $(ADOBE35)/Helvetica-NarrowBoldOblique.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pshnbo.fmt: $(ADOBE35)\Helvetica-NarrowBoldOblique.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pshno.fmt: $(ADOBE35)/Helvetica-NarrowOblique.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pshno.fmt: $(ADOBE35)\Helvetica-NarrowOblique.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psho.fmt: $(ADOBE35)/Helvetica-Oblique.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psho.fmt: $(ADOBE35)\Helvetica-Oblique.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psncsb.fmt: $(ADOBE35)/NewCenturySchlbk-Bold.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psncsb.fmt: $(ADOBE35)\NewCenturySchlbk-Bold.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psncsbi.fmt: $(ADOBE35)/NewCenturySchlbk-BoldItalic.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psncsbi.fmt: $(ADOBE35)\NewCenturySchlbk-BoldItalic.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psncsi.fmt: $(ADOBE35)/NewCenturySchlbk-Italic.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psncsi.fmt: $(ADOBE35)\NewCenturySchlbk-Italic.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psncsr.fmt: $(ADOBE35)/NewCenturySchlbk-Roman.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psncsr.fmt: $(ADOBE35)\NewCenturySchlbk-Roman.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pspb.fmt: $(ADOBE35)/Palatino-Bold.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pspb.fmt: $(ADOBE35)\Palatino-Bold.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pspbi.fmt: $(ADOBE35)/Palatino-BoldItalic.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pspbi.fmt: $(ADOBE35)\Palatino-BoldItalic.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pspi.fmt: $(ADOBE35)/Palatino-Italic.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pspi.fmt: $(ADOBE35)\Palatino-Italic.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pspr.fmt: $(ADOBE35)/Palatino-Roman.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pspr.fmt: $(ADOBE35)\Palatino-Roman.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pstb.fmt: $(ADOBE35)/Times-Bold.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pstb.fmt: $(ADOBE35)\Times-Bold.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pstbi.fmt: $(ADOBE35)/Times-BoldItalic.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pstbi.fmt: $(ADOBE35)\Times-BoldItalic.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-psti.fmt: $(ADOBE35)/Times-Italic.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+psti.fmt: $(ADOBE35)\Times-Italic.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pstr.fmt: $(ADOBE35)/Times-Roman.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pstr.fmt: $(ADOBE35)\Times-Roman.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pszcmi.fmt: $(ADOBE35)/ITCZapfChancery-MediumItalic.afm
-	$(PROJECT_BINDIR)/bin/makefmt -e adobestd.enc -o $@ $<
+pszcmi.fmt: $(ADOBE35)\ITCZapfChancery-MediumItalic.afm
+	$(MAKEFMT) -e adobestd.enc -o $@ $**
 
-pssym.fmt: $(ADOBE35)/Symbol.afm
-	$(PROJECT_BINDIR)/bin/makefmt -o $@ $<
+pssym.fmt: $(ADOBE35)\Symbol.afm
+	$(MAKEFMT) -o $@ $**
 
-pszd.fmt: $(ADOBE35)/ZapfDingbats.afm
-	$(PROJECT_BINDIR)/bin/makefmt -o $@ $<
+pszd.fmt: $(ADOBE35)\ZapfDingbats.afm
+	$(MAKEFMT) -o $@ $**
 
 .afm.fmt:
-	$(PROJECT_BINDIR)\bin\makefmt $<
+	$(MAKEFMT) $**
 
 .gle.fve:
-	$(PROJECT_BINDIR)\bin\fbuild $<
+	$(PROJECT_BINDIR)\bin\fbuild $**
 
 clean:
-	-$(RM) *.fve *.fmt
+	-$(RM) *.fve *.fmt $(PROJECT_BINDIR)\font\*.fve $(PROJECT_BINDIR)\font\*.fmt $(PROJECT_BINDIR)\font\font.dat $(PROJECT_BINDIR)\font\psfont.dat
+	-$(RMDIR) $(PROJECT_BINDIR)\font
+
 
 movefonts:
-	-mkdir $(PROJECT_BINDIR)\font
-	-copy *.fve $(PROJECT_BINDIR)\font
-	-copy *.fmt $(PROJECT_BINDIR)\font
-	-copy font.dat $(PROJECT_BINDIR)\font
-	-copy psfont.dat $(PROJECT_BINDIR)\font
+	-mkdir /Ne $(PROJECT_BINDIR)\font
+	-copy /QE *.fve *.fmt font.dat psfont.dat $(PROJECT_BINDIR)\font
 
 d2u:
 	d2u -u -z $(AFM)

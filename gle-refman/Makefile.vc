@@ -1,0 +1,239 @@
+########################################################################
+#                                                                      #
+# GLE - Graphics Layout Engine <http://www.gle-graphics.org/>          #
+#                                                                      #
+# Modified BSD License                                                 #
+#                                                                      #
+# Copyright (C) 2009 GLE.                                              #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+#    1. Redistributions of source code must retain the above copyright #
+# notice, this list of conditions and the following disclaimer.        #
+#                                                                      #
+#    2. Redistributions in binary form must reproduce the above        #
+# copyright notice, this list of conditions and the following          #
+# disclaimer in the documentation and/or other materials provided with #
+# the distribution.                                                    #
+#                                                                      #
+#    3. The name of the author may not be used to endorse or promote   #
+# products derived from this software without specific prior written   #
+# permission.                                                          #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR   #
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       #
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       #
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    #
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER #
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  #
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
+#                                                                      #
+########################################################################
+
+!include "..\config.vc"
+
+GLE_FIGURES	=\
+title\glelogo.pdf \
+advanced\fig\gc_clip.pdf \
+advanced\fig\gc_join.pdf \
+advanced\fig\house.pdf \
+advanced\fig\join.pdf \
+advanced\fig\texgraph.inc \
+appendix\fig\ap_marker.pdf \
+appendix\fig\ap_fonts.pdf \
+appendix\fig\wall.pdf \
+appendix\fig\join.pdf \
+appendix\fig\single.pdf \
+appendix\fig\stack2.pdf \
+appendix\fig\stack1.pdf \
+appendix\fig\stack4b.pdf \
+appendix\fig\loop.pdf \
+appendix\fig\clip.pdf \
+appendix\fig\color_sample.inc \
+appendix\fig\color_list_svg.inc \
+appendix\fig\symbols.inc \
+tutorial\fig\tut_simple.inc \
+tutorial\fig\tut_graph.inc \
+tutorial\fig\tut_graph2.inc \
+tutorial\fig\tut_graph3.inc \
+primitives\fig\gc_arc.pdf \
+primitives\fig\gc_arcto.pdf\
+primitives\fig\gc_beginbox.pdf\
+primitives\fig\gc_bezier.pdf\
+primitives\fig\gc_cap.pdf\
+primitives\fig\gc_color.pdf \
+primitives\fig\gc_curve.pdf\
+primitives\fig\gc_fontlwidth.pdf\
+primitives\fig\gc_for.pdf\
+primitives\fig\gc_justify.pdf\
+primitives\fig\gc_ljoin.pdf\
+primitives\fig\gc_lstyle.pdf \
+primitives\fig\gc_marker.inc\
+primitives\fig\gc_nonzero.pdf\
+primitives\fig\gc_rot1.pdf\
+primitives\fig\gc_rot2.pdf\
+primitives\fig\gc_table.pdf\
+primitives\fig\gc_text.pdf \
+primitives\fig\gc_write.pdf\
+primitives\fig\gc_xend.pdf\
+primitives\fig\grids.inc\
+primitives\fig\setcolor.inc\
+primitives\fig\curve.inc\
+primitives\fig\fullpage.inc\
+primitives\fig\gc_arrstyle.pdf \
+primitives\fig\curve_length.inc \
+graph\fig\gc_axes.inc \
+graph\fig\gc_axisall.inc \
+graph\fig\gc_bargraph1.inc \
+graph\fig\gc_bargraph2.inc \
+graph\fig\gc_bargraph_3d.inc \
+graph\fig\gc_err.inc \
+graph\fig\gc_fillgraph.inc \
+graph\fig\gc_let.inc \
+graph\fig\gc_names.inc \
+graph\fig\gc_nomiss.inc \
+graph\fig\gc_fit.inc \
+graph\fig\gc_fitfct.inc \
+graph\fig\linemode.inc \
+graph\fig\gc_loglabels.inc \
+graph\fig\gc_graphscale.inc \
+graph\fig\gc_horizbar.inc \
+graph\fig\gc_mathmode.inc \
+graph\fig\gc_logsubticks.inc \
+graph\fig\noisysine.inc \
+graph\fig\age.inc \
+graph\fig\normal.inc \
+graph\fig\gridmode.inc \
+graph\fig\y2axis-scale.inc \
+graph\fig\discontinuity.inc \
+graph\fig\sqroot.inc \
+graph\fig\cos2t.inc \
+graph\fig\shadow.inc \
+graph\fig\semitrans.inc \
+key\fig\k_key.inc \
+key\fig\keypos.inc \
+key\fig\grkey.inc \
+key\fig\multicolkey.inc \
+utilities\fig\xyz.pdf \
+utilities\fig\fitls.pdf\
+utilities\fig\fitz1.pdf\
+utilities\fig\jack.pdf\
+utilities\fig\saddle.pdf\
+utilities\fig\surf1.pdf\
+utilities\fig\surf2.pdf\
+utilities\fig\surf3.pdf\
+utilities\fig\surf4.pdf\
+utilities\fig\surf5.pdf\
+utilities\fig\surf5b.pdf\
+utilities\fig\saddle-contour.inc\
+utilities\fig\volcano.inc\
+utilities\fig\gaussian.inc\
+prog\fig\axisformat.pdf
+
+GLE				=..\build\bin\gle -cairo
+GLEBTOOL		=..\build\bin\glebtool
+INSTALL_FOLDER	=..\build\doc
+
+all: $(GLE_FIGURES) defstex fonts pdf $(INSTALL_FOLDER) $(INSTALL_FOLDER)\gle-manual.pdf
+
+$(INSTALL_FOLDER):
+	-mkdir /Ne $(INSTALL_FOLDER)
+
+$(INSTALL_FOLDER)\gle-manual.pdf: gle-manual.pdf
+	copy /QE gle-manual.pdf $(INSTALL_FOLDER)
+
+pdf: defs.tex
+	texify -p -q gle-manual.tex
+
+dvi:
+	texify -q gle-manual.tex
+
+index:
+	makeindex gle-manual
+
+fonts:
+	cd fonttest & perl winfonts.pl
+	cd fonttest & ..\$(GLEBTOOL) -latexdef extrafonts.tex extrafonts $(HAVE_EXTRA_FONTS)
+
+fonts-clean:
+	-erase /QE fonttest\extrafonts.tex
+	cd fonttest & perl winfonts.pl clean
+
+clean: fonts-clean
+	-erase /QE *.pdf *.idx *.aux *.dvi *.log *.out *.ilg *.ind *.toc defs.tex
+	-erase /QE $(GLE_FIGURES)
+	-erase /QE $(GLE_FIGURES:.inc=_inc.pdf)
+	-rmdir /SQ /Ne utilities\fig\.gle
+	-rmdir /SQ /Ne prog\fig\.gle
+	-rmdir /SQ /Ne graph\fig\.gle
+	-rmdir /SQ /Ne key\fig\.gle
+	-rmdir /SQ /Ne primitives\fig\.gle
+	-rmdir /SQ /Ne tutorial\fig\.gle
+	-rmdir /SQ /Ne appendix\fig\.gle
+	-rmdir /SQ /Ne advanced\fig\.gle
+
+# PDFS = $(addsuffix .pdf, $(basename $(EPSS)))
+
+# %.pdf: %.eps
+# 	epstopdf $<
+
+defstex:
+	$(GLEBTOOL) -latexdef defs.tex hascairo $(HAVE_CAIRO)
+	$(GLEBTOOL) -latexversion defs.tex
+
+.SUFFIXES: .gle .pdf .inc
+
+{title\}.gle{title\}.pdf:
+	$(GLE) -d pdf $<
+
+{advanced\fig}.gle{advanced\fig}.pdf:
+	$(GLE) -d pdf $<
+
+{advanced\fig}.gle{advanced\fig}.inc:
+	$(GLE) -texincprefix advanced/fig/ -inc -d pdf $<
+
+{appendix\fig}.gle{appendix\fig}.pdf:
+	$(GLE) -d pdf $<
+
+{appendix\fig}.gle{appendix\fig}.inc:
+	$(GLE) -texincprefix appendix/fig/ -inc -d pdf $<
+
+{tutorial\fig}.gle{tutorial\fig}.pdf:
+	$(GLE) -d pdf $<
+
+{tutorial\fig}.gle{tutorial\fig}.inc:
+	$(GLE) -texincprefix tutorial/fig/ -inc -d pdf $<
+
+{primitives\fig}.gle{primitives\fig}.pdf:
+	$(GLE) -d pdf $<
+
+{primitives\fig}.gle{primitives\fig}.inc:
+	$(GLE) -texincprefix primitives/fig/ -inc -d pdf $<
+
+{graph\fig}.gle{graph\fig}.pdf:
+	$(GLE) -d pdf $<
+
+{graph\fig}.gle{graph\fig}.inc:
+	$(GLE) -texincprefix graph/fig/ -inc -d pdf $<
+
+{utilities\fig}.gle{utilities\fig}.pdf:
+	$(GLE) -d pdf $<
+
+{utilities\fig}.gle{utilities\fig}.inc:
+	cd $(@D) & ..\..\$(GLE) -texincprefix utilities/fig/ -inc -d pdf $(<F)
+
+{key\fig}.gle{key\fig}.pdf:
+	$(GLE) -d pdf $<
+
+{key\fig}.gle{key\fig}.inc:
+	$(GLE) -texincprefix key/fig/ -inc -d pdf $<
+
+{prog\fig}.gle{prog\fig}.pdf:
+	$(GLE) -d pdf $<
+

@@ -35,119 +35,70 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
 #                                                                      #
 ########################################################################
-
 #
-# files list for GLE to be included by the makefiles
+# makefile.vc for GLE v4.0
+# for compilation with MS vc++ .net
 #
+#
+HAVE_QT = 1
+!include ..\..\config.vc
+#
+!include files.txt
 
-INCLUDES = \
-all.h \
-axis.h \
-begin.h \
-color.h \
-core.h \
-font.h \
-glepro.h \
-op_def.h \
-graph.h \
-justify.h \
-key.h \
-d_interface.h \
-pass.h \
-polish.h \
-tex.h \
-gprint.h \
-token.h \
-cutils.h \
-var.h \
-config.h \
-cmdline.h \
-glearray.h \
-gle-block.h \
-numberformat.h \
-builtin-double.h \
-gle-poppler.h \
-gle-interface$(PATH_SEP)gle-shapemath.h \
-gle-interface$(PATH_SEP)gle-base.h \
-gle-interface$(PATH_SEP)gle-datatype.h
+!ifdef HAVE_LIBTIFF
+OBJECTS = $(OBJECTS) $(TIFFOBJS)
+!endif
 
-OBJECTS = \
-axis.$(OBJ_SUFF) \
-b_tab.$(OBJ_SUFF) \
-b_text.$(OBJ_SUFF) \
-begin.$(OBJ_SUFF) \
-core.$(OBJ_SUFF) \
-curve.$(OBJ_SUFF) \
-color.$(OBJ_SUFF) \
-drawit.$(OBJ_SUFF) \
-eval.$(OBJ_SUFF) \
-file_io.$(OBJ_SUFF) \
-fitbez.$(OBJ_SUFF) \
-fitcf.$(OBJ_SUFF) \
-fn.$(OBJ_SUFF) \
-font.$(OBJ_SUFF) \
-general.$(OBJ_SUFF) \
-op_def.$(OBJ_SUFF) \
-gprint.$(OBJ_SUFF) \
-graph.$(OBJ_SUFF) \
-graph2.$(OBJ_SUFF) \
-key.$(OBJ_SUFF) \
-keyword.$(OBJ_SUFF) \
-leastsq.$(OBJ_SUFF) \
-memory.$(OBJ_SUFF) \
-mychar.$(OBJ_SUFF) \
-pass.$(OBJ_SUFF) \
-polish.$(OBJ_SUFF) \
-run.$(OBJ_SUFF) \
-savgol.$(OBJ_SUFF) \
-sub.$(OBJ_SUFF) \
-tex.$(OBJ_SUFF) \
-token.$(OBJ_SUFF) \
-var.$(OBJ_SUFF) \
-cutils.$(OBJ_SUFF) \
-texinterface.$(OBJ_SUFF) \
-d_ps.$(OBJ_SUFF) \
-d_svg.$(OBJ_SUFF) \
-d_x.$(OBJ_SUFF) \
-d_dummy.$(OBJ_SUFF) \
-d_cairo.$(OBJ_SUFF) \
-config.$(OBJ_SUFF) \
-numberformat.$(OBJ_SUFF) \
-glearray.$(OBJ_SUFF) \
-cmdline.$(OBJ_SUFF) \
-gle-block.$(OBJ_SUFF) \
-gle-sourcefile.$(OBJ_SUFF) \
-gle-interface.$(OBJ_SUFF) \
-gle-base.$(OBJ_SUFF) \
-gle-datatype.$(OBJ_SUFF) \
-gle-poppler.$(OBJ_SUFF) \
-builtin-double.$(OBJ_SUFF)
+!ifdef HAVE_LIBPNG
+OBJECTS = $(OBJECTS) $(PNGOBJS)
+!endif
 
-GLE_CPP =gle.cpp
+!ifdef HAVE_LIBJPEG
+OBJECTS = $(OBJECTS) $(JPEGOBJS)
+!endif
 
-LINKOBJS = \
-bitmap$(PATH_SEP)img2ps.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)lzwencode.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glegif.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glejpeg.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)gletiff.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glepng.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)ascii85.$(OBJ_SUFF) \
-surface$(PATH_SEP)gsurface.$(OBJ_SUFF) \
-surface$(PATH_SEP)hide.$(OBJ_SUFF) \
-surface$(PATH_SEP)fcontour.$(OBJ_SUFF) \
-surface$(PATH_SEP)ffitcontour.$(OBJ_SUFF) \
-surface$(PATH_SEP)gcontour.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)let.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)fit.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)ffit.$(OBJ_SUFF) \
-tokens$(PATH_SEP)Tokenizer.$(OBJ_SUFF) \
-tokens$(PATH_SEP)StringKeyHash.$(OBJ_SUFF) \
-tokens$(PATH_SEP)BinIO.$(OBJ_SUFF)
+MOC_OBJECTS = $(MOC_SOURCES:.cpp=.moc_obj)
+QRC_OBJECTS = $(QRC_SOURCES:.qrc=.qrc_obj)
+OBJECTS		= $(OBJECTS) $(MOC_OBJECTS) $(QRC_OBJECTS)
 
-SVGOBJS =
+all: $(OBJECTS) qgle.res $(PROJECT_BINDIR)\bin\qgle$(EXE_SUFF)
 
-PNGOBJS =
+3dviewer.moc_obj: 3dviewer.h
+about.moc_obj: about.h
+amove.moc_obj: amove.h
+circle.moc_obj: circle.h
+curve.moc_obj: curve.h
+ellipse.moc_obj: ellipse.h
+grid.moc_obj: grid.h
+settings.moc_obj: settings.h
+settings_dialog.moc_obj: settings_dialog.h
+text.moc_obj: text.h
+snapline.moc_obj: snapline.h
+propertyeditor.moc_obj: propertyeditor.h
+propertymodel.moc_obj: propertymodel.h
+serverthread.moc_obj: serverthread.h
+newfile.moc_obj: newfile.h
+downloader.moc_obj : downloader.h
+dialogues.moc_obj  : dialogues.h
+colourpicker.moc_obj : colourpicker.h
+snapline.moc_obj : snapline.h
+consolewindow.moc_obj: consolewindow.h
+arc.moc_obj: arc.h
+drawingobject.moc_obj: drawingobject.h
+colourbutton.moc_obj: colourbutton.h
+component.moc_obj: component.h
+variantdelegate.moc_obj: variantdelegate.h
+gledrawing.moc_obj: gledrawing.h
+polararray.moc_obj: polararray.h
+mainwindow.moc_obj: mainwindow.h
+objectblocks.moc_obj: objectblocks.h
+qgs.moc_obj: qgs.h
+qgle.qrc_obj: qgle.qrc
 
-JPEGOBJS =
+
+$(PROJECT_BINDIR)\bin\qgle$(EXE_SUFF): $(GLEOBJS) $(OBJECTS)
+	$(AR) $(LINKFLAGS) /out:$(PROJECT_BINDIR)\bin\qgle$(EXE_SUFF) $(OBJECTS) libgle-graphics_s.lib $(LIBS) qgle.res
+
+clean:
+	-$(RM) $(OBJECTS) qgle.res $(PSOBJS) $(SVGOBJS) $(MOC_SOURCES:.cpp=.moc_cpp) $(QRC_SOURCES:.qrc=.qrc_cpp) $(PROJECT_BINDIR)\bin\qgle$(EXE_SUFF)
 

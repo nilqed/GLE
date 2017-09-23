@@ -136,8 +136,8 @@ private slots:
 	void openDownloadDialogue();
 	//! Open file in new window
 	void openFileInNewWindow();
-   //! Browse the folder containing the current script
-   void browseScriptFolder();
+	//! Browse the folder containing the current script
+	void browseScriptFolder();
 	//! Open an existing file
 	void openFile(QString fileName = QString(), bool isOnStartup = false);
 	//! Open a recently opened file
@@ -345,8 +345,8 @@ private:
 	QAction *openInNewWindowAct;
 	//! Open an existing file
 	QAction *openAct;
-   //! Browse the script folder
-   QAction *browseAct;
+	//! Browse the script folder
+	QAction *browseAct;
 	//! Save the file under a new name
 	QAction *saveAsAct;
 	//! Save the file

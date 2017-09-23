@@ -42,8 +42,9 @@
 
 all:
 	set GLE_TOP=$(PROJECT_BINDIR)
-	-copy init.tex $(PROJECT_BINDIR)
+	copy /QE init.tex $(PROJECT_BINDIR)
 	$(PROJECT_BINDIR)\bin\gle -mkinittex
+#-copy init.tex $(PROJECT_BINDIR)
 
 clean:
-	-del $(PROJECT_BINDIR)\inittex.ini $(PROJECT_BINDIR)\init.tex init.ps
+	-$(RM) $(PROJECT_BINDIR)\inittex.ini $(PROJECT_BINDIR)\init.tex

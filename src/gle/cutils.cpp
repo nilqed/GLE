@@ -42,6 +42,7 @@
 #include <math.h>
 #include <errno.h>
 #include <string.h>
+#include <algorithm>
 
 #ifdef HAVE_CONFIG_H
     #include "../config.h"

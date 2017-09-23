@@ -23,7 +23,8 @@
 #include <QSettings>
 
 // Constructor: create the settings object
-GLESettings::GLESettings(QObject *parent) : QObject(parent)
+GLESettings::GLESettings(QObject *parent) : QObject(parent),
+consoleWindowAutoShowSize(0)
 {
 	settingStore = new QSettings("gle", "qgle", this);
 }

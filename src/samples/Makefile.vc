@@ -39,7 +39,7 @@
 #makefile for building sample.eps
 #
 
-RUN_GLE = $(PROJECT_BINDIR)\bin\gle
+RUN_GLE = $(PROJECT_BINDIR)\bin\gle --cairo
 !include ..\..\config.vc
 
 all:
@@ -52,6 +52,7 @@ all:
 	-$(RUN_GLE) hubble.gle
 	-$(RUN_GLE) CommentTest.gle
 	-$(RUN_GLE) logo.gle
+	-$(RUN_GLE) sho_wavefunction.gle
 
 clean:
-	-del sample.eps IncludeTest.eps MathTest.eps Graph.eps sine.eps hubble.eps CommentTest.eps logo.eps
+	-$(RM) sample.eps IncludeTest.eps MathTest.eps Graph.eps sine.eps hubble.eps CommentTest.eps logo.eps sho_wavefunction.eps

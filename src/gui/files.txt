@@ -41,109 +41,80 @@
 #
 
 INCLUDES = \
-all.h \
-axis.h \
-begin.h \
-color.h \
-core.h \
-font.h \
-glepro.h \
-op_def.h \
-graph.h \
-justify.h \
-key.h \
-d_interface.h \
-pass.h \
-polish.h \
-tex.h \
-gprint.h \
-token.h \
-cutils.h \
-var.h \
-config.h \
-cmdline.h \
-glearray.h \
-gle-block.h \
-numberformat.h \
-builtin-double.h \
-gle-poppler.h \
-gle-interface$(PATH_SEP)gle-shapemath.h \
-gle-interface$(PATH_SEP)gle-base.h \
-gle-interface$(PATH_SEP)gle-datatype.h
 
 OBJECTS = \
-axis.$(OBJ_SUFF) \
-b_tab.$(OBJ_SUFF) \
-b_text.$(OBJ_SUFF) \
-begin.$(OBJ_SUFF) \
-core.$(OBJ_SUFF) \
-curve.$(OBJ_SUFF) \
-color.$(OBJ_SUFF) \
-drawit.$(OBJ_SUFF) \
-eval.$(OBJ_SUFF) \
-file_io.$(OBJ_SUFF) \
-fitbez.$(OBJ_SUFF) \
-fitcf.$(OBJ_SUFF) \
-fn.$(OBJ_SUFF) \
-font.$(OBJ_SUFF) \
-general.$(OBJ_SUFF) \
-op_def.$(OBJ_SUFF) \
-gprint.$(OBJ_SUFF) \
-graph.$(OBJ_SUFF) \
-graph2.$(OBJ_SUFF) \
-key.$(OBJ_SUFF) \
-keyword.$(OBJ_SUFF) \
-leastsq.$(OBJ_SUFF) \
-memory.$(OBJ_SUFF) \
-mychar.$(OBJ_SUFF) \
-pass.$(OBJ_SUFF) \
-polish.$(OBJ_SUFF) \
-run.$(OBJ_SUFF) \
-savgol.$(OBJ_SUFF) \
-sub.$(OBJ_SUFF) \
-tex.$(OBJ_SUFF) \
-token.$(OBJ_SUFF) \
-var.$(OBJ_SUFF) \
-cutils.$(OBJ_SUFF) \
-texinterface.$(OBJ_SUFF) \
-d_ps.$(OBJ_SUFF) \
-d_svg.$(OBJ_SUFF) \
-d_x.$(OBJ_SUFF) \
-d_dummy.$(OBJ_SUFF) \
-d_cairo.$(OBJ_SUFF) \
-config.$(OBJ_SUFF) \
-numberformat.$(OBJ_SUFF) \
-glearray.$(OBJ_SUFF) \
-cmdline.$(OBJ_SUFF) \
-gle-block.$(OBJ_SUFF) \
-gle-sourcefile.$(OBJ_SUFF) \
-gle-interface.$(OBJ_SUFF) \
-gle-base.$(OBJ_SUFF) \
-gle-datatype.$(OBJ_SUFF) \
-gle-poppler.$(OBJ_SUFF) \
-builtin-double.$(OBJ_SUFF)
+3dviewer.$(OBJ_SUFF) \
+about.$(OBJ_SUFF) \
+amove.$(OBJ_SUFF) \
+arc.$(OBJ_SUFF) \
+circle.$(OBJ_SUFF) \
+colourbutton.$(OBJ_SUFF) \
+colourpicker.$(OBJ_SUFF) \
+component.$(OBJ_SUFF) \
+consolewindow.$(OBJ_SUFF) \
+dialogues.$(OBJ_SUFF) \
+downloader.$(OBJ_SUFF) \
+drawingobject.$(OBJ_SUFF) \
+ellipse.$(OBJ_SUFF) \
+fileinfo.$(OBJ_SUFF) \
+gledrawing.$(OBJ_SUFF) \
+grid.$(OBJ_SUFF) \
+line.$(OBJ_SUFF) \
+main.$(OBJ_SUFF) \
+mainwindow.$(OBJ_SUFF) \
+newfile.$(OBJ_SUFF) \
+objectblocks.$(OBJ_SUFF) \
+polararray.$(OBJ_SUFF) \
+propertyeditor.$(OBJ_SUFF) \
+propertymodel.$(OBJ_SUFF) \
+qgle_statics.$(OBJ_SUFF) \
+qgs.$(OBJ_SUFF) \
+qgslibloader.$(OBJ_SUFF) \
+serverthread.$(OBJ_SUFF) \
+settings.$(OBJ_SUFF) \
+settings_dialogue.$(OBJ_SUFF) \
+snapline.$(OBJ_SUFF) \
+text.$(OBJ_SUFF) \
+variantdelegate.$(OBJ_SUFF)
 
-GLE_CPP =gle.cpp
+LINKOBJS =\
+..\gle\color.$(OBJ_SUFF) \
+..\gle\axis.$(OBJ_SUFF) \
+..\gle\curve.$(OBJ_SUFF) \
+..\gle\gle-base.$(OBJ_SUFF) \
+..\gle\gle-block.$(OBJ_SUFF) \
+..\gle\core.$(OBJ_SUFF) \
+..\gle\cutils.$(OBJ_SUFF) \
+..\gle\graph.$(OBJ_SUFF) \
+..\gle\graph2.$(OBJ_SUFF) \
+..\gle\var.$(OBJ_SUFF) \
+..\gle\polish.$(OBJ_SUFF) \
+..\gle\file_io.$(OBJ_SUFF) \
+..\gle\gle-datatype.$(OBJ_SUFF) \
+..\gle\bitmap$(PATH_SEP)img2ps.$(OBJ_SUFF) \
+..\gle\bitmap$(PATH_SEP)lzwencode.$(OBJ_SUFF) \
+..\gle\bitmap$(PATH_SEP)glegif.$(OBJ_SUFF) \
+..\gle\bitmap$(PATH_SEP)glejpeg.$(OBJ_SUFF) \
+..\gle\bitmap$(PATH_SEP)gletiff.$(OBJ_SUFF) \
+..\gle\bitmap$(PATH_SEP)glepng.$(OBJ_SUFF) \
+..\gle\bitmap$(PATH_SEP)ascii85.$(OBJ_SUFF) \
+..\gle\surface$(PATH_SEP)gsurface.$(OBJ_SUFF) \
+..\gle\surface$(PATH_SEP)hide.$(OBJ_SUFF) \
+..\gle\surface$(PATH_SEP)fcontour.$(OBJ_SUFF) \
+..\gle\surface$(PATH_SEP)ffitcontour.$(OBJ_SUFF) \
+..\gle\surface$(PATH_SEP)gcontour.$(OBJ_SUFF) \
+..\gle\letzfitz$(PATH_SEP)let.$(OBJ_SUFF) \
+..\gle\letzfitz$(PATH_SEP)fit.$(OBJ_SUFF) \
+..\gle\letzfitz$(PATH_SEP)ffit.$(OBJ_SUFF) \
+..\gle\tokens$(PATH_SEP)Tokenizer.$(OBJ_SUFF) \
+..\gle\tokens$(PATH_SEP)StringKeyHash.$(OBJ_SUFF) \
+..\gle\tokens$(PATH_SEP)BinIO.$(OBJ_SUFF)
 
-LINKOBJS = \
-bitmap$(PATH_SEP)img2ps.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)lzwencode.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glegif.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glejpeg.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)gletiff.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glepng.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)ascii85.$(OBJ_SUFF) \
-surface$(PATH_SEP)gsurface.$(OBJ_SUFF) \
-surface$(PATH_SEP)hide.$(OBJ_SUFF) \
-surface$(PATH_SEP)fcontour.$(OBJ_SUFF) \
-surface$(PATH_SEP)ffitcontour.$(OBJ_SUFF) \
-surface$(PATH_SEP)gcontour.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)let.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)fit.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)ffit.$(OBJ_SUFF) \
-tokens$(PATH_SEP)Tokenizer.$(OBJ_SUFF) \
-tokens$(PATH_SEP)StringKeyHash.$(OBJ_SUFF) \
-tokens$(PATH_SEP)BinIO.$(OBJ_SUFF)
+
+LINKOBJS =
+
+#glegs.$(OBJ_SUFF) \
+#macspecific.$(OBJ_SUFF) \
 
 SVGOBJS =
 
@@ -151,3 +122,44 @@ PNGOBJS =
 
 JPEGOBJS =
 
+#MOC_DIR = moc
+#
+#MOC_SOURCES = \
+#$(MOC_DIR)$(PATH_SEP)3dviewer.cpp \
+#$(MOC_DIR)$(PATH_SEP)about.cpp \
+#$(MOC_DIR)$(PATH_SEP)amove.cpp \
+#$(MOC_DIR)$(PATH_SEP)circle.cpp
+
+MOC_SOURCES = \
+3dviewer.cpp \
+about.cpp \
+arc.cpp \
+amove.cpp \
+circle.cpp \
+line.cpp \
+ellipse.cpp \
+grid.cpp \
+settings.cpp \
+settings_dialogue.cpp \
+snapline.cpp \
+text.cpp \
+propertyeditor.cpp \
+propertymodel.cpp \
+serverthread.cpp \
+newfile.cpp \
+downloader.cpp \
+dialogues.cpp \
+colourpicker.cpp \
+consolewindow.cpp \
+drawingobject.cpp \
+component.cpp \
+colourbutton.cpp  \
+variantdelegate.cpp \
+gledrawing.cpp \
+polararray.cpp \
+mainwindow.cpp \
+objectblocks.cpp \
+qgs.cpp
+
+QRC_SOURCES = \
+qgle.qrc

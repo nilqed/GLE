@@ -577,8 +577,10 @@ void GLEMainWindow::startServer()
 void GLEMainWindow::stopServer()
 {
 	// This should clean it all up in theory
-	delete(serverThread);
-	serverRunning = false;
+	if(serverRunning){
+		delete(serverThread);
+		serverRunning = false;
+	}
 }
 
 bool GLEMainWindow::tryGhostScriptLocation(const QString location, QString& error) {

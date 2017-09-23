@@ -41,61 +41,149 @@
 # include the global config file
 #
 !include config.i
-
 #
 # other global defines
 #
 PROJECT_BINDIR 	= ..\..\build
-PROJECT_LIBDIR 	= ..\..\lib
+PROJECT_LIBDIR 	= ..\..\build\bin
 PROJECT_INCDIR 	= ..\..\include
 INSTALL_DIR     =c:\\program files\\gle
-EXE_SUFF	=.exe
-OBJ_SUFF	=obj
-CC		=cl
-AR		=link
-RM		=erase
-RMDIR		=rmdir
-MKDIR		=mkdir
-PATH_SEP	=^\
+EXE_SUFF		=.exe
+OBJ_SUFF		=obj
+CC				=cl
+AR				=link
+RM				=erase /QE
+RMDIR			=rmdir /Q /Ne
+MKDIR			=mkdir
+PATH_SEP		=^\
+MSVC_TOOLSET	=vc141
+VC_MODEL		=mt
+LIB_TAG			=-$(MSVC_TOOLSET)-$(VC_MODEL)
 
-EXTRA_DEFS		=-D __WIN32__
-EXTRA_INCLUDE_PATHS	=-I$(BOOSTDIR)
-EXTRA_LIB_PATHS		=
-LIBS			=
 
-WINLIBS = advapi32.lib comctl32.lib comdlg32.lib gdi32.lib kernel32.lib odbc32.lib oldnames.lib ole32.lib oleaut32.lib rpcrt4.lib shell32.lib user32.lib uuid.lib winmm.lib winspool.lib wsock32.lib
+EXTRA_DEFS			=-D __WIN32__ -D __NOCYGWIN__ -D _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS -D NOMINMAX -D HAVE_CAIRO -D CAIRO_WIN32_STATIC_BUILD -D HAVE_EXTRA_FONTS
+EXTRA_INCLUDE_PATHS	=-I$(CAIRODIR)\src
+EXTRA_LIB_PATHS		=/LIBPATH:$(CAIRODIR)\src /LIBPATH:$(PIXMANDIR)\pixman
+LIBS				=cairo$(LIB_TAG).lib pixman$(LIB_TAG).lib
+
+WINLIBS				=advapi32.lib comctl32.lib comdlg32.lib gdi32.lib kernel32.lib odbc32.lib oldnames.lib \
+ole32.lib oleaut32.lib rpcrt4.lib shell32.lib user32.lib uuid.lib winmm.lib winspool.lib wsock32.lib msimg32.lib\
+psapi.lib glu32.lib opengl32.lib Imm32.lib Ws2_32.lib
 
 !ifdef HAVE_LIBTIFF
-EXTRA_INCLUDE_PATHS	= $(EXTRA_INCLUDE_PATHS) -I$(LIBTIFFDIR)
-EXTRA_DEFS		= $(EXTRA_DEFS) -D HAVE_LIBTIFF
-EXTRA_LIB_PATHS		= $(EXTRA_LIB_PATHS) -LIBPATH:$(LIBTIFFDIR)
-LIBS			= $(LIBS) libtiff.lib
+EXTRA_INCLUDE_PATHS	= $(EXTRA_INCLUDE_PATHS) -I$(LIBTIFFDIR)\libtiff
+EXTRA_DEFS			= $(EXTRA_DEFS) -D HAVE_LIBTIFF
+EXTRA_LIB_PATHS		= $(EXTRA_LIB_PATHS) /LIBPATH:$(LIBTIFFDIR)\libtiff
+LIBS				= $(LIBS) libtiff$(LIB_TAG).lib jpeg.lib
 !endif
 
 !ifdef HAVE_LIBPNG
-EXTRA_DEFS		= $(EXTRA_DEFS) -D HAVE_LIBPNG
+EXTRA_DEFS			= $(EXTRA_DEFS) -D HAVE_LIBPNG
 EXTRA_INCLUDE_PATHS	= $(EXTRA_INCLUDE_PATHS) -I$(LIBPNGDIR) -I$(ZLIBDIR)
-EXTRA_LIB_PATHS		= $(EXTRA_LIB_PATHS) -LIBPATH:$(LIBPNGDIR) -LIBPATH:$(ZLIBDIR)
-LIBS			= $(LIBS) libpng.lib zlib.lib
+EXTRA_LIB_PATHS		= $(EXTRA_LIB_PATHS) /LIBPATH:$(LIBPNGDIR) /LIBPATH:$(ZLIBDIR)
+LIBS				= $(LIBS) libpng$(LIB_TAG).lib zlib$(LIB_TAG).lib
 !endif
 
 !ifdef HAVE_LIBJPEG
-EXTRA_DEFS		= $(EXTRA_DEFS) -D __JPEG__
-EXTRA_INCLUDE_PATHS	= $(EXTRA_INCLUDE_PATHS) -I$(LIBJPEGDIR)
-EXTRA_LIB_PATHS		= $(EXTRA_LIB_PATHS) -LIBPATH:$(LIBJPEGDIR)
-LIBS			= $(LIBS) jpeg.lib
+EXTRA_DEFS			= $(EXTRA_DEFS) -D HAVE_LIBJPEG
+EXTRA_INCLUDE_PATHS	= $(EXTRA_INCLUDE_PATHS) -I$(JPEGDIR)
+EXTRA_LIB_PATHS		= $(EXTRA_LIB_PATHS) /LIBPATH:$(JPEGDIR)\Release
+LIBS				= $(LIBS) jpeg.lib
 !endif
 
 
-# multithreaded dll link to msvcrt.dll
-# this is the default on all the libs such as zlib, libtiff and lpng
-#
-#
+QT_LIBS = \
+QAxContainer.lib \
+QAxServer.lib \
+Qt3Support.lib \
+QtCLucene.lib \
+QtCore.lib \
+QtDesigner.lib \
+QtDesignerComponents.lib \
+QtGui.lib \
+QtHelp.lib \
+QtMultimedia.lib \
+QtNetwork.lib \
+QtOpenGL.lib \
+QtSql.lib \
+QtSvg.lib \
+QtTest.lib \
+QtUiTools.lib \
+QtXml.lib \
+QtXmlPatterns.lib \
+Qtmain.lib \
+phonon.lib
 
-CPPFLAGS	=/nologo /MD /EHsc /Ox -I$(GLOBAL_INCDIR) -I$(PROJECT_INCDIR) $(EXTRA_INCLUDE_PATHS) $(VERSION_INFO) $(EXTRA_DEFS) -DINSTALL_DIR="\"$(INSTALL_DIR)\""
-LINKFLAGS	=/nologo -LIBPATH:$(GLOBAL_LIBDIR) $(EXTRA_LIB_PATHS)
+#QtWebKit.lib \
+#QtDeclarative.lib \
+#QtScript4.lib \
+#QtScriptTools4.lib \
+
+QT_LIBSD = \
+QAxContainerd.lib \
+QAxServerd.lib \
+Qt3Supportd4.lib \
+QtCLucened4.lib \
+QtCored4.lib \
+QtDeclaratived4.lib \
+QtDesignerComponentsd4.lib \
+QtDesignerd4.lib \
+QtGuid4.lib \
+QtHelpd4.lib \
+QtMultimediad4.lib \
+QtNetworkd4.lib \
+QtOpenGLd4.lib \
+QtSqld4.lib \
+QtSvgd4.lib \
+QtTestd4.lib \
+QtUiToolsd.lib \
+QtWebKitd4.lib \
+QtXmlPatternsd4.lib \
+QtXmld4.lib \
+Qtmaind.lib \
+phonond4.lib
+
+#QtScriptd4.lib \
+#QtScriptToolsd4.lib \
+
+
+!ifdef HAVE_QT
+DLFCN_DIR			= c:\sandbox\libs\dlfcn-win32\trunk
+QT_DIR				= c:\sandbox\libs\Qt\5.9.1\msvc2015_64
+QT_DIR				= c:\sandbox\libs\Qt\4.8.6
+EXTRA_DEFS			= $(EXTRA_DEFS) -DUNICODE
+EXTRA_INCLUDE_PATHS	= $(EXTRA_INCLUDE_PATHS) -I$(DLFCN_DIR) -I$(QT_DIR)\include -I$(QT_DIR)\include\QtCore -I$(QT_DIR)\include\Qt -I$(QT_DIR)\include\QtGui -I$(QT_DIR)\include\QtOpenGL -I$(QT_DIR)\include\QtWidgets -I$(QT_DIR)\include\QtNetwork
+EXTRA_LIB_PATHS		= $(EXTRA_LIB_PATHS) /LIBPATH:$(QT_DIR)\lib /LIBPATH:$(DLFCN_DIR)
+LIBS				= $(LIBS) $(WIN_LIBS) $(QT_LIBS)
+RCOPT				=/nologo /d WIN32 /d _WINDOWS
+!endif
+
+#dl$(LIB_TAG).lib
+
+# multithreaded dll link /MD to MSVC dlls
+
+CPPFLAGS	=/nologo /MD /GL /EHsc /Ox -I.\.. -I$(PROJECT_INCDIR) -I$(PROJECT_INCDIR) $(EXTRA_INCLUDE_PATHS) $(VERSION_INFO) $(EXTRA_DEFS) -DINSTALL_DIR="\"$(INSTALL_DIR)\""
+LINKFLAGS	=/nologo /LTCG /MACHINE:X86 /MANIFEST /LIBPATH:$(PROJECT_LIBDIR) $(EXTRA_LIB_PATHS)
+LIBFLAGS	=/nologo /LTCG /MACHINE:X86
 
 # for win32
-LIBS= $(LIBS) $(WINLIBS)
+LIBS	=$(LIBS) $(WINLIBS)
+
+.SUFFIXES: .moc_obj .h .rc .res .qrc .qrc_obj
+
+.h.moc_obj:
+	$(QT_DIR)\bin\moc.exe %|fF.h -o %|fF.moc_cpp
+	cl $(CPPFLAGS) /c /TP /Fo$@ %|fF.moc_cpp
+
+.rc.res:
+	rc $(RCOPT) /Fo$@ $<
+
+.qrc.qrc_obj:
+	$(QT_DIR)\bin\rcc.exe %|fF.qrc -name qgle -o %|fF.qrc_cpp
+	cl $(CPPFLAGS) /c /TP /Fo$@ %|fF.qrc_cpp
+
+#$(QT_DIR)\bin\rcc.exe -binary %|fF.qrc -o %|fF.qrc_cpp
+
+
 
 
