@@ -99,7 +99,6 @@ samples:
 manual:
 	cd gle-refman & $(_NMAKE_r)
 
-
 src\config.h: src\config.h.vc
 	copy /QE $** $@
 

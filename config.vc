@@ -161,9 +161,12 @@ LIBS				= $(LIBS) jpeg.lib
 !endif
 
 
+#
+#QAxContainer.lib \
+#QAxServer.lib \
+
+
 QT_LIBS = \
-QAxContainer.lib \
-QAxServer.lib \
 Qt3Support.lib \
 QtCLucene.lib \
 QtCore.lib \
@@ -188,9 +191,11 @@ phonon.lib
 #QtScript4.lib \
 #QtScriptTools4.lib \
 
+#QAxContainerd.lib \
+#QAxServerd.lib \
+
+
 QT_LIBSD = \
-QAxContainerd.lib \
-QAxServerd.lib \
 Qt3Supportd.lib \
 QtCLucene.lib \
 QtCored.lib \

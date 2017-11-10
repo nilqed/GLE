@@ -84,7 +84,7 @@ $(BUILD_DIR)$(PATH_SEP)qgle.qrc_obj: qgle.qrc
 
 
 $(PROJECT_BINDIR)\bin\qgle$(D)$(EXE_SUFF): $(OBJECTS)
-	$(AR) $(LINKFLAGS) /out:$@ $(OBJECTS) libgle-graphics_s$(LIB_TAG).lib $(LIBS) qgle.res
+	$(AR) /SUBSYSTEM:WINDOWS $(LINKFLAGS) /out:$@ $(OBJECTS) libgle-graphics_s$(LIB_TAG).lib $(LIBS) qgle.res
 
 clean:
 	-$(RM) $(OBJECTS) qgle.res $(PSOBJS) $(SVGOBJS) $(MOC_SOURCES) $(QRC_SOURCES) $(PROJECT_BINDIR)\bin\qgle$(EXE_SUFF) *.pdb
