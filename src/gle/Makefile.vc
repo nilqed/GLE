@@ -35,7 +35,6 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
 #                                                                      #
 ########################################################################
-
 #
 # makefile.vc for GLE v4.0
 # for compilation with MS visual studio 2017
@@ -45,48 +44,30 @@
 #
 !include files.txt
 
-!ifdef HAVE_LIBTIFF
-OBJECTS = $(OBJECTS) $(TIFFOBJS)
-!endif
+all: $(BUILD_DIR) $(OBJECTS) $(GLE_OBJ) $(GLE_CPP_LIB_OBJ) $(PROJECT_BINDIR)\bin\gle$(D)$(EXE_SUFF) $(PROJECT_BINDIR)\bin\glebtool$(D)$(EXE_SUFF) $(PROJECT_BINDIR)\bin\libgle-graphics_s$(LIB_TAG).lib $(PROJECT_BINDIR)\bin\libgle-graphics$(LIB_TAG).lib $(PROJECT_BINDIR)\bin\libgle-graphics$(LIB_TAG).dll $(PROJECT_BINDIR)\glerc
 
-!ifdef HAVE_LIBPNG
-OBJECTS = $(OBJECTS) $(PNGOBJS)
-!endif
-
-!ifdef HAVE_LIBJPEG
-OBJECTS = $(OBJECTS) $(JPEGOBJS)
-!endif
-#$(PSOBJS) $(SVGOBJS)
-
-UTILOBJS=cutils.$(OBJ_SUFF) file_io.$(OBJ_SUFF)
-
-all: $(OBJECTS) gle.$(OBJ_SUFF) gle_cpp_lib.$(OBJ_SUFF) $(PROJECT_BINDIR)\bin\gle$(EXE_SUFF) $(PROJECT_BINDIR)\bin\glebtool$(EXE_SUFF) $(PROJECT_BINDIR)\bin\libgle-graphics_s$(LIBTAG).lib $(PROJECT_BINDIR)\bin\libgle-graphics$(LIBTAG).lib $(PROJECT_BINDIR)\bin\libgle-graphics$(LIBTAG).dll $(PROJECT_BINDIR)\glerc
+$(BUILD_DIR):
+	-$(MKDIR) $(BUILD_DIR)
 
 $(OBJECTS): $(INCLUDES)
 
-gle_cpp_lib.$(OBJ_SUFF): gle.cpp
+$(GLE_CPP_LIB_OBJ): $(GLE_CPP)
 	cl $(CPPFLAGS) -D HAVE_LIBGLE /Fo$@ /c $**
 
-gle.$(OBJ_SUFF): gle.cpp
-	cl $(CPPFLAGS) /Fo$@ /c $**
+$(PROJECT_BINDIR)\bin\gle$(D)$(EXE_SUFF): $(OBJECTS) $(LINKOBJS) $(GLE_OBJ)
+	$(AR) $(LINKFLAGS) $** $(LIBS) /OUT:$@
 
-glebtool.$(OBJ_SUFF): glebtool.cpp
-	cl $(CPPFLAGS) /Fo$@ /c $**
+$(PROJECT_BINDIR)\bin\glebtool$(D)$(EXE_SUFF): $(GLEBTOOLOBJS)
+	$(AR) $(LINKFLAGS) $** $(LIBS) /OUT:$@
 
-$(PROJECT_BINDIR)\bin\gle$(EXE_SUFF): $(GLEOBJS) $(OBJECTS) $(LINKOBJS)
-	$(AR) $(LINKFLAGS) $(OBJECTS) gle.$(OBJ_SUFF) $(LINKOBJS) $(LIBS) /OUT:$@
+$(PROJECT_BINDIR)\bin\libgle-graphics_s$(LIB_TAG).lib: $(OBJECTS) $(LINKOBJS) $(GLE_CPP_LIB_OBJ)
+	LIB $(LIBFLAGS) /OUT:$@ $**
 
-$(PROJECT_BINDIR)\bin\glebtool$(EXE_SUFF): glebtool.$(OBJ_SUFF) $(UTILOBJS)
-	$(AR) $(LINKFLAGS) $(UTILOBJS) glebtool.$(OBJ_SUFF) $(LIBS) /OUT:$@
+$(PROJECT_BINDIR)\bin\libgle-graphics$(LIB_TAG).lib: $(OBJECTS) $(LINKOBJS) $(GLE_CPP_LIB_OBJ)
+	LIB $(LIBFLAGS) /DEF $** /OUT:$@
 
-$(PROJECT_BINDIR)\bin\libgle-graphics_s$(LIBTAG).lib: $(OBJECTS) $(LINKOBJS)
-	LIB $(LIBFLAGS) /OUT:$@ $(OBJECTS) gle_cpp_lib.$(OBJ_SUFF) $(LINKOBJS)
-
-$(PROJECT_BINDIR)\bin\libgle-graphics$(LIBTAG).dll: $(OBJECTS) $(LINKOBJS)
-	$(AR) /DLL $(LINKFLAGS) $(OBJECTS) gle_cpp_lib.$(OBJ_SUFF) $(LINKOBJS) $(LIBS) /OUT:$@ /IMPLIB:$*.lib
-
-$(PROJECT_BINDIR)\bin\libgle-graphics$(LIBTAG).lib: $(OBJECTS) $(LINKOBJS)
-	LIB $(LIBFLAGS) /DEF $(OBJECTS) gle_cpp_lib.$(OBJ_SUFF) $(LINKOBJS) /OUT:$*.lib
+$(PROJECT_BINDIR)\bin\libgle-graphics$(LIB_TAG).dll: $(OBJECTS) $(LINKOBJS) $(GLE_CPP_LIB_OBJ)
+	$(AR) /DLL $(LINKFLAGS) $** $(LIBS) /OUT:$@ /IMPLIB:$*.lib
 
 $(PROJECT_BINDIR)\glerc:
 	echo begin config gle	> $(PROJECT_BINDIR)\glerc
@@ -94,5 +75,19 @@ $(PROJECT_BINDIR)\glerc:
 	echo end config >> $(PROJECT_BINDIR)\glerc
 
 clean:
-	-$(RM) $(OBJECTS) glebtool.obj gle.obj gle_cpp_lib.obj $(PROJECT_BINDIR)\bin\gle$(EXE_SUFF) $(PROJECT_BINDIR)\bin\gle$(EXE_SUFF).manifest  $(PROJECT_BINDIR)\bin\libgle-graphics$(LIBTAG).lib $(PROJECT_BINDIR)\glerc
+	-$(RM) $(OBJECTS) $(GLE_CPP_LIB_OBJ) $(GLE_OBJ) $(GLEBTOOLOBJS)
+	-$(RM) $(PROJECT_BINDIR)\bin\gle$(D)$(EXE_SUFF) $(PROJECT_BINDIR)\bin\glebtool$(D)$(EXE_SUFF)
+	-$(RM) $(PROJECT_BINDIR)\bin\gle$(D).manifest $(PROJECT_BINDIR)\bin\glebtool$(D).manifest
+	-$(RM) $(PROJECT_BINDIR)\bin\libgle-graphics_s$(LIB_TAG).lib $(PROJECT_BINDIR)\bin\libgle-graphics$(LIB_TAG).lib $(PROJECT_BINDIR)\bin\libgle-graphics$(LIB_TAG).dll
+	-$(RM) $(PROJECT_BINDIR)\glerc
+	-$(RMDIR) $(BUILD_DIR)
+
+
+#gle.$(OBJ_SUFF): gle.cpp
+#	cl $(CPPFLAGS) /Fo$@ /c $**
+#
+#glebtool.$(OBJ_SUFF): glebtool.cpp
+#	cl $(CPPFLAGS) /Fo$@ /c $**
+
+
 

@@ -46,10 +46,10 @@ lzwencode.h \
 glegif.h
 
 OBJECTS = \
-img2ps.$(OBJ_SUFF) \
-lzwencode.$(OBJ_SUFF) \
-glegif.$(OBJ_SUFF) \
-glejpeg.$(OBJ_SUFF) \
-gletiff.$(OBJ_SUFF) \
-glepng.$(OBJ_SUFF) \
-ascii85.$(OBJ_SUFF)
+$(BUILD_DIR)$(PATH_SEP)img2ps.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)lzwencode.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)glegif.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)glejpeg.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)gletiff.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)glepng.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)ascii85.$(OBJ_SUFF)

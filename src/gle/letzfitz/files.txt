@@ -43,6 +43,6 @@
 INCLUDES =
 
 OBJECTS = \
-let.$(OBJ_SUFF) \
-fit.$(OBJ_SUFF) \
-ffit.$(OBJ_SUFF)
+$(BUILD_DIR)$(PATH_SEP)let.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)fit.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)ffit.$(OBJ_SUFF)

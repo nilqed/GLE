@@ -35,19 +35,18 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
 #                                                                      #
 ########################################################################
-
 #
 # files list for GLE to be included by the makefiles
 #
-
 PROGRAM = makefmt
 
 INCLUDES = \
 parseAFM.h 
 
 OBJECTS = \
-parseAFM.$(OBJ_SUFF)
+$(BUILD_DIR)$(PATH_SEP)makefmt.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)parseAFM.$(OBJ_SUFF)
 
 EXTRA_OBJS = \
-../gle/cutils.$(OBJ_SUFF) \
-../gle/file_io.$(OBJ_SUFF)
+../gle/$(BUILD_DIR)$(PATH_SEP)cutils.$(OBJ_SUFF) \
+../gle/$(BUILD_DIR)$(PATH_SEP)file_io.$(OBJ_SUFF)

@@ -136,8 +136,8 @@ utilities\fig\volcano.inc\
 utilities\fig\gaussian.inc\
 prog\fig\axisformat.pdf
 
-GLE				=..\build\bin\gle -cairo
-GLEBTOOL		=..\build\bin\glebtool
+GLE				=..\build\bin\gle$(D) -cairo
+GLEBTOOL		=..\build\bin\glebtool$(D)
 INSTALL_FOLDER	=..\build\doc
 
 all: $(GLE_FIGURES) defstex fonts pdf $(INSTALL_FOLDER) $(INSTALL_FOLDER)\gle-manual.pdf

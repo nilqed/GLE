@@ -131,7 +131,14 @@ vector<GLEFileLocation> GLEFileLocationMap::getFiles() {
 	return res;
 }
 
-GLEInterface::GLEInterface() {
+GLEInterface::GLEInterface():
+m_Script(NULL),
+m_Output(NULL),
+m_Config(NULL),
+m_FontHash(NULL),
+m_FontIndexHash(NULL),
+m_InitialPS(NULL),
+m_FileInfoMap(NULL){
 	m_Output = new GLEOutputStream();
 	m_MakeDrawObjs = false;
 	m_CommitMode = false;
@@ -179,9 +186,9 @@ GLEInterface::GLEInterface() {
 }
 
 GLEInterface::~GLEInterface() {
-	delete m_FontHash;
-	delete m_FontIndexHash;
-	delete m_Output;
+	if(m_FontHash != NULL) delete m_FontHash;
+	if (m_FontIndexHash != NULL) delete m_FontIndexHash;
+	if (m_Output != NULL) delete m_Output;
 	if (m_Config != NULL) delete m_Config;
 	if (m_FileInfoMap != NULL) delete m_FileInfoMap;
 }

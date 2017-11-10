@@ -48,50 +48,57 @@ ZIP_EXE_NAME	=$(BASE_NAME)_$(VERSION_NUMBER).$(BUILD_NUMBER)_exe_win32.zip
 INSTALL_NAME	=GLE-$(VERSION_NUMBER).$(BUILD_NUMBER)-win-x86-vc141.exe
 RELEASE_DIR		=.\release
 NSIS_SCRIPT_DIR =.\contrib\packagers\nsis
-_NMAKE			=nmake -f makefile.vc /nologo
+_NMAKE_r		=nmake -f makefile.vc /nologo VARIANT=release
+_NMAKE_d		=nmake -f makefile.vc /nologo VARIANT=debug
 
-SRC_FILES = gle4/Makefile* gle4/config* gle4/README gle4/src/gle/* gle4/src/fonts/* gle4/src/makefmt/* gle4/src/fbuild/* gle4/src/samples/* gle4/src/TeX/*
-EXE_FILES = gle4/README gle4/bin/*.exe gle4/bin/font.dat gle4/bin/inittex.ini gle4/bin/font/*
+SRC_FILES		=gle4/Makefile* gle4/config* gle4/README gle4/src/gle/* gle4/src/fonts/* gle4/src/makefmt/* gle4/src/fbuild/* gle4/src/samples/* gle4/src/TeX/*
+EXE_FILES		=gle4/README gle4/bin/*.exe gle4/bin/font.dat gle4/bin/inittex.ini gle4/bin/font/*
 
 all: src\config.h
 	-mkdir /Ne build
 	-mkdir /Ne build\bin
 	-mkdir /Ne build\lib
 	-mkdir /Ne build\gleinc
-	cd src\gle\bitmap & $(_NMAKE)
-	cd src\gle\surface & $(_NMAKE)
-	cd src\gle\letzfitz & $(_NMAKE)
-	cd src\gle\tokens & $(_NMAKE)
-	cd src\gle & $(_NMAKE)
-	cd src\gui & $(_NMAKE)
-	cd src\fbuild & $(_NMAKE)
-	cd src\makefmt & $(_NMAKE)
-	cd src\fonts & $(_NMAKE)
-	cd src\lib & $(_NMAKE)
-	cd src\tex & $(_NMAKE)
-	cd src\samples & $(_NMAKE)
-	cd gle-refman & $(_NMAKE)
+	cd src\gle\bitmap & $(_NMAKE_r) & $(_NMAKE_d)
+	cd src\gle\surface & $(_NMAKE_r) & $(_NMAKE_d)
+	cd src\gle\letzfitz & $(_NMAKE_r) & $(_NMAKE_d)
+	cd src\gle\tokens & $(_NMAKE_r) & $(_NMAKE_d)
+	cd src\gle & $(_NMAKE_r) & $(_NMAKE_d)
+	cd src\gui & $(_NMAKE_r) & $(_NMAKE_d)
+	cd src\fbuild & $(_NMAKE_r) & $(_NMAKE_d)
+	cd src\makefmt & $(_NMAKE_r) & $(_NMAKE_d)
+	cd src\fonts & $(_NMAKE_r)
+	cd src\lib & $(_NMAKE_r)
+	cd src\tex & $(_NMAKE_r)
 
 clean:
-	cd src\gle\bitmap & $(_NMAKE) clean
-	cd src\gle\surface & $(_NMAKE) clean
-	cd src\gle\letzfitz & $(_NMAKE) clean
-	cd src\gle\tokens & $(_NMAKE) clean
-	cd src\gle & $(_NMAKE) clean
-	cd src\gui & $(_NMAKE) clean
-	cd src\fbuild & $(_NMAKE) clean
-	cd src\makefmt & $(_NMAKE) clean
-	cd src\fonts & $(_NMAKE) clean
-	cd src\lib & $(_NMAKE) clean
-	cd src\tex & $(_NMAKE) clean
-	cd src\samples & $(_NMAKE) clean
-	cd gle-refman & $(_NMAKE) clean
+	cd src\gle\bitmap & $(_NMAKE_r) clean & $(_NMAKE_d) clean
+	cd src\gle\surface & $(_NMAKE_r) clean & $(_NMAKE_d) clean
+	cd src\gle\letzfitz & $(_NMAKE_r) clean & $(_NMAKE_d) clean
+	cd src\gle\tokens & $(_NMAKE_r) clean & $(_NMAKE_d) clean
+	cd src\gle & $(_NMAKE_r) clean & $(_NMAKE_d) clean
+	cd src\gui & $(_NMAKE_r) clean & $(_NMAKE_d) clean
+	cd src\fbuild & $(_NMAKE_r) clean & $(_NMAKE_d) clean
+	cd src\makefmt & $(_NMAKE_r) clean & $(_NMAKE_d) clean
+	cd src\fonts & $(_NMAKE_r) clean
+	cd src\lib & $(_NMAKE_r) clean
+	cd src\tex & $(_NMAKE_r) clean
+	cd src\samples & $(_NMAKE_r) clean
+	cd gle-refman & $(_NMAKE_r) clean
 	-erase /QE $(RELEASE_DIR)\$(INSTALL_NAME) src\config.h
 	-rmdir /SQ /Ne build\bin
 	-rmdir /SQ /Ne build\lib
 	-rmdir /SQ /Ne build\gleinc
 	-rmdir /SQ /Ne build
 	-rmdir /SQ /Ne $(RELEASE_DIR)
+
+
+samples:
+	cd src\samples & $(_NMAKE_r)
+
+manual:
+	cd gle-refman & $(_NMAKE_r)
+
 
 src\config.h: src\config.h.vc
 	copy /QE $** $@

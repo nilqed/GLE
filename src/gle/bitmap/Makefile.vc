@@ -46,9 +46,13 @@
 #
 !include files.txt
 
-all: $(OBJECTS)
+all: $(BUILD_DIR) $(OBJECTS)
+
+$(BUILD_DIR):
+	-$(MKDIR) $(BUILD_DIR)
 
 $(OBJECTS): $(INCLUDES)
 
 clean:
 	-$(RM) $(OBJECTS)
+	-$(RMDIR) $(BUILD_DIR)

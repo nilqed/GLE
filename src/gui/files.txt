@@ -35,86 +35,83 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        #
 #                                                                      #
 ########################################################################
-
 #
 # files list for GLE to be included by the makefiles
 #
-
 INCLUDES = \
 
-OBJECTS = \
-3dviewer.$(OBJ_SUFF) \
-about.$(OBJ_SUFF) \
-amove.$(OBJ_SUFF) \
-arc.$(OBJ_SUFF) \
-circle.$(OBJ_SUFF) \
-colourbutton.$(OBJ_SUFF) \
-colourpicker.$(OBJ_SUFF) \
-component.$(OBJ_SUFF) \
-consolewindow.$(OBJ_SUFF) \
-dialogues.$(OBJ_SUFF) \
-downloader.$(OBJ_SUFF) \
-drawingobject.$(OBJ_SUFF) \
-ellipse.$(OBJ_SUFF) \
-fileinfo.$(OBJ_SUFF) \
-gledrawing.$(OBJ_SUFF) \
-grid.$(OBJ_SUFF) \
-line.$(OBJ_SUFF) \
-main.$(OBJ_SUFF) \
-mainwindow.$(OBJ_SUFF) \
-newfile.$(OBJ_SUFF) \
-objectblocks.$(OBJ_SUFF) \
-polararray.$(OBJ_SUFF) \
-propertyeditor.$(OBJ_SUFF) \
-propertymodel.$(OBJ_SUFF) \
-qgle_statics.$(OBJ_SUFF) \
-qgs.$(OBJ_SUFF) \
-qgslibloader.$(OBJ_SUFF) \
-serverthread.$(OBJ_SUFF) \
-settings.$(OBJ_SUFF) \
-settings_dialogue.$(OBJ_SUFF) \
-snapline.$(OBJ_SUFF) \
-text.$(OBJ_SUFF) \
-variantdelegate.$(OBJ_SUFF)
+OBJECTS =\
+$(BUILD_DIR)$(PATH_SEP)3dviewer.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)about.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)amove.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)arc.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)circle.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)colourbutton.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)colourpicker.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)component.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)consolewindow.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)dialogues.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)downloader.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)drawingobject.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)ellipse.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)fileinfo.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)gledrawing.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)grid.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)line.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)main.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)mainwindow.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)newfile.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)objectblocks.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)polararray.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)propertyeditor.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)propertymodel.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)qgle_statics.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)qgs.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)qgslibloader.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)serverthread.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)settings.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)settings_dialogue.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)snapline.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)text.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)variantdelegate.$(OBJ_SUFF)
 
-LINKOBJS =\
-..\gle\color.$(OBJ_SUFF) \
-..\gle\axis.$(OBJ_SUFF) \
-..\gle\curve.$(OBJ_SUFF) \
-..\gle\gle-base.$(OBJ_SUFF) \
-..\gle\gle-block.$(OBJ_SUFF) \
-..\gle\core.$(OBJ_SUFF) \
-..\gle\cutils.$(OBJ_SUFF) \
-..\gle\graph.$(OBJ_SUFF) \
-..\gle\graph2.$(OBJ_SUFF) \
-..\gle\var.$(OBJ_SUFF) \
-..\gle\polish.$(OBJ_SUFF) \
-..\gle\file_io.$(OBJ_SUFF) \
-..\gle\gle-datatype.$(OBJ_SUFF) \
-..\gle\bitmap$(PATH_SEP)img2ps.$(OBJ_SUFF) \
-..\gle\bitmap$(PATH_SEP)lzwencode.$(OBJ_SUFF) \
-..\gle\bitmap$(PATH_SEP)glegif.$(OBJ_SUFF) \
-..\gle\bitmap$(PATH_SEP)glejpeg.$(OBJ_SUFF) \
-..\gle\bitmap$(PATH_SEP)gletiff.$(OBJ_SUFF) \
-..\gle\bitmap$(PATH_SEP)glepng.$(OBJ_SUFF) \
-..\gle\bitmap$(PATH_SEP)ascii85.$(OBJ_SUFF) \
-..\gle\surface$(PATH_SEP)gsurface.$(OBJ_SUFF) \
-..\gle\surface$(PATH_SEP)hide.$(OBJ_SUFF) \
-..\gle\surface$(PATH_SEP)fcontour.$(OBJ_SUFF) \
-..\gle\surface$(PATH_SEP)ffitcontour.$(OBJ_SUFF) \
-..\gle\surface$(PATH_SEP)gcontour.$(OBJ_SUFF) \
-..\gle\letzfitz$(PATH_SEP)let.$(OBJ_SUFF) \
-..\gle\letzfitz$(PATH_SEP)fit.$(OBJ_SUFF) \
-..\gle\letzfitz$(PATH_SEP)ffit.$(OBJ_SUFF) \
-..\gle\tokens$(PATH_SEP)Tokenizer.$(OBJ_SUFF) \
-..\gle\tokens$(PATH_SEP)StringKeyHash.$(OBJ_SUFF) \
-..\gle\tokens$(PATH_SEP)BinIO.$(OBJ_SUFF)
+MOC_OBJECTS =\
+$(BUILD_DIR)$(PATH_SEP)3dviewer.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)about.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)arc.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)amove.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)circle.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)line.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)ellipse.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)grid.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)settings.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)settings_dialogue.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)snapline.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)text.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)propertyeditor.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)propertymodel.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)serverthread.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)newfile.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)downloader.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)dialogues.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)colourpicker.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)consolewindow.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)drawingobject.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)component.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)colourbutton.moc_obj  \
+$(BUILD_DIR)$(PATH_SEP)variantdelegate.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)gledrawing.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)polararray.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)mainwindow.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)objectblocks.moc_obj \
+$(BUILD_DIR)$(PATH_SEP)qgs.moc_obj
 
+QRC_OBJECTS =\
+$(BUILD_DIR)$(PATH_SEP)qgle.qrc_obj
+
+OBJECTS	=$(OBJECTS) $(MOC_OBJECTS) $(QRC_OBJECTS)
 
 LINKOBJS =
-
-#glegs.$(OBJ_SUFF) \
-#macspecific.$(OBJ_SUFF) \
 
 SVGOBJS =
 
@@ -122,6 +119,20 @@ PNGOBJS =
 
 JPEGOBJS =
 
+!ifdef HAVE_LIBTIFF
+OBJECTS = $(OBJECTS) $(TIFFOBJS)
+!endif
+
+!ifdef HAVE_LIBPNG
+OBJECTS = $(OBJECTS) $(PNGOBJS)
+!endif
+
+!ifdef HAVE_LIBJPEG
+OBJECTS = $(OBJECTS) $(JPEGOBJS)
+!endif
+
+#glegs.$(OBJ_SUFF) \
+#macspecific.$(OBJ_SUFF) \
 #MOC_DIR = moc
 #
 #MOC_SOURCES = \
@@ -130,36 +141,35 @@ JPEGOBJS =
 #$(MOC_DIR)$(PATH_SEP)amove.cpp \
 #$(MOC_DIR)$(PATH_SEP)circle.cpp
 
-MOC_SOURCES = \
-3dviewer.cpp \
-about.cpp \
-arc.cpp \
-amove.cpp \
-circle.cpp \
-line.cpp \
-ellipse.cpp \
-grid.cpp \
-settings.cpp \
-settings_dialogue.cpp \
-snapline.cpp \
-text.cpp \
-propertyeditor.cpp \
-propertymodel.cpp \
-serverthread.cpp \
-newfile.cpp \
-downloader.cpp \
-dialogues.cpp \
-colourpicker.cpp \
-consolewindow.cpp \
-drawingobject.cpp \
-component.cpp \
-colourbutton.cpp  \
-variantdelegate.cpp \
-gledrawing.cpp \
-polararray.cpp \
-mainwindow.cpp \
-objectblocks.cpp \
-qgs.cpp
-
-QRC_SOURCES = \
-qgle.qrc
+#LINKOBJS =\
+#..\gle\$(BUILD_DIR)$(PATH_SEP)color.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)axis.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)curve.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)gle-base.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)gle-block.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)core.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)cutils.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)graph.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)graph2.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)var.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)polish.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)file_io.$(OBJ_SUFF) \
+#..\gle\$(BUILD_DIR)$(PATH_SEP)gle-datatype.$(OBJ_SUFF) \
+#..\gle\bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)img2ps.$(OBJ_SUFF) \
+#..\gle\bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)lzwencode.$(OBJ_SUFF) \
+#..\gle\bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)glegif.$(OBJ_SUFF) \
+#..\gle\bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)glejpeg.$(OBJ_SUFF) \
+#..\gle\bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)gletiff.$(OBJ_SUFF) \
+#..\gle\bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)glepng.$(OBJ_SUFF) \
+#..\gle\bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)ascii85.$(OBJ_SUFF) \
+#..\gle\surface$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)gsurface.$(OBJ_SUFF) \
+#..\gle\surface$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)hide.$(OBJ_SUFF) \
+#..\gle\surface$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)fcontour.$(OBJ_SUFF) \
+#..\gle\surface$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)ffitcontour.$(OBJ_SUFF) \
+#..\gle\surface$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)gcontour.$(OBJ_SUFF) \
+#..\gle\letzfitz$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)let.$(OBJ_SUFF) \
+#..\gle\letzfitz$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)fit.$(OBJ_SUFF) \
+#..\gle\letzfitz$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)ffit.$(OBJ_SUFF) \
+#..\gle\tokens$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)Tokenizer.$(OBJ_SUFF) \
+#..\gle\tokens$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)StringKeyHash.$(OBJ_SUFF) \
+#..\gle\tokens$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)BinIO.$(OBJ_SUFF)

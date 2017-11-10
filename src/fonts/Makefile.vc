@@ -71,7 +71,7 @@ FMT = glemark.fmt \
 
 all: $(FVE) $(FMT) movefonts
 
-MAKEFMT =$(PROJECT_BINDIR)\bin\makefmt
+MAKEFMT =$(PROJECT_BINDIR)\bin\makefmt$(D)
 
 .SUFFIXES: .fve .fmt .afm .gle
 
@@ -184,7 +184,7 @@ pszd.fmt: $(ADOBE35)\ZapfDingbats.afm
 	$(MAKEFMT) $**
 
 .gle.fve:
-	$(PROJECT_BINDIR)\bin\fbuild $**
+	$(PROJECT_BINDIR)\bin\fbuild$(D) $**
 
 clean:
 	-$(RM) *.fve *.fmt $(PROJECT_BINDIR)\font\*.fve $(PROJECT_BINDIR)\font\*.fmt $(PROJECT_BINDIR)\font\font.dat $(PROJECT_BINDIR)\font\psfont.dat

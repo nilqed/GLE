@@ -45,8 +45,8 @@ gsurface.h \
 f2c.h
 
 OBJECTS = \
-gsurface.$(OBJ_SUFF) \
-hide.$(OBJ_SUFF) \
-fcontour.$(OBJ_SUFF) \
-ffitcontour.$(OBJ_SUFF) \
-gcontour.$(OBJ_SUFF)
+$(BUILD_DIR)$(PATH_SEP)gsurface.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)hide.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)fcontour.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)ffitcontour.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)gcontour.$(OBJ_SUFF)

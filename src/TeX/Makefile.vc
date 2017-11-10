@@ -43,7 +43,7 @@
 all:
 	set GLE_TOP=$(PROJECT_BINDIR)
 	copy /QE init.tex $(PROJECT_BINDIR)
-	$(PROJECT_BINDIR)\bin\gle -mkinittex
+	$(PROJECT_BINDIR)\bin\gle$(D) -mkinittex
 #-copy init.tex $(PROJECT_BINDIR)
 
 clean:

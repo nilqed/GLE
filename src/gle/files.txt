@@ -72,82 +72,107 @@ gle-interface$(PATH_SEP)gle-base.h \
 gle-interface$(PATH_SEP)gle-datatype.h
 
 OBJECTS = \
-axis.$(OBJ_SUFF) \
-b_tab.$(OBJ_SUFF) \
-b_text.$(OBJ_SUFF) \
-begin.$(OBJ_SUFF) \
-core.$(OBJ_SUFF) \
-curve.$(OBJ_SUFF) \
-color.$(OBJ_SUFF) \
-drawit.$(OBJ_SUFF) \
-eval.$(OBJ_SUFF) \
-file_io.$(OBJ_SUFF) \
-fitbez.$(OBJ_SUFF) \
-fitcf.$(OBJ_SUFF) \
-fn.$(OBJ_SUFF) \
-font.$(OBJ_SUFF) \
-general.$(OBJ_SUFF) \
-op_def.$(OBJ_SUFF) \
-gprint.$(OBJ_SUFF) \
-graph.$(OBJ_SUFF) \
-graph2.$(OBJ_SUFF) \
-key.$(OBJ_SUFF) \
-keyword.$(OBJ_SUFF) \
-leastsq.$(OBJ_SUFF) \
-memory.$(OBJ_SUFF) \
-mychar.$(OBJ_SUFF) \
-pass.$(OBJ_SUFF) \
-polish.$(OBJ_SUFF) \
-run.$(OBJ_SUFF) \
-savgol.$(OBJ_SUFF) \
-sub.$(OBJ_SUFF) \
-tex.$(OBJ_SUFF) \
-token.$(OBJ_SUFF) \
-var.$(OBJ_SUFF) \
-cutils.$(OBJ_SUFF) \
-texinterface.$(OBJ_SUFF) \
-d_ps.$(OBJ_SUFF) \
-d_svg.$(OBJ_SUFF) \
-d_x.$(OBJ_SUFF) \
-d_dummy.$(OBJ_SUFF) \
-d_cairo.$(OBJ_SUFF) \
-config.$(OBJ_SUFF) \
-numberformat.$(OBJ_SUFF) \
-glearray.$(OBJ_SUFF) \
-cmdline.$(OBJ_SUFF) \
-gle-block.$(OBJ_SUFF) \
-gle-sourcefile.$(OBJ_SUFF) \
-gle-interface.$(OBJ_SUFF) \
-gle-base.$(OBJ_SUFF) \
-gle-datatype.$(OBJ_SUFF) \
-gle-poppler.$(OBJ_SUFF) \
-builtin-double.$(OBJ_SUFF)
+$(BUILD_DIR)$(PATH_SEP)axis.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)b_tab.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)b_text.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)begin.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)core.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)curve.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)color.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)drawit.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)eval.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)file_io.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)fitbez.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)fitcf.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)fn.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)font.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)general.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)op_def.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)gprint.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)graph.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)graph2.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)key.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)keyword.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)leastsq.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)memory.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)mychar.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)pass.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)polish.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)run.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)savgol.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)sub.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)tex.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)token.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)var.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)cutils.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)texinterface.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)d_ps.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)d_svg.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)d_x.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)d_dummy.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)d_cairo.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)config.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)numberformat.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)glearray.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)cmdline.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)gle-block.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)gle-sourcefile.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)gle-interface.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)gle-base.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)gle-datatype.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)gle-poppler.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)builtin-double.$(OBJ_SUFF) 
+
+GLE_OBJ =\
+$(BUILD_DIR)$(PATH_SEP)gle.$(OBJ_SUFF)
+
+GLE_CPP_LIB_OBJ=\
+$(BUILD_DIR)$(PATH_SEP)gle_cpp_lib.$(OBJ_SUFF)
+
+GLEBTOOLOBJS=\
+$(BUILD_DIR)$(PATH_SEP)cutils.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)file_io.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)glebtool.$(OBJ_SUFF)
 
 GLE_CPP =gle.cpp
 
 LINKOBJS = \
-bitmap$(PATH_SEP)img2ps.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)lzwencode.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glegif.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glejpeg.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)gletiff.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)glepng.$(OBJ_SUFF) \
-bitmap$(PATH_SEP)ascii85.$(OBJ_SUFF) \
-surface$(PATH_SEP)gsurface.$(OBJ_SUFF) \
-surface$(PATH_SEP)hide.$(OBJ_SUFF) \
-surface$(PATH_SEP)fcontour.$(OBJ_SUFF) \
-surface$(PATH_SEP)ffitcontour.$(OBJ_SUFF) \
-surface$(PATH_SEP)gcontour.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)let.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)fit.$(OBJ_SUFF) \
-letzfitz$(PATH_SEP)ffit.$(OBJ_SUFF) \
-tokens$(PATH_SEP)Tokenizer.$(OBJ_SUFF) \
-tokens$(PATH_SEP)StringKeyHash.$(OBJ_SUFF) \
-tokens$(PATH_SEP)BinIO.$(OBJ_SUFF)
+bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)img2ps.$(OBJ_SUFF) \
+bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)lzwencode.$(OBJ_SUFF) \
+bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)glegif.$(OBJ_SUFF) \
+bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)glejpeg.$(OBJ_SUFF) \
+bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)gletiff.$(OBJ_SUFF) \
+bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)glepng.$(OBJ_SUFF) \
+bitmap$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)ascii85.$(OBJ_SUFF) \
+surface$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)gsurface.$(OBJ_SUFF) \
+surface$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)hide.$(OBJ_SUFF) \
+surface$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)fcontour.$(OBJ_SUFF) \
+surface$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)ffitcontour.$(OBJ_SUFF) \
+surface$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)gcontour.$(OBJ_SUFF) \
+letzfitz$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)let.$(OBJ_SUFF) \
+letzfitz$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)fit.$(OBJ_SUFF) \
+letzfitz$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)ffit.$(OBJ_SUFF) \
+tokens$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)Tokenizer.$(OBJ_SUFF) \
+tokens$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)StringKeyHash.$(OBJ_SUFF) \
+tokens$(PATH_SEP)$(BUILD_DIR)$(PATH_SEP)BinIO.$(OBJ_SUFF)
 
 SVGOBJS =
 
 PNGOBJS =
 
 JPEGOBJS =
+
+!ifdef HAVE_LIBTIFF
+OBJECTS = $(OBJECTS) $(TIFFOBJS)
+!endif
+
+!ifdef HAVE_LIBPNG
+OBJECTS = $(OBJECTS) $(PNGOBJS)
+!endif
+
+!ifdef HAVE_LIBJPEG
+OBJECTS = $(OBJECTS) $(JPEGOBJS)
+!endif
+#$(PSOBJS) $(SVGOBJS)
+
 

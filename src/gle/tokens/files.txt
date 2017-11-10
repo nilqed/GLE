@@ -48,6 +48,6 @@ Tokenizer.h \
 Tokenizer.i
 
 OBJECTS = \
-Tokenizer.$(OBJ_SUFF) \
-StringKeyHash.$(OBJ_SUFF) \
-BinIO.$(OBJ_SUFF)
+$(BUILD_DIR)$(PATH_SEP)Tokenizer.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)StringKeyHash.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)BinIO.$(OBJ_SUFF)

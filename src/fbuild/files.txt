@@ -48,8 +48,9 @@ token.h \
 ../gle/cutils.h
 
 OBJECTS = \
-token.$(OBJ_SUFF)
+$(BUILD_DIR)$(PATH_SEP)fbuild.$(OBJ_SUFF) \
+$(BUILD_DIR)$(PATH_SEP)token.$(OBJ_SUFF)
 
 EXTRA_OBJS = \
-../gle/cutils.$(OBJ_SUFF) \
-../gle/file_io.$(OBJ_SUFF)
+../gle/$(BUILD_DIR)$(PATH_SEP)cutils.$(OBJ_SUFF) \
+../gle/$(BUILD_DIR)$(PATH_SEP)file_io.$(OBJ_SUFF)

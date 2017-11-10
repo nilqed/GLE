@@ -36,69 +36,57 @@
 #                                                                      #
 ########################################################################
 #
-# makefile.vc for GLE v4.0
-# for compilation with MS vc++ .net
-#
+# makefile.vc for GLE v4.0 for compilation with MS vc++ .net
 #
 HAVE_QT = 1
 !include ..\..\config.vc
-#
 !include files.txt
 
-!ifdef HAVE_LIBTIFF
-OBJECTS = $(OBJECTS) $(TIFFOBJS)
-!endif
+MOC_SOURCES		= $(MOC_OBJECTS:.moc_obj=.moc_cpp)
+QRC_SOURCES		= $(QRC_OBJECTS:.qrc_obj=.qrc_cpp)
 
-!ifdef HAVE_LIBPNG
-OBJECTS = $(OBJECTS) $(PNGOBJS)
-!endif
+all: $(BUILD_DIR) $(OBJECTS) qgle.res $(PROJECT_BINDIR)\bin\qgle$(D)$(EXE_SUFF)
 
-!ifdef HAVE_LIBJPEG
-OBJECTS = $(OBJECTS) $(JPEGOBJS)
-!endif
+$(BUILD_DIR):
+	-$(MKDIR) $(BUILD_DIR)
 
-MOC_OBJECTS = $(MOC_SOURCES:.cpp=.moc_obj)
-QRC_OBJECTS = $(QRC_SOURCES:.qrc=.qrc_obj)
-OBJECTS		= $(OBJECTS) $(MOC_OBJECTS) $(QRC_OBJECTS)
-
-all: $(OBJECTS) qgle.res $(PROJECT_BINDIR)\bin\qgle$(EXE_SUFF)
-
-3dviewer.moc_obj: 3dviewer.h
-about.moc_obj: about.h
-amove.moc_obj: amove.h
-circle.moc_obj: circle.h
-curve.moc_obj: curve.h
-ellipse.moc_obj: ellipse.h
-grid.moc_obj: grid.h
-settings.moc_obj: settings.h
-settings_dialog.moc_obj: settings_dialog.h
-text.moc_obj: text.h
-snapline.moc_obj: snapline.h
-propertyeditor.moc_obj: propertyeditor.h
-propertymodel.moc_obj: propertymodel.h
-serverthread.moc_obj: serverthread.h
-newfile.moc_obj: newfile.h
-downloader.moc_obj : downloader.h
-dialogues.moc_obj  : dialogues.h
-colourpicker.moc_obj : colourpicker.h
-snapline.moc_obj : snapline.h
-consolewindow.moc_obj: consolewindow.h
-arc.moc_obj: arc.h
-drawingobject.moc_obj: drawingobject.h
-colourbutton.moc_obj: colourbutton.h
-component.moc_obj: component.h
-variantdelegate.moc_obj: variantdelegate.h
-gledrawing.moc_obj: gledrawing.h
-polararray.moc_obj: polararray.h
-mainwindow.moc_obj: mainwindow.h
-objectblocks.moc_obj: objectblocks.h
-qgs.moc_obj: qgs.h
-qgle.qrc_obj: qgle.qrc
+$(BUILD_DIR)$(PATH_SEP)3dviewer.moc_obj: 3dviewer.h
+$(BUILD_DIR)$(PATH_SEP)about.moc_obj: about.h
+$(BUILD_DIR)$(PATH_SEP)amove.moc_obj: amove.h
+$(BUILD_DIR)$(PATH_SEP)circle.moc_obj: circle.h
+$(BUILD_DIR)$(PATH_SEP)curve.moc_obj: curve.h
+$(BUILD_DIR)$(PATH_SEP)ellipse.moc_obj: ellipse.h
+$(BUILD_DIR)$(PATH_SEP)grid.moc_obj: grid.h
+$(BUILD_DIR)$(PATH_SEP)settings.moc_obj: settings.h
+$(BUILD_DIR)$(PATH_SEP)settings_dialog.moc_obj: settings_dialog.h
+$(BUILD_DIR)$(PATH_SEP)text.moc_obj: text.h
+$(BUILD_DIR)$(PATH_SEP)snapline.moc_obj: snapline.h
+$(BUILD_DIR)$(PATH_SEP)propertyeditor.moc_obj: propertyeditor.h
+$(BUILD_DIR)$(PATH_SEP)propertymodel.moc_obj: propertymodel.h
+$(BUILD_DIR)$(PATH_SEP)serverthread.moc_obj: serverthread.h
+$(BUILD_DIR)$(PATH_SEP)newfile.moc_obj: newfile.h
+$(BUILD_DIR)$(PATH_SEP)downloader.moc_obj : downloader.h
+$(BUILD_DIR)$(PATH_SEP)dialogues.moc_obj  : dialogues.h
+$(BUILD_DIR)$(PATH_SEP)colourpicker.moc_obj : colourpicker.h
+$(BUILD_DIR)$(PATH_SEP)snapline.moc_obj : snapline.h
+$(BUILD_DIR)$(PATH_SEP)consolewindow.moc_obj: consolewindow.h
+$(BUILD_DIR)$(PATH_SEP)arc.moc_obj: arc.h
+$(BUILD_DIR)$(PATH_SEP)drawingobject.moc_obj: drawingobject.h
+$(BUILD_DIR)$(PATH_SEP)colourbutton.moc_obj: colourbutton.h
+$(BUILD_DIR)$(PATH_SEP)component.moc_obj: component.h
+$(BUILD_DIR)$(PATH_SEP)variantdelegate.moc_obj: variantdelegate.h
+$(BUILD_DIR)$(PATH_SEP)gledrawing.moc_obj: gledrawing.h
+$(BUILD_DIR)$(PATH_SEP)polararray.moc_obj: polararray.h
+$(BUILD_DIR)$(PATH_SEP)mainwindow.moc_obj: mainwindow.h
+$(BUILD_DIR)$(PATH_SEP)objectblocks.moc_obj: objectblocks.h
+$(BUILD_DIR)$(PATH_SEP)qgs.moc_obj: qgs.h
+$(BUILD_DIR)$(PATH_SEP)qgle.qrc_obj: qgle.qrc
 
 
-$(PROJECT_BINDIR)\bin\qgle$(EXE_SUFF): $(GLEOBJS) $(OBJECTS)
-	$(AR) $(LINKFLAGS) /out:$(PROJECT_BINDIR)\bin\qgle$(EXE_SUFF) $(OBJECTS) libgle-graphics_s.lib $(LIBS) qgle.res
+$(PROJECT_BINDIR)\bin\qgle$(D)$(EXE_SUFF): $(OBJECTS)
+	$(AR) $(LINKFLAGS) /out:$@ $(OBJECTS) libgle-graphics_s$(LIB_TAG).lib $(LIBS) qgle.res
 
 clean:
-	-$(RM) $(OBJECTS) qgle.res $(PSOBJS) $(SVGOBJS) $(MOC_SOURCES:.cpp=.moc_cpp) $(QRC_SOURCES:.qrc=.qrc_cpp) $(PROJECT_BINDIR)\bin\qgle$(EXE_SUFF)
+	-$(RM) $(OBJECTS) qgle.res $(PSOBJS) $(SVGOBJS) $(MOC_SOURCES) $(QRC_SOURCES) $(PROJECT_BINDIR)\bin\qgle$(EXE_SUFF) *.pdb
+	-$(RMDIR) $(BUILD_DIR)
 

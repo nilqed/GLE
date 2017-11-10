@@ -44,6 +44,13 @@
 #
 # other global defines
 #
+#VARIANT			=release #debug or release
+
+MSVC_TOOLSET	=vc141
+MULTI_THREADED	=mt		# or nothing - why not write multithreaded???
+CHAR_SET		=ascii #or unicode
+ARCH			=32bit #or 64bit
+VC_RUN_TIME_LIB	=dynamic # link against msvc dlls or not
 PROJECT_BINDIR 	= ..\..\build
 PROJECT_LIBDIR 	= ..\..\build\bin
 PROJECT_INCDIR 	= ..\..\include
@@ -54,14 +61,76 @@ CC				=cl
 AR				=link
 RM				=erase /QE
 RMDIR			=rmdir /Q /Ne
-MKDIR			=mkdir
+MKDIR			=mkdir /Ne
 PATH_SEP		=^\
-MSVC_TOOLSET	=vc141
-VC_MODEL		=mt
-LIB_TAG			=-$(MSVC_TOOLSET)-$(VC_MODEL)
+!ifndef VARIANT
+VARIANT			=release
+!endif
+#
+# - charset ascii or unicode
+#
+!ifndef CHAR_SET
+CHAR_SET		=ascii
+!endif
+#
+# -- runtime lib static or dynamic
+#
+!ifndef VC_RUN_TIME_LIB
+VC_RUN_TIME_LIB	=dynamic
+!endif
+!ifndef VARIANT
+VARIANT			=debug
+!endif
+#
+# -- arch 32 or 64 bit
+#
+!ifndef ARCH
+ARCH			=32bit
+!endif
+#
+# -- UNICODE
+#
+UNICODE_CPPOPT	=
+U				=
+!if "$(CHAR_SET)" == "unicode"
+U				=u
+UNICODE_CPPOPT	=/D _UNICODE /D UNICODE
+!endif
+#
+# -- Variant - assumes release by default
+#
+_WARNINGS		=/wd4100 /wd4002 /wd4251 /wd4512 /wd4511 /wd4239 /wd4673 /wd4671 /wd4456 /wd4290
+D				=
+RTD				=
+VARIANT_CPPOPT	=/Ox /W4 /GL /GA /EHsc $(_WARNINGS) /wd4702
+RC_DEBUG_OPT	=
+VARIANT_LINKOPT	=/LTCG
+VARIANT_LIBOPT	=-machine:X86 /LTCG
+!if "$(VARIANT)" == "debug"
+D				=d
+RTD				=-gd
+VARIANT_CPPOPT	=/Od /W4 /Zi /EHsc /D _DEBUG $(_WARNINGS) #/Fd$*.pdb
+RC_DEBUG_OPT	=
+VARIANT_LINKOPT	=/DEBUG /NODEFAULTLIB:LIBCMT
+VARIANT_LIBOPT	=-machine:X86
+!endif
+#
+# -- Run Time Library
+#
+!if "$(VC_RUN_TIME_LIB)" == "dynamic"
+RUNTIME_CPPOPT	=/MD$D
+M				=$(MULTI_THREADED)$(RTD)
+!elseif "$(VC_RUN_TIME_LIB)" == "static"
+RUNTIME_CPPOPT	=/MT$D
+M				=$(MULTI_THREADED)-s$(RTD)
+!endif
+#
+#	-- tags for libraries and build directory
+#
+LIB_TAG			=-$(MSVC_TOOLSET)-$(MULTI_THREADED)$(RTD)
+BUILD_DIR		=$(MSVC_TOOLSET)-$U$M
 
-
-EXTRA_DEFS			=-D __WIN32__ -D __NOCYGWIN__ -D _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS -D NOMINMAX -D HAVE_CAIRO -D CAIRO_WIN32_STATIC_BUILD -D HAVE_EXTRA_FONTS
+EXTRA_DEFS			=-D __WIN32__ -D __NOCYGWIN__ -D _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS -D NOMINMAX -D HAVE_CAIRO -D CAIRO_WIN32_STATIC_BUILD -D HAVE_EXTRA_FONTS -D _CRT_SECURE_NO_WARNINGS
 EXTRA_INCLUDE_PATHS	=-I$(CAIRODIR)\src
 EXTRA_LIB_PATHS		=/LIBPATH:$(CAIRODIR)\src /LIBPATH:$(PIXMANDIR)\pixman
 LIBS				=cairo$(LIB_TAG).lib pixman$(LIB_TAG).lib
@@ -122,26 +191,28 @@ phonon.lib
 QT_LIBSD = \
 QAxContainerd.lib \
 QAxServerd.lib \
-Qt3Supportd4.lib \
-QtCLucened4.lib \
-QtCored4.lib \
-QtDeclaratived4.lib \
-QtDesignerComponentsd4.lib \
-QtDesignerd4.lib \
-QtGuid4.lib \
-QtHelpd4.lib \
-QtMultimediad4.lib \
-QtNetworkd4.lib \
-QtOpenGLd4.lib \
-QtSqld4.lib \
-QtSvgd4.lib \
-QtTestd4.lib \
+Qt3Supportd.lib \
+QtCLucene.lib \
+QtCored.lib \
+QtDesigner.lib \
+QtDesignerComponents.lib \
+QtGuid.lib \
+QtHelp.lib \
+QtMultimediad.lib \
+QtNetworkd.lib \
+QtOpenGLd.lib \
+QtSqld.lib \
+QtSvgd.lib \
+QtTestd.lib \
 QtUiToolsd.lib \
-QtWebKitd4.lib \
-QtXmlPatternsd4.lib \
-QtXmld4.lib \
+QtXmld.lib \
+QtXmlPatternsd.lib \
 Qtmaind.lib \
-phonond4.lib
+phonond.lib
+
+!if "$(VARIANT)" == "debug"
+QT_LIBS=$(QT_LIBSD)
+!endif
 
 #QtScriptd4.lib \
 #QtScriptToolsd4.lib \
@@ -160,27 +231,31 @@ RCOPT				=/nologo /d WIN32 /d _WINDOWS
 
 #dl$(LIB_TAG).lib
 
-# multithreaded dll link /MD to MSVC dlls
-
-CPPFLAGS	=/nologo /MD /GL /EHsc /Ox -I.\.. -I$(PROJECT_INCDIR) -I$(PROJECT_INCDIR) $(EXTRA_INCLUDE_PATHS) $(VERSION_INFO) $(EXTRA_DEFS) -DINSTALL_DIR="\"$(INSTALL_DIR)\""
-LINKFLAGS	=/nologo /LTCG /MACHINE:X86 /MANIFEST /LIBPATH:$(PROJECT_LIBDIR) $(EXTRA_LIB_PATHS)
-LIBFLAGS	=/nologo /LTCG /MACHINE:X86
+CPPFLAGS	=/nologo /c $(RUNTIME_CPPOPT) $(VARIANT_CPPOPT) -I.\.. -I$(PROJECT_INCDIR) $(EXTRA_INCLUDE_PATHS) $(VERSION_INFO) $(EXTRA_DEFS) -DINSTALL_DIR="\"$(INSTALL_DIR)\""
+LINKFLAGS	=/nologo $(VARIANT_LINKOPT) /MANIFEST /LIBPATH:$(PROJECT_LIBDIR) $(EXTRA_LIB_PATHS)
+LIBFLAGS	=/nologo $(VARIANT_LIBOPT)
 
 # for win32
 LIBS	=$(LIBS) $(WINLIBS)
 
-.SUFFIXES: .moc_obj .h .rc .res .qrc .qrc_obj
+.SUFFIXES: .moc_obj .h .rc .res .qrc .qrc_obj .cpp .c .obj
 
-.h.moc_obj:
-	$(QT_DIR)\bin\moc.exe %|fF.h -o %|fF.moc_cpp
-	cl $(CPPFLAGS) /c /TP /Fo$@ %|fF.moc_cpp
+{}.h{$(BUILD_DIR)}.moc_obj:
+	$(QT_DIR)\bin\moc.exe $< -o $*.moc_cpp
+	cl $(CPPFLAGS) /c /TP /Fo$@ $*.moc_cpp
+
+{}.qrc{$(BUILD_DIR)}.qrc_obj:
+	$(QT_DIR)\bin\rcc.exe $< -name qgle -o $*.qrc_cpp
+	cl $(CPPFLAGS) /c /TP /Fo$@ $*.qrc_cpp
 
 .rc.res:
 	rc $(RCOPT) /Fo$@ $<
 
-.qrc.qrc_obj:
-	$(QT_DIR)\bin\rcc.exe %|fF.qrc -name qgle -o %|fF.qrc_cpp
-	cl $(CPPFLAGS) /c /TP /Fo$@ %|fF.qrc_cpp
+{}.c{$(BUILD_DIR)}.obj::
+	cl $(CPPFLAGS) /Fo$(BUILD_DIR)\ $<
+
+{}.cpp{$(BUILD_DIR)}.obj::
+	cl $(CPPFLAGS) /Fo$(BUILD_DIR)\ $<
 
 #$(QT_DIR)\bin\rcc.exe -binary %|fF.qrc -o %|fF.qrc_cpp
 
