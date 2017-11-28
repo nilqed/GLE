@@ -42,7 +42,7 @@
 #  this sets the global version number for all programs
 #
 MODULE_NAME				=gle40
-BASE_NAME				=GLE
+BASE_NAME				=gle-graphics
 MAJOR_VERSION_NUMBER 	=4
 MINOR_VERSION_NUMBER 	=2
 BUILD_NUMBER    		=5
