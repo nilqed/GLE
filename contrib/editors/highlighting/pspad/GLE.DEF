@@ -1,0 +1,324 @@
+; PSPad clip definition file for GLE
+; author:  SciOS Scientific Operating Systems GmbH/pagani
+; version: 0.1
+; last revision 17. Aug 2007  15:45
+;
+; Colours
+; M - Maroon 
+; R - Red 
+; N - Navy 
+; B - Blue 
+; P - Purple 
+; F - Fuchsia 
+; G - Green 
+; D - Dark gray 
+
+[Macro definition] 
+%x%=@E x:
+%y%=@E y:
+%w%=@E width:
+%h%=@E height:
+%a%=@E alpha:
+%s%=@E size:
+%x1%=@E x1:
+%y1%=@E y1:
+%x2%=@E x2:
+%y2%=@E y2:
+%x3%=@E x3:
+%y3%=@E y3:
+%a1%=@E alpha1:
+%a2%=@E alpha2:
+%ix%=@E initial slope x:
+%iy%=@E initial slope y:
+%ex%=@E end slope x:
+%ey%=@E end slope y:
+%vectorXY%=@E vector x1 y1 ... xn yn:
+%radius%=@E radius:
+%arrow%=@C arrow:,"arrow ",,start;end;both
+%fill%=@C fill:,"fill ",,grid;grid1;grid2;grid3;grid4;grid5;shade;shade1;shade2;shade3;shade4;shade5;rshade;rshade1;rshade2;rshade3;rshade4;rshade5
+%patterntypes%=@C choose a pattern:,,,grid;grid1;grid2;grid3;grid4;grid5;shade;shade1;shade2;shade3;shade4;shade5;rshade;rshade1;rshade2;rshade3;rshade4;rshade5
+%addgap%=@E gap:,add 
+%addval%=@E increase box value:,add 
+%width%=@E width:,width 
+%nobox%=@C nobox?:,,,nobox
+%stroke%=@C stroke?:,,,stroke
+%clip%=@C clip?:,,,clip
+%bitmaptype%=@C type:,"type ",,TIFF;JPEG;PNG;GIF
+%bitmapfilename%=@O File:,,,Bitmap files |*.jpg;*.gif;*.tif;*.png,',A\ 
+%justify%=@C justify:,"justify ",,left;center;right;tl;tc;tr;lc;cc;rc;bl;bc;br
+%name%=@E name:,name 
+%round%=@E round corners (val):,round 
+%tblr%=@E top bottom left right: 
+%markername%=@E markername: 
+%subroutinename%=@E sub-routine name: 
+%scaleDxDy%=@E scale dx dy (3 values):
+%fontname%=@E font name (see manual):
+%var%=@E variable name:
+%from%=@E start value:
+%to%=@E end value:,to 
+%step%=@E stepsize:,step 
+%expression%=@E expression:
+%includefile%=@O File:,,,GLE include files |*.*,',A\ 
+%object1%=@E object1.just:
+%object2%=@E object2.just:
+%separator%=@C separator (arrows):,,,-;<-;->;<->
+%markerchoice%=@C marker name:,,,circle;triangle;square;diamond;fcircle;ftriangle;fsquare;fdiamond;dot;cross;club;heart;star;snake;dag;ddag;asterisk;oplus;ominus;otimes;odot;trianglez;diamondz;wcircle;wtriangle;wsquare;wdiamond
+%scalefactor%=@E relative scale factor:
+%papersizes%=@C paper sizes (xor w/h):,,,a0paper;a1paper;a2paper;a3paper;a4paper;letterpaper
+%epsfile%=@O File:,,,eps files |*.eps;*.ps,',A\
+%objectname%=@E object name:
+%captype%=@C cap type:,,,butt;round;square
+%jointype%=@C join type:,,,mitre;round;bevel
+%justtype%=@C justify type:,,,left;center;right;tl;tc;tr;lc;cc;rc;bl;bc;br
+%colorpicker%=@L choose color:
+%pictureselect%=@P choose picture:
+%colorbyname%=@E named color:
+%othercolor%=@E rgb or rgb255 or 0<gray<1:
+%standardfonts%=@C standard fonts:,,,rm;rmb;rmi;ss;ssb;ssi;tt;ttb;tti
+%texfonts%=@C TeX CM fonts:,,,texcmb;texcmitt;texcmmi;texcmr;texcmss;texcmssb;texcmssi;texcmti;texcmtt
+%plfonts%=@C PL fonts:,,,plba
+%psfonts%=@C PS fonts:,,,psagb
+%manualfont%=@E enter fontname manually:
+%linestyle%=@E line style (1-9):
+%subname%=@E subroutine name:
+%subparams%=@E parameters (no commas):
+%texstring%=@E LaTeX string:
+%text%=@E text:
+%subroutinep%=@E subname p1 ... pn:
+
+[aline |B Draws a line from the current point to (x,y)]
+aline %x% %y% %arrow%
+
+[amove |B Changes the current point to the absolute coordinates (x,y)]
+amove %x% %y% 
+
+[arc |B Draws an arc of a circle (anticlockwise)]
+arc %radius% %a1% %a2% %arrow%
+
+[narc |B Draws an arc of a circle (clockwise)]
+arc %radius% %a1% %a2% %arrow%
+
+[arcto |B Draws a line from the current point to (x1,y1) then to (x2,y2) and fits an arc]
+arcto %x1% %y1% %x2% %y2% %radius%
+
+[begin box |N Draws a box around everything between 'begin box' and 'end box']
+begin box %fill% %addgap% %nobox% 
+! --> draw box around ...
+end box
+
+[begin clip |N Saves the current clipping region]
+begin clip
+! --> save current clipping region
+end clip
+
+[begin name |N Saves the coordinates of what is inside the block for later use]
+begin name
+! --> save coordinates for later use
+end name
+
+[begin origin |N Makes the current point the origin]
+begin origin
+! --> make current point the origin
+end origin
+
+[begin path |N Initialises the drawing of a filled shape]
+begin path %stroke% %fill% %clip%
+! --> initialize drawing of a filled shape
+end path
+
+[begin rotate |N The coordinate system is rotated anti-clockwise about the current point by the angle a (degrees)]
+begin rotate %a%
+! --> rotate by angle a (degrees)
+end rotate
+
+[begin scale |N Everything between the begin and end is scaled by the factors x and y]
+begin scale %x% %y%
+! --> scale by factors x,y
+end scale
+
+[begin table |N Table alignment]
+begin table
+! --> table alignment
+end table
+
+[begin text |N Displays multiple lines or paragraphs of text]
+begin text %width%
+! --> display multiple lines or paragraphs of text
+end text
+
+[begin translate |N Everything between the begin and end is moved x units to the right and y units up]
+begin translate %x% %y%
+! --> translate x units to the right and y units up
+end translate
+
+[bezier |B Draws a Bezier from the current point to (x3,y3) with control points (x1,y1) and (x2,y2)]
+bezier %x1% %y1% %x2% %y2% %x3% %y3%
+
+[bitmap |B Imports the bitmap filename. The bitmap is scaled to width×height]
+bitmap %bitmapfilename% %w% %h% %bitmaptype%
+
+[bitmap_info |B Returns the dimensions in pixels of the bitmap in the output parameters width and height]
+bitmap_info %bitmapfilename% %w% %h% %bitmaptype%
+
+[box |B Draws a box, of width x and height y, with its bottom left corner at the current point]
+box %x% %y% %justify% %fill% %name% %nobox% %round%
+
+[circle |B Draws a circle at the current point, with radius radius]
+circle %radius% %fill%
+
+[closepath |B Joins the beginning of a line to the end of a line (an aline to the end of the last amove)]
+closepath
+
+[curve |B Draws a curve starting at the current point and passing through the points vectorXY]
+curve %ix% %iy% %vectorXY% %ex% %ey%
+!Draws a curve starting at the current point and passing through the points (x1,y1) . . . (xn,yn),
+!with an initial slope of (ix,iy) to (x1,y1) and a final slope of (ex,ey). All the vectors are relative
+!movements from the vector before.
+
+[margins |B This command can be used to define the page margins]
+margins %tblr%
+
+[define marker |B Defines a new marker (markername) which will call the subroutine subroutine-name]
+define marker %markername% %subroutinename%
+
+[defmarker |B Defines a new marker, from any font, it is centered but can be adjusted using dx,dy ]
+defmarker %markername% %fontname% %scaleDxDy%
+ 
+[ellipse |B Draws an ellipse at the current point, with diameters dx and dy]
+ellipse %x% %y% %fill%
+
+[elliptical_arc |B Draws an arc of an ellipse (anticlockwise)]
+elliptical_arc %x% %y% %a1% %a2% %arrow%
+
+[elliptical_narc |B Draws an arc of an ellipse (clockwise)]
+elliptical_narc %x% %y% %a1% %a2% %arrow%
+
+[for |N for ... next structure]
+for %var% = %from% %to% %step%
+! --> code
+next %var%
+
+[grestore |B Restores the most recently saved graphics state]
+grestore
+
+[gsave |B Saves the current graphics state]
+gsave
+
+[if |N if ... then ... else]
+if %expression% then
+!--> commands
+else
+!--> commands
+end if
+
+[include |B Includes the GLE script “filename” into the current script]
+include %includefile%
+
+[join |B Draws a line between two named objects]
+join %object1% %separator% %object2%
+
+[marker |B Draws marker marker-name at the current point]
+marker %markerchoice% %scalefactor%
+
+[papersize |B Sets the paper size of the output]
+papersize %papersizes% %w% %h%
+
+[postscript |B Includes an encapsulated postscript file into a GLE picture]
+postscript %epsfile% %w% %h%
+
+[print |B This command prints its argument to the console (terminal)]
+print %expression%
+
+[psbbtweak |B Changes the default behavior of the bounding box]
+!psbbtweak command must appear before the first size command in the GLE file.
+psbbtweak
+
+[pscomment |B Allows inclusion of exp as a comment in the preamble of the postscript file.]
+!pscomment command must appear before the first size command in the GLE file.
+pscomment %expression%
+
+[rbezier |B Identical to the BEZIER except that points are relative to the current point.]
+rbezier %x1% %y1% %x2% %y2% %x3% %y3%
+
+[return |B The return command is used inside subroutines to return a value]
+return %expression%
+
+[rline |B Draws a line from the current point to relative coordinates (x,y)]
+rline %x% %y% %arrow%
+
+[move |B Changes the current point to the relative coordinate (x,y)]
+move %x% %y%
+
+[save |B This command saves a point for later use with the join command]
+save %objectname%
+
+[set arrowangle |M Sets the opening angle of the arrow tips]
+set arrowangle %a%
+
+[set arrowsize |M Sets the size of the arrow tips]
+set arrowsize %s%
+
+[set cap |M Defines what happens at the end of a wide line]
+set cap %captype%
+
+[set color |M Sets the current colour for all future drawing operations]
+set color %colorpicker% %colorbyname% %othercolor%
+
+[set dashlen |M Sets the length of the smallest dash used for the line styles]
+!Sets the length of the smallest dash used for the line styles. This command MUST come before the
+!set lstyle command. This may be needed when scaling a drawing by a large factor.
+set dashlen %s%
+
+[set fill |M Sets the color for filling shapes]
+set fill %colorpicker% %colorbyname% %othercolor%
+
+[set pattern |M Sets the pattern for filling shapes]
+!To paint a shape in a color different from black first set the color, then the pattern.
+set pattern %patterntypes%
+
+[set fill clear |M To draw unfilled shapes]
+set fill clear
+
+[set font |M Sets the current font]
+set font %standardfonts% %texfonts% %plfonts% %psfonts% %manualfont%
+
+[set fontlwidth |M This sets the width of lines used to draw the stroked fonts]
+set fontlwidth %w%
+
+[set hei |M Sets the height of text]
+set hei %h%
+
+[set join |M Defines how two wide lines will be joined together]
+set join %jointype%
+
+[set just |M Sets the justification which will be used for text commands]
+set just %justtype%
+
+[set lstyle |M Sets the current line style. There are 9 predefined line styles (1–9)]
+set lstyle %linestyle%
+
+[set lwidth |M Sets the width of lines to line-width cm]
+set lwidth %w%
+
+[size |M Sets the size of the paper we are working with]
+size %x% %y%
+
+[sub |G Defines a subroutine. The end of the subroutine is denoted with end sub]
+sub %subname% %subparams%
+! --> code / return
+end sub
+
+[tex |G Draw a LaTeX expression at the current point using the current value of ‘justify’]
+tex %texstring% %name% %addval%
+
+[text |G This is the simplest command for drawing text]
+text %text%
+
+[write |G This command is similar to text except that it expects a quoted string, string variable ...]
+write %expression%
+
+[comment |P Insert a line comment]
+! %text%
+
+[execute sub |P Execute a subroutine]
+@%subroutinep%
