@@ -1,0 +1,69 @@
+
+<HTML>
+<HEAD>
+<TITLE>LaTeX Tips: Creating Graphs and Plots</TITLE>
+<META NAME="Keywords" CONTENT="LaTeX, Graph, Plot, Figure" >
+</HEAD>
+
+<BODY BGCOLOR=#FFFFFF TEXT=#000000 VLINK="#000000" LINK="#000000" ALINK="#000000">
+
+<h1>Creating Graphs and Plots in LaTeX</h1>
+
+This page contains a brief tutorial on how to create scientific graphs (function plots, histograms, bar graphs, scatter plots, contour lines, color maps, surface plots, ...) in <a href="http://en.wikipedia.org/wiki/LaTeX" target=_top>LaTeX</a> documents using <a href="http://www.gle-graphics.org/" target=_top>GLE</a>.
+
+<p>
+Suppose that we want to insert a graph of the <a href="http://en.wikipedia.org/wiki/Sine" target=_top>sine</a> function in a LaTeX document. That is, we would like to have the following result:
+
+<p>
+<img src="sine-result.png">
+
+<p>
+Because the support for creating graphs in LaTeX itself is limited, it is best to rely on an external graphing program. That is, you create the graph of the sine function with the graphing program and save the result to a file. Then you include that file as a figure into your LaTeX document. The best file formats for saving graphs are the vector graphics file formats <a href="http://en.wikipedia.org/wiki/PostScript" target=_top>EPS</a> and <a href="http://en.wikipedia.org/wiki/Pdf" target=_top>PDF</a> because these are well supported by LaTeX and because they can be scaled without loss of quality to any resolution. Any graphing program that supports these file formats can be used to create graphs that can be included in a LaTeX document. Examples of such programs are <a href="http://www.gnuplot.info/" target=_top>GNUPlot</a>, <a href="http://asymptote.sourceforge.net/" target=_top>Asymptote</a>, <a href="http://gri.sourceforge.net/" target=_top>GRI</a>, <a href="http://www.r-project.org" target=_top>R</a>, <a href="http://www.gnu.org/software/octave/" target=_top>Octave</a>, and <a href="http://en.wikipedia.org/wiki/Microsoft_Excel" target=_top>Excel</a>. Further down this page, I will show how the free software graphing tool <a href="http://www.gle-graphics.org/" target=_top>GLE</a> can be used to this end.
+
+<p>
+For now, I assume that you already created your graph in EPS or PDF format and saved it to a file in the same directory as where your LaTeX file is (your .tex file). If you want to follow this example, you can download such a file for the sine function here: <a href="sin.eps">sin.eps</a>, <a href="sin.pdf">sin.pdf</a>.
+
+<p>
+You can include a figure in EPS or PDF format into a LaTeX document by using the "graphics" package. The following is an example of a LaTeX file that includes the figure from the file "sin.eps" (or "sin.pdf"):
+
+<p>
+<pre>
+\documentclass{article}
+\usepackage{graphics}
+\begin{document}
+  \begin{figure}
+    \includegraphics{sin}
+    \caption{\label{sin}The sine function.}
+  \end{figure}
+\end{document}
+</pre>
+
+<p>
+The most important parts here are the "<tt>\usepackage{graphics}</tt>", which should go at the top of your LaTeX document (in the so-called preamble) and the "<tt>\includegraphics{sin}</tt>", which imports the graph from the file "sin" into your LaTeX document. Note that the extension ".eps" or ".pdf" of the file name is not required. If you process your document with "latex" into DVI format, then it will use the ".eps" version; if you process your document with "pdflatex" to produce a PDF document, then it will use the ".pdf" version. Below I'll assume that you use "pdflatex".
+
+<p>
+Assume you have saved the above LaTeX document to a file called "graph.tex" (available <a href="graph.tex">here</a>) and that you downloaded the files <a href="sin.eps">sin.eps</a> and <a href="sin.pdf">sin.pdf</a> to the same directory. Now you can run "<tt>pdflatex graph.tex</tt>" to produce the final result: <a href="graph.pdf">graph.pdf</a>.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<P ALIGN="center">
+<img src="gleall.png">
+</P>
+
+</BODY>
+</HTML>

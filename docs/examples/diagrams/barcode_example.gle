@@ -1,0 +1,8 @@
+include "barcode.gle"
+
+! GLE file that draws EAN-13 barcodes
+! Author: Jan Soubusta
+
+size sx+.2 sy+.2
+amove .1 .1
+draw bar_code.bl 8 "594005" "530744" "Water"

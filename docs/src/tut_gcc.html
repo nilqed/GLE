@@ -1,0 +1,586 @@
+<h2>GLE Compilation Guide</h2>
+
+<p>
+This tutorial explains how to compile GLE from its source code using the <a href="http://gcc.gnu.org/">GCC</a> compiler. The tutorial covers compilation on the following operation systems:
+</p>
+
+<table>
+<tr><td><img src="../images/bitmap/xp-logo.gif" width="32" height="32" alt="Windows"></td><td>Windows</td></tr>
+<tr><td><img src="../images/bitmap/linux-logo.gif" width="32" height="32" alt="Linux"></td><td>GNU/Linux</td></tr>
+<tr><td><img src="../images/bitmap/macosx-logo.gif" width="32" height="32" alt="Mac OS/X"></td><td>MacOS/X</td></tr>
+</table>
+
+<p>
+Instructions relevant to a particular OS are marked with the corresponding icon.
+</p>
+
+<p>
+Please feel free to contact the <a href="../main/docs.html">GLE mailing list</a> if you experience any problems while compiling GLE. Also, please contact the list if you find that some information on this page is outdated, incorrect, or missing.
+</p>
+
+<h2>Required Software</h2>
+
+<h3>Development Tools</h3>
+
+<table>
+<tr>
+<td valign="top"><img src="../images/bitmap/xp-logo.gif" width="32" height="32" alt="Windows"></td>
+<td>To compile GLE on Windows with GCC, you need a Windows port of GCC, "make", and other Unix-like tools. There are two options: <a href="http://www.mingw.org/">MinGW/MSYS</a> and <a href="http://www.cygwin.com/">Cygwin</a>. GLE compiles fine with both systems. In this tutorial I will focus on Cygwin. Download Cygwin's "Setup.exe" from <a href="http://www.cygwin.com/">this location</a> and double click it in Explorer. This will guide you through Cygwin's installation process. After asking you, among others, to select a download mirror, Cygwin's setup will show you a list with all software packages that can be installed. It is best to keep all packages that are selected by default. In addition, make sure that the following packages are selected:
+<ul>
+<li>Archive/unzip</li>
+<li>Archive/zip</li>
+<li>Devel/autoconf</li>
+<li>Devel/automake</li>
+<li>Devel/pkg-config</li>
+<li>Devel/gcc-core</li>
+<li>Devel/gcc-g++</li>
+<li>Devel/gcc-mingw-core</li>
+<li>Devel/gcc-mingw-g++</li>
+<li>Devel/make</li>
+<li>Devel/mingw-runtime</li>
+<li>Libs/w32api</li>
+<li>Interpreters/perl</li>
+</ul>
+Then proceed with the Cygwin install. I'll assume that you install Cygwin in "C:\Devel\Cygwin". Cygwin's installer will add an entry labeled "Cygwin Bash Shell" in a folder named "Cygwin" to your Start Menu. Click this entry to start the <a href="http://www.gnu.org/software/bash/bash.html">Bash</a> command prompt (later also called "terminal window"). All commands discussed next should be entered here.
+</td>
+</tr>
+</table>
+
+<table><tr>
+<td valign="top"><img src="../images/bitmap/linux-logo.gif" width="32" height="32" alt="Linux"></td><td>To compile GLE on Linux with GCC, you need the GNU build tools GCC and "make". In many cases, these are installed by default. To find out, enter the command "g++ --version" in a terminal window ("Gnome Terminal" on <a href="http://www.gnome.org/">Gnome</a>, or "Konsole" on <a href="http://www.kde.org/">KDE</a>). If this prints "bash: g++: command not found", then GCC is not installed. Try the same with "make". If GCC or make is missing, then check your Linux distribution's software package repository and install the packages for "g++", "gcc", "make", and "libc-devel". On Ubuntu, all these packages can be installed at once with the command "sudo apt-get install build-essential".
+</td></tr>
+</table>
+
+<table><tr>
+<td valign="top"><img src="../images/bitmap/macosx-logo.gif" width="32" height="32" alt="Mac OS/X"></td><td>To compile GLE on MacOS/X with GCC, you need the "Developer Tools", which are also known as the "Xcode" package, installed. These should be available on your OS/X DVD. To test that these tools are correctly installed, open Terminal and enter the command "g++ --version". If this prints "bash: g++: command not found", then the Developer Tools are not installed.
+</td></tr>
+</table>
+
+<p>
+I'm using the following versions of GCC and make (newer versions also work):
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+[~]$ g++ --version
+g++ (GCC) 3.3.5 (Debian 1:3.3.5-13)
+Copyright (C) 2003 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+[~]$ make --version
+GNU Make 3.80
+Copyright (C) 2002  Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+</pre></td></tr></table>
+
+<p>
+Note that "[~]$" is my command prompt. The command prompt on your system might appear different. Only type the part that comes after the prompt. I.e., type "g++ --version" and then press enter and next type "make --version" and press enter. In the following, I assume basic familiarity with <a href="http://www.gnu.org/software/bash/bash.html">Bash</a> and simple Unix commands.
+</p>
+
+<h3>Optional Software Packages</h3>
+
+<p>
+This section lists a number of software packages that are optional, but recomended. That is, GLE will compile without these packages, but it will lack certain features.
+</p>
+
+<ul>
+<li>The <a href="http://trolltech.com/products/qt" target=_top>QT library</a> is required to build QGLE, GLE's graphical user interface. QGLE requires at least Qt version 4.1.1.</li>
+</ul>
+
+<ul>
+<li>The following bitmap graphics libraries are required by GLE's "bitmap" command:
+<ul>
+<li><a href="http://www.libtiff.org" target=_top>Libtiff</a> is required to load TIFF bitmap images.</li>
+<li><a href="http://www.libpng.org" target=_top>Libpng</a> is required to load PNG bitmap images.</li>
+<li><a href="http://www.ijg.org" target=_top>Libjpeg</a> is required to load JPEG bitmap images.</li>
+</ul>
+</ul>
+
+<ul>
+<li><a href="http://pages.cs.wisc.edu/~ghost/" target=_top>GhostScript</a> is required by QGLE. It is also required by GLE to be able to generate PDF, PNG, and JPEG output. GhostScript is only needed at runtime; it is not required to compile GLE's source code.</li>
+</ul>
+
+<ul>
+<li><a href="http://www.latex-project.org/" target=_top>LaTeX</a> is required if you plan to use LaTeX labels (e.g, mathematical formulae) in your GLE scripts. LaTeX is only needed at runtime; it is not required to compile GLE's source code.</li>
+</ul>
+
+<table>
+<tr>
+<td valign="top"><img src="../images/bitmap/xp-logo.gif" width="32" height="32" alt="Windows"></td><td>
+<p>
+On Windows you obtain the optional software packages as follows:
+<ul>
+<li>Download and install the Qt Open Source Edition for C++ Developers for Windows from the <a href="http://trolltech.com/" target=_top>QT website</a>. This tutorial assumes that you install Qt in "C:\Devel\Qt4".</li>
+
+<li>Download and install "GPL GhostScript" from the <a href="http://pages.cs.wisc.edu/~ghost/" target=_top>GhostScript website</a>. The windows installer is named "gsXYZw32.exe" with XYZ the version number. It is also useful to install "GSview" (GhostScript's PostScript/EPS viewer) from the same location. This tutorial assumes that you install GhostScript in a subfolder of "C:\Program Files".</li>
+
+<li>Download and install "LaTeX" from the <a href="http://www.miktex.org" target=_top>MiKTeX website</a>. This tutorial assumes that you install MikTeX in a subfolder of "C:\Program Files".</li>
+
+<li>Download and install the bitmap libraries. I've made a ZIP archive file containing libtiff, libpng, and libjpeg: <a href="http://downloads.sourceforge.net/glx/bitmap-win32-v1.0.zip" target=_top>bitmap-win32-v1.0.zip</a>. Download this ZIP file and extract it to "C:\Devel\bitmap-win32". If you don't have WinZip, then save the ZIP file to your Cygwin home directory and type at the Cygwin Bash prompt:<br>&nbsp;
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+[~]$ mkdir -p c:/Devel
+[~]$ cd c:/Devel
+[~]$ unzip ~/bitmap-win32-v1.0.zip
+</pre></td></tr></table>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top"><img src="../images/bitmap/linux-logo.gif" width="32" height="32" alt="Linux"></td><td>
+<p>
+The optional software packages should all be included in your Linux distribution's package repository. You should be able to find and install them by searching the repository for the package names (i.e., "qt4", "libtiff", "libpng", ...). If, for a given package, a version is available with "devel" or "dev" in the name, then install that version. The "devel" packages typically include the "C" header files of the library, which are required to compile GLE.
+</p>
+
+<p>
+The following are the appropriate commands to install all of the optional software packages on some well known Linux distributions:
+</p>
+<ul>
+<li>
+<a href="http://fedoraproject.org/">Fedora Linux</a>:<br>&nbsp;
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+[~]$ yum install 
+</pre></td></tr></table>
+</li>
+</ul>
+
+<p>
+Please contact the <a href="../main/docs.html">mailing list</a> (or contact Jan Struyf directly) to share the appropriate command for your Linux distribution.
+</p>
+
+<p>
+QGLE requires Ghostscript to be installed as a library named "libgs.so" (the actual name may include a version number). Normally this file should be part of GhostScript. If your distribution does not include "libgs.so" in its GhostScript package, then download <a href="http://jeans.studentenweb.org/gs8.54-linux.zip">gs8.54-linux.zip</a> and extract it in your home directory, or somewhere under "/usr" (as root). This ZIP file contains a GhostScript binary that includes "libgs.so".
+</p>
+</td></tr>
+</table>
+
+<table>
+<tr>
+<td valign="top"><img src="../images/bitmap/macosx-logo.gif" width="32" height="32" alt="Mac OS/X"></td><td>
+<p>
+Ghostscript should be compiled and installed as a framework and it should include the "display" device to work with QGLE.
+Install Ghostscript as explained in <a href="../tut/ghostscript-mac.html">these instructions</a>. 
+</p>
+<ul>
+<li>Alternatively, you can install Ghostscript as follows. Download <a href="http://jeans.studentenweb.org/gle/Ghostscript.dmg">Ghostscript.dmg</a> and install its contents (Ghostscript.framework) in /Library/Frameworks or $HOME/Library/Frameworks.</li>
+
+<li>Ghostscript is also available in <a href="http://www.macports.org/">MacPorts</a>. If you have MacPorts installed, you could try to install GhostScript with: "sudo port install ghostscript +gslib", but it is unclear if this version includes the required "display" device. Please contact the <a href="../main/docs.html">GLE mailing list</a> if you can confirm this.</li>
+</ul>
+
+<p>
+Install the Qt Open Source Edition for C++ Developers for Mac from <a href="http://trolltech.com/">TrollTech</a>. It is best to download and install a binary distribution in .dmg format. Alternativaly, you can also install Qt by compiling its source code, but this may take some time. The following are compilation instructions for the case that you've downloaded the source code. Optionally, you may want to add "-prefix $HOME/apps" to the "./configure" call to install Qt in your home directory instead of system-wide. In that case you also don't need to include the "sudo".
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+tar -xvzf qt-mac-opensource-src-x.y.z.tar.gz
+cd qt-mac-opensource-src-x.y.z
+./configure -nomake examples -nomake tools -nomake demos -no-qt3support -no-phonon -no-webkit
+make
+sudo make install
+</pre></td></tr></table>
+</td></tr>
+</table>
+
+<h2>Download and Unzip GLE</h2>
+
+You can either download and install a stable source code package or install GLE's development source from its CVS repository.
+
+<h3>Download and Unzip the Source Code</h3>
+
+<p>
+This section shows how to install a stable source code package.
+</p>
+
+<p>
+Download GLE's source code archive gle-graphics-x.y.z-src.tar.gz (with x.y.z the version number) from the <a href="../downloads/downloads.html">download page</a> and save it to your home directory. This tutorial assumes that you have GLE &ge; 4.2.x. Open a terminal or console window and extract the archive using the following commands.
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ cd
+[~]$ tar -xvzf gle-graphics-x.y.z-src.tar.gz
+gle-graphics-x.y.z/configure
+gle-graphics-x.y.z/README.txt
+gle-graphics-x.y.z/LICENSE.txt
+...
+</pre></td></tr></table>
+
+<p>
+The untar command above should have extracted GLE to a subfolder of your home directory called "gle-graphics-x.y.z". 
+</p>
+
+<h3>Download the CVS Version</h3>
+
+<p>
+Alternatively, you can install GLE from its development CVS repository. You can skip this step if you chose to install a stable source code package and followed the instructions from the previous paragraph.
+</p>
+
+<p>
+To install the CVS versios, you also need the tools <a href="http://www.nongnu.org/cvs/">cvs</a>, <a href="http://pkg-config.freedesktop.org/">pkg-config</a>, <a href="http://www.gnu.org/software/autoconf/">autoconf</a>, and <a href="http://www.gnu.org/software/automake/">automake</a>. Double check that these are installed.
+</p>
+
+
+<h2>Configure GLE's Source Code</h2>
+<p>
+Next we have to configure GLE's source code. During this step, various compilation options for GLE can be set. In many cases, however, the defaults should be fine. To configure GLE using the default settings, run the "configure" script in the "gle-graphics-x.y.z" directory as follows.
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ cd gle-graphics-x.y.z/
+[~/gle-graphics-x.y.z]$ ./configure
+</pre></td></tr></table>
+
+<table>
+<tr>
+<td valign="top"><img src="../images/bitmap/xp-logo.gif" width="32" height="32" alt="Windows"></td><td>
+On Windows, the default is to build a Cygwin executable. In order to create a native Windows executable, which can run on non-Cygwin systems, add the configure option "--with-win32=yes". This option is also required if you wish to build QGLE. If you downloaded the bitmap libraries mentioned above (bitmap-win32-vx.y.zip) then you indicate this with the option "--with-gnuwin32=c:/Devel/bitmap-win32", and if you have Qt installed, then you add "--with-qt=c:/Devel/Qt4".
+<br><br>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+[~/gle-graphics-x.y.z]$ ./configure --with-win32=yes --with-gnuwin32=c:/Devel/bitmap-win32 --with-qt=c:/Devel/Qt4
+</pre></td></tr></table>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top"><img src="../images/bitmap/linux-logo.gif" width="32" height="32" alt="Linux"><br>&nbsp;<br><img src="../images/bitmap/macosx-logo.gif" width="32" height="32" alt="Mac OS/X"></td><td>
+On Linux and MacOS/X, the default is to install GLE system wide in /usr/bin (for all users). You will need the root password of your system to do this. Alternatively, you may wish to install GLE in your home directory. To do so, use the "--prefix" option of configure as follows.
+<br><br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~/gle-graphics-x.y.z]$ ./configure --prefix=$HOME/apps
+</pre></td></tr></table>
+<br>
+If you have installed Qt in a non-standard location, then also add a ./configure option for Qt as follows (using $HOME/apps as an example):
+<br><br>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~/gle-graphics-x.y.z]$ ./configure --prefix=$HOME/apps --with-qt=$HOME/apps
+</pre></td></tr></table>
+</td></tr></table>
+
+<p>
+The output of configure should look similar to this:
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+checking for g++... g++
+checking for C++ compiler default output file name... a.out
+checking whether the C++ compiler works... yes
+checking whether we are cross compiling... no
+checking for suffix of executables... 
+checking for suffix of object files... o
+checking whether we are using the GNU C++ compiler... yes
+checking whether g++ accepts -g... yes
+checking for a BSD-compatible install... /usr/bin/install -c
+checking for a thread-safe mkdir -p... /bin/mkdir -p
+checking build system type... i686-pc-linux-gnu
+checking host system type... i686-pc-linux-gnu
+checking how to run the C++ preprocessor... g++ -E
+checking for grep that handles long lines and -e... /bin/grep
+checking for egrep... /bin/grep -E
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking sys/param.h usability... yes
+checking sys/param.h presence... yes
+checking for sys/param.h... yes
+checking whether byte ordering is bigendian... no
+checking for uint16_t... yes
+checking for pkg-config... /usr/bin/pkg-config
+checking pkg-config is at least version 0.9.0... yes
+checking for X... libraries , headers 
+checking for XOpenDisplay in -lX11... yes
+checking for deflate in -lz... yes
+checking for library containing socket... none required
+checking for library containing gethostbyname... none required
+checking for jpeg_destroy_decompress in -ljpeg... yes
+checking jpeglib.h usability... yes
+checking jpeglib.h presence... yes
+checking for jpeglib.h... yes
+checking for TIFFReadScanline in -ltiff... yes
+checking tiffio.h usability... yes
+checking tiffio.h presence... yes
+checking for tiffio.h... yes
+checking for libpng... yes
+checking for cairo... yes
+   cairo CFLAGS: -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng12  
+   cairo LIBS: -lcairo  
+checking for qmake-qt4... /usr/lib/qt4/bin/qmake-qt4
+checking for library containing dlopen... -ldl
+checking for library containing wbkgdset... -lncurses
+checking ncurses.h usability... yes
+checking ncurses.h presence... yes
+checking for ncurses.h... yes
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating src/gle/Makefile
+config.status: creating src/gle/bitmap/Makefile
+config.status: creating src/gle/letzfitz/Makefile
+config.status: creating src/gle/surface/Makefile
+config.status: creating src/gle/tokens/Makefile
+config.status: creating src/fbuild/Makefile
+config.status: creating src/makefmt/Makefile
+config.status: creating src/manip/Makefile
+config.status: creating src/TeX/Makefile
+config.status: creating src/gui/MakefileAC
+config.status: creating src/gui/qgle.pro
+config.status: creating src/doc/gle.1
+config.status: creating platform/autoconf/gle-graphics.pc
+config.status: creating platform/autopackage/gle4.apspec
+config.status: creating src/config.h
+
+CPPFLAGS: -DHAVE_CONFIG_H $(VERSION_INFO) -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng12   -I/usr/include/libpng12   
+LDFLAGS:    -L. 
+LIBS: -lcairo   -lpng12   -ltiff -ljpeg -lz -lX11  
+
+** Configuration summary for GLE x.y.z (i686-pc-linux-gnu):
+
+   ** Bitmap support:
+      PNG support: yes
+      TIFF support: yes
+      JPEG support: yes
+      Statically link: no
+
+   ** X11 preview support: yes
+   ** Cairo graphics support: yes
+   ** Socket support: yes
+   ** Include 'manip' utility: yes
+   ** Debug mode: off
+
+   ** GLE GUI support: yes (Qt4 version: 4.5.2)
+
+** Install data into: /usr/share/gle-graphics/x.y.z
+** Install binary into: /usr/bin
+   (use ./configure --prefix=dir to change the installation directory.)
+
+GLE x.y.z has been configured. The next step is to run "make". After "make" completes, run "make install" to install GLE.
+</pre></td></tr></table>
+
+<p>
+If you see some error messages instead, please contact the <a href="../main/docs.html">GLE mailing list</a>. I will try to list the most common problems here based on your feedback.
+</p>
+
+<ul>
+<li>If you see "no" for some of the bitmap options, then you may want to install the development packages that implement PNG, TIFF and JPEG support: <a href="http://www.libpng.org" target=_top>libpng-devel</a>,  <a href="http://www.libtiff.org" target=_top>libtiff-devel</a> and <a href="http://www.ijg.org" target=_top>libjpeg-devel</a>. Note that GLE will also work without these, but you will not be able to use the "bitmap" command. See the "Optional Software Packages" section at the top of this page for more information.
+</li>
+
+<li>
+If you see "GLE GUI support: no" in the output, then Qt was not found and QGLE will not be built. If you want to build QGLE, then install Qt as described in the section "Optional Software Packages" above. Then re-run "./configure" and add the option "--with-qt=/path/to/Qt". Make sure to replace "/path/to/Qt" with the location where you installed Qt. For example, if the "qmake" program is in "/usr/local/qt4/bin", then you should use "--with-qt=/usr/local/qt4". If you have installed Qt by compiling the source code and used the prefix $HOME/apps, then use "--with-qt=$HOME/apps" instead. After this step, the output should include "GLE GUI support: yes". On my system, the output includes:
+<br>&nbsp;<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+   ** GLE GUI support: yes
+      Using Qt version 4.4.3 in /home/jan/apps/lib
+</pre></td></tr></table>
+</li>
+
+<li>
+If the output includes "./configure: line ....: PKG_PROG_PKG_CONFIG: command not found", then you have to install the <a href="http://pkg-config.freedesktop.org/">pkg-config</a> tool. After installing pkg-config, you have to run "aclocal", "autoconf", and "./configure" again to fix this issue.
+</li>
+</ul>
+
+<h2>Compile GLE's Source Code</h2>
+
+<p>
+Next enter the command "make" to compile GLE. This is the output on my system.
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+[~/gle-graphics-x.y.z]$ make
+mkdir -p build
+mkdir -p build/bin
+mkdir -p build/lib
+make -C src/gle
+make[1]: Entering directory `/home/jan/gle-graphics-x.y.z/src/gle'
+g++  -DHAVE_CONFIG_H -D__GLEVN__="\"x.y.z\"" -Wreturn-type -I/usr/X11R6/include  -c -o cutils.o cutils.cpp
+g++  -DHAVE_CONFIG_H -D__GLEVN__="\"x.y.z\"" -Wreturn-type -I/usr/X11R6/include  -c -o file_io.o file_io.cpp
+g++ -DHAVE_CONFIG_H -D__GLEVN__="\"x.y.z\"" -Wreturn-type -I/usr/X11R6/include setrelpath.cpp cutils.o file_io.o -o ../../build/bin/setrelpath
+../../build/bin/setrelpath /home/jan/apps/bin /home/jan/apps/share/gle/x.y.z ../config.h
+Binary:   "/home/jan/apps/bin"
+GLE_TOP:  "/home/jan/apps/share/gle/x.y.z"
+Relative: "1"
+Path:     "share/gle/x.y.z"
+g++  -DHAVE_CONFIG_H -D__GLEVN__="\"x.y.z\"" -Wreturn-type -I/usr/X11R6/include  -c -o gle.o gle.cpp
+**SNIP**
+...
+**SNIP**
+[texcmssi.afm]==>[texcmssi.fmt]
+../../build/bin/makefmt texcmsy.afm
+[texcmsy.afm]==>[texcmsy.fmt]
+../../build/bin/makefmt texcmti.afm
+[texcmti.afm]==>[texcmti.fmt]
+../../build/bin/makefmt texcmtt.afm
+[texcmtt.afm]==>[texcmtt.fmt]
+mkdir -p ../../build/font
+cp *.fve *.fmt ../../build/font
+cp font.dat ../../build/font
+cp psfont.dat ../../build/font
+touch movefonts
+make[1]: Leaving directory `/home/jan/gle-graphics-x.y.z/src/fonts'
+make -C src/lib -f Makefile.gcc
+make[1]: Entering directory `/home/jan/gle-graphics-x.y.z/src/lib'
+mkdir -p ../../build/lib
+cp *.gle ../../build/lib/
+make[1]: Leaving directory `/home/jan/gle-graphics-x.y.z/src/lib'
+make -C src/TeX
+make[1]: Entering directory `/home/jan/gle-graphics-x.y.z/src/TeX'
+cp init.tex ../../build/
+../../build/bin/gle -mkinittex
+GLE x.y.z [/home/jan/gle-graphics-x.y.z/build/init.tex]-C-R-
+If GLE says 'Saving definitions', then compilation was successful.
+
+>> /home/jan/gle-graphics-x.y.z/build/init.tex (629) |end text|
+Saving definitions
+
+make[1]: Leaving directory `/home/jan/gle-graphics-x.y.z/src/TeX'
+
+**********************************************************
+Type "make install" to install GLE x.y.z
+Install data into: /usr/share/gle-graphics/x.y.z
+Install library into: /usr/lib
+Install binary into: /usr/bin
+**********************************************************
+</pre></td></tr></table>
+
+<h2>Find Software Dependencies (Optional)</h2>
+
+<p>
+Next enter the command "make finddeps" to make GLE search for installed software such as Ghostscript and LaTeX. This is the output on my system.
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~/gle-graphics-x.y.z]$ make finddeps
+./build/bin/gle -finddeps
+Running GLE -finddeps "" to locate installed software (e.g., Ghostscript and LaTeX): 
+........................
+Found: pdflatex in '/usr/bin/pdflatex'
+Found: latex in '/usr/bin/latex'
+Found: dvips in '/usr/bin/dvips'
+Found: ghostscript in '/usr/bin/gs'
+
+Save configuration to: '/home/jan/gle-graphics-x.y.z/build/glerc'
+</pre></td></tr></table>
+
+<table>
+<tr><td valign="top"><img src="../images/bitmap/macosx-logo.gif" width="32" height="32" alt="Mac OS/X"></td><td>
+If you have installed the Ghostscript framework, double check that the output includes:
+<br><br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+Found: libgs in '/Users/john/Library/Frameworks/Ghostscript.framework'
+</pre></td></tr></table>
+</td></tr></table>
+
+<h2>Build the Documentation (Optional)</h2>
+
+<p>
+Next enter the command "make doc" to build the GLE reference manual in PDF format. This step is optional and requires that "pdflatex" is installed.
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~/gle-graphics-x.y.z]$ make doc
+</pre></td></tr></table>
+
+<h2>Install GLE</h2>
+
+<p>
+Next enter the command "make install" to install GLE. If you are installing system-wide, then you should enter "su" before running "make install" to install GLE as root, or run "sudo make install" on systems that do not support "su". This is the output on my system.
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~/gle-graphics-x.y.z]$ make install
+/bin/mkdir -p /usr/share/gle-graphics/x.y.z
+/bin/mkdir -p /usr/bin
+/bin/mkdir -p /usr/share/man/man1
+/bin/mkdir -p /usr/share/doc/gle-graphics
+/bin/mkdir -p /usr/lib/pkgconfig
+/usr/bin/install -c -m 644 build/glerc /usr/share/gle-graphics/x.y.z
+/usr/bin/install -c -m 644 build/inittex.ini /usr/share/gle-graphics/x.y.z
+**SNIP**
+...
+**SNIP**
+/usr/bin/install -c -m 755 build/bin/manip* /usr/bin/
+/usr/bin/install -c -m 755 build/bin/qgle /usr/bin/
+
+****************************************************************
+QGLE has been installed in: /usr/bin
+****************************************************************
+
+****************************************************************
+GLE x.y.z has been installed
+You can use GLE now by entering the command "gle"
+(Provided that /usr/bin is in your PATH.)
+****************************************************************
+</pre></td></tr></table>
+
+<p>
+GLE should now be ready to use. Enter the command "gle" in your terminal to test it.
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+[~/gle-graphics-x.y.z]$ gle
+GLE version x.y.z
+Usage: gle [options] filename.gle
+More information: gle -help
+</pre></td></tr></table>
+
+<p>
+GLE should respond as in the example above. If you instead get the message "bash: gle: command not found", then the directory containing the "gle" executable is not in your system's search path. This is what happens if you have installed GLE in your home directory and "$HOME/apps/bin" is not in your path.
+</p>
+
+<p>
+To fix this, enter "export PATH=$HOME/apps/bin:$PATH" and try again. Add this line to your "~/.bash_profile" file to make it permanent. Note: if this does not work, you can always start GLE using the full path, e.g., by entering the command "$HOME/apps/bin/gle".
+</p>
+
+<h2>Install the Additional Fonts</h2>
+
+<p>
+Some of GLE's fonts (mainly plotter fonts) are distributed as a separate package called gle-graphics-extrafonts-x.y.tar.gz, with x.y the version number of the fonts package (this is different from the version number of GLE's source code archive). To install these, you need to download this package and extract it in the GLE source code folder before compiling GLE. In addition, you add the option "--with-extrafonts=yes" to the configure command.
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+[~/gle-graphics-x.y.z]$ tar -xvzf $HOME/gle-graphics-extrafonts-x.y.tar.gz
+[~/gle-graphics-x.y.z]$ ./configure --with-extrafonts=yes
+[~/gle-graphics-x.y.z]$ make clean
+[~/gle-graphics-x.y.z]$ make doc
+[~/gle-graphics-x.y.z]$ make install
+</pre></td></tr></table>
+
+<p>
+These commands assume that you already extracted the GLE source code and that you downloaded gle-graphics-extrafonts-x.y.tar.gz and saved it into your home directory.
+</p>
+
+<h2>Run GLE</h2>
+
+<p>
+Running GLE is covered in the following documents:
+</p>
+
+<ul>
+<li><a href="../tut/windows.html">Windows Installation Guide &amp; Tutorial</a>.</li>
+<li><a href="../tut/linux.html">Linux Installation Guide &amp; Tutorial</a>.</li>
+<li><a href="../tut/mac.html">Mac OS/X Installation Guide &amp; Tutorial</a>.</li>
+<li><a href="../main/docs.html">The GLE Reference Manual</a>.</li>
+</ul>
+
+<p>
+Please feel free to contact the <a href="../main/docs.html">GLE mailing list</a> if you have any questions or feedback regarding this compilation guide.
+</p>

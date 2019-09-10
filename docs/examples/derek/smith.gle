@@ -1,0 +1,152 @@
+! GLE2000 Smith Chart Example
+! This demonstrates the use of subroutines to draw a 
+! special form of graph. 
+! GLE2000 is fully compatible with Windows9x and plots may 
+! be printed directly or saved in bitmap (.bmp) format and
+! then converted to .gif, .jpeg, etc by standard Graphics
+! packages, such as Paint shop Pro. 
+ Size          26  23.5
+ WindowOrigin  0  0
+ PixelsPerCm   32
+
+ amove 0.5 0.5
+ r1 = 8
+ h = r1/25+0.2
+ if h>1.0
+   h = 1.0
+ endif
+ box 2*r1+5.0 2*r1+2.75
+ amove r1+3.0   r1+2.0
+ radians
+ begin scale 1.0  1.0
+  begin origin
+   begin rotate 0.0
+	sub "rcircle" r
+		rmove 0 r1/(r+1) 
+		circle r1/(r+1)
+		rmove 0 -r1/(r+1)
+	endsub
+	sub "xcircle" x a
+                radians
+		b = r1/x
+                f = 4*atn(1)
+		rmove -b 0
+		e = f-atn2(sqr(x)-1,2*x)
+		s = f-atn2(sqr(x/(1+a))-1,2*x/(1+a))
+		arc b s  e
+		rmove 2*b 0
+		arc b f-e  f-s
+		rmove -b 0
+	endsub
+        sub "xlabel" x  a   b
+           f = 4*atn(1)
+	   e = atn2(sqr(x)-1,2*x)
+           amove r1*sin(e)+a  -r1*cos(e)+b
+         if x>0
+           write "j" x
+         else
+           write "-j" -x
+         endif
+        endsub
+        sub "rlabel" r a  b
+          amove  a  2*r1/(r+1)+b-r1
+          write r
+        endsub
+        r2 = r1+0.01
+        rmove 0 -r1
+	for x = 0.25 to 0.75 step 0.25
+		@rcircle x
+                @xcircle x 5.0
+	next x
+        for x = 1 to 4
+           @rcircle x
+           @xcircle x 10.0 
+        next x
+        for x = 5 to 15 step 10
+           @rcircle x
+           @rcircle x+5
+           @xcircle x 20.0
+           @xcircle x+5 250 
+        next x
+        rmove 0 r1/1.1
+        arc r1/1.1 -0.72*atn(1) 4.72*atn(1)
+        rmove 0 r1/2.5-r1/1.1
+        arc r1/2.5  -0.58*atn(1) 4.58*atn(1)
+        rmove 0 -r1/2.5   
+        @xcircle 1.50 4.0
+        @xcircle 7.5 10.0
+ 
+        amove  0 -r1
+        aline  0  r1
+        amove 0 0
+
+        set linewidth 0.05
+        circle r1
+        set linewidth 0.01 linestyle 3 linecolor red
+        a = 0.4*atn(1)
+        for i = 0 to 19
+         amove 0  0
+         aline r1*cos(i*a)  r1*sin(i*a)
+        next i
+        amove 0 0
+        for r = 0.1 to 0.9 step 0.1
+          circle r*r1
+        next r
+
+        set linestyle 1 linecolor black
+        set hei h font "Arial"
+        amove -0.9*h+0.1 r1+1.4*h
+        text 0.0
+        amove -1.5*h r1+0.9*h
+        set arrowstyle  froman arrowsize h
+        rline -4.5*h 0 arrow end
+        rmove -5.0*h 0.65*h
+        text To load
+        amove 1.5*h  r1+0.9*h
+        rline 4.5*h 0 arrow end
+        rmove 0.5*h 0.65*h
+        text To source
+!        amove -0.65*r1 0.95*r1
+
+        fix 4 2
+        @xlabel  0.25  0.5*h  1.4*h
+        @xlabel -0.25  -3.5*h  1.4*h
+        @xlabel  0.5  0.5*h  1.3*h
+        @xlabel -0.5  -4*h  1.3*h
+        @xlabel  0.75  0.5*h  1.2*h
+        @xlabel -0.75  -4*h  1.2*h
+        fix 3 1
+        @xlabel  1.0  0.5*h  0.7*h
+        @xlabel -1.0  -3.5*h  0.7*h
+        @xlabel  1.5  0.7*h  0.4*h
+        @xlabel -1.5  -3.8*h  0.4*h
+        @xlabel  2.0  0.7*h  0.1*h
+        @xlabel -2.0  -3.7*h  0.1*h
+        @xlabel  3.0  0.6*h  -0.1*h
+        @xlabel -3.0  -3.6*h -0.1*h
+        @xlabel  5.0  0.1*h  -0.3*h
+        @xlabel -5.0  -2.8*h -0.3*h
+        fix 4 1
+        @xlabel  10.0 -0.8*h  -0.6*h-0.1
+        @xlabel -10.0  -1.8*h -0.6*h-0.1
+ 
+        set fillstyle 1 fillcolor white
+        @rlabel 5 -1.2*h 1.1*h
+        @rlabel 2 -1.2*h  1.1*h
+        @rlabel 1 -1.2*h  1.1*h
+        fix 4 2
+        @rlabel 0.75 -1.2*h 1.1*h
+        @rlabel 0.5  -1.2*h 1.1*h
+        @rlabel 0.25 -1.2*h  1.1*h
+        @rlabel 0.1 -1.2*h 1.1*h
+  end rotate
+ end origin
+end scale
+! The Source code for GLE 2000 and further examples
+! can be downloaded from either SimTel in
+! http://www.simtel.net/simtel.net/win95/graphics/
+! or from my File cache on http://www.cai.cam.ac.uk/people/dgi
+! the latest version which includes minor bug fixes is in
+! GLEFix2.zip.
+! Derek Ingram.  Gonville & Caius College. Cambridge
+! dgi1@cus.cam.ac.uk

@@ -1,0 +1,25 @@
+#
+# this needs make not nmake
+#
+GLE_FILES = $(wildcard *.gle)
+# use this instead
+#EPS_FILES = $(shell dir *.eps)
+MAKE_MODE=pc
+
+EPSS := $(patsubst %.gle, %.eps, $(GLE_FILES))
+all: $(EPSS)
+
+
+%.eps: %.gle
+	-gle_ps $< /eps
+	-perl -S ceps.pl -f gif -x 200 -y 200 -i $@ -o $(patsubst %.eps, %_icon.gif, $@)
+	-perl -S ceps.pl -f gif -d 100 -i $@ -o $(patsubst %.eps, %.gif, $@)
+
+clean:
+	-del $(patsubst %.gle, %.eps, $(GLE_FILES))
+	-del $(patsubst %.gle, %.gif, $(GLE_FILES))
+	-del $(patsubst %.gle, %_icon.gif, $(GLE_FILES))
+
+
+
+

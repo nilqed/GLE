@@ -1,0 +1,210 @@
+
+<h2>Compile and Install Ghostscript on MacOS/X as a Framework</h2>
+
+<p>
+This tutorial explains how to compile and install Ghostscript on MacOS/X as a Framework. It assumes that you have the Developer Tools installed (these should be available on your OS/X DVD) and that you are familiar with the Terminal.
+</p>
+
+<h2>Required Downloads</h2>
+
+<p>
+Start by downloading Ghostscript from the <a href="http://pages.cs.wisc.edu/~ghost/" target=_top>GhostScript website</a> in .tar.gz format and save it to your home directory. I have downloaded "ghostscript-8.63.tar.gz", but newer versions should also work. Next, download Ghostscript's fonts "ghostscript-fonts-std-x.y.tar.gz" from <a href="ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/fonts/">here</a> and also save them to your home directory. Now you should have something like this:
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ ls -alh $HOME/ghostscript*
+-rw-r--r--@ 1 john  staff    17M Aug  1 20:17 ghostscript-8.63.tar.gz
+-rw-------@ 1 john  staff   3.6M Jul 24  2003 ghostscript-fonts-std-8.11.tar.gz
+</pre></td></tr></table>
+
+<p>
+Note that "[~]$" is my command prompt. The command prompt on your system might appear different. Only type the part that comes after the prompt. In the following, I assume basic familiarity with <a href="http://www.gnu.org/software/bash/bash.html">Bash</a> and simple Unix commands.
+</p>
+
+<h2>Compiling Ghostscript as a Framework</h2>
+
+<p>
+Decompress "ghostscript-8.63.tar.gz" as follows:
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ cd $HOME
+[~]$ tar -xvzf ghostscript-8.63.tar.gz
+ghostscript-8.63/autogen.sh
+ghostscript-8.63/configure
+ghostscript-8.63/configure.ac
+ghostscript-8.63/contrib/
+ghostscript-8.63/contrib/epson740/
+ghostscript-8.63/contrib/epson740/printerdb_rh5.2
+ghostscript-8.63/contrib/epson740/README
+*** SNIP ***
+</pre></td></tr></table>
+
+<p>
+Now enter the ghostscript-x.y directory and copy the file "src/macosx.mak" to "Makefile". Next, we will edit the resulting "Makefile":
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ cd ghostscript-8.63
+[~]$ cp src/macosx.mak Makefile
+</pre></td></tr></table>
+
+<p>
+Now open "Makefile" using your favorite text editor and make the following two changes:
+</p>
+<ul>
+<li>Search for the line:
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+DEVICE_DEVS=$(DD)png16m.dev $(DD)pnggray.dev $(DD)pngmono.dev
+</pre></td></tr></table>
+and add "$(DD)display.dev" at the front. This is very important as some applications (such as <a href="http://www.gle-graphics.org">GLE</a>) that will link to the framework require this device. The resulting line is now:
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+DEVICE_DEVS=$(DD)display.dev $(DD)png16m.dev $(DD)pnggray.dev $(DD)pngmono.dev
+</pre></td></tr></table>
+</li>
+<li>Look for the line that contains "GS_LIB_DEFAULT". Add to this line:
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+:/Users/john/Library/Frameworks/Ghostscript.framework/Resources/lib:/Users/john/Library/Frameworks/Ghostscript.framework/Resources/fonts
+</pre></td></tr></table>
+assuming that your user name is "john" and that you plan to install the framework in your home directory. The resulting line in my case is now:
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+GS_LIB_DEFAULT=$(gsdatadir)/lib:$(gsdatadir)/Resource/Font:$(datadir)/fonts:/Library/Fonts:/System/Library/Fonts:/Users/john/Library/Frameworks/Ghostscript.framework/Resources/lib:/Users/john/Library/Frameworks/Ghostscript.framework/Resources/fonts
+</pre></td></tr></table>
+This second step is only required if you plan to install the framework in your home directory. If you plan to install system-wide in "/Library/Frameworks/", then this step is not required.
+</li>
+</ul>
+
+<p>
+Now compile the framework with the command "make framework":
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ make framework
+make LDFLAGS=' -dynamic -dynamiclib -install_name /Library/Frameworks/Ghostscript.framework/Ghostscript' GS_XE=./bin/../sobin/libgs.8.63.dylib STDIO_IMPLEMENTATION=c DISPLAY_DEV=./obj/../soobj/display.dev BINDIR=./bin/../sobin GLGENDIR=./obj/../soobj GLOBJDIR=./obj/../soobj PSGENDIR=./obj/../soobj PSOBJDIR=./obj/../soobj CFLAGS=' -dynamic -Wall -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -fno-builtin -fno-common -DHAVE_STDINT_H ' prefix=/Library/Frameworks/Ghostscript.framework ./bin/../sobin/gsc 
+cc -I./src -o ./obj/../soobj/genconf ./src/genconf.c
+cc -I./src -o ./obj/../soobj/echogs ./src/echogs.c
+*** SNIP ***
+(cd ./bin/../sobin/Ghostscript.framework/Versions; ln -s 8.63 Current)
+(cd ./bin/../sobin/Ghostscript.framework; \
+	ln -s Versions/Current/Headers . ;\
+	ln -s Versions/Current/Resources ;\
+	ln -s Versions/Current/man . ;\
+	ln -s Versions/Current/doc . ;\
+	ln -s Versions/Current/Ghostscript . )
+cp src/iapi.h src/ierrors.h src/gdevdsp.h ./bin/../sobin/Ghostscript.framework/Headers/
+cp lib/Info-macos.plist ./bin/../sobin/Ghostscript.framework/Resources/
+cp -r lib ./bin/../sobin/Ghostscript.framework/Resources/
+cp ./bin/../sobin/libgs.8.63.dylib ./bin/../sobin/Ghostscript.framework/Versions/Current/Ghostscript
+cp -r man ./bin/../sobin/Ghostscript.framework/Versions/Current
+cp -r doc ./bin/../sobin/Ghostscript.framework/Versions/Current
+</pre></td></tr></table>
+
+<p>
+This should have created "Ghostscript.framework" in the subdirectory "sobin".
+</p>
+
+<h2>Install the Framework</h2>
+
+<p>
+If you want to install the framework in your home directory, proceed as follows:
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ mkdir -p $HOME/Library/Frameworks
+[~]$ mv sobin/Ghostscript.framework $HOME/Library/Frameworks/
+</pre></td></tr></table>
+
+<p>
+If you want to install system-wide, do the following instead:
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ sudo mv sobin/Ghostscript.framework /Library/Frameworks/
+</pre></td></tr></table>
+
+<p>
+Now, test the framework by issuing the command:
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ ./sobin/gsc -h
+GPL Ghostscript 8.63 (2008-08-01)
+Copyright (C) 2008 Artifex Software, Inc.  All rights reserved.
+Usage: gs [switches] [file1.ps file2.ps ...]
+Most frequently used switches: (you can use # in place of =)
+ -dNOPAUSE           no pause after page   | -q       `quiet', fewer messages
+ -g&lt;width&gt;x&lt;height&gt;  page size in pixels   | -r&lt;res&gt;  pixels/inch resolution
+ -sDEVICE=&lt;devname&gt;  select device         | -dBATCH  exit after last file
+ -sOutputFile=&lt;file&gt; select output file: - for stdout, |command for pipe,
+                                         embed %d or %ld for page #
+Input formats: PostScript PostScriptLevel1 PostScriptLevel2 PostScriptLevel3 PDF
+Default output device: display
+Available devices:
+   bbox display epswrite jpeg jpegcmyk jpeggray nullpage pamcmyk32 pbm
+   pbmraw pdfwrite pdfwrite pgm pgmraw pgnm pgnmraw pkm pkmraw pksm pksmraw
+   png16 png16m png256 pngalpha pnggray pngmono pnm pnmraw ppm ppmraw
+   ps2write pswrite pxlcolor pxlmono txtwrite
+Search path:
+   . :
+   /Library/Frameworks/Ghostscript.framework/Versions/8.63/Resources/lib :
+   /Library/Frameworks/Ghostscript.framework/Versions/8.63/Resources/Resource/Font :
+   /Library/Frameworks/Ghostscript.framework/Resources/fonts :
+   /Library/Fonts : /System/Library/Fonts :
+   /Users/john/Library/Frameworks/Ghostscript.framework/Resources/lib :
+   /Users/john/Library/Frameworks/Ghostscript.framework/Resources/fonts
+For more information, see /Library/Frameworks/Ghostscript.framework/Versions/8.63/Resources/doc/Use.htm.
+Please report bugs to bugs.ghostscript.com.
+</pre></td></tr></table>
+
+<p>
+Double check that the output lists "display" under "Available devices" and that "Search path" includes the paths you added to "Makefile" (if any). Now install the "gsc" program by copying it to a directory in the $PATH and optionally rename it to "gs" if you do not have a previous version of Ghostscript installed. To install it in your home directory, do:
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ mkdir -p $HOME/bin
+[~]$ cp sobin/gsc $HOME/bin/gs
+[~]$ export PATH=$PATH:$HOME/bin
+</pre></td></tr></table>
+
+<p>
+Or install it system-wide as follows:
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ sudo cp sobin/gsc /usr/bin/gs
+</pre></td></tr></table>
+
+<h2>Install the Fonts</h2>
+
+<p>
+The last step is to install the fonts. First decompress the .tar.gz you downloaded before. This gives a directory called "fonts" in your home directory.
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ cd $HOME
+[~]$ tar -xvzf ghostscript-fonts-std-8.11.tar.gz
+</pre></td></tr></table>
+
+<p>
+If you have installed Ghostscript in your home directory, install the fonts as follows:
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ mv fonts $HOME/Library/Frameworks/Ghostscript.framework/Resources/
+</pre></td></tr></table>
+
+<p>
+If you have installed Ghostscript system-wide, install the fonts as follows:
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+[~]$ sudo mv fonts /Library/Frameworks/Ghostscript.framework/Resources/
+</pre></td></tr></table>
+
+<p>
+This finishes the installation of the Ghostscript framework. If you are installing Ghostscript to be used with GLE, run "gle -finddeps" to make it locate the framework automatically.
+</p>
+
+<p>
+Please feel free to contact the <a href="../main/docs.html">GLE mailing list</a> if you have any feedback regarding this compilation guide.
+</p>

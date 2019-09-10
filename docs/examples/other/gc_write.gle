@@ -1,0 +1,27 @@
+size 12 3
+amove 1 2.7
+set hei .32
+set font pldr ! tt
+begin table
+  set hei .35 set font pltr
+  set just center
+  amove 3 .5 
+  a$ = "Hello there "
+  xx = sqrt(10)
+  t$ = time$()
+  c$ = a$+t$ 
+  write a$+t$ xx
+end table
+
+amove 5.4 0
+box 6 3
+begin origin
+  set  hei .35  just center  font pltr
+  amove 3 .5 
+  a$ = "Hello there "
+  xx = sqrt(10)
+  t$ = time$()
+  c$ = a$+t$ 
+  write a$+t$ xx
+end origin
+                

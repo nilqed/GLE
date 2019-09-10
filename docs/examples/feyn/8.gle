@@ -1,0 +1,18 @@
+size 2.2 0.4 ! 2*(x+dx) 4*d
+
+include "feyn.gle"
+
+x = 1
+d = 0.1
+a = 0.1
+
+begin translate x+d 2*d
+    amove -x 0
+    @fermion x 0
+    @arrow 0.25
+    @arrow 0.75
+    amove -a -a
+    @fermion a a
+    amove -a a
+    @fermion a -a
+end translate

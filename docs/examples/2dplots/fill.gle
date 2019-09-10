@@ -1,0 +1,14 @@
+size 13 9
+
+set font texcmr
+begin graph
+   title  "Example of filling"
+   xtitle "TRYPSIN activity"
+   ytitle "Weight gain"
+   data   "test.dat"
+   d1 line marker fcircle   color red
+   d2 line marker ftriangle color blue
+   fill x1,d1 color gray50
+   fill d1,d2 color gray20
+   fill d2,x2 color gray5
+end graph

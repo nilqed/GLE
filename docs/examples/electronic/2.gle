@@ -1,0 +1,73 @@
+! Three phase inverter
+
+size 13 10
+
+include "electronics.gle"
+
+begin scale 0.5 0.5
+
+   set lwidth 0.05 cap round
+
+   ! Draw the DC Link
+   amove 1 19
+   rline 24 0
+   
+   ! Draw Ground
+   amove 1 11
+   rline 2 0
+   @connection
+   @ground
+   rline 22 0
+   
+   ! Transistors
+   for i = 0 to 16 step 8
+      for j = 0 to 4 step 4
+	 amove 2 13
+	 rmove i j
+	 @igbt ""
+	 rmove 2 1
+	 rline 0 1
+	 rmove 0 -3
+	 rline 0 -1
+	 rmove 2 4
+	 @diode_vu ""
+      next j
+   next i
+   
+   ! Connection po int s
+   amove 4 11
+   for i = 0 to 16 step 8
+      for j = 0 to 8 step 4
+	 amove 4 11
+	 rmove i j
+	 @connection
+	 rmove 2 0
+	 @connection
+      next j
+   next i
+   
+   ! Machine windings
+   amove 12 15
+   rline 4 0
+   rline 0 -6
+   @inductor_v 0 ""
+   @connection
+   starx = xpos()
+   stary = ypos()
+   begin rotate -30
+      @inductor_h 0 ""
+   end rotate
+   rmove 4*cos(torad(30)) -4*sin(torad(30))
+   end_y = ypos()
+   aline 24 end_y
+   aline 24 15
+   rline -4 0
+   amove starx stary
+   begin rotate 210
+      @inductor_h 0 ""
+   end rotate
+   rmove -4*cos(torad(30)) -4*sin(torad(30))
+   aline 8 end_y
+   aline 8 15
+   rline -4 0
+end scale

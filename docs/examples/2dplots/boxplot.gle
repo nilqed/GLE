@@ -1,0 +1,17 @@
+
+size 10 10
+
+include "graphutil.gle"
+
+set font texcmr
+begin graph
+   scale auto
+   title "Box plot"
+   xtitle "Experiment"
+   ytitle "Error"
+   data "boxplot.csv"
+   xaxis min 0 max 11 ftick 1 dticks 1 nolast
+   yaxis min 0.71 max 0.78
+   draw boxplot bwidth 0.4
+end graph
+

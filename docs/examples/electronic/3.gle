@@ -1,0 +1,87 @@
+! Example of logic gate use: SR Flip-Flop
+
+size 4.5 3.5
+
+include "electronics.gle"
+
+sub overline str$ dy
+	gsave
+	begin name ov
+		write str$
+	end name
+	amove pointx(ov.tl) pointy(ov.tl)+dy
+	aline pointx(ov.tr) pointy(ov.tr)+dy
+	grestore
+end sub
+
+begin scale 0.25 0.25
+
+set lwidth 0.05 hei 1.2 font rm cap round
+
+! Radius of end terminals
+termrad = 0.25; x0 = 4.7
+
+! Reset input
+amove x0 2
+rmove -termrad 0
+circle termrad
+rmove -2*termrad 0
+set just RC color red
+text RESET
+set color black
+rmove 3*termrad 0
+rline 2 0
+
+! Set input
+amove x0 12
+rmove -termrad 0
+circle termrad
+rmove -2*termrad 0
+set just RC color red
+text SET
+set color black
+rmove 3*termrad 0
+rline 2 0
+
+! Top NAND Gate
+@nand
+rmove 0 -2
+rline 0 -2
+rmove 0 -2
+rline 0 -2
+! Bottom NAND Gate
+@nand
+
+! Interconnections
+rmove 6 -1
+rline 1 0
+@connection
+rline 0 2
+rline -7 3
+rmove 0 -2
+rline 7 3
+rline 0 2
+@connection
+rline -1 0
+rmove 1 0
+
+! Top Output
+rline 2 0
+rmove termrad 0
+circle termrad
+rmove 2*termrad 0
+set just LC color red
+text Q
+set color black
+
+! Bottom Output
+rmove 0 -8
+set color red
+@overline Q 0.2
+set color black
+rmove -2*termrad 0
+circle termrad
+rmove -termrad 0
+rline -2 0
+
+end scale

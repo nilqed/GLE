@@ -1,0 +1,63 @@
+size 18 27
+
+include "shape.gle"
+
+box 18 27
+amove .2 .2
+box 18-.4 27-.4
+set just center hei 1.4 font rmi
+amove 12.1 23
+
+for i = 0 to 1 step .05
+   set color (1-i)
+   write "Utilities"
+   rmove -.05 .025
+next i
+
+set color white
+write "Utilities"
+set color black
+
+set hei .8 just center
+amove 11.8 21.6
+write "Surface, Contour,"
+rmove 0 -.9
+write "Manip, Fitz, Letz, Fitls"
+rmove 0 -1.2
+set hei .6
+write "Version 3.2"
+set just left hei .401 font rm
+
+begin object thetext
+   begin text width 13
+      \setstretch{.01}MANIP is a general purpose data entry and manipulation
+      package. 
+
+      FITLS fits any equation with unknown constants to X,Y data.
+
+      FITZ allows surfaces to be fitted to X,Y,Z data.
+
+      LETZ allows a surface to be generated from an X,Y 
+      equation.
+
+      Evenly spaced Z data can be plotted 
+      using SURFACE or a contour of the data
+      can be plotted on a normal GLE graph using CONTOUR.  
+   end text 
+end object
+
+amove pagewidth()/2 16 
+draw shadow_box.tc thetext 0.4 0.4
+
+set hei 7 font rmi
+amove 2 2 
+begin path clip stroke
+   write "GLE"
+end path
+
+set lwidth .1
+amove 2 1.8 
+for i = 0 to 40
+   amove 2 2 
+   aline i 40-i
+next i

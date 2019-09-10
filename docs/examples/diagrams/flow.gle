@@ -1,0 +1,36 @@
+size 18 27
+
+amove 9 20
+set font pltr just center hei 1.7
+begin box add .6 name a
+begin text
+GLE Application
+Program
+end text
+end box
+
+rmove 0 -10
+begin box add 2 name b fill gray20
+ text GLE core
+end box
+begin box add 2.1 name b
+ text GLE core
+end box
+rmove 0 -7
+
+rmove .4 -.4
+begin box add .6 fill white
+ text Device drivers
+end box
+rmove -.2 .2
+begin box add .6 fill white
+ text Device drivers
+end box
+rmove -.2 .2
+begin box add .6 fill white name c
+ text Device drivers
+end box
+text Device drivers
+
+join a.bc <-> b.tc
+join b.bc <-> c.tc

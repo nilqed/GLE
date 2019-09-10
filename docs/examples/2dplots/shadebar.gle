@@ -1,0 +1,32 @@
+size 12 8
+
+include "color.gle"
+include "barstyles.gle"
+
+sub bar_purplecolormap x1 y1 x2 y2 bar group
+  set_palette_shade_gray_color red 94 green 19 blue 175
+  bar_colormap_palette_labels x1 y1 x2 y2 bar palette_shade_gray "fix 0 append '%'"
+end sub
+
+sub bar_yellowcolormap x1 y1 x2 y2 bar group
+  set_palette_shade_gray_color red 255 green 255 blue 0
+  bar_colormap_palette_labels x1 y1 x2 y2 bar palette_shade_gray "fix 0 append '%'"
+end sub
+
+set font texcmr
+begin graph
+  x2axis off
+  y2axis off
+  xaxis min 0.5 max 4.5 dticks 1
+  yaxis min -5  max 90  dticks 10 format "fix 0 append '%'" grid
+  xsubticks off
+  yticks color grey20
+  data "shadebar.csv"
+  bar d1,d2 width 0.3,0.3 style purplecolormap,yellowcolormap
+end graph
+
+begin key
+  position bc coldist 0.5 offset 0 -0.5 nobox hei 0.25 boxcolor clear
+  fill rgb255(94,19,175) text "Series 1" separator
+  fill rgb255(255,255,0) text "Series 2"
+end key

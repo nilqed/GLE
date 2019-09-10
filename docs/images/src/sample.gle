@@ -1,0 +1,14 @@
+size 10 10          ! size of drawing area is 10 cm x 10 cm
+amove 1 1           ! move to position 1,1 in cm
+box 3 2 fill red    ! draw a box that is 3cm by 2cm and fill it red
+                    ! note: the outline of the box is the current
+                    ! drawing color which is black by default
+set color blue      ! sets drawing color to blue
+amove 4 4           ! moves to 4,4 in cm
+box 2 2 fill blue   ! draws a box that is 2x2 cm filled in blue
+                    ! and outlined in blue
+set color black     ! set color back to black
+set just cc         ! set text justification to center center
+amove 5 7           ! move to (5,7)cm and draw some text
+text Hello World.   
+		 

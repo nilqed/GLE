@@ -1,0 +1,53 @@
+
+size 8 8
+
+include "shape.gle"
+
+set hei 0.35 arrowangle 25 arrowsize 0.2 font texcmr
+
+begin graph
+   scale 0.85 0.85 math
+   xaxis min -1.1 max 1.1
+   yaxis min -1.1 max 1.1
+   y2axis on offset 1 symticks
+   xlabels off
+   ylabels off
+   y2labels off
+   xnoticks -1 1
+   ynoticks -1 1
+   y2noticks 0
+end graph
+
+radius = xg(1)-xg(0)
+
+amove xg(0) yg(0)
+circle radius
+
+arc radius/3 0 45 arrow both
+
+amove xg(0) yg(0)
+xp = xg(cos(torad(45)))
+yp = yg(sin(torad(45)))
+yt = yg(tan(torad(45)))
+
+aline xg(1) yt
+amove xp    yp
+aline xg(0) yp
+amove xp    yp
+aline xp    yg(0)
+
+curly_bracket xp    yg(0) xg(0) yg(0) 0.2
+curly_bracket xg(0) yg(0) xg(0) yp    0.2
+curly_bracket xg(1) yt    xg(1) yg(0) 0.2
+
+line_label xg(0) yg(0) xp    yp    "r" 0.1
+line_label xg(0) yg(0) xp    yg(0) "r\cdot cos \theta" -0.5
+line_label xg(0) yg(0) xg(0) yp    "r\cdot sin \theta"  0.5
+line_label xg(1) yg(0) xg(1) yt    "r\cdot tan \theta" -0.5
+
+set just cc
+amove xg(0.425*cos(torad(45/2))) yg(0.425*sin(torad(45/2)))
+write "\theta"
+
+
+

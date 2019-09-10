@@ -1,0 +1,62 @@
+size 14.5 4.75
+
+include "shape.gle"
+
+set hei 0.35 font texcmr just center
+
+sub print_name name$
+   rmove 0 -0.5
+   write name$
+   rmove 2 0.5
+end sub
+
+amove 1.25 pageheight()-1.5
+rmove -0.3 0; draw curly_bracket_left.bc
+rmove +0.6 0; draw curly_bracket_right.bc
+
+amove 1.25 pageheight()-1.5
+print_name "curly brackets"
+
+set fill wheat
+set_shape_color_2 sienna
+
+draw rectangle.bc
+print_name "rectangle"
+
+draw triangle.bc
+print_name "triangle"   
+   
+draw hexagon.bc
+print_name "hexagon"
+
+draw rhomb.bc 1 1
+print_name "rhomb" 
+      
+draw big_arrow_ud.bc
+print_name "u/d-arrow"
+   
+draw big_arrow_lr.bc
+print_name "l/r-arrow"
+
+amove 1.25 pageheight()-1.5-2
+
+draw big_arrow_left.bc
+print_name "left-arrow"
+
+draw big_arrow_right.bc
+print_name "right-arrow"
+
+draw big_arrow_up.bc
+print_name "up-arrow"
+
+draw big_arrow_down.bc
+print_name "down-arrow"
+   
+draw disk_text.bc text "S"
+print_name "disk"   
+
+draw l_tree.bc
+print_name "l-tree"
+   
+draw r_tree.bc
+print_name "r-tree"   

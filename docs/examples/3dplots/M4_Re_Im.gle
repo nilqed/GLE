@@ -1,0 +1,92 @@
+! Example by Jan Soubusta
+
+size 21 10.5
+
+alfa = 25
+beta = 35
+mmax = 4
+
+persp_scale = 3
+
+include "matrix_3D.gle"
+
+sub namaluj_graf jmeno$ skip_lines polabel_xy popisz$
+   begin origin
+      if (popisz$="re") then
+         z_axis_min = -.5
+         z_axis_max  =  1
+      else
+         z_axis_min = -.5
+         z_axis_max  = 0.5
+         formatz$="fix 2"
+      end if
+      dmin = z_axis_min
+      dmax = z_axis_max
+      z0=normalize_z(0)
+
+      draw_back_frame
+
+      fopen jmeno$ vstup read
+      local k
+      for k=1 to skip_lines
+         freadln vstup
+      next k
+      for k=1 to mmax
+         draw_matrix_row k 1
+      next k
+      fclose vstup
+
+      draw_middle_frame
+
+      if (popisz$="re") then
+         draw_z_ticks -.5 1 .5
+      else
+         draw_z_ticks -.5 .5 .25
+      end if
+
+      draw_xy_ticks
+
+      if polabel_xy then
+         label_x 1 "HH"
+         label_x 2 "HV"
+         label_x 3 "VH"
+         label_x 4 "VV"
+
+         label_y 1 "HH"
+         label_y 2 "HV"
+         label_y 3 "VH"
+         label_y 4 "VV"
+      end if
+   end origin
+end sub
+
+sub print_xy x y txt$
+   amove x y
+   write txt$
+end sub
+
+!-----------------------------------------------------------
+
+set just cc hei 0.3 color black
+x0=0; y0=0
+project_3D2D .5 .5 .5
+x0 = pagewidth()/2-xgr-4.6
+y0 = pageheight()/2-ygr+.8
+
+project_3D2D .5 .5 .5
+xgrp = xgr+0
+ygrp = ygr-3
+
+!-----------------------------------------------------------
+
+filek$ = "sample_3D.dat"
+amove 0 0
+namaluj_graf filek$ 1 true "re"
+
+amove 10.5 0
+namaluj_graf filek$ 6 true "im"
+
+set just cc hei .6 color black
+kam = 8
+print_xy 2    kam "Re"
+print_xy 12.5 kam "Im"

@@ -1,0 +1,8 @@
+begin surface
+	size 10 10
+	data jack.z 
+	underneath on color green
+	!zaxis min -2 max 2 
+	!cube zlen 5
+	!base xstep 1 ystep 1 color red
+end surface

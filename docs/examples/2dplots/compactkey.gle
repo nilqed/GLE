@@ -1,0 +1,15 @@
+size 12 9
+
+set font texcmr
+begin graph
+   scale auto
+   title "``Compact'' key mode"
+   yaxis dticks 0.5
+   xaxis min 0 max 2*pi dticks pi/4 format "pi"
+   let d1 = sin(x)
+   let d2 = cos(x)
+   key pos bl compact offset 0.2 0.2
+   d1 line color red  marker triangle mdist 1 key "Sine"
+   d2 line color blue marker circle   mdist 1 key "Cosine"
+end graph
+

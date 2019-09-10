@@ -1,0 +1,32 @@
+
+size 32 22
+
+a = 3; b = 4; c = sqrt(a^2+b^2)
+
+sub pythagorean n
+   local red   = (34+n*92)/(n+1)
+   local green = (139+n*64)/(n+1)
+   local blue  = (34+n*51)/(n+1)
+   box c c fill rgb255(red,green,blue)
+   if n = 0 then return
+   begin translate c c
+      begin rotate todeg(-acos(a/c))
+         begin scale a/c a/c
+            begin translate -c 0
+               pythagorean n-1
+            end translate
+         end scale
+      end rotate
+   end translate
+   begin translate 0 c
+      begin rotate todeg(acos(b/c))
+         begin scale b/c b/c
+            pythagorean n-1
+         end scale
+      end rotate
+   end translate
+end sub
+
+begin translate 16 0
+   pythagorean 10
+end translate

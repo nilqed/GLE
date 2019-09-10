@@ -1,0 +1,37 @@
+size 10 8.75
+
+wd = 4.75; ad = 0.2
+set lwidth 0.01 cap round
+
+sub a_line x0 y0 x1 y1
+  amove x0 y0
+  aline x1 y1
+end sub
+
+sub sierpinski x_left x_right y_bot y_top d
+  if d > 0 then
+    set color rgb(1/(d+ad),0,0)
+    local y_c = (y_bot+y_top)/2     ! middle y coordinate
+    local x_c = (x_left+x_right)/2  ! middle x coordinate
+    local x_1 = (x_left+x_c)/2      ! 1/3 x coordinate
+    local x_2 = (x_c+x_right)/2     ! 2/3 x coordinate
+    a_line x_c y_bot x_1 y_c
+    a_line x_1 y_c   x_2 y_c
+    a_line x_2 y_c   x_c y_bot
+    sierpinski x_left x_c     y_bot y_c   d-1 ! lower left triangle
+    sierpinski x_c    x_right y_bot y_c   d-1 ! lower right triangle
+    sierpinski x_1    x_2     y_c   y_top d-1 ! top triangle
+  end if
+end sub
+
+x_left  = pagewidth()/2 - wd
+y_bot   = pageheight()/2 - wd*sin(torad(60))
+y_top   = y_bot + 2*wd*sin(torad(60))
+x_right = x_left + wd*2
+x_c     = x_left + wd
+
+a_line x_left  y_bot x_c     y_top
+a_line x_c     y_top x_right y_bot
+a_line x_right y_bot x_left  y_bot
+
+sierpinski x_left x_right y_bot y_top 7

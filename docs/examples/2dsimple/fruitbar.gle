@@ -1,0 +1,11 @@
+size 12 8
+
+set font texcmr
+begin graph
+   title  "Fruit Production"
+   xtitle "Weekday"
+   ytitle "Production [x100 pound]"
+   xticks off
+   data   "test.dat"
+   bar d1,d2 fill navy,skyblue
+end graph

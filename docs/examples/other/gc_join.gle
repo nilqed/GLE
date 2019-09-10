@@ -1,0 +1,33 @@
+size 12 3
+amove 1 2.7
+set hei .27
+set font pldr ! tt
+begin table
+	set hei .3 font plge
+	amove 1.2 .2
+	box 1 1 fill blue  name square
+	amove 1.9 2 
+	begin box add .1  name titlebox
+		text Title
+	end box
+	join square.tr -> titlebox.tr
+	join square <- titlebox
+	join square.tc <-> titlebox.v
+end table
+
+amove 7.4 0
+box 4 3
+begin origin
+	set hei .6 font plge
+	set hei .3
+	amove 1.2 .2
+	box 1 1 fill blue  name square
+	amove 1.9 2 
+	begin box add .1  name titlebox
+		text Title
+	end box
+	join square.tr -> titlebox.tr
+	join square <- titlebox
+	join square.tc <-> titlebox.v
+end origin
+               

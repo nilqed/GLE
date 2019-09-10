@@ -1,0 +1,83 @@
+! GLE2000 Simple polar plot with filled background
+! This demonstrates graph plotting in polar coordinates.
+! Facilities are similar to those provided in earlier
+! versions of GLE for Cartesian plots. Two data sets
+! held in Polar1.dat are plotted. The first is plotted
+! as a smooth curve, the second as a set of straight lines.
+! Markers are inserted at the data points and clipping
+! occurs at the boundary of the plotting areas. The
+! green star illustrates the placing of a graphics object 
+! at a point defined by graph coordinates. 
+  Size         16 14
+  WindowOrigin 0  0
+  PixelsPerCm  40
+  Amove 8  7
+  h = 1.0
+! The entire plot may be scaled by changing the next line
+begin scale 1.0 1.0
+! Alter angle of rotation to rotate the entire graph
+begin rotate 0 
+  begin origin
+  degrees
+! First insert the graded background colour fill
+  set fillstyle 0 linestyle 1 linewidth 0.1
+  for a = 0 to 1.0 step 0.01
+    set linecolor setcol(yellow,aqua,a*a)
+    circle 5.0*a*h
+  next r
+! Next plot the polar graph over the background
+ set linecolor black linewidth 0.02 
+ circle 5.3*h
+  begin polarplot
+   Fullsize
+   aaxis startatangle 0   endatangle 360
+   aaxis min 360 max 0  nolast
+   aaxis  nticks 0 dticks 10
+   aaxis labels on 
+   aaxis side linewidth 0.01 linecolor black on
+   raxis min 0  max 5  nolast
+   raxis startatangle 0 stepangleby 45 endatangle 360
+! Load the data and set up the plotting options
+   data "Polar1.dat"
+   d01 line smooth 2 linecolor red linestyle 1 use r1axis a1axis
+   d01 marker fsquare linecolor black fillcolor darkblue size 0.05
+   d02 line linecolor brown linestyle 3 use r1axis a1axis
+   d02 marker wcircle linecolor black   size 0.10
+   centrecircle 0.1 black green
+  end polarplot
+! End the graph, then add caption etc.
+  amove 0 6
+  set fillstyle 1 fillcolor white
+  Fillto black
+  amove 0 0
+  set fillcolor green
+!  circle 0.2*h
+  set fillstyle 0  linestyle 1 linecolor black
+  circle 5.0*h
+  set linecolor white
+  circle 5.3*h
+  set font "times New Roman" fontcolor DarkBlue hei 0.5
+  Amove    -2.75 6.300
+  Text    Simple Polar Graph
+! The graph coordinate system is available until another graph is 
+! set up, so a star can be drawn and positioned at a point (radius 6.2,
+! angle 45deg) defined on the graph.
+  set fillcolor green
+  use raxis aaxis
+  amove rg(6.2,45.0)  ag(6.2,45.0)
+  star 5 0.3 0.1 90
+  end origin
+end rotate
+end scale
+! The plot can be saved as a .bmp file and then converted to .gif or .jpeg format
+! by other packages (e.g. Paint Shop Pro). Alternatively it can be printed from
+! within GLE2000 to any printer set up for your Windows System, via the Windows
+! printer drivers. For this diagram .gif appears to be slightly superior to .jpeg
+! The Source code for GLE 2000 and further examples
+! can be downloaded from either SimTel in
+! http://www.simtel.net/simtel.net/win95/graphics/
+! or from my File cache on http://www.cai.cam.ac.uk/people/dgi
+! the latest version which includes minor bug fixes is in
+! GLEFix2.zip.
+! Derek Ingram.  Gonville & Caius College. Cambridge
+! dgi1@cus.cam.ac.uk

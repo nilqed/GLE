@@ -1,0 +1,109 @@
+! Example circuit with electronics.gle
+
+size 20 7.5
+
+include "electronics.gle"
+
+begin scale 0.5 0.5
+   set lwidth 0.05 cap round
+   termrad = 0.25
+   amove 1 3
+   rmove -termrad 0
+   circle termrad
+   rmove termrad 0
+   rline 35 0
+   rmove termrad 0
+   circle termrad
+   amove 1 6
+   rmove -termrad 0
+   circle termrad
+   rmove termrad 0
+   rline 1 0
+   @resistor_h "R1"
+   @npn_bjt "Q1"
+   rmove 2 -1
+   rline 0 -2
+   @connection
+   rmove 0 4
+   rline 0 1
+   @connection
+   rmove 0 5
+   @connection
+   rline 0 -1
+   @resistor_v "R2"
+   rline 2 0
+   @connection
+   rline 0 2
+   @npn_bjt "Q2"
+   rmove 0 -2
+   rline 0 -2
+   @pnp_bjt "Q3"
+   rmove 2 -1
+   rline 0 -2
+   @connection
+   rmove 0 4
+   rline 0 2
+   rmove 0 2
+   rline 0 2
+   @connection
+   rmove 0 -5
+   @connection
+   @capacitor_h "C1"
+   rmove 0 5
+   @connection
+   rline 0 -1
+   @resistor_v "R3"
+   @connection
+   rline 1 0
+   @connection
+   resistor_v "R4"
+   rline 0 -1
+   @connection
+   rmove 0 5
+   @resistor_h "R5"
+   @connection
+   gsave
+   @resistor_h "R6"
+   @connection
+   rline 1 0
+   rmove -1 0
+   @capacitor_v "C3"
+   rline 0 -1
+   @connection
+   grestore
+   rline 0 3
+   @capacitor_h "C2"
+   @connection
+   rline 0 -1
+   rline 1 0
+   gsave
+   @opamp 1 "U1"
+   rmove -1 1
+   rline 0 1
+   rline 6 0
+   rline 0 -3
+   @connection
+   @capacitor_h "C4"
+   rline 1 0
+   rmove termrad 0
+   circle termrad
+   rmove -termrad 0
+   grestore
+   rmove 2 1
+   rline 0 2
+   @connection
+   rmove 0 -6
+   rline 0 -4
+   @connection
+   rmove -7 0
+   @connection
+   @ground
+   amove 1 13
+   rmove -termrad 0
+   circle termrad
+   rmove termrad 0
+   rline 35 0
+   rmove termrad 0
+   circle termrad
+   rmove -termrad 0
+end scale

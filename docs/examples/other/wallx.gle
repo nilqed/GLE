@@ -1,0 +1,245 @@
+size 18 27      ! this is for sticking on your wall
+		! it has fonts, lstyles, shading, colors, markers on it.
+		! try this: gle_ps wall /eps
+		!           gs wall.eps
+		! you should have Ghostscript!
+set hei 1 just center font pltr fontlwidth 0.05
+
+begin translate 0 1     ! Printing on Deskjets is a problem
+
+box 18 26
+
+amove 9 25
+text GLE Wall Reference
+
+set fontlwidth 0.03
+
+set just left
+set hei .3
+amove .3 .4
+text wall.gle
+amove 2 4
+sub sh f$ 
+ set just left
+ box -.5 .5 fill f$
+ RMOVE .2 .1
+ write f$
+ rmove -.2 .4
+end sub
+
+amove 10 8.5
+set hei .3 font pldr
+begin box add .2
+begin text width 7
+The GRID and SHADE patterns should only be used for filling
+on PostScript printers, the gray levels and colors will work
+for both filling and color settings on any device.
+end text
+end box
+
+set font plsr  !rm
+set hei .4
+amove 11.5 1
+@sh "Shade"
+@sh "Shade1"
+@sh "Shade2"
+@sh "Shade3"
+@sh "Shade4"
+@sh "Shade5"
+@sh "Grid"
+@sh "Grid1"
+@sh "Grid2"
+@sh "Grid3"
+@sh "Grid4"
+@sh "Grid5"
+
+amove 15 1
+@sh "Red"
+@sh "Green"
+@sh "Blue"
+@sh "Magenta"
+@sh "Yellow"
+@sh "Black"
+@sh "White"
+@sh "Gray10"
+@sh "Gray20"
+@sh "Gray40"
+@sh "Gray60"
+@sh "Gray80"
+
+sub mm name$
+	gsave
+	mk = mk+1
+	gsave
+	set lwidth .0001
+	set lstyle 1212
+	rmove 0 .4
+	rline 0 -.8
+	rmove 0 .4
+	grestore
+	marker name$ 1 
+	rmove .3 0 
+	rline .5 0 
+	rmove .2 -.15
+	write name$
+	grestore 
+	rmove 0 -.65
+end sub 
+
+amove 12.5 19.4
+set font pldr hei .6
+text Markers
+amove 12.3 19.3
+box 2.8 0.7
+amove 12.2 19.2
+box 3 0.9
+
+
+set hei .4
+amove 11 18.5
+@mm "circle"
+@mm "triangle"
+@mm "square"
+@mm "diamond"
+@mm "fcircle"
+@mm "ftriangle"
+@mm "fsquare"
+@mm "fdiamond"
+@mm "dot"
+@mm "cross"
+@mm "club"
+@mm "heart"
+@mm "star"
+@mm "snake"
+
+amove 14.5 18.5
+@mm "dag"
+@mm "ddag"
+@mm "asterisk"
+@mm "oplus"
+@mm "ominus"
+@mm "otimes"
+@mm "odot"
+@mm "trianglez"
+@mm "diamondz"
+@mm "wcircle"
+@mm "wtriangle"
+@mm "wsquare"
+@mm "wdiamond"
+
+
+
+sub fnt f$ n$
+ set font plsr  !rm
+ set just right
+ write f$
+ rmove .5 0
+ set just left font f$
+ write n$
+ rmove -.5 -.6
+end sub 
+
+amove 2 19.4
+set hei 0.6 font pldr
+text Fonts
+amove 1.8 19.3
+box 2 0.7
+amove 1.7 19.2
+box 2.2 0.9
+
+
+set hei .4 
+amove 2 18.5 
+@fnt "rm" "Roman"
+@fnt "rmi" "Roman Italic"
+@fnt "rmb" "Roman Bold"
+@fnt "rmbi" "Roman Bold Italic"
+@fnt "tt" "Typewriter"
+@fnt "ttb" "Typewriter Bold"
+! @fnt "ss"  "Sans Serif " ! crash with Linux Ghostscript 2.6.1
+@fnt "ssb"  "Sans Serif Bold"
+@fnt "ssi"  "Sans Serif Italic"
+@fnt "psc" "PostScript Courier"
+!@fnt "psh"  "PostScript Helvetica" ! crashes Linux-Ghostscript 2.6.1
+@fnt "psbd"  "PostScript Bookman Demi"
+@fnt "psncsr" "PostScript New Century Schlblk Roman"
+@fnt "pszcmi" "PostScript ZapfChancery-MediumItalic"
+@fnt "pszd" "PostScript ZapfDingbats"
+@fnt "plcg" "Plotter Complex Greek"
+@fnt "plci" "Plotter Complex Italic"
+@fnt "plcr" "Plotter Complex Roman"
+@fnt "plcs" "Plotter Complex Script"
+@fnt "pldr" "Plotter Duplex Roman"
+@fnt "plge" "Plotter Gothic English"
+@fnt "plgg" "Plotter Gothic German"
+@fnt "plgi" "Plotter Gothic Italian"
+@fnt "plsa" "Plotter Simplex Ascii"
+@fnt "plsg" "Plotter Simplex Greek"
+@fnt "plsr" "Plotter Simplex Roman"
+@fnt "plss" "Plotter Simplex Script"
+@fnt "plsym1" "Plotter Symbols one"
+@fnt "plti" "Plotter Triplex Italic"
+@fnt "pltr" "Plotter Triplex Roman"
+@fnt "plba" "Plotter Block Ascii"
+@fnt "plcc" "Plotter Complex Cyrillic"
+
+set font pldr hei 0.6
+amove 9 22.5
+text Linestyles
+amove 1 20.5
+box 16 4
+amove 0.9 20.4
+box 16.2 4.2
+
+amove 2 21
+box 6 3
+begin origin
+  set hei .3 just left font plsr
+  amove .5 2.5
+  for z = 0 to 4
+     set lstyle z
+     rline 2 0
+     rmove .1 0
+     set lstyle 1
+     write z
+     rmove -2.1 -.4
+  next z
+
+  amove 3.5 2.5
+  for z = 5 to 9
+     set lstyle z
+     rline 2 0
+     rmove .1 0
+     set lstyle 1
+     write z
+     rmove -2.1 -.4
+  next z
+	
+  amove .5 .2
+  set lstyle 9229
+  rline 3 0
+  rmove .1 0
+  set lstyle 1 !
+  text 9229
+end origin
+
+sub lw ww wn$
+	set lwidth ww
+	rline 1 0
+	rmove .2 -.1
+	set lwidth 0
+	write wn$
+	rmove -1.2 .5
+end sub
+set hei .3 just left font plsr
+amove 13 21.2
+@lw 0 "lwidth 0"
+@lw .0001 "lwidth 0.0001"
+@lw .01 "lwidth 0.01"
+@lw .02 "lwidth 0.02"
+@lw .05 "lwidth 0.05"
+@lw .1 "lwidth 0.1"
+@lw .2 "lwidth 0.2"
+
+
+end translate

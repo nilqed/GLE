@@ -1,0 +1,25 @@
+
+SRC=../src
+SCRIPT=../script
+
+FILES=gcc.html ghostscript-mac.html linux.html windows.html mac.html
+
+all: $(FILES)
+
+clean:
+	rm -rf $(FILES)
+
+gcc.html: $(SRC)/template.html $(SRC)/tut_gcc.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/tut_gcc.html gcc.html
+
+ghostscript-mac.html: $(SRC)/template.html $(SRC)/tut_ghostscript-mac.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/tut_ghostscript-mac.html ghostscript-mac.html
+
+linux.html: $(SRC)/template.html $(SRC)/tut_linux.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/tut_linux.html linux.html
+
+windows.html: $(SRC)/template.html $(SRC)/tut_windows.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/tut_windows.html windows.html
+
+mac.html: $(SRC)/template.html $(SRC)/tut_mac.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/tut_mac.html mac.html

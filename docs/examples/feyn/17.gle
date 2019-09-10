@@ -1,0 +1,63 @@
+size 10.2 1.7 ! 6*x1+2*(d1+d) 2*(y+d)
+
+include "feyn.gle"
+
+x = 1
+y = 0.75
+rr = (x*x+y*y)/(2*y)
+y2 = 0.5
+x2 = sqrt(sqr(rr)-sqr(rr-y+y2))
+x1 = 1.5
+d = 0.1
+d1 = 0.5
+r = 0.05
+
+begin translate x1+d y+d
+    amove -x1 0
+    @photon -x 0
+    circle r fill black
+    set lwidth 0.06
+    @fermion2 0 y x 0
+    @fermion2 0 -y -x 0
+    set lwidth 0.03
+    amove x 0
+    circle r fill black
+    @photon x1 0
+end translate
+
+begin translate 3*x1+d1+d y+d
+    amove -x1 0
+    @photon -x 0
+    circle r fill black
+    set lwidth 0.06
+    @fermion2 0 y x 0
+    @fermion2 0 -y -x 0
+    set lwidth 0.03
+    amove x 0
+    circle r fill black
+    @photon x1 0
+    amove -x2 y2
+    circle r fill black
+    photona = -photona
+    photonn = -1
+    @photon2 0 y2-0.75*x2 x2 y2
+    circle r fill black
+    photona = -photona
+end translate
+
+begin translate 5*x1+2*d1+d y+d
+    amove -x1 0
+    @photon -x 0
+    circle r fill black
+    set lwidth 0.06
+    @fermion2 0 y x 0
+    @fermion2 0 -y -x 0
+    set lwidth 0.03
+    amove x 0
+    circle r fill black
+    @photon x1 0
+    amove 0 -y
+    circle r fill black
+    @photon 0 y
+    circle r fill black
+end translate

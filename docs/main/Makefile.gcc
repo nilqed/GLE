@@ -1,0 +1,40 @@
+
+SRC=../src
+SCRIPT=../script
+
+FILES=docs.html license.html changes.html git.html faq.html links.html sponsors.html todo.html gle_background.html screenshots.html
+
+all: $(FILES)
+
+clean:
+	rm -rf $(FILES)
+
+docs.html: $(SRC)/template.html $(SRC)/docs.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/docs.html docs.html
+
+license.html: $(SRC)/template.html $(SRC)/license.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/license.html license.html
+
+changes.html: $(SRC)/template.html $(SRC)/changes.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/changes.html changes.html
+
+git.html: $(SRC)/template.html $(SRC)/git.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/git.html git.html
+
+faq.html: $(SRC)/template.html $(SRC)/faq.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/faq.html faq.html
+
+links.html: $(SRC)/template.html $(SRC)/links.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/links.html links.html
+
+sponsors.html: $(SRC)/template.html $(SRC)/sponsors.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/sponsors.html sponsors.html
+
+todo.html: $(SRC)/template.html $(SRC)/todo.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/todo.html todo.html
+
+gle_background.html: $(SRC)/template.html $(SRC)/gle_background.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/gle_background.html gle_background.html
+
+screenshots.html: $(SRC)/template.html $(SRC)/screenshots.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/screenshots.html screenshots.html

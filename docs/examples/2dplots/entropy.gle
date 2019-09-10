@@ -1,0 +1,15 @@
+size 11 8
+
+sub entropy x
+   return (-x)*log(x)/log(2)-(1-x)*log(1-x)/log(2)
+end sub
+
+set texlabels 1
+begin graph
+   scale  auto
+   title  "$E(D) = -p_\oplus \cdot \log_2 p_\oplus - (1-p_\oplus) \cdot \log_2 (1-p_\oplus)$"
+   xtitle "$p_\oplus$"
+   ytitle "Entropy $E(D)$"
+   let d1 = entropy(x) from 0 to 1
+   d1 line color red
+end graph

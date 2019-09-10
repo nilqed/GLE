@@ -1,0 +1,43 @@
+size 18 24		! This is CLIP.GLE, sets up arbitrary clipping region.
+! Clipping doesn't work on the screen
+! to see this example enter :
+! dvigle clip
+! dviprint -dvt
+set hei .3 font texcmr	! you can remove the font setting for PostScript
+			! printers.
+amove 2.3 .3
+text clip.gle
+
+set hei 10
+amove 2 2 
+begin clip	! Save default clipping region
+begin path clip	! Set up the clipping region
+	text GLE
+end path
+gsave
+	amove 2 2 	
+	text www	! Draw some text which will be clipped
+	for i =	1 to 90	! Draw some lines which will be clipped
+		amove 2	2 
+		rotate -1
+		rline 0 30
+	next i
+grestore
+end clip ! restore default clippping region
+amove 0 0 
+rline 10 10 	! draw a line which won't be clipped.
+!-----------------------------------------------------------------------------
+!Here's a simple example of how to set up a clipping region which consists
+!of two squares. Try this out
+amove 1 11
+begin origin
+begin path clip stroke
+	amove 2 2 
+	box 4 4 
+	amove 7 2 
+	box 4 4 
+end path
+amove 2 2 
+set hei 4
+text Here is clipped text
+end origin

@@ -1,0 +1,180 @@
+
+<h2>GLE - MacOS Installation Instructions</h2>
+
+<h2>Installing QGLE/GLE (Binary Installation)</h2>
+
+<p>
+These instructions explain how to install QGLE/GLE using binary .dmg packages (for Intel Macs with MacOS/X &ge; 10.5). 
+</p>
+
+<ul>
+<li>Download <a href="http://prdownloads.sourceforge.net/glx/Ghostscript-8.63.dmg?download">Ghostscript.dmg</a> and install its contents (Ghostscript.framework) in /Library/Frameworks or $HOME/Library/Frameworks.</li>
+
+<li>Download <a href="http://prdownloads.sourceforge.net/glx/gle-graphics-4.2.4c-exe-mac.dmg?download">gle-graphics-4.2.4c-exe-mac.dmg</a> and install its contents (QGLE.app) in /Applications or $HOME/Applications.</li>
+
+<li>Now try running QGLE from /Applications or from $HOME/Applications.</li>
+
+<li>To run the command line tool "gle" in Terminal, run "/Applications/QGLE.app/Contents/bin/gle", or add the "bin" directory to your system's search path with "export PATH=$PATH:/Applications/QGLE.app/Contents/bin" and run "gle".</li>
+</ul>
+
+<p>
+If you have questions about the installation, please feel free to contact the <a href="../main/docs.html">GLE mailing list</a>.
+</p>
+
+<h2>Installing GLE (Source Installation)</h2>
+
+<p>
+The recommended way to install GLE on a Mac is to compile and install the source code. Below are brief instructions to do so. Detailed instructions about compiling GLE in general can be found in <a href="../tut/gcc.html">The GLE Compilation Guide</a>.
+</p>
+
+<ul>
+<li> Make sure you have the Developer Tools installed (these should be available on your OS/X DVD).</li>
+<li> Download and unzip GLE-x.y.z-src.zip to your home directory.</li>
+<li> Execute these commands in a terminal (assuming you unzipped GLE to $HOME/gle4):
+<br>&nbsp;<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+cd $HOME/gle4
+./configure --with-libgle
+make clean
+make
+sudo make install
+</pre></td></tr></table>
+<br>
+</li>
+
+<li> Now try running "gle".</li>
+</ul>
+
+<p>
+If you have questions about the installation, please feel free to contact the <a href="../main/docs.html">GLE mailing list</a>.
+</p>
+
+<h2>Installing QGLE (GLE's Graphical User Interface)</h2>
+
+<p>The following explains how to install QGLE, the user interface of GLE. These instructions only work with the latest version of GLE (version 4.2.x), which is available <a href="http://www.gle-graphics.org/cvs.html">here</a>.</p>
+
+<img src="../screenshots/qgle-mac.png" alt="QGLE on Mac" width="759" height="524">
+
+<ul>
+<li>Install <a href="http://pages.cs.wisc.edu/~ghost/" target=_top>GhostScript</a> as explained in <a href="../tut/ghostscript-mac.html">these instructions</a>. Ghostscript should be compiled and installed as a framework or as a dynamic library and it should include the "display" device to work with QGLE.
+
+<ul>
+<li>Alternatively, you can install Ghostscript as follows. Download <a href="http://people.cs.kuleuven.be/~jan.struyf/gle/Ghostscript.dmg">Ghostscript.dmg</a> and install its contents (Ghostscript.framework) in /Library/Frameworks or $HOME/Library/Frameworks.</li>
+
+<li>Ghostscript is also available in <a href="http://www.macports.org/">MacPorts</a>. If you have MacPorts installed, you could try to install GhostScript with: "sudo port install ghostscript +gslib", but it is unclear if this version includes the required "display" device. Please contact the <a href="../main/docs.html">GLE mailing list</a> if you can confirm this.</li>
+</ul>
+</li>
+
+<li> Install the Qt Open Source Edition for C++ Developers for Mac from <a href="http://trolltech.com/">TrollTech</a>. QGLE requires at least version 4.2.x. It is best to download and install a binary distribution in .dmg format. Alternativaly, you can also install Qt by compiling its source code, but this may take some time. The following are compilation instructions for the case that you've downloaded the source code. Optionally, you may want to add "-prefix $HOME/apps" to the "./configure" call to install Qt in your home directory instead of system-wide. In that case you also don't need to include the "sudo".
+<br>&nbsp;<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+tar -xvzf qt-mac-opensource-src-x.y.z.tar.gz
+cd qt-mac-opensource-src-x.y.z
+./configure -nomake examples -nomake tools -nomake demos -no-qt3support -no-phonon -no-webkit
+make
+sudo make install
+</pre></td></tr></table>
+</li>
+
+<li>Recompile GLE. Make sure to replace "/path/to/Qt" in the "./configure" command below with the location where you installed Qt. For example, "--with-qt=$HOME/apps", if you used this prefix in the previous step. If the "qmake" program is in "/usr/local/qt4/bin", then you should use "--with-qt=/usr/local/qt4" instead.
+<br>&nbsp;<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+cd $HOME/gle4
+./configure --with-qt=/path/to/Qt
+</pre></td></tr></table>
+</li>
+
+<li>
+Make sure that the output of the "./configure" command includes "GLE GUI support: yes". If it says "no" instead, then the location specified after "--with-qt" is incorrect or Qt is not correctly installed. On my system, the output ends with:
+<br>&nbsp;<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+** Configuration summary for GLE x.y.z (i386-apple-darwin9.6.0):
+
+   ** Bitmap support:
+      PNG support: yes
+      TIFF support: no
+      JPEG support: no
+      Statically link: no
+
+   ** X11 preview support: yes
+   ** Cairo graphics support: no
+   ** Socket support: yes
+   ** Include 'manip' utility: yes
+   ** Debug mode: off
+
+   ** GLE GUI support: yes
+      Using Qt version 4.4.3 in /Users/john/apps/lib
+
+** Install data into: /Users/john/apps/share/gle/4.2.0
+** Install binary into: /Users/john/apps/bin
+   (use ./configure --prefix=dir to change the installation directory.)
+
+GLE x.y.z has been configured. The next step is to run "make". After "make" completes, run "make install" to install GLE.
+</pre></td></tr></table>
+</li>
+
+<li>Next, compile GLE and QGLE as follows:
+<br>&nbsp;<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+make clean
+make
+./build/bin/gle -finddeps
+</pre></td></tr></table>
+</li>
+
+<li>The last command "./build/bin/gle -finddeps" should have located the Ghostscript framework that you installed before. On my system it outputs the following (double check that the output after "Found: libgs" is correct):
+<br>&nbsp;<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+Running GLE -finddeps "" to locate installed software (e.g., Ghostscript and LaTeX): 
+........................
+Found: pdflatex in '/usr/texbin/pdflatex'
+Found: latex in '/usr/texbin/latex'
+Found: dvips in '/usr/texbin/dvips'
+Found: ghostscript in '/usr/local/bin/gs'
+Found: libgs in '/Users/john/Library/Frameworks/Ghostscript.framework'
+
+Save configuration to: '/Users/john/gle4/build/glerc'
+</pre></td></tr></table>
+</li>
+
+<li>Build the documentation (this step requires pdflatex and is optional):
+<br>&nbsp;<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+make doc
+</pre></td></tr></table>
+</li>
+
+<li>Install GLE and QGLE:
+<br>&nbsp;<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+sudo make install
+</pre></td></tr></table>
+</li>
+
+<li>Test QGLE as follows:
+<br>&nbsp;<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0"><pre>
+./build/bin/QGLE.app/Contents/MacOS/QGLE
+</pre></td></tr></table>
+</li>
+
+<li>Now try running QGLE from /Applications or from $HOME/Applications.</li>
+</ul>
+
+<p>
+If you have questions about the installation, please feel free to contact the <a href="../main/docs.html">GLE mailing list</a>. Also, please contact us if you have comments about this installation guide, or if you would be interested in maintaining a <a href="http://www.macports.org/">MacPorts</a> or <a href="http://fink.sourceforge.net/" target=_top>Fink</a> package of GLE.
+</p>
+
+<!--
+The recommended way to install GLE on a Mac is to use the <a href="http://fink.sourceforge.net/" target=_top>Fink</a> package provided by Edd Edmondson.
+
+<ol>
+<li> Make sure you have the Developer Tools installed (these should be available on your OS/X DVD).<p>
+<li> Download Fink from the Fink homepage at <a href="http://fink.sourceforge.net/" target=_top>http://fink.sourceforge.net/</a> and install it.<p>
+<li> Download the GLE Fink package files (glx.info and glx.patch) from <a href="https://sourceforge.net/tracker/index.php?func=detail&aid=1191070&group_id=17203&atid=414256">here</a> - the download links are a little way down the page.<p>
+<li> Copy both glx.info and glx.patch into your /sw/fink/dists/local/main/finkinfo directory.<p>
+<li> Use fink to install the glx package, e.g., <pre>'sudo fink install glx'</pre> and all relevant libraries will be downloaded and GLE will be patched, compiled and installed (this may take a few minutes to complete). If Fink has a problem downloading the source .zip ask it to try from the Sourceforge mirror set.
+</ol>
+
+Users needing help with Fink can contact the fink-users or fink-beginners <a href="http://fink.sourceforge.net/lists/index.php" target=_top>mailing lists</a>. If you need help with the package itself, contact the GLE mailing list <a href="http://lists.sourceforge.net/lists/listinfo/glx-general" target=_top>glx-general</a>. The Fink developers might also be persuaded to upload the package to the main online repository, in which case steps 3 and 4 above would be eliminated.
+-->

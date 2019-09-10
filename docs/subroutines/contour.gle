@@ -1,0 +1,21 @@
+! Subroutines to draw contour plots
+
+sub contour_labels file$ fmt$
+! draws the labels on a contour plot
+!
+! file$ = filename of file with label data
+! fmt$ = format string used to format labels
+
+   set just cc hei 0.25 color blue
+   fopen file$ f1 read
+   until feof(f1)
+      fread f1 x y i v
+      amove xg(x) yg(y)
+      s$ = format$(v, fmt$)
+      begin box add 0.05 fill white
+    write s$
+      end box
+      write s$
+   next
+   fclose f1
+end sub

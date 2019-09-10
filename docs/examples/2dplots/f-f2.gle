@@ -1,0 +1,42 @@
+size 14 9
+
+include "graphutil.gle"
+
+f0 = 467300.42; flock = 460000; frock = 476000
+
+sub adler x f
+   return abs(f0-x)*sqrt(1-((f-f0)/(x-f0))^2)
+end sub
+
+sub graph_hairlines
+   set lstyle 6 just lc
+   graph_vline f0
+   graph_text f0 15000 label "f_0" dx 0.1
+   set lstyle 4
+   graph_hline 0
+end sub
+
+set font texcmr
+begin graph
+   scale  auto
+   xtitle "modulation frequency f_d [kHz]"
+   ytitle "beat frequency F [kHz]"
+   data   "f-f2.dat"
+   xaxis min 438000 max 496000
+   yaxis min -1000  max 30000
+   xnames 440 450 460 470 480 490
+   ynames 0   5   10  15  20  25  30
+   let d10 = adler(x,flock) to flock step 10
+   let d11 = adler(x,frock) from frock step 10
+   d7  marker fcircle msize 0.35 color red
+   d6  line lstyle 2
+   d10 line lstyle 1
+   d11 line lstyle 1
+   draw graph_hairlines
+end graph
+
+begin key
+  pos tc
+  line lstyle 1 text "F = F_0 (1 - (F_{0c}/F_0)^2 )^{1/2}"
+  line lstyle 2 text "conventional beat frequency"
+end key

@@ -1,0 +1,73 @@
+! Subroutines to create polar plots (r = f(theta))
+
+sub polar fct$ from to tstep color$ fill$ lwidth
+   default tstep  0.025
+   default color  black
+   default fill   clear
+   default lwidth 0.02
+   t = from
+   r = eval(fct$)
+   gsave
+   set color color$ lwidth lwidth
+   begin path stroke fill fill$
+      amove xg(r*cos(t)) yg(r*sin(t))
+      for t = from+tstep to to step tstep
+          r = eval(fct$)
+          aline xg(r*cos(t)) yg(r*sin(t))
+      next t
+      closepath
+   end path
+   grestore
+end sub
+
+sub polar_data ds$ color$ fill$ lwidth type$ 
+   default color  black
+   default fill   clear
+   default lwidth 0.02
+   default type   line
+   gsave
+   set color color$ lwidth lwidth
+   if type$="line" then
+      for i = 1 to ndata(ds$) 
+          amove xg(0) yg(0)
+          local r = datayvalue(ds$,i)
+          !change deg to radians
+          local t = torad(dataxvalue(ds$,i))
+          aline xg(r*cos(t)) yg(r*sin(t))
+      next i
+   ! here I should check for the type, but since there are only two...
+   else
+     begin path stroke fill fill$
+        local r = datayvalue(ds$,1)
+        !change deg to radians
+        local t = torad(dataxvalue(ds$,1))
+        amove xg(r*cos(t)) yg(r*sin(t))
+        for i = 2 to ndata(ds$)
+            r = datayvalue(ds$,i)          
+            t = torad(dataxvalue(ds$,i))
+            aline xg(r*cos(t)) yg(r*sin(t))
+        next i
+        closepath
+     end path
+   end if
+   grestore
+end sub
+
+sub polar_grid radius rings sectors color$
+  default radius  1.0
+  default rings   4
+  default sectors 8
+	default color   gray10
+	gsave
+	set color color$
+	for ring = 1 to rings
+	   amove xg(0) yg(0)
+	   circle xg(radius/rings*ring)-xg(0)
+	next ring
+	for sector = 1 to sectors	   
+	   local theta = 2*pi/sectors*(sector-1)
+	   amove xg(0) yg(0)	   
+	   aline xg(radius*cos(theta)) yg(radius*sin(theta))
+	next sector
+	grestore
+end sub

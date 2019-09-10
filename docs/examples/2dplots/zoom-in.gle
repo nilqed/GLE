@@ -1,0 +1,59 @@
+size 17.75 11.5
+
+set font texcmr
+
+! Provided by Bükki-Deme András.
+
+begin graph
+   size 12 7
+   data "kep/kep4-0.csv"
+   xtitle "t(s)"
+   ytitle "U(V)"
+   yaxis min -1.1 max 1.1
+   xaxis min 0 max 130
+   d1 line color darkblue
+end graph
+
+zoom1a = 20455852; zoom1b = 20655999
+zoom2a = 20555925; zoom2b = 20575925
+zoom3a = 20565925; zoom3b = 20567925
+
+sub zoom_in xa xb x1 x2 data$ from$ to$
+   save "pos"
+   ! draw red square on graph to indicate zoom region
+   gsave
+      set color red lwidth 0.04
+      amove xg(xa) yg(ygmin)+0.05*(yg(ygmax)-yg(ygmin))
+      box xg(xb)-xg(xa) 0.9*(yg(ygmax)-yg(ygmin)) name "box"
+   grestore
+   ! draw graph
+   move "pos"
+   begin box fill grey5 add 0.2 name "graph"
+      begin graph
+         size 8 5
+         data "kep/"+data$
+         xlabels off
+         ylabels off
+         xaxis min x1 max x2
+         yaxis min -0.1 max 0.5
+         d1 line color darkblue
+      end graph
+   end box
+   ! connect graph with zoom region
+   set join round
+   begin path fill grey5 stroke
+      move "box."+from$+"c"
+      aline ptx("graph."+to$+"l") pty("graph."+to$+"l")
+      aline ptx("graph."+to$+"r") pty("graph."+to$+"r")
+      closepath
+   end path
+end sub
+
+amove 1.5 6.5
+zoom_in 100 101 zoom1a zoom1b "kep4-1.csv" "t" "b"
+
+amove 8.5 4.9
+zoom_in zoom2a zoom2b zoom2a zoom2b "kep4-2.csv" "t" "t"
+
+amove 10 0.3
+zoom_in zoom3a zoom3b zoom3a zoom3b "kep4-3.csv" "b" "t"

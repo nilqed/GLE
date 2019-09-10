@@ -1,0 +1,65 @@
+size 8 8
+
+! Based on "C" code by Lode Vandevenne
+! http://www.student.kuleuven.ac.be/~m0216922/CG/
+
+set cap round
+
+maxRecursions = 8  ! never make this too big or it'll take forever
+angle = 0.2 * pi   ! angle in radians
+shrink = 1.8       ! relative size of new branches
+
+! Now follows the recursion function, a function that only draws a single line and calls
+! itself a few times, but results in a huge tree!
+
+sub recursion posX posY dirX dirY bsize n
+
+! Here's the part that draws the line. The line is drawn from (posX, posY) to (posX+dirX, 
+! posY+dirY). So the position and direction of the line is given as a vector, instead of 
+! a begin point, an angle and a size, because direction vectors are much easier to work 
+! with. The size parameter itself isn't used to draw the line directly, it's only needed 
+! later to calculate the direction vector of the next branches. If the maximum number of 
+! recursions is reached, the function returns immediately after drawing the line, without 
+! calling itself again.
+
+    local posX2 = posX + bsize * dirX
+    local posY2 = posY + bsize * dirY
+
+    if n > 5 then
+        set color forestgreen
+    else
+        set color rgb255(128, 96, 64)
+    end if
+    set lwidth 0.2/(n+1)+0.005
+    amove posX pageheight()-posY
+    aline posX2 pageheight()-posY2
+
+    if n < maxRecursions then
+
+! And in the second part of the function, the new position of the new branches is
+! calculated as the endpoint of the previous branch, and the new direction vector for
+! the new branches is calculated out of the size and current direction of the current
+! branch. The new branches are rotated with the angle, the sine and cosine formulas are
+! actually the calculation of the rotation matrix. Then the recursion function is called
+! again with the new branch as its parameters. This is done twice: once for a branch
+! rotated to the right, and then for a branch rotated to the left.
+
+       dirX2 = cos(angle) * dirX + sin(angle) * dirY
+       dirY2 = -sin(angle) * dirX + cos(angle) * dirY
+       recursion posX2 posY2 dirX2 dirY2 bsize/shrink n+1
+
+       dirX2 = cos(-angle) * dirX + sin(-angle) * dirY
+       dirY2 = -sin(-angle) * dirX + cos(-angle) * dirY
+       recursion posX2 posY2 dirX2 dirY2 bsize/shrink n+1
+   end if
+end sub
+
+! The main program doesn't do much more than calling the recursive function.
+! The value "h/2.3" in the parameters of the recursion function is the initial 
+! length of the first branch (the stem). The coordinates are the begin
+! point and direction vector of the first branch.
+
+w = pagewidth()
+h = pageheight()
+
+recursion w/2 h-0.1 0 -1 h/2.3 0

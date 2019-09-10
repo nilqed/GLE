@@ -1,0 +1,94 @@
+!
+! InP(001) STM images three images of the (2x4)/c(2x8) reconstruction
+! example of how to layout three STM images
+! By: V.P. LaBella vlabella@albany.edu
+! the eps output of this gle file was submitted directly
+! to the journal.  See Figure 2 in The Jour. Vac. Sci. & Technology A, Vol. 18 no. 4 pp. 1492 (2000)
+! be sure to get the stm.gle include from the GLE function repository
+!
+size 15 15
+
+include stm.gle
+
+set font ss hei 0.5
+
+dx = 15; dy = 15
+idx = dx/2; idy = idx
+
+tbox = idx/2-0.5
+scale_bar_x = 0.2
+scale_bar_y = 0.2
+
+!
+! 1000 nm x 1000 nm (2x4)
+!
+amove 0 idy
+box idx idy
+bitmap "tiff/large.png" idx idy
+@textbox 0 2*idy "tl" 0.5 "(a)" 0.05 0.1 1 "WHITE" "BLACK" "BLACK" 0.01
+@scale_bar idx/1000*200 0.3 "200 nm" scale_bar_x idy+scale_bar_y "lr" 0.07 0.1 "WHITE" 1 0.2 0.1
+
+!
+! 100 nm x 100 nm (2x4)
+!
+amove idx idy
+box idx idy
+bitmap "tiff/med.png" idx idy
+@textbox idx 2*idy "tl" 0.5 "(b)" 0.05 0.1 1 "WHITE" "BLACK" "BLACK" 0.01
+@scale_bar idx/100*20 0.3 "20 nm" idx+scale_bar_x idy+scale_bar_y "lr" 0.07 0.1 "WHITE" 1 0.2 0.1
+
+!
+! 20 nm x 20 nm (2x4)
+!
+amove 0 0
+box idx idy
+bitmap "tiff/small.png" idx idy
+@textbox 0 idy "tl" 0.5 "(c)" 0.05 0.1 1 "WHITE" "BLACK" "BLACK" 0.01
+@scale_bar idx/20*2 0.3 "2 nm" scale_bar_x scale_bar_y "lr" 0.07 0.1 "WHITE" 1 0.2 0.1
+
+!
+! draw the direction arrows
+!
+axis_l = 2.0
+@axis_box 1.5*idy 0.5*idy-1.0  "[110]" "[1\={1}0]" 45 0.1 0.1 axis_l "cc" 0 "BLACK" "WHITE" "BLACK" 0.45 0.1
+
+!
+! That's it!
+! All the STM images are in place with the proper scales and labels.
+!
+! Now draw some text over the images
+! to identify the unit cell
+! 2x4 box
+!
+
+a = 0.7*idx/20
+
+by2 = 2*sqrt(2)*a/2
+by4 = 2*by2; by8 = 2*by4-0.04
+line1 = 0.07
+line2 = 0.02
+angle = 46
+
+! 2x4 box
+amove 2.328 4.419
+begin rotate angle
+	set lwidth line1 color white
+	box by4 by2
+	set color black lwidth line2
+	box by4 by2
+end rotate
+xp = xpos()+by4*cos(torad(angle))-by2*sin(torad(angle))
+yp = ypos()+by4*sin(torad(angle))+by2*cos(torad(angle))+0.2
+@textbox xp yp "bc" 0.3 "(2\times 4)" 0.05 0.1 1 "WHITE" "BLACK" "BLACK" 0.01
+
+!2x8 box
+amove 2.461 1.508
+begin rotate angle
+	set lwidth line1 color white
+	box by8 by2
+	set color black lwidth line2
+	box by8 by2
+end rotate
+xp = xpos()+by8*cos(torad(angle))-by2*sin(torad(angle))
+yp = ypos()+by8*sin(torad(angle))+by2*cos(torad(angle))+0.2
+@textbox xp yp "bc" 0.3 "c(2\times 8)" 0.05 0.1 1 "WHITE" "BLACK" "BLACK" 0.01

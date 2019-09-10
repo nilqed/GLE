@@ -1,0 +1,101 @@
+! Color subroutines
+
+palette_shade_gray_fade = 0.4
+
+sub color_range_horizontal zmin zmax zstep palette$ width height format$ pixels
+! draws a horizontal color range
+   default zstep   1
+   default palette "color"
+   default width   xg(xgmax)-xg(xgmin)
+   default height  0.25
+   default format  "fix 0"
+   default pixels  -1
+   if pixels = -1 then
+      pixels = (zmax-zmin)/zstep
+   end if
+   begin box name cmap
+      if palette$ = "gray" then
+         colormap "x" 0 1 0 1 pixels 1 width height
+      else if palette$ = "color" then
+         colormap "x" 0 1 0 1 pixels 1 width height color
+      else
+         colormap "x" 0 1 0 1 pixels 1 width height palette palette$
+      end if
+   end box
+   set just tc
+   local xp = zmin
+   while xp <= zmax
+      amove pointx(cmap.lc)+(xp-zmin)/(zmax-zmin)*width pointy(cmap.bc)
+      rline 0 -height/3; rmove 0 -height/3; write format$(xp, format$)
+      xp = xp + zstep
+   next
+end sub
+
+sub color_range_vertical zmin zmax zstep palette$ width height format$ pixels
+! draws a vertical color range
+   default zstep   1
+   default palette "color"
+   default width   0.25
+   default height  yg(ygmax)-yg(ygmin)
+   default format  "fix 0"
+   default pixels  -1
+   if pixels = -1 then
+      pixels = (zmax-zmin)/zstep
+   end if
+   begin box name cmap
+      if palette$ = "gray" then
+         colormap "y" 0 1 0 1 1 pixels width height
+      else if palette$ = "color" then
+         colormap "y" 0 1 0 1 1 pixels width height color
+      else
+         colormap "y" 0 1 0 1 1 pixels width height palette palette$
+      end if
+   end box
+   set just lc
+   local xp = zmin
+   while xp <= zmax
+      amove pointx(cmap.rc) pointy(cmap.bc)+(xp-zmin)/(zmax-zmin)*height
+      rline width/3 0; rmove width/3 0; write format$(xp, format$)
+      xp = xp + zstep
+   next
+end sub
+
+sub palette_blue_white_red z
+   ! a custom palette ranging from blue over white to red
+   local r = 0
+   local g = 0
+   local b = 0
+   ! RED
+   if (z > 0.25) and (z <= 0.50) then r = (z-0.25)*4
+   if (z > 0.50) and (z <= 0.75) then r = 1
+   if (z > 0.75)                 then r = 1-(123/255)*4*(z-0.75)
+   ! GREEN
+   if (z > 0.25) and (z <= 0.50) then g = (z-0.25)*4
+   if (z > 0.50) and (z <= 0.75) then g = 1-4*(z-0.5)
+   if (z > 0.75)                 then g = 0
+   ! BLUE
+   if (z <= 0.25)                 then b = 132/255+(123/255)*4*z
+   if (z >  0.25) and (z <= 0.50) then b = 1
+   if (z >  0.50) and (z <= 0.75) then b = 1-4*(z-0.5)
+   if (z >  0.75)                 then b = 0
+   return rgb(r,g,b)
+end sub
+
+sub palette_blue_purple_red z
+   ! a custom palette ranging from blue over purple to red
+   return rgb(z,0,1-z)
+end sub
+
+sub set_palette_shade_gray_fade fade
+	palette_shade_gray_fade = fade
+end sub
+
+sub sgp_color z x
+  local y = palette_shade_gray_fade ! set to 0 to fade completely white, 1 no fade at all
+  return (z*(1-y)+y)*(x/255-1)+1 ! the final +1 hard codes this to fade to white
+end sub
+
+sub palette_shade_gray z r g b
+  ! r, g, b is the color of the gradient which will fade towards white
+  return rgb(sgp_color(z,r), sgp_color(z,g), sgp_color(z,b))
+end sub

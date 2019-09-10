@@ -1,0 +1,141 @@
+#
+# makefile for gle web site
+#
+# for running on windows platform using nmake and 4nt
+#
+BASE_NAME	=gle
+MODULE_NAME	=gle4
+# change this for new version....
+VERSION		=4.0.12
+WIN32_EXE_TAG=exe_win32
+# for auto upload to sourceforge
+PASSWORD =
+USERID =
+#
+# these are for the InstallShield builder used in "nmake installer"
+#
+INSTALL_BUILDER		= IsExpCmdBld.exe
+INSTALL_NAME		= $(BASE_NAME)_$(VERSION)_$(WIN32_EXE_TAG).exe
+INSTALL_NAME_MSI	= $(BASE_NAME)_$(VERSION)_$(WIN32_EXE_TAG).msi
+ISM_FILE_NAME		= $(BASE_NAME)_$(VERSION).ism
+HERE			= $(SANDBOX)\glewww
+
+SRC=src
+SCRIPT=script
+
+DD = downloads
+
+# SFTP = sftp jeans,glx@web.sourceforge.net
+# SFTP = sftp $(USERID),glx@web.sourceforge.net
+# cd htdocs
+
+SFT = $(USERID)@shell.sf.net:/home/groups/g/gl/glx/htdocs
+SITE_FILES = *.html examples images main subroutines
+DOWNLOADS = $(DD)/downloads.html \
+            $(DD)/makeani.pl \
+	    $(DD)/gle-emacs.el $(DD)/gle.vim $(DD)/gle.stx $(DD)/gle.nedit
+
+all: index.html
+	make -C main -f Makefile.gcc
+	make -C images -f Makefile.gcc
+	make -C subroutines -f Makefile.gcc
+	make -C examples -f Makefile.gcc
+	make -C downloads -f Makefile.gcc
+	make -C tut -f Makefile.gcc	
+	(cd downloads; perl ../script/gen_dl_page.pl downloads.txt downloads.html $(VERSION))
+
+dl:
+	perl script/gen_dl_page.pl downloads/downloads.txt downloads/downloads.html $(VERSION)
+
+zip:
+	rm -rf GLE.zip
+	mkdir test
+	cp -r $(SITE_FILES) test/
+	mkdir -p test/downloads
+	cp $(DOWNLOADS) test/downloads/
+	-(cd test/; find . -name .svn -exec rm -rf {} \;)
+	-(cd test/; find . -name CVS -exec rm -rf {} \;)
+	(cd test/; zip -9 -r ../GLE.zip .)
+
+# upload:
+# 	rm -rf GLE.zip
+# 	zip GLE -9 -q -r $(SITE_FILES) -x CVS\*
+# 	pscp -pw $(PASSWORD) -r -batch GLE.zip $(SFT)
+# 	putty -pw $(PASSWORD) -l $(USERID) -m UnzipScript -ssh shell.sourceforge.net
+
+clean:
+	rm -rf *.bak *.log GLE.zip index.html log.txt
+	rm -rf downloads/downloads.html
+	make -C images -f Makefile.gcc clean
+	make -C subroutines -f Makefile.gcc clean
+	make -C examples -f Makefile.gcc clean
+	make -C downloads -f Makefile.gcc clean
+	make -C tut -f Makefile.gcc clean
+	make -C main -f Makefile.gcc clean
+
+commit:
+	cvs commit -m "web site changes"
+
+installer:
+	$(INSTALL_BUILDER) -p .\installer\$(ISM_FILE_NAME) -c COMP -b $(HERE) -e Y
+	copy .\Express\SingleImage\DiskImages\DISK1\setup.exe .\downloads\$(INSTALL_NAME)
+	$(INSTALL_BUILDER) -p .\installer\$(ISM_FILE_NAME) -c COMP -b $(HERE) -e N
+	copy .\Express\SingleImage\DiskImages\DISK1\$(BASE_NAME).msi .\downloads\$(INSTALL_NAME_MSI)
+
+checklinks:
+	wget --recursive -nd -nv --delete-after --domains=www.gle-graphics.org http://www.gle-graphics.org
+
+#
+# to relase new version
+# make sure version number match in this file and config.i in gle4\
+# make sure the new .ism file exists
+# commit the gle4 sources
+# nmake release
+# tag gle4 sources
+release:
+	nmake commit
+	cd ..\gle4 & nmake /nologo -f Makefile.vc clean all zipsrc zipexe tarsrc upx
+	nmake /nologo installer /A
+	nmake /nologo all upload filerelease
+
+# for sourceforges file release
+# ftp to upload.sourceforge.net in the incomming directory
+filerelease:
+	IFTP /V "ftp://anonymous:email@domain.com@upload.sourceforge.net" & \
+copy downloads\$(INSTALL_NAME) "ftp:/incoming" &\
+copy downloads\$(INSTALL_NAME_MSI) "ftp:/incoming" &\
+copy downloads\gle_$(VERSION)_$(WIN32_EXE_TAG).zip "ftp:/incoming" &\
+copy downloads\gle_$(VERSION)_src.zip "ftp:/incoming" &\
+copy downloads\gle_$(VERSION)_src.tar.bz2 "ftp:/incoming" &\
+copy downloads\gle_$(VERSION)_src.tar.gz "ftp:/incoming" &\
+iftp /c
+
+
+oldfilerelease:
+	IFTP /V "ftp://anonymous:email@domain.com@upload.sourceforge.net" & \
+copy downloads\GLEusersguide.pdf "ftp:/incoming" &\
+copy downloads\GLEusersguide.ps.gz "ftp:/incoming" &\
+copy downloads\gle-3.3h-man.pdf "ftp:/incoming" &\
+copy downloads\gle-3.3h-src.tar.gz "ftp:/incoming" &\
+copy downloads\gletex.tar.gz "ftp:/incoming" &\
+copy downloads\gle3-5-man.pdf "ftp:/incoming" &\
+copy downloads\gle35-src-R0-23.zip "ftp:/incoming" &\
+copy downloads\gle35-w32-R0-23.exe "ftp:/incoming" &\
+copy downloads\gle-demo-src.zip "ftp:/incoming" &\
+copy downloads\gle-font-src.zip "ftp:/incoming" &\
+iftp /c
+
+
+olddoc:
+	IFTP /V "ftp://anonymous:email@domain.com@upload.sourceforge.net" & \
+copy downloads\gle-3.3h-bin.tar.gz "ftp:/incoming" &\
+iftp /c
+
+index.html: $(SRC)/template.html $(SRC)/welcome.html
+	perl $(SCRIPT)/combine.pl "." -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/welcome.html index.html
+
+upload:	
+	rsync -avP --exclude-from=src/exclude.txt -e ssh * jeans,glx@web.sourceforge.net:htdocs/
+
+uploadRelease:
+	rsync -avP -e ssh gle-graphics-4.2.4c* jeans,glx@frs.sourceforge.net:"/home/frs/project/g/gl/glx/gle4\ \(Current\ Active\ Version\)/4.2.4c"

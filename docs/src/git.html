@@ -1,0 +1,73 @@
+<h2>GIT access for GLE</h2>
+
+<p>
+GLE uses the GIT repository provided by SourceForge.net. If you simply want to compile the source code you are better off downloading the source code distribution. If you want to get the latest source code under development you will need to use anonymous GIT access. This will allow you to checkout the sources without any involvement from the GLE team. However, you will not be able to check in your changes.  
+</p>
+
+<p>
+If you would like to contribute your changes to the development, which we appreciate a lot, then please request to be added to the list of developers by contacting the <a href="docs.html">mailing list</a>, or send your patch or suggested modification directly to this list.
+</p>
+
+<h3>GIT Repository</h3>
+
+<p>
+<a href="http://sourceforge.net/p/glx/_list/git">Browse the GIT repository</a>.
+</p>
+
+<p>
+Description of the GIT repositories:
+</p>
+
+<ul>
+<li>
+<B>gle</B> - the GLE source code.
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+git clone git://git.code.sf.net/p/glx/gle gle (read-only)
+
+git clone ssh://jeans@git.code.sf.net/p/glx/gle gle (read/write) 
+</pre></td></tr></table>
+</li>
+
+<p>
+To get all the fixes for the last stable version, checkout the 4.2.4-fixes branch. To get the development version, checkout the master branch.
+</p>
+
+<p>
+The following is a list of commands to build GLE from the (read only) GIT repository on a Unix like system. For detailed instructions for all platforms see the <a href="../tut/gcc.html">GLE compilation guide</a>.
+</p>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+git clone git://git.code.sf.net/p/glx/gle gle
+cd gle
+aclocal
+autoconf
+./configure
+make
+make doc
+make install
+</pre></td></tr></table>
+
+<li>
+<B>gle-www</B> - the GLE website.
+
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+git clone git://git.code.sf.net/p/glx/gle-www gle-www (read-only)
+
+git clone ssh://jeans@git.code.sf.net/p/glx/gle-www gle-www (read/write) 
+</pre></td></tr></table>
+</li>
+
+<li>
+<B>gle-contrib</B> - contributed files.
+<table width="100%" border=0 cellspacing=0 cellpadding=3 class="mytable"><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+git clone git://git.code.sf.net/p/glx/gle-contrib gle-contrib (read-only)
+
+git clone ssh://jeans@git.code.sf.net/p/glx/gle-contrib gle-contrib (read/write) 
+</pre></td></tr></table>
+</li>
+</ul>

@@ -1,0 +1,41 @@
+size 6.9 1 ! 4*x1+2*d+d1 y+2*d
+
+include "feyn.gle"
+
+x = 1
+x1 = 1.5
+d = 0.1
+d1 = 0.7
+r = 0.05
+y = 0.75*x
+a = 1.75*doublea
+
+sub quad x y
+    amove x-a y-a
+    begin path fill black
+        rline 2*a 0
+        rline 0 2*a
+        rline -2*a 0
+        rline 0 -2*a
+    end path
+    amove x y
+end sub
+
+begin translate x1+d d ! a
+    amove -x1 0
+    @double x1 0
+    amove -x 0
+    circle r fill black
+    @photon2 0 y x 0
+    circle r fill black
+    @quad 0 0
+end translate
+
+begin translate 3*x1+d1+d d ! b
+    amove -x1 0
+    @double x1 0
+    amove -x 0
+    @photon2 0 y x 0
+    circle r fill black
+    @quad -1 0
+end translate

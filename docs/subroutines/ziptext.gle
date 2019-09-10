@@ -1,0 +1,13 @@
+! Subroutines to draw moving (zipped) text...
+
+sub ziptext tt$
+gsave
+for i = 1 to 0 step -.05
+   set color (i)
+   write tt$ 
+   rmove -.05 .025
+next i
+set color white
+write tt$ 
+grestore
+end sub

@@ -1,0 +1,66 @@
+size 13 8.75
+
+set font texcmr texlabels 1
+mscale = 0.1
+
+sub plotphas name$ number x_pos y_pos
+   set hei 0.35
+   amove x_pos y_pos
+   begin graph
+      size 4.7 3
+      scale 0.95 0.95
+      xtitle "$x$ [cm]"
+      ytitle "$V_x$ [m/s]"
+      xaxis min 0      max 0.04  dticks 0.01
+      yaxis min -40000 max 40000 dticks 2e4 format "sci 1 10"
+      data name$+num$(number)+".s1.gz" d1=c1,c2
+      data name$+num$(number)+".s2.gz" d2=c1,c2
+      data name$+num$(number)+".s3.gz" d3=c1,c2
+      data name$+num$(number)+".s4.gz" d4=c1,c2
+      data name$+num$(number)+".s5.gz" d5=c1,c2
+      data name$+num$(number)+".s6.gz" d6=c1,c2
+      data name$+num$(number)+".s7.gz" d7=c1,c2
+      d1 marker fcircle msize 0.15*mscale color dblue$
+      d2 marker fcircle msize 0.13*mscale color dblue$
+      d3 marker fcircle msize 0.11*mscale color dblue$
+      d4 marker fcircle msize 0.09*mscale color dblue$
+      d5 marker fcircle msize 0.07*mscale color dblue$
+      d6 marker fcircle msize 0.06*mscale color dblue$
+      d7 marker fcircle msize 0.05*mscale color dblue$
+   end graph
+   set lstyle 1 hei 0.4
+   amove xg(0.035) yg(-30000)
+   tex num1$(number)
+   set lstyle 2
+   amove xg(xgmin) yg(0)
+   aline xg(xgmax) yg(0)
+   set lstyle 9
+   amove xg(0.0070536) yg(ygmin)
+   aline xg(0.0070536) yg(ygmax)
+   set lstyle 1
+end sub
+
+sub my_index number
+   if number = 0 then return 0
+   else if number = 1 then return 2
+   else if number = 2 then return 5
+   else if number = 3 then return 7
+   end if
+end sub
+
+number = 0
+deltax = 6.3; deltay = 4
+posx = 1.5;   posy = 5
+startposy = posy
+dblue$ = "rgb255(25,25,89)"
+
+for x = 1 to 2
+   for y = 1 to 2
+      plotphas "phas/phas" my_index(number) posx posy
+      number = number+1
+      posy = posy-deltay
+   next y
+   posy = startposy
+   posx = posx+deltax
+next x
+

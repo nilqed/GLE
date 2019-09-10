@@ -1,0 +1,77 @@
+! An H-Bridge
+
+! Set the page size
+size 21 10
+
+include "electronics.gle"
+
+set lwidth 0.05 cap round
+
+! Draw a grid if the line below is uncommented
+!@drawgrid xscale
+
+! Top left of diagram
+amove 2 9
+gsave
+
+! Battery leg
+rline 0 -2
+@cell_v "E_1"
+rline 0 -2
+
+! Ground plane
+rline 17 0
+
+! Return to top left
+grestore
+
+! Power to cap leg
+rline 4 0
+@connection
+rline 0 -2
+@p_capacitor_vt "C_1"
+rline 0 -2
+@connection
+
+! Back to power rail
+rmove 0 8
+
+! Power to First Leg
+rline 5 0
+@connection
+rline 0 -1
+rmove -2 -1
+@n_mosfet "Q_1"
+rmove 2 -1
+rline 0 -1
+@connection
+@diode_vu "D_1"
+@connection
+
+! Back to Power rail
+rmove 0 8
+
+! Power to second leg
+rline 8 0
+@diode_vu "D_2"
+@connection
+rline 0 -1
+rmove -2 -1
+@n_mosfet "Q_2"
+rmove 2 -1
+rline 0 -1
+
+! Back to right hand side of load
+rmove 0 4
+
+! Connections to load
+rline -2 0
+rmove -4 0
+rline -2 0
+rmove 2 -1
+
+! Load
+box 4 2
+rmove 2 1
+set just CC hei 1
+text LOAD

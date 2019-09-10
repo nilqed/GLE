@@ -1,0 +1,269 @@
+	   feyn.gle - a package for drawing Feynman diagrams 
+			       A.Grozin 
+ 
+It is often necessary to produce publication quality Feynman diagrams.  
+I know at least 3 tools intended for this purpose. The LaTeX package  
+FEYNMAN by M.J.S.Levine [1] constructs diagrams from characters  
+available in LaTeX fonts. It is therefore not enough flexible: it  
+permits a few slopes of lines, photon wavelengths and amplitudes, etc.  
+It requires to write a rather lengthy source to produce a moderately  
+complex diagram. The package Axodraw by J.A.M.Vermaseren [2] is much  
+more flexible. It is intended for use in LaTeX documents which will be  
+translated to PostScript by dvips, and directly generates PostScript  
+source for diagrams. From my point of view, it still misses several  
+useful features; and it hardly allows one to produce graphics formats  
+other than PostScript. Finally, there is FEYNMAN application in the  
+Instant TeX package on NeXT. It has a nice graphical user interface,  
+though it is not always easy to select a desired element by mouse in a  
+complicated diagram. In addition to this, it is platform-specific. 
+ 
+Due to these reasons, I have written a package of procedures for  
+drawing Feynman diagrams in the gle programming language. This language  
+is sufficiently convenient for programming, though it misses several  
+important features (the absence of local variables and the limitation  
+on a number of global variables are two most striking examples). A gle  
+source for a diagram can be used to produce graphic files in various  
+formats, either directly or with straightforward conversions. Preview  
+is nearly instant, so that it is easy to tune parameters of a diagram  
+by trial and error. It is also easy to include various geometric  
+calculations with square roots, arctangents, etc. to a gle program  
+(this is difficult in TeX packages and impossible in the NeXT graphics  
+environment). 
+ 
+To use the package in your gle program, write the line 
+        include feyn.gle 
+near the beginning. The package uses many variables beginning from F 
+for internal purposes. To avoid conflicts, don't use variables beginning 
+from this letter in your program. Please ignore error messages "Wrong  
+end" which may be produced occasionally. They are due to a bug in gle,  
+and don't influence a resulting diagram. 
+ 
+To draw a fermion (solid) line from (x1,y1) to (x2,y2), use 
+        amove x1 y1 
+	@Fermion x2 y2 
+After that, the pen is left at (x2,y2), so that 
+        @Fermion x3 y3 
+will draw line from (x2,y2) to (x3,y3). The line width can be  
+controlled by set lwidth. 
+        amove x1 y1 
+        @Fermion2 x2 y2 x3 y3 
+draws an arc from (x1,y1) via (x2,y2) to (x3,y3). For such an arc to be  
+uniquely defined, all three points must be different from each other.  
+In order to draw a complete circle, you should call Fermion2 twice. 
+ 
+Procedures for other kinds of lines are similar to the ones considered  
+above: they can draw a straight line from the current point to a given  
+point (x,y), or an arc from the current point via (x2,y2) to (x3,y3).  
+They leave the pen at the end point of the line. The call 
+        @Double x y 
+draws a double line from the current point to (x,y). The half-distance  
+between lines is determined by the variable DoubleA. The call 
+        @Dash x y 
+draws a dashed line to (x,y). The period of the dashed line is DashL,  
+and its fraction DashF is filled. For example, if you want dashes to be  
+twice as long as empty spaces between then, you should set DashF = 2/3. 
+ 
+A photon line is drawn by 
+        @Photon x y 
+Its half-wavelength is PhotonL, and amplitude - PhotonA. If you want  
+the waves to be in the opposite side, just change the sign of PhotonA. 
+Sometimes you may want both the first half-wave and the last one to be,  
+say, to the left, while the line produced by Photon has an even number  
+of half-waves. In such a case, you can add an extra half-wave by  
+setting PhotonN = +1, or eliminate one half-wave by setting PhotonN =  
+-1. This variable is reset back to 0 after each call. The call 
+        @Zigzag x y 
+produces a zigzag line, often used for a vector boson. This procedure  
+is controlled by the same parameters PhotonL, PhotonA, PhotonN. 
+ 
+A gluon line is drawn by 
+        @Gluon x y 
+Its wavelength is twice PhotonL, and its amplitude is PhotonA (a gluon  
+line always contains an integer number of periods, and PhotonN is not  
+used). The shape of a gluon line is controlled by the winding  
+coefficient GluonW. Wiggles become narrower when you decrease GluonW  
+from its default value 1, and degenerate to edges at 1/pi; at GluonW =  
+0, a gluon line looks like a photon one. When you increase GluonW,  
+wiggles become wider, and touch each other at GluonW = 1.46529 (this is  
+1/(pi*sin(x)), where x is the root of x+cot(x)=3*pi/2); beyond this  
+value they overlap. You may often wish to change the sign of PhotonA  
+so that wiggles will be to the opposite side. For example, gluon loops  
+usually look better when wiggles are inside; if an arc curves to the  
+left, this would require a negative PhotonA. 
+ 
+You can put an arrow at the middle of the last drawn line of any kind  
+by the call 
+        @Arrow 0.5 
+Similarly, the calls 
+        @Arrow 1/3 
+	@Arrow 2/3 
+will produce two arrows, at 1/2 and 2/3 of the line length from the  
+beginning. The position of an arrow is that of its tip. The length of  
+arrow wings is ArrowL; if it's negative, the arrow will point in a  
+direction opposite to that of the line. Half-width of arrow is ArrowA. 
+The arrow can be displaced in the transverse direction by setting  
+ArrowD non-zero, but this is rarely needed. After drawing an arrow, the  
+pen will be positioned again at the end of the line, so that you can  
+draw another line from this point. 
+ 
+A separate arrow near the middle of the last drawn line may be drawn by 
+        @Mom 0.5 
+It is often used for indication of the momentum flowing through the  
+line. The arrow is at the transverse distance MomD from the line, and  
+has half-length MomL. ArrowL and ArrowA are used as parameters of the  
+arrow wings. You will often need to change the sign of MomD to draw an  
+arrow to the other side from the line. In order to get an arrow  
+pointing in the opposite direction, you need to change signs of both  
+MomL and ArrowL. A similar call 
+        @DMom 0.5 
+produces a double arrow (with half-distance between lines DoubleA).  
+Such arrows can be used, e.g., to indicate spin projections. 
+ 
+Probably, a better way to understand how to use feyn.gle is to look at  
+the file ftest.gle containing some examples. Send comments and bug reports 
+to A.Grozin@open.ac.uk 
+ 
+References 
+[1] M.J.S.Levine, Comp. Phys. Comm. 58 (1990) 181. 
+[2] J.A.M.Vermaseren. Comp. Phys. Comm. 83 (1994) 45. 
+ 
+			       Appendix 
+ 
+All procedures and variables exported by the package are described below. 
+Following the wise saying "Don't throw away debugging tools from your  
+program after debugging is complete, because it is not complete" I  
+retained a primitive debugging procedure; you can use it if something  
+goes wrong. 
+ 
+================================ Fermion ================================= 
+@Fermion x y 
+draws fermion line from the current point to x,y 
+ 
+@Fermion2 x1 y1 x2 y2 
+draws fermion line along the arc from the current point via x1,y1 to x2,y2 
+========================================================================== 
+ 
+================================ Double ================================== 
+@Double x y 
+draws double line from the current point to x,y 
+ 
+@Double2 x1 y1 x2 y2 
+draws double line along the arc from the current point via x1,y1 to x2,y2 
+ 
+DoubleA (default 0.05) 
+half-distance between lines 
+========================================================================== 
+ 
+================================ Dashed ================================== 
+@Dash x y 
+draws dashed line from the current point to x,y 
+ 
+@Dash2 x1 y1 x2 y2 
+draws dashed line along the arc from the current point via x1,y1 to x2,y2 
+ 
+DashL (default 0.3) 
+period of the dashed line 
+ 
+DashF (default 0.5) 
+fraction of the period that is filled 
+========================================================================== 
+ 
+================================ Photon ================================== 
+@Photon x y 
+draws photon line from the current point to x,y 
+ 
+@Photon2 x1 y1 x2 y2 
+draws photon line along the arc from the current point via x1,y1 to x2,y2 
+ 
+PhotonL (default 0.1) 
+half-period of the photon line 
+ 
+PhotonA (default 0.1) 
+amplitude of the photon line. When positive, the first half-wave is to the 
+left, when negative - to the right. 
+ 
+PhotonN (default 0) 
+change of the number of half-periods as calculated from PhotonL. Set to 0 
+after each call.  
+========================================================================== 
+ 
+================================ Zigzag ================================== 
+@Zigzag x y 
+draws zigzag line from the current point to x,y 
+ 
+@Zigzag2 x1 y1 x2 y2 
+draws zigzag line along the arc from the current point via x1,y1 to x2,y2 
+ 
+PhotonL, PhotonA, and PhotonN are used 
+========================================================================== 
+ 
+================================ Gluon =================================== 
+@Gluon x y 
+draws gluon line from the current point to x,y 
+ 
+@Gluon2 x1 y1 x2 y2 
+draws gluon line along the arc from the current point via x1,y1 to x2,y2 
+ 
+PhotonL and PhotonA are used 
+ 
+GluonW (default 1) 
+winding coefficient. Wiggles are wider when it is increased and narrower 
+when it is decreased 
+========================================================================== 
+ 
+================================ Arrow =================================== 
+@Arrow f 
+draws arrow on the last line of any sort, at the fraction of length f 
+from the beginning 
+ 
+ArrowL (default 0.5) 
+length of the arrow wings. When negative, arrow points backwards 
+ 
+ArrowA (default 0.2) 
+half-width of the arrow 
+ 
+ArrowD (default 0, rarely needed) 
+transverse displacement of the arrow from the line. When positive - to the 
+left, when negative - to the right 
+========================================================================== 
+ 
+================================ Momentum ================================ 
+@Mom f 
+draws an arrow for indication of momentum near the last line, at the 
+fraction of length f from the beginning 
+ 
+ArrowL and ArrowA are used 
+ 
+MomL (default 0.75) 
+half-length of the arrow 
+ 
+MomD (default 0.5) 
+transverse displacement of the arrow from the line. When positive - to the 
+left, when negative - to the right 
+========================================================================== 
+ 
+========================= Double momentum arrow ========================== 
+@DMom f 
+draws a double arrow near the last line, at the fraction of length f from 
+the beginning 
+ 
+DoubleA, MomL, MomD, ArrowL, and ArrowA are used 
+========================================================================== 
+ 
+================================ Debugging =============================== 
+@fdebug l "name" variable 
+primitive debugging tool. If Debug>=l then writes the name and the value 
+of the variable at DebugX,DebugY and increments DebugY by DebugD. If 
+@fdebug is used inside begin {translate|rotate|scale} ... end, its output 
+will be {translated|rotated|scaled}, and may be outside the screen. 
+ 
+Debug (default 0) 
+level of debugging output 
+ 
+DebugX (default 1) 
+DebugY (default 1) 
+initial coordinates for debugging output 
+ 
+DebugD (default 1) 
+y increment for debugging output. If positive, later output is higher 
+==========================================================================

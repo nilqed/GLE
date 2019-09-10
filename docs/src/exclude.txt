@@ -1,0 +1,11 @@
+CVS
+.svn
+src
+Makefile.*
+order.txt
+*.bmp
+*.ps
+uploadme.too
+exclude
+
+

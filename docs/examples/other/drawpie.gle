@@ -1,0 +1,23 @@
+!drawpie.gle - Example of the use of the pie wedge routine
+size 6 10 
+include piesub.gle
+
+amove 3 9.8
+set just tc
+set hei 0.5
+text Pie Chart Example
+
+amove 3 2.5
+@pie 0 10 2 "gray10"
+@pie 10 40 2 "gray20"
+@pie 40 120  2 "blue"
+@pie 120 250 2 "green"
+@pie 250 360 2 "red"
+
+set font ss
+set hei 0.3
+amove 3 7
+@pie_text 0 60 2 "gray10" "apples" 
+@pie_text 60 120 2 "gray20" "oranges" 
+@pie_text 120 230 2 "blue" "pears" 
+@pie_text 230 360 2 "green" "grapes"

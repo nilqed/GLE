@@ -1,0 +1,4 @@
+cd /home/groups/g/gl/glx/htdocs
+unzip -o -q GLE.zip
+rm GLE.zip
+logout

@@ -1,0 +1,23 @@
+
+GLE = $(wildcard *.gle)
+
+PNG = $(addsuffix .png, $(basename $(GLE)))
+
+HTML = $(addsuffix .html, $(basename $(GLE)))
+
+all: $(EPSS) index.html $(HTML) $(PNG)
+
+index.html: ../../script/gen_sample_page.pl
+	perl ../../script/gen_sample_page.pl "Electronic circuits" ../../
+
+%.html: %.gle
+	perl ../../script/make_gle_html.pl $< 1 ../../
+
+%.png: %.gle
+	perl ../../script/make_example_pngs.pl $<
+
+clean:
+	rm -rf *.eps *.png *.html *.pdf *.inc .gle
+
+
+

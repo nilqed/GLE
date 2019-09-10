@@ -1,0 +1,88 @@
+! GLE2000  Large Caption
+! This example illustates techniques for providing shadows, 
+! raised text and a graded colour fill. Depending on the 
+! characteristics of your graphics card  the graded fill
+! may appear smooth or show traces of colour bands.
+ size         19  12   
+ WindowOrigin  0  0
+ PixelsPerCm  50
+ amove 0 -0.20
+ for t = 0.1 to 1.0 step 0.015
+ set fillstyle 1 fillcolor setcol(green,blue,t) linestyle 0
+ box 19 0.2
+ rmove -19 0.0
+ next t
+ amove 4 3.5
+ set fillstyle 32 fillcolor lavender fill2color pink
+ box 11 7
+ amove 4 3.5
+ set fillstyle 0
+ begin graph
+ size 11 7
+ end graph
+ set linestyle 1 linecolor black
+ amove 10  10
+ begin origin
+ Amove    3.20 -2.62
+ ALine    3.36 -2.92
+ Amove   -4.340 -2.480
+ Bezier   0.880 -2.640  0.560  1.380  2.960 -5.440
+ end origin
+ set fillstyle 1 fillcolor white linecolor darkgray linestyle 1
+ amove 4 10.5
+ apolygon 11 0  11.5 0.5  -0.5 0.5
+ set fillcolor lightgray
+ apolygon -0.5 0.5  -0.5 -7.5  0 -7.0
+ amove 15 3.5
+ set fillcolor gray
+ apolygon 0 7 0.5 7.5 0.5 -0.5
+ set fillcolor darkgray
+ apolygon -11 0 -11.5 -0.5 0.5 -0.5
+! set  fillstyle 0 
+ Amove    4.80  10.4
+ set font "Times New Roman" fontcolor gray hei 2.75
+ set fillstyle 0 
+ Text    G
+ Amove    7.50  8.50
+ Text    L
+ Amove    9.9  6.40
+ Text    E
+ set fontcolor red
+ amove 4.55 10.55
+ Text G
+ amove 7.35 8.65
+ Text L
+ amove 9.75 6.55
+ Text E
+ amove 10  10.0
+ begin origin
+ begin scale 0.75 1.5
+  set font "Arial" hei 2.5 fontcolor $00909090
+  for x1 = 0 to 0.2 step 0.01
+  Amove    -0.49+x1  0.51-x1
+  Text    2000
+  next x1
+  set font "Arial" hei 2.5 fontcolor black
+  Amove    0.35  0.45
+  set font "Arial" hei 2.5 fontcolor blue
+  Amove    -0.5  0.5
+  Text    2000
+  set linecolor black
+ end scale
+ set font "Times New Roman" fontcolor yellow hei 0.5
+ Amove   -6.75 -7.5
+ Text    An adaption of GLE for Windows 95 and N.T. 4
+ Rmove   0.0 -0.5
+ Text    by Derek G. W. Ingram
+ Rmove 0.8 -0.5
+ Text    Gonville & Caius College  Cambridge
+ Rmove 0 -0.5
+ Text  dgi1@cus.cam.ac.uk
+! The Source code for GLE 2000 and further examples
+! can be downloaded from either SimTel in
+! http://www.simtel.net/simtel.net/win95/graphics/
+! or from my File cache on http://www.cai.cam.ac.uk/people/dgi
+! the latest version which includes minor bug fixes is in
+! GLEFix2.zip.
+! Derek Ingram.  Gonville & Caius College. Cambridge
+! dgi1@cus.cam.ac.uk

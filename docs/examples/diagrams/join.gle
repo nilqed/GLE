@@ -1,0 +1,52 @@
+size 18 18.5
+
+! This is JOIN.GLE, demonstrates the join commands.
+
+set hei 0.8 just cc font psh arrowsize 0.6 arrowangle 16
+
+set lwidth 0.05 fill lightcyan
+
+begin name line
+   amove 8 18
+   rline 0 -6
+end name
+
+begin name main
+   amove 9.5 6.5
+   ellipse 2 0.8
+   write "Main"
+end name
+
+amove 3 16
+begin box name grv add 0.3 round 0.3 fill lightcyan
+   write "GRV"
+end box
+
+amove 12.5 16.5
+begin box name cheese add 0.3 fill lightcyan
+   write "Cheese"
+end box
+
+amove 15.5 11.5
+begin box name chv add 0.3 fill lightcyan
+   write "CHV"
+end box
+
+amove 3 10
+begin box name goats add 0.3 fill lightcyan
+   write "Goats"
+end box
+
+amove 13 1.5
+begin box name hi add 0.3 fill lightcyan
+   write "Hi there"
+end box
+
+! Now draw the lines between objects
+join chv -> goats                           ! ".box" is default and can be omitted
+join grv -> line.h                          ! ".h" means to join horizontally
+join line.h <-> cheese.tl
+join cheese.rc -> chv.tc curve 0 90 1.5 1
+join main.c <- hi                           ! ".c" is used for circles
+join main.c <- chv
+join main.c <- goats

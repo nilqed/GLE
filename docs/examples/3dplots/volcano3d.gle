@@ -1,0 +1,24 @@
+size 9 9
+
+set font texcmr hei 0.4 just tc
+amove pagewidth()/2 pageheight()-0.1
+write "Auckland's Maunga Whau Volcano"
+
+begin object volcano
+   begin surface
+      size 9 9
+      data "volcano.z"
+      xtitle "X-axis" hei 0.3 dist 0.7
+      ytitle "Y-axis" hei 0.3 dist 0.7
+      ztitle "Z-axis" hei 0.3 dist 0.9
+      top color brown
+      zcolour brown
+      zaxis ticklen 0.1 hei 0.25
+      xaxis hei 0.25 dticks 4 nolast nofirst
+      yaxis hei 0.25 dticks 4
+   end surface
+end object
+
+amove pagewidth()/2 0.4
+draw "volcano.bc"
+

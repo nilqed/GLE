@@ -1,0 +1,165 @@
+<H2> GLE Frequently Asked Questions</H2>
+
+<b>List</b>
+
+<ul>
+<li><a href="#whatis">What is GLE?</a></li>
+<li><a href="#work">How does GLE work?</a></li>
+<li><a href="#graph">How do I draw a graph?</a></li>
+<li><a href="#download">Where do I get GLE?</a></li>
+<li><a href="#license">Under what license is GLE distributed?</a></li>
+<li><a href="#install">How do I install GLE?</a></li>
+<li><a href="#compile">How do I compile GLE?</a></li>
+<li><a href="#deps">What packages are needed to compile GLE?</a></li>
+<li><a href="#gui">Is GLE a GUI program?</a></li>
+<li><a href="#os">What compilers/operating systems do you support?</a></li>
+<li><a href="#fontdat">When running GLE I get a "font.dat" not found. Is this a bug?</a></li>
+<li><a href="#envvars">What environment variables are used by GLE?</a></li>
+</ul>
+
+<a name="whatis"></a>
+<b>What is GLE?</b>
+<p>
+GLE stands for graphics layout engine.  Essentially, it is a scripting language (a kind of programming language) that lets you draw figures, diagrams, and graphs. GLE outputs to graphics file formats such as Encapsulated PostScript (EPS) or Portable Document Format (PDF).  The scripting language is very flexible, supporting commands for standard graphics elements and programming constructs. <p>
+For example it supports:
+<ul>
+<li>Lines, circles, boxes, arrows, and text.</li>
+<li>Mathematical functions, such as, sin(), cos(), log(), exp(), etc.</li>
+<li>For-next loops, subroutines, variables, if-then-else.</li>
+<li>A graph module for drawing graphs of data and functions.</li>
+<li>Advanced graphics commands like paths, clipping, and rotation.</li>
+<li>Inclusion of bitmap and PostScript files.</li>
+<li>Inclusion of other GLE files thus allowing libraries.</li> 
+</ul><p>
+The original version of GLE was developed by Chris Pugmire and included support for various types of output devices.  The most useful output device (for me at least) is PostScript.  It is very handy for people who use LaTeX, since it allows creation of excellent looking EPS and PDF files that can be directly included into the LaTeX document. In addition, it included an editor, previewer and other utilities like a simple spreadsheet.<p>
+
+<a name="work"></a>
+<b>How does GLE work?</b>
+<p>
+<OL>
+<LI>Simply create a text file that contains commands.  For example:</li>
+<font face="courier"><pre>
+size 10 10          ! size of drawing area is 10 cm x 10 cm
+amove 1 1           ! move to position 1,1 in cm
+box 3 2 fill red    ! draw a box that is 3cm by 2cm and fill it red
+					! note: the outline of the box is the current
+					! drawing color which is black by default
+set color blue      ! sets drawing color to blue
+amove 4 4           ! moves to 4,4 in cm
+box 2 2 fill blue   ! draws a box that is 2x2 cm filled in blue
+					! and outlined in blue
+set color black     ! set color back to black
+set just cc         ! set text justification to center center
+amove 5 7           ! move to (5,7)cm and draw some text
+text Hello World.   
+</pre></font>
+<LI>Compile that file using GLE to produce the output (such as a PS or EPS file).</li><br>E.g., type:
+<font face="courier"><pre>
+/foo/bar> gle -d eps sample.gle
+</pre></font>
+This produces sample.eps, which looks like this:
+<br>
+<img border=0 src="../images/sample.png">
+<br>
+<a href="../examples/index.html">To see more examples click here</a>.
+</ol>
+<p>
+
+<a name="graph"></a>
+<b>How do I draw a graph?</b>
+<p>
+First create a data file with your data in it (call it data.dat).  This can be a multi column file where the columns are separated by spaces, tabs, or commas.
+<P>
+For example:
+<font face="courier"><pre>
+0 0
+2 3
+4 5
+5 10
+</pre></font>
+Then use the graphing commands in GLE.
+<P>
+For example:
+<font face="courier"><pre>
+size 10 10
+begin graph
+    data "data.dat"
+    d1 marker fcircle color red
+    title  "This is the graph title"
+    xtitle "This is the x axis title"
+    ytitle "This is the y axis title"
+end graph
+</pre></font>
+<p>
+<img src="graph.png">
+<p>
+See the documentation for more information on drawing graphs.
+<p>
+
+<a name="download"></a>
+<B>Where do I get GLE?</B><p>
+<a href="../downloads/downloads.html" target=content>Click here to go to the download page</a>.
+<p>
+
+<a name="license"></a>
+<B>Under what license is GLE distributed?</B><p>
+
+GLE is available under the <a href="license.html">BSD license</a>.
+<p>
+GLE comes with a user interface QGLE. QGLE is licensed under the GNU
+General Public License (GPL) as published by the Free Software 
+Foundation; either version 2 of the License, or (at your option) any
+later version.
+<p>
+
+<a name="install"></a>
+<b>How do I install GLE?</b>
+<ul>
+<li>Windows users: download the self installing executable file <a href="../downloads/downloads.html" target=content>GLE-x.y.z-exe-win32.exe</a>, double click it, and follow the simple instructions. The installation process is discussed in detail in the <a href="../tut/windows.html">Windows Installation Guide & Tutorial</a>.</li>
+<p>
+<li>Linux users: download the self installing executable file <a href="../downloads/downloads.html" target=content>GLE-x.y.z-exe-linux-x86.package</a>, double click it, and follow the simple instructions. The installation process is discussed in detail in the <a href="../tut/linux.html">Linux Installation Guide & Tutorial</a>.</li>
+<p>
+<li>Mac OS/X users: follow <a href="../downloads/mac.html">these installation instructions</a>.
+</ul>
+<p>
+
+<a name="compile"></a>
+<b>How do I compile GLE?</b>
+<ul>
+<li>Microsoft Visual C++ users: download the source code <a href="../downloads/downloads.html" target=content>GLE-x.y.z-src.zip</a> and type "nmake -f makefile.vc" in the main directory.
+<p>
+<li><a href="http://gcc.gnu.org/">GCC</a> users: download the source code <a href="../downloads/downloads.html" target=content>GLE-x.y.z-src.zip</a> and compile it by typing "./configure" followed by "make" and "make install" in the GLE main directory. The compilation process is discussed in detail in the <a href="../tut/gcc.html">GLE Compilation Guide</a>.
+</ul>
+<p>
+
+<a name="deps"></a>
+<b>What packages are needed to compile GLE?</b>
+<p>
+One of the latest standard C++ compilers: <a href="http://gcc.gnu.org/">GCC</a> or Microsoft Visual C++. For support for including bitmap files, you will need libtiff (<a href="http://www.libtiff.org" target=blank_>www.libtiff.org</a>), libjpeg (<a href="http://www.ijg.org/" target=blank_>www.ijg.org</a>), and libpng (<a href="http://www.libpng.org" target=blank_>www.libpng.org</a>) as well.
+<p>
+
+<a name="gui"></a>
+<b>Is GLE a GUI program?</b>
+<p>
+GLE comes with a graphical user interface called <a href="../screenshots/qgle0.2-asbudden.png">QGLE</a>.
+<p>
+<a name="os"></a>
+<b>What compilers/operating systems do you support?</b>
+<p>
+GLE is platform independent and will run on any OS or be built with any compiler. Currently there are makefiles for MSVC and <a href="http://gcc.gnu.org/">GCC</a> and supported platforms are Windows, Cygwin, Linux, Mac OS/X, and OS/2.  If you have another compiler or OS you want to use it on, please develop you own makefiles (makefile.compiler) and add them to the distribution (become a GLE developer).  You may need to define your own macro for platform dependent peculiarities (like __WIN32__ and __UNIX__ that exists now).
+<p>
+
+<a name="fontdat"></a>
+<b>When running GLE I get a "font.dat" not found. Is this a bug?</b>
+<p>
+No, its not a bug, you need to configure your environment properly.  Set the environment variable <B>GLE_TOP</B> to point to the place that GLE is located. Note: recent GLE versions do not require GLE_TOP.
+<p>
+
+<a name="envvars"></a>
+<b>What environment variables are used by GLE?</b>
+<p>
+The <B>GLE_USRLIB</B> environment variable is used to locate include files. It can contain a list of paths separated by your platforms path separator (; Windows : Unix).  This is much like the PATH environment variable used by your operating system.
+<p>
+<b>When running the makefile, I get an error that it can't find tiffio.h</b>
+<p>
+You need to install <a href="http://www.libtiff.org">libtiff</a>.  Or you can disable TIFF support in config.i by opening config.i with an editor and following instructions for disabling TIFF support.

@@ -1,0 +1,15 @@
+size 8.0 8.0
+
+include "polarplot.gle"
+
+set font texcmr
+begin graph
+   center
+   title "r = 2cos(3\theta)"
+   xaxis min -2 max 2
+   yaxis min -2 max 2
+   x2axis off
+   y2axis off
+   draw polar_grid radius 2 rings 4 sectors 24
+   draw polar "2*cos(3*t)" from 0 to pi color red fill thistle lwidth 0.04
+end graph

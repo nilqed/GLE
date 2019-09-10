@@ -1,0 +1,30 @@
+size 6 6
+
+set texlabels 1
+xmin = -4; xmax = 4
+
+sub floor x
+   if x>=0 then
+       return int(x)
+   else if x=int(x) then
+       return int(x)
+   else
+       return int(x)-1
+   end if
+end sub
+
+begin graph
+   math
+   scale auto
+   xaxis min xmin max xmax
+   labels dist 0.15
+   xaxis format "fix 0"
+   yaxis format "fix 0"
+   x2axis off
+   y2axis off
+   title "$\mathrm{floor}(x)$"
+   discontinuity threshold 5
+   let d1 = floor(x) step 0.1
+   d1 line color red lwidth 0.05
+end graph
+

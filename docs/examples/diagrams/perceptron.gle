@@ -1,0 +1,113 @@
+size 12.5 6
+
+set lwidth 0.03
+graphsiz = 6
+
+include "shape.gle"
+include "ellipse.gle"
+
+! draw graph on the right
+amove pagewidth()-graphsiz+0.5 0.1
+begin graph
+   nobox
+   size graphsiz graphsiz
+   xaxis min -1.5 max 1.5 dticks 0.25
+   yaxis min -1.5 max 1.5 dticks 0.25
+   xplaces -1 0 1
+   yplaces -1 0 1
+   xtitle "\tex{$A$}"
+   ytitle "\tex{$B$}"
+   title "\tex{$A \land B$}"
+   let d1 = 1-x from -1 to 1.5 step 0.5
+   d1 line
+   fill d1,x2 color CVTRGB(1,0.7,0.7)
+end graph
+
+! draw labeled instances on the graph
+set just cc
+amove xg(-1) yg(-1)
+tex "$\ominus$"
+amove xg(1) yg(-1)
+tex "$\ominus$"
+amove xg(-1) yg(1)
+tex "$\ominus$"
+amove xg(1) yg(1)
+tex "$\oplus$"
+
+! draw equation representing decision surface
+set just tc
+amove xg(0.5)-0.1 yg(0.5)-0.1
+begin rotate -45
+   tex "$w_0 + w_1 A + w_2 B = 0$"
+end rotate
+
+! draw sign function for perceptron node
+sub drawsign dx
+   set color blue
+   rline dx 0
+   rmove -dx -dx/3
+   set color red
+   rline dx/2 0
+   rline 0 2*dx/3
+   rline dx/2 0
+   set color black
+end sub
+
+! draw percepton internal node (sum + sign function)
+set just lc
+amove 2.5 yg(0)
+begin name perceptron
+   tex "{\Large $\Sigma$}" name sum
+   amove pointx(sum.rc)+0.3 pointy(sum.rc)
+   drawsign width(sum)
+end name
+
+! draw ellipse around internal node
+set_ellipse_c 0.65
+ellipse_obj perceptron ell
+amove pointx(ell.tc) pointy(ell.tc)
+aline pointx(ell.bc) pointy(ell.bc)
+
+! draw input node, label and weight
+sub drawinode idx name$ wi$
+   r = 0.15
+   xdel = 1.25
+   ydel = 1.5
+   amove pointx(ell.lc) pointy(ell.lc)
+   rline -xdel idx*ydel
+   rmove -r 0
+   circle r
+   rmove -r-0.2 0
+   set just rc
+   tex name$ name input
+   set just cc
+   amove pointx(ell.lc)-xdel/2 pointy(ell.lc)+idx*ydel/2
+   begin box add 0.1 fill white nobox
+      tex wi$
+   end box
+end sub
+
+! draw output node and label
+sub drawonode idx name$
+   r = 0.15
+   xdel = 0.5
+   amove pointx(ell.rc) pointy(ell.rc)
+   rline xdel 0
+   rmove r 0
+   circle r
+   rmove r+0.2 0
+   set just lc
+   tex name$
+end sub
+
+! draw the input and output nodes
+drawinode 1  "1" "$w_0$"
+drawinode 0  "A" "$w_1$"
+drawinode -1 "B" "$w_2$"
+drawonode 0  "$o(A,B)$"
+
+! draw the function implemented by the perceptron
+set just bl
+amove pointx(input.lc) 0.1
+tex "$o(A,B) = \mathrm{sign}(w_0 + w_1 A + w_2 B)$"
+

@@ -1,0 +1,27 @@
+
+SRC=../src
+SCRIPT=../script
+
+all: index.html
+	make -C 2dsimple -f Makefile.gcc
+	make -C 2dplots -f Makefile.gcc
+	make -C 3dplots -f Makefile.gcc	
+	make -C feyn -f Makefile.gcc	
+	make -C diagrams -f Makefile.gcc
+	make -C fractals -f Makefile.gcc
+	make -C other -f Makefile.gcc
+	make -C electronic -f Makefile.gcc
+	
+clean:
+	rm -f index.html
+	make -C feyn -f Makefile.gcc clean
+	make -C 2dsimple -f Makefile.gcc clean	
+	make -C 2dplots -f Makefile.gcc	clean
+	make -C 3dplots -f Makefile.gcc	clean	
+	make -C diagrams -f Makefile.gcc clean
+	make -C fractals -f Makefile.gcc clean
+	make -C other -f Makefile.gcc clean	
+	make -C electronic -f Makefile.gcc clean
+
+index.html: $(SRC)/template.html $(SRC)/examples.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/examples.html index.html

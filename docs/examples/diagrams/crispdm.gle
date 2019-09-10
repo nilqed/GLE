@@ -1,0 +1,51 @@
+size 11 6
+
+set lwidth 0.03 hei 0.4 just tc font texcmr arrowsize 0.27
+
+amove 3.5 5.65
+begin box add 0.2 round 0.2 name bi fill palegreen
+   begin text
+      Business
+      understanding
+   end text
+end box
+
+amove 7.5 5.65
+begin box add 0.2 round 0.2 name du fill palegreen
+   begin text
+      Data
+      understanding
+   end text
+end box
+
+amove 9.5 4 
+begin box add 0.2 round 0.2 name dp fill palegreen
+   begin text
+      Data
+      preparation
+   end text
+end box
+
+set just cc
+
+amove 9.5 1.7
+begin box add 0.2 round 0.2 name mo fill palegreen
+   text Modeling
+end box
+
+amove 5.5 0.4 
+begin box add 0.2 round 0.2 name ev fill palegreen
+   text Evaluation
+end box
+
+amove 1.5 3
+begin box add 0.2 round 0.2 name dep fill palegreen
+   text Deployment
+end box
+
+join bi.rc <-> du.lc
+join dp.bc <-> mo.tc
+join du.rc  -> dp.tc  curve 0   90  0.5 0.75 ! angle & dist of Bezier control points
+join mo.bc  -> ev.rc  curve 270 0   1   2
+join ev.tc  -> bi.bc  curve 160 270 2   2
+join ev.lc  -> dep.bc curve 180 270 2   2

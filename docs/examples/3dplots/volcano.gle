@@ -1,0 +1,13 @@
+size 9 9
+
+begin contour
+   data "volcano.z"
+   values from 130 to 190 step 10
+end contour
+
+begin graph
+   title "Auckland's Maunga Whau Volcano"
+   data "volcano-cdata.dat"
+   d1 line color black
+   colormap "volcano.z" 100 100
+end graph

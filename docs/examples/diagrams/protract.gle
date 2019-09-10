@@ -1,0 +1,59 @@
+! A do-it-yourself protractor for GLE
+! S.J. Blundell    distributed under GPL
+! sjb@ermine.ox.ac.uk      09/08/00
+
+size 18 18
+set font plsr hei 0.4
+
+a=8; b=0.3; c=1; d=0.65; f=6; g=6
+
+amove 9 9
+begin origin
+
+for i=0 to 359
+	begin rotate i
+		amove 0 a
+		rline 0 -b
+	end rotate
+next i
+
+set color blue
+for i=0 to 350 step 10
+	begin rotate i
+		amove 0 a
+		rline 0 -c
+		if i>0 then
+			rmove -0.2 -0.5
+		else
+			rmove -0.1 -0.5
+		end if
+		write i
+	end rotate
+next i
+
+set color green
+for i=5 to 355 step 10
+	begin rotate i
+		amove 0 a
+		rline 0 -d
+	end rotate
+next i
+
+set color red
+for i=0 to 350 step 10
+	begin rotate i
+		amove 0 0
+		aline 0 g
+	end rotate
+next i
+
+set color black
+amove 0 0
+circle 0.3
+amove -f 0
+aline f 0
+amove 0 -f
+aline 0 f
+amove 0 0
+
+end origin

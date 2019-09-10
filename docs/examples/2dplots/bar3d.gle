@@ -1,0 +1,13 @@
+size 11 7
+
+set font texcmr
+
+begin graph
+   scale  auto
+   data   "bar3d.csv"
+   title  "Tree spacing 4.5 x 2.0 m"
+   xtitle "Fruit size grade"
+   ytitle "Tonnes/ha"
+   key pos tr
+   bar d1,d2 fill wheat,darkred dist 0.43 3d 0.5 0.3 side sienna,sienna top sienna,sienna
+end graph

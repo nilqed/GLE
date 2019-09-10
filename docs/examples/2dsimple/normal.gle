@@ -1,0 +1,13 @@
+size 10 8
+
+set texlabels 1
+begin graph
+   title  "1000 samples of $N(\mu=0, \sigma=1)$"
+   ytitle "Frequency"
+   xtitle "Value"
+   data   "normal.csv"
+   xticks off
+   yaxis max 100
+   let d2 = hist d1 step 0.5
+   d2 line bar color red
+end graph

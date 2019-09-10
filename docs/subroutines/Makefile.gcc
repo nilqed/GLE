@@ -1,0 +1,20 @@
+#
+# makefile for makeing and uploading subroutines
+#
+
+GLE = $(wildcard *.gle)
+
+HTML = $(addsuffix .html, $(basename $(GLE)))
+
+all: $(HTML)
+	perl ../script/gen_function_page.pl ../
+
+upload:
+	copy *.html $(GLE_SITE)\subroutines
+	copy *.gle $(GLE_SITE)\subroutines
+
+%.html: %.gle
+	perl ../script/make_gle_html.pl $< 0 ../
+
+clean:
+	-rm -rf *.bak *.html

@@ -1,0 +1,166 @@
+
+<h2>GLE for Linux Installation Guide</h2>
+
+<p>
+This tutorial explains how to install, configure, and run GLE on Linux (and Cygwin).
+</p>
+
+<h3>Installing GLE</h3><p>
+
+<p>
+GLE may be included in your Linux distribution's package repository. If so, install GLE using your Linux software install tool. If not, install GLE by downloading and compiling its source code. There are detailed instructions available about this proces here: "<a href="gcc.html">GLE Compilation Guide</a>".
+</p>
+
+<h3>Running GLE</h3>
+
+<p>
+GLE should now be ready to use. Enter the command "gle" in your terminal to test it.
+</p>
+
+<table width=100% border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+GLE version 4.0.12
+Usage: gle [options] filename.gle
+More information: gle -help
+</pre></td></tr></table>
+
+<p>
+GLE should respond as in the example above. If you instead get the message "bash: gle: command not found", then the directory containing the "gle" executable is not in your system's search path. This is what happens if you have installed GLE in your home directory and "$HOME/apps/bin" is not in your path.
+</p>
+
+<p>
+To fix this, enter "export PATH=$HOME/apps/bin:$PATH" and try again. Add this line to your "~/.bash_profile" file to make it permanent. Note: if this does not work, you can always start GLE using the full path, e.g., by entering the command "$HOME/apps/bin/gle".
+</p>
+
+<p>
+GLE takes as input a script file containing GLE commands and outputs a graph or drawing, e.g., in <a href="http://en.wikipedia.org/wiki/PostScript" target=_top>PostScript</a> or <a href="http://en.wikipedia.org/wiki/Pdf" target=_top>PDF</a> format, which can be included in your LaTeX or OpenOffice document. 
+</p>
+
+<p>
+To create the script file we need a text editor. You may use any editor you like. Note that your editor should save files in <a href="http://en.wikipedia.org/wiki/UTF8" target=_top>UTF8</a> or <a href="http://en.wikipedia.org/wiki/ASCII" target=_top>ASCII</a> format.
+</p>
+
+<p>
+I will be creating my example GLE script file in the folder "GLE" in my home directory. Open your editor, type in the following GLE script, choose "Save" from the menu, create a new folder "GLE" in your home directory and save the file as "parabola.gle" in that folder.
+</p>
+
+<table width=100% border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+size 12 8
+
+begin graph
+    let d1 = (x-2)^2 from 0 to 4 step 0.1
+    d1 line color red
+end graph
+</pre></td></tr></table>
+
+<p>
+Next we are going to run GLE to create a PostScript ".eps" file from our script. In your terminal, enter the folldowing commands (replacing the argument of "cd" with the location where you saved "parabola.gle").
+</p>
+
+<table width=100% border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+[~]$ cd GLE
+[~/GLE]$ gle parabola.gle
+GLE 4.0.12-rc1 [parabola.gle]-C-R-[parabola.eps]
+</pre></td></tr></table>
+
+<p>
+GLE should respond as above. It has created the output file "parabola.eps".
+</p>
+
+<table width=100% border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+[~/GLE]$ ls
+total 10K
+-rw-r--r-- 8.3K Jul 18 20:20 parabola.eps
+-rw-r--r--   98 Jul 18 20:08 parabola.gle
+</pre></td></tr></table>
+
+<p>
+To view "parabola.eps", we need a PostScript viewer like the program GhostView. Install GhostView on your system from your Linux DVD or package repository.
+</p>
+
+<h3>Viewing GLE's Output</h3>
+
+<p>
+After you have installed GhostView, enter the command "gv parabola.eps". If everyting went ok, then you will now see a preview of our parabola graph.
+</p>
+
+<img src="img/parabolagvlx.png">
+
+<p>
+Try making changes to the GLE script in your editor, save it, rerun GLE, and preview in GhostView until you are satisfied with the output.
+</p>
+
+<p>
+Try adding the following commands in the graph block of the GLE script.
+</p>
+
+<table width=100% border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+title "Parabola"
+xtitle "x"
+ytitle "f(x) = (x-2)^2"
+</pre></td></tr></table>
+
+<p>
+After running GLE, your output should include the title "Parabola" at the top of the graph and axis labels. Your graph is now ready for publication ;-).
+</p>
+
+<p>
+<a href="http://en.wikipedia.org/wiki/Encapsulated_postscript" target=_top>Encapsulated PostScript</a> (.eps) files are designed to be included as figures into other documents. If you want to print your file without including it in a larger document, tell GLE to create a regular PostScript (.ps) file instead. This can be done by running GLE with the "-d ps" option.
+</p>
+
+<table width=100% border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+gle -d ps parabola.gle
+</pre></td></tr></table>
+
+<p>
+Preview the resulting "parabola.ps" with GhostView. You will notice that the graph is now centered on a full page. Choose "File | Print" in GhostView to print it.
+</p>
+
+<p>
+If you wish you can try running more examples from the <a href="../examples/index.html">GLE Example</a> repository. You may also want to browse through the <a href="../main/docs.html">GLE documentation</a> to learn more about writing GLE scripts.
+</p>
+
+<h3>Creating PDF, JPG, and PNG Output</h3>
+
+<p>
+GLE can create <a href="http://en.wikipedia.org/wiki/Pdf" target=_top>PDF</a>, <a href="http://en.wikipedia.org/wiki/Jpeg" target=_top>JPG</a>, and <a href="http://en.wikipedia.org/wiki/Png" target=_top>PNG</a> output by relying on GhostScript. GLE can use GhostScript if the "gs" executable is in your system's search path. This should normally be the case by default if you have installed GhostView.
+</p>
+
+<p>
+We can now create PDF, JPG, and PNG output with the following commands.
+</p>
+
+<table width=100% border=0 cellspacing=0 cellpadding=3><tr><td align=left valign=top bgcolor="#d0d0d0">
+<pre>
+gle -d pdf parabola.gle
+gle -d jpg parabola.gle
+gle -d png parabola.gle
+gle -d pdf -fullpage parabola.gle
+</pre></td></tr></table>
+
+<p>
+The command with the "-d pdf" and "-fullpage" options creates a full page PDF file with the parabola graph centered. This file can be printed with <a href="http://www.adobe.com/products/acrobat/readstep2.html" target=_top>Adobe Reader</a>.
+</p>
+
+<p>
+The options "-d jpg" and "-d png" can be used in combination with "-dpi X", which changes the resolution of the resulting bitmap. Try, e.g., with "-dpi 75" and "-dpi 200".
+</p>
+
+<h3>Using the GLE Graphical User Interface QGLE</h3>
+
+<p>
+Starting from 4.0.12, GLE also has its own previewer called QGLE (written by A. S. Budden). As you make changes to your GLE script, QGLE will update its display.
+</p>
+
+<p>
+Enter "qgle" to start QGLE. The first time you run QGLE it will ask you for the location of "libgs.so". This is the GhostScript library, which might come with your GhostScript installation. It is usually located in "/usr/lib/libgs.so".
+</p>
+
+<p><img width="994" height="894" alt="" src="../screenshots/QGLE-decay-dialogs.png"></p>
+
+

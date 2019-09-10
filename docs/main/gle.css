@@ -1,0 +1,150 @@
+body  {
+  font:80%/130% sans-serif,arial,helvetica,clean;
+  color:#000;
+  background:#fff;
+  text-align:left;
+}
+body,div,ul,li,h1,h2,h3,h4,h5,h6,p,img {
+  margin:0;
+  padding:0;
+  border:0;
+}
+table {
+  font:100% sans-serif,arial,helvetica,clean;
+  text-align:left;
+  border-collapse: collapse; 
+}
+img{
+z-index:-10;
+}
+.menu {
+  float:left;
+  margin:0;
+  margin-left:0px;
+  padding:0;
+}
+TABLE.menu{
+  margin:0;
+  width: 201px;
+}
+TABLE.menu_header{
+  margin-left:15px;
+  width: 198px;
+}
+TH{
+width:66px;
+height:30px;
+}
+.inset1 {
+  position: absolute; top: 569px; left: 35px; 
+}
+.inset2 {
+  position: absolute; top: 569px; left: 35px; 
+}
+.color{
+  color: white;
+  background-color: #5D0201;
+  background-repeat: repeat-x;
+}
+.side{
+  height: 620px;
+  background-image: url(../images/menu-main.png);
+  background-repeat: repeat-y;
+}
+.bottom{
+ background-image: url(../images/menu-bot.png);
+ height:31px;
+}
+.menu a {
+color:white;  
+text-decoration: none;
+}
+.menu a:link {color: white;}
+.menu a:visited {color: white;}
+.menu a:hover {
+  color: #FFFF00;
+  border-bottom: 1px solid #FFFF00;
+}
+.menu a:active { color: #CB8E00;}
+.tab {
+  margin:15px;
+  padding: 0;
+  font-size: 100%;
+  font-weight: bold;
+  text-align: center;
+}
+.logo {
+  margin-left:26px;
+}
+.menu ul {
+  margin-left:30px;
+  margin-top:10px;
+  margin-bottom:30px;
+  margin-top:30px;
+  list-style-type: none;
+}
+.menu ul li {
+  margin: 0 0 8px 0;
+}
+.menu ul li a {
+  color: #fff;
+}
+.menu ul li.title {
+  font-weight: bold;
+  position: relative;
+  left: -10px;
+  margin: 20px 0 10px 0;
+  color: #ccccff;
+  border-bottom:1px dotted #ccccff;
+}
+.content {
+  float:left;
+  margin: 0px 15px 0px 0px
+}
+.content p {
+  margin: 8px; 
+  min-width: 500px
+}
+.content pre {
+  margin: 8px; 
+}
+h1, h2 {
+  margin: 20px auto 15px auto;
+  font-size: 125%;
+  width: 100%;
+  border-bottom: 2px solid #000000;
+}
+h3 {
+  margin: 20px auto 15px auto;
+  font-size: 125%;
+  width: 100%;
+  border-bottom: none;
+}
+.content ul {
+  margin: 15px 0px 15px 30px;
+}
+.content ul li {
+  margin: 5px 0px 5px 0px;
+}
+.content a {
+  text-decoration: none;
+  border-bottom: #425CA3;
+}
+.content a:link {color: #425CA3;}
+.content a:visited {color: #425CA3;}
+.content a:hover {
+  color: #CB8E00;
+  border-bottom: 1px solid #CB8E00;
+}
+.excell {
+  margin: 20px 15px 10px 15px;
+}
+.excell a:hover {
+  color: #CB8E00;
+}
+.mytable {
+  margin: 10px 10px 10px 20px;
+}
+.mymarg {
+margin: 40px 10px 10px 40px;
+}

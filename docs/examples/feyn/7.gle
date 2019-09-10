@@ -1,0 +1,67 @@
+size 10.7 1.7 ! 4*(x1+y)+3*d1+2*d 2*(y+d)
+
+include "feyn.gle"
+
+x = 1
+y = 0.75
+x1 = 1.5
+d = 0.1
+d1 = 0.5
+a = 0.5
+r = 0.05
+doublea = 0.05
+
+begin translate y+d y+d ! a
+    amove -y 0
+    set lwidth 0.06
+    @fermion y 0
+    amove 0 0
+    circle r fill black
+    @fermion2 -0.5*y -0.5*y 0 -y
+    @fermion2 0.5*y -0.5*y 0 0
+    set lwidth 0.03
+    @fermion2 -0.5*y 0.5*y 0 y
+    @fermion2 0.5*y 0.5*y 0 0
+end translate
+
+begin translate 3*y+d1+d y+d ! b
+    amove -y 0
+    set lwidth 0.06
+    @fermion y 0
+    amove 0 0
+    circle r fill black
+    set lwidth 0.03
+    @fermion2 -0.5*y 0.5*y 0 y
+    @fermion2 0.5*y 0.5*y 0 0
+    @fermion2 -0.5*y -0.5*y 0 -y
+    @fermion2 0.5*y -0.5*y 0 0
+end translate
+
+begin translate 4*y+x1+2*d1+d y+d ! c
+    amove -x1 0
+    set lwidth 0.06
+    @fermion x1 0
+    set lwidth 0.03
+    amove x 0
+    circle r fill black
+    @fermion2 0 y -x 0
+    circle r fill black
+    @fermion2 0 -y x 0
+end translate
+
+begin translate 4*y+3*(x1+d1)+d y-0.5*x+d ! d
+    amove -x1 0
+    set lwidth 0.06
+    @fermion x1 0
+    set lwidth 0.03
+    amove 0 x
+    @fermion2 (1+a)*0.5*x (1+a)*0.5*x x 0
+    circle r fill black
+    @fermion2 (1-a)*0.5*x (1-a)*0.5*x 0 x
+    circle r fill black
+    photona = -photona
+    photonn = -1
+    @photon -x 0
+    photona = -photona
+    circle r fill black
+end translate

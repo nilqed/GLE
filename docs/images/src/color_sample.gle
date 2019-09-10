@@ -1,0 +1,286 @@
+!
+! GLE COLOR SAMPLE
+!
+size 21.59 27.94
+dx=21.59
+dy=27.94
+xfudge=1.5
+yfudge=1.0
+xbuffer=0.0
+ybuffer=0.0
+xbase=xbuffer-xfudge
+ybase=ybuffer-yfudge
+size_x=dx/5
+size_y=dy/26
+move_x=size_x
+move_y=size_y
+sub vbox dx dy clr$ clrt$
+	set color BLACK 
+	box dx dy fill clr$ 
+	rmove dx/2 dy/2
+	set hei 0.35
+	set just cc
+	if THWIDHT(clrt$)>dx then
+		 set hei 0.25
+	end if
+	rmove -TWIDTH(clrt$)/2-0.05 -THEIGHT(clrt$)/2-0.05
+	set color WHITE
+	box TWIDTH(clrt$)+0.1 THEIGHT(clrt$)+0.1 fill WHITE
+	rmove TWIDTH(clrt$)/2+0.05 THEIGHT(clrt$)/2+0.05
+	set color BLACK
+	write clrt$ 
+end sub
+amove xbase+0*move_x ybase+0*move_y
+@vbox size_x size_y AQUA "AQUA"
+amove xbase+1*move_x ybase+0*move_y
+@vbox size_x size_y AQUAMARINE "AQUAMARINE"
+amove xbase+2*move_x ybase+0*move_y
+@vbox size_x size_y BAKERS_CHOCOLATE "BAKERS\_CHOCOLATE"
+amove xbase+3*move_x ybase+0*move_y
+@vbox size_x size_y BLACK "BLACK"
+amove xbase+4*move_x ybase+0*move_y
+@vbox size_x size_y BLUE "BLUE"
+amove xbase+0*move_x ybase+1*move_y
+@vbox size_x size_y BLUE_VIOLET "BLUE\_VIOLET"
+amove xbase+1*move_x ybase+1*move_y
+@vbox size_x size_y BRASS "BRASS"
+amove xbase+2*move_x ybase+1*move_y
+@vbox size_x size_y BRIGHT_GOLD "BRIGHT\_GOLD"
+amove xbase+3*move_x ybase+1*move_y
+@vbox size_x size_y BRONZE "BRONZE"
+amove xbase+4*move_x ybase+1*move_y
+@vbox size_x size_y BRONZE_II "BRONZE\_II"
+amove xbase+0*move_x ybase+2*move_y
+@vbox size_x size_y BROWN "BROWN"
+amove xbase+1*move_x ybase+2*move_y
+@vbox size_x size_y BROWN_WEB "BROWN\_WEB"
+amove xbase+2*move_x ybase+2*move_y
+@vbox size_x size_y CADET_BLUE "CADET\_BLUE"
+amove xbase+3*move_x ybase+2*move_y
+@vbox size_x size_y CLEAR "CLEAR"
+amove xbase+4*move_x ybase+2*move_y
+@vbox size_x size_y COOL_COPPER "COOL\_COPPER"
+amove xbase+0*move_x ybase+3*move_y
+@vbox size_x size_y COPPER "COPPER"
+amove xbase+1*move_x ybase+3*move_y
+@vbox size_x size_y CORAL "CORAL"
+amove xbase+2*move_x ybase+3*move_y
+@vbox size_x size_y CORN_FLOWER_BLUE "CORN\_FLOWER\_BLUE"
+amove xbase+3*move_x ybase+3*move_y
+@vbox size_x size_y CYAN "CYAN"
+amove xbase+4*move_x ybase+3*move_y
+@vbox size_x size_y DARK_BROWN "DARK\_BROWN"
+amove xbase+0*move_x ybase+4*move_y
+@vbox size_x size_y DARK_GREEN "DARK\_GREEN"
+amove xbase+1*move_x ybase+4*move_y
+@vbox size_x size_y DARK_GREEN_COPPER "DARK\_GREEN\_COPPER"
+amove xbase+2*move_x ybase+4*move_y
+@vbox size_x size_y DARK_OLIVE_GREEN "DARK\_OLIVE\_GREEN"
+amove xbase+3*move_x ybase+4*move_y
+@vbox size_x size_y DARK_ORCHID "DARK\_ORCHID"
+amove xbase+4*move_x ybase+4*move_y
+@vbox size_x size_y DARK_PURPLE "DARK\_PURPLE"
+amove xbase+0*move_x ybase+5*move_y
+@vbox size_x size_y DARK_SLATE_BLUE "DARK\_SLATE\_BLUE"
+amove xbase+1*move_x ybase+5*move_y
+@vbox size_x size_y DARK_SLATE_GREY "DARK\_SLATE\_GREY"
+amove xbase+2*move_x ybase+5*move_y
+@vbox size_x size_y DARK_TAN "DARK\_TAN"
+amove xbase+3*move_x ybase+5*move_y
+@vbox size_x size_y DARK_TURQUOISE "DARK\_TURQUOISE"
+amove xbase+4*move_x ybase+5*move_y
+@vbox size_x size_y DARK_WOOD "DARK\_WOOD"
+amove xbase+0*move_x ybase+6*move_y
+@vbox size_x size_y DIM_GREY "DIM\_GREY"
+amove xbase+1*move_x ybase+6*move_y
+@vbox size_x size_y DUSTY_ROSE "DUSTY\_ROSE"
+amove xbase+2*move_x ybase+6*move_y
+@vbox size_x size_y FELDSPAR "FELDSPAR"
+amove xbase+3*move_x ybase+6*move_y
+@vbox size_x size_y FIREBRICK "FIREBRICK"
+amove xbase+4*move_x ybase+6*move_y
+@vbox size_x size_y FOREST_GREEN "FOREST\_GREEN"
+amove xbase+0*move_x ybase+7*move_y
+@vbox size_x size_y FOREST_GREEN_WEB "FOREST\_GREEN\_WEB"
+amove xbase+1*move_x ybase+7*move_y
+@vbox size_x size_y FUCHSIA "FUCHSIA"
+amove xbase+2*move_x ybase+7*move_y
+@vbox size_x size_y GOLD "GOLD"
+amove xbase+3*move_x ybase+7*move_y
+@vbox size_x size_y GOLDENROD "GOLDENROD"
+amove xbase+4*move_x ybase+7*move_y
+@vbox size_x size_y GREEN "GREEN"
+amove xbase+0*move_x ybase+8*move_y
+@vbox size_x size_y GREEN_COPPER "GREEN\_COPPER"
+amove xbase+1*move_x ybase+8*move_y
+@vbox size_x size_y GREEN_YELLOW "GREEN\_YELLOW"
+amove xbase+2*move_x ybase+8*move_y
+@vbox size_x size_y GREY "GREY"
+amove xbase+3*move_x ybase+8*move_y
+@vbox size_x size_y GREY1 "GREY1"
+amove xbase+4*move_x ybase+8*move_y
+@vbox size_x size_y GREY10 "GREY10"
+amove xbase+0*move_x ybase+9*move_y
+@vbox size_x size_y GREY20 "GREY20"
+amove xbase+1*move_x ybase+9*move_y
+@vbox size_x size_y GREY30 "GREY30"
+amove xbase+2*move_x ybase+9*move_y
+@vbox size_x size_y GREY40 "GREY40"
+amove xbase+3*move_x ybase+9*move_y
+@vbox size_x size_y GREY5 "GREY5"
+amove xbase+4*move_x ybase+9*move_y
+@vbox size_x size_y GREY50 "GREY50"
+amove xbase+0*move_x ybase+10*move_y
+@vbox size_x size_y GREY60 "GREY60"
+amove xbase+1*move_x ybase+10*move_y
+@vbox size_x size_y GREY70 "GREY70"
+amove xbase+2*move_x ybase+10*move_y
+@vbox size_x size_y GREY80 "GREY80"
+amove xbase+3*move_x ybase+10*move_y
+@vbox size_x size_y GREY90 "GREY90"
+amove xbase+4*move_x ybase+10*move_y
+@vbox size_x size_y GREY_WEB "GREY\_WEB"
+amove xbase+0*move_x ybase+11*move_y
+@vbox size_x size_y HUNTER_GREEN "HUNTER\_GREEN"
+amove xbase+1*move_x ybase+11*move_y
+@vbox size_x size_y INDIAN_RED "INDIAN\_RED"
+amove xbase+2*move_x ybase+11*move_y
+@vbox size_x size_y KHAKI "KHAKI"
+amove xbase+3*move_x ybase+11*move_y
+@vbox size_x size_y LAWN_GREEN "LAWN\_GREEN"
+amove xbase+4*move_x ybase+11*move_y
+@vbox size_x size_y LIGHT_BLUE "LIGHT\_BLUE"
+amove xbase+0*move_x ybase+12*move_y
+@vbox size_x size_y LIGHT_GREY "LIGHT\_GREY"
+amove xbase+1*move_x ybase+12*move_y
+@vbox size_x size_y LIGHT_STEEL_BLUE "LIGHT\_STEEL\_BLUE"
+amove xbase+2*move_x ybase+12*move_y
+@vbox size_x size_y LIGHT_WOOD "LIGHT\_WOOD"
+amove xbase+3*move_x ybase+12*move_y
+@vbox size_x size_y LIME "LIME"
+amove xbase+4*move_x ybase+12*move_y
+@vbox size_x size_y LIME_GREEN "LIME\_GREEN"
+amove xbase+0*move_x ybase+13*move_y
+@vbox size_x size_y MAGENTA "MAGENTA"
+amove xbase+1*move_x ybase+13*move_y
+@vbox size_x size_y MANDARIAN_ORANGE "MANDARIAN\_ORANGE"
+amove xbase+2*move_x ybase+13*move_y
+@vbox size_x size_y MAROON "MAROON"
+amove xbase+3*move_x ybase+13*move_y
+@vbox size_x size_y MAROON_WEB "MAROON\_WEB"
+amove xbase+4*move_x ybase+13*move_y
+@vbox size_x size_y MEDIUM_AQUAMARINE "MEDIUM\_AQUAMARINE"
+amove xbase+0*move_x ybase+14*move_y
+@vbox size_x size_y MEDIUM_BLUE "MEDIUM\_BLUE"
+amove xbase+1*move_x ybase+14*move_y
+@vbox size_x size_y MEDIUM_FOREST_GREEN "MEDIUM\_FOREST\_GREEN"
+amove xbase+2*move_x ybase+14*move_y
+@vbox size_x size_y MEDIUM_GOLDENROD "MEDIUM\_GOLDENROD"
+amove xbase+3*move_x ybase+14*move_y
+@vbox size_x size_y MEDIUM_ORCHID "MEDIUM\_ORCHID"
+amove xbase+4*move_x ybase+14*move_y
+@vbox size_x size_y MEDIUM_SEA_GREEN "MEDIUM\_SEA\_GREEN"
+amove xbase+0*move_x ybase+15*move_y
+@vbox size_x size_y MEDIUM_SLATE_BLUE "MEDIUM\_SLATE\_BLUE"
+amove xbase+1*move_x ybase+15*move_y
+@vbox size_x size_y MEDIUM_SPRING_GREEN "MEDIUM\_SPRING\_GREEN"
+amove xbase+2*move_x ybase+15*move_y
+@vbox size_x size_y MEDIUM_TURQUOISE "MEDIUM\_TURQUOISE"
+amove xbase+3*move_x ybase+15*move_y
+@vbox size_x size_y MEDIUM_VIOLET_RED "MEDIUM\_VIOLET\_RED"
+amove xbase+4*move_x ybase+15*move_y
+@vbox size_x size_y MEDIUM_WOOD "MEDIUM\_WOOD"
+amove xbase+0*move_x ybase+16*move_y
+@vbox size_x size_y MIDNIGHT_BLUE "MIDNIGHT\_BLUE"
+amove xbase+1*move_x ybase+16*move_y
+@vbox size_x size_y NAVY "NAVY"
+amove xbase+2*move_x ybase+16*move_y
+@vbox size_x size_y NAVY_BLUE "NAVY\_BLUE"
+amove xbase+3*move_x ybase+16*move_y
+@vbox size_x size_y NEON_BLUE "NEON\_BLUE"
+amove xbase+4*move_x ybase+16*move_y
+@vbox size_x size_y NEON_PINK "NEON\_PINK"
+amove xbase+0*move_x ybase+17*move_y
+@vbox size_x size_y NEW_MIDNIGHT_BLUE "NEW\_MIDNIGHT\_BLUE"
+amove xbase+1*move_x ybase+17*move_y
+@vbox size_x size_y NEW_TAN "NEW\_TAN"
+amove xbase+2*move_x ybase+17*move_y
+@vbox size_x size_y OLD_GOLD "OLD\_GOLD"
+amove xbase+3*move_x ybase+17*move_y
+@vbox size_x size_y OLIVE "OLIVE"
+amove xbase+4*move_x ybase+17*move_y
+@vbox size_x size_y ORANGE "ORANGE"
+amove xbase+0*move_x ybase+18*move_y
+@vbox size_x size_y ORANGE_RED "ORANGE\_RED"
+amove xbase+1*move_x ybase+18*move_y
+@vbox size_x size_y ORANGE_WEB "ORANGE\_WEB"
+amove xbase+2*move_x ybase+18*move_y
+@vbox size_x size_y ORCHID "ORCHID"
+amove xbase+3*move_x ybase+18*move_y
+@vbox size_x size_y PALE_GREEN "PALE\_GREEN"
+amove xbase+4*move_x ybase+18*move_y
+@vbox size_x size_y PINK "PINK"
+amove xbase+0*move_x ybase+19*move_y
+@vbox size_x size_y PINK_WEB "PINK\_WEB"
+amove xbase+1*move_x ybase+19*move_y
+@vbox size_x size_y PLUM "PLUM"
+amove xbase+2*move_x ybase+19*move_y
+@vbox size_x size_y PURPLE "PURPLE"
+amove xbase+3*move_x ybase+19*move_y
+@vbox size_x size_y QUARTZ "QUARTZ"
+amove xbase+4*move_x ybase+19*move_y
+@vbox size_x size_y RED "RED"
+amove xbase+0*move_x ybase+20*move_y
+@vbox size_x size_y RICH_BLUE "RICH\_BLUE"
+amove xbase+1*move_x ybase+20*move_y
+@vbox size_x size_y SALMON "SALMON"
+amove xbase+2*move_x ybase+20*move_y
+@vbox size_x size_y SCARLET "SCARLET"
+amove xbase+3*move_x ybase+20*move_y
+@vbox size_x size_y SEA_GREEN "SEA\_GREEN"
+amove xbase+4*move_x ybase+20*move_y
+@vbox size_x size_y SEMI_SWEET_CHOCOLATE "SEMI\_SWEET\_CHOCOLATE"
+amove xbase+0*move_x ybase+21*move_y
+@vbox size_x size_y SIENNA "SIENNA"
+amove xbase+1*move_x ybase+21*move_y
+@vbox size_x size_y SILVER "SILVER"
+amove xbase+2*move_x ybase+21*move_y
+@vbox size_x size_y SILVER_WEB "SILVER\_WEB"
+amove xbase+3*move_x ybase+21*move_y
+@vbox size_x size_y SKY_BLUE "SKY\_BLUE"
+amove xbase+4*move_x ybase+21*move_y
+@vbox size_x size_y SLATE_BLUE "SLATE\_BLUE"
+amove xbase+0*move_x ybase+22*move_y
+@vbox size_x size_y SPICY_PINK "SPICY\_PINK"
+amove xbase+1*move_x ybase+22*move_y
+@vbox size_x size_y SPRING_GREEN "SPRING\_GREEN"
+amove xbase+2*move_x ybase+22*move_y
+@vbox size_x size_y STEEL_BLUE "STEEL\_BLUE"
+amove xbase+3*move_x ybase+22*move_y
+@vbox size_x size_y SUMMER_SKY "SUMMER\_SKY"
+amove xbase+4*move_x ybase+22*move_y
+@vbox size_x size_y TAN_COLOR "TAN\_COLOR"
+amove xbase+0*move_x ybase+23*move_y
+@vbox size_x size_y TEAL "TEAL"
+amove xbase+1*move_x ybase+23*move_y
+@vbox size_x size_y THISTLE "THISTLE"
+amove xbase+2*move_x ybase+23*move_y
+@vbox size_x size_y TURQUOISE "TURQUOISE"
+amove xbase+3*move_x ybase+23*move_y
+@vbox size_x size_y VERY_DARK_BROWN "VERY\_DARK\_BROWN"
+amove xbase+4*move_x ybase+23*move_y
+@vbox size_x size_y VERY_LIGHT_GREY "VERY\_LIGHT\_GREY"
+amove xbase+0*move_x ybase+24*move_y
+@vbox size_x size_y VIOLET "VIOLET"
+amove xbase+1*move_x ybase+24*move_y
+@vbox size_x size_y VIOLET_RED "VIOLET\_RED"
+amove xbase+2*move_x ybase+24*move_y
+@vbox size_x size_y VIOLET_WEB "VIOLET\_WEB"
+amove xbase+3*move_x ybase+24*move_y
+@vbox size_x size_y WHEAT "WHEAT"
+amove xbase+4*move_x ybase+24*move_y
+@vbox size_x size_y WHITE "WHITE"
+amove xbase+0*move_x ybase+25*move_y
+@vbox size_x size_y YELLOW "YELLOW"
+amove xbase+1*move_x ybase+25*move_y
+@vbox size_x size_y YELLOW_GREEN "YELLOW\_GREEN"

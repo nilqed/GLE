@@ -1,0 +1,50 @@
+!
+! ellispes - demo of new ellipse functions
+!
+size 15 15
+
+
+amove 15/4 15/4
+ellipse 3 1
+ellipse 1.5 3
+
+amove 3*15/4 15/4
+
+ellipse 3 1 fill red
+ellipse 1.5 0.8 fill blue
+
+set color black
+set lwidth 0.2
+
+amove 3*15/4 3*15/4
+
+ellipse 3 0.5
+set color yellow
+set lwidth 0.05
+ellipse 3 0.5
+
+amove 15/4 3*15/4
+
+stp=10
+set color red
+for i=0 to 360-stp STEP stp
+	begin rotate i
+	ellipse 3 0.5
+	end rotate
+
+next i
+
+set color black
+amove 15/2 15/2
+set just cc
+set font ss
+set hei 0.75
+
+txt$="fun with GLE ellipses"
+set color YELLOW
+ellipse 2.25*TWIDTH(txt$) 1.5*THEIGHT(txt$) fill BLACK
+set color white
+write txt$
+
+
+

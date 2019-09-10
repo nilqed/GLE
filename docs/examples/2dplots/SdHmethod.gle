@@ -1,0 +1,113 @@
+!---------------------------------------------------------!
+! This sequence of graphs illustrates the four main steps !
+! to obtain the concentration and quantum mobility of two !
+! dimensional electron gases using Shubnikov-de Haas      !
+! measurements and Fourier transform.                     !
+!                                                         !
+! Author:  Ivan Ramos Pagnossin                           !
+! Data:    2003.12.13                                     !
+! Project: Master thesis                                  !
+!---------------------------------------------------------!
+
+size 16 15
+
+set texlabels 1
+
+!------------------- STEP 1 ------------------------
+amove 1.5 8
+begin graph
+   size 6 6
+   fullsize   
+   data "SdHmethod/step1.dat"
+   d1 line smooth
+   xaxis min -0.1 max 10.1 dticks 2   dsubticks 1
+   yaxis min 0.6  max 2.2  dticks 0.5 dsubticks 0.25
+   xlabels off
+   x2labels on
+   x2title "$B$ (T)"
+   ytitle  "$\rho_{xx}$ $\mathrm{(k\Omega)}$ or $V$ (mV)"   
+end graph
+
+set just cc
+amove xg(xgmin)+0.6 yg(ygmax)-0.6
+tex "(a)"
+
+!------------------- STEP 2 ------------------------
+amove 8 8
+begin graph
+   size 6 6
+   fullsize
+   data "SdHmethod/step2.dat"
+   d1 line smooth 
+   xaxis min 0.09 max 1 dticks 0.2 dsubticks 0.1
+   yaxis min -10  max 15 
+   xlabels off
+   x2labels on
+   ylabels off
+   y2labels on
+   x2title "$1/B$ $\mathrm{(T^{-1})}$"
+   y2title "$\rho''$ $\mathrm{(10^3\,k\Omega\,T^2)}$"
+end graph
+
+amove xg(xgmax)-0.6 yg(ygmax)-0.6
+tex "(b)"
+
+!------------------- STEP 3 ------------------------
+amove 1.5 1.5
+begin graph
+   size 6 6
+   fullsize
+   data "SdHmethod/FFT1.dat"
+   data "SdHmethod/FFT2.dat"
+   data "SdHmethod/FFT3.dat"
+   data "SdHmethod/FFT4.dat"
+   data "SdHmethod/FFT5.dat"
+   d1 line smooth color black
+   d2 line smooth color red
+   d3 line smooth color green
+   d4 line smooth color blue
+   d5 line smooth color yellow
+   xaxis min -0.2 max 2.2 dticks 1  dsubticks 0.5 
+   yaxis min -5   max 180 dticks 40 dsubticks 20
+   xtitle "$\nu$ (T) or $n$ $\mathrm{(10^{12} cm^{-2})}$"
+   ytitle "$|F_{H}(\nu)|$ $\mathrm{(10^3 k\Omega\, T)}$"
+end graph
+
+amove xg(xgmin)+0.6 yg(ygmax)-0.6
+tex "(c)"
+
+amove xg(1.65) yg(160)
+tex "s = 2"
+
+begin key
+   nobox
+   pos lc
+   text "1st DFT" line color black
+   text "2nd" line color red
+   text "3rd" line color green
+   text "4th" line color blue
+   text "5th" line color yellow
+end key
+
+!------------------- STEP 4 ------------------------
+amove 8 1.5
+begin graph
+   size 6 6
+   fullsize
+   data "SdHmethod/step4.dat"
+   let d2 = logefit d1 from 0.05 to 0.35
+   d1 marker fcircle msize 0.3
+   d2 line color blue
+   xaxis min 0.05 max 0.35 dticks 0.1 dsubticks 0.05
+   yaxis min 50 max 210 log grid
+   yticks lstyle 2
+   ysubticks lstyle 2
+   ylabels off
+   y2labels hei 0.4
+   y2labels on
+   xtitle "$t_1$ $\mathrm{(T^{-1})}$"
+   y2title "$|F_{H}(\nu)|$ $\mathrm{(10^3 k\Omega\, T)}$"   
+end graph
+
+amove xg(xgmax)-0.6 yg(ygmax)-0.6
+tex "(d)"

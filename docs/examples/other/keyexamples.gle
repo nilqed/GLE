@@ -1,0 +1,42 @@
+
+size 5.25 4.25
+
+set hei 0.24 font rm
+
+begin name k1
+   begin key
+      justify bl
+      marker circle fill white lstyle 3 text "\tex{\Huge{Happy}}"
+      marker triangle fill gray10 lstyle 1 text "Mark II"
+      separator lstyle 1
+      marker star fill gray50 lstyle 1 color red text "X"
+   end key
+end name
+
+begin name k2
+   amove 0 pointy(k1.tc)+0.1
+   begin key
+      justify bl llen 0.4      
+      color blue lstyle 1 text "Hello"
+      color red lstyle 1 text "World"
+      color green lstyle 1 text "GLE"
+   end key
+end name
+
+begin name k3
+   amove 0 pointy(k2.tc)+0.1
+   begin key
+      justify bl      
+      marker wsquare  msize 0.25 lstyle 2 text "Age"
+      marker dot msize 0.35 lstyle 1 text "Width"
+   end key
+end name
+
+begin name k4
+   amove 0 pointy(k3.tc)+0.1
+   begin key
+      justify bl      
+      marker wsquare  msize 0.25 lstyle 2 text "\tex{$\frac{1}{x+1}$}"
+      marker dot msize 0.35 lstyle 1 text "Width"
+   end key
+end name

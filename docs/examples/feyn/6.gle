@@ -1,0 +1,31 @@
+size 5.2 2 ! 2*(x2+d) y1+y+2*d
+
+include "feyn.gle"
+
+x = 1
+x1 = 2
+x2 = 2.5
+y = 0.7
+y1 = 1.1
+d = 0.1
+
+r = 0.05
+doublea = 0.05
+
+begin translate x2+d d
+    amove -x2 0
+    set lwidth 0.06
+    @fermion x2 0
+    set lwidth 0.03
+    amove -x1 0
+    circle r fill black
+    @photon -x y1
+    circle r fill black
+    @fermion2 0 y1+y x y1
+    circle r fill black
+    @fermion2 0 y1-y -x y1
+    amove x1 0
+    circle r fill black
+    photona = -photona
+    @photon x y1
+end translate

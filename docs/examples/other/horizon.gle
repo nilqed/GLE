@@ -1,0 +1,36 @@
+size 15 13	! This is HORIZON.GLE  (From TURBO-C manual cover)
+amove 12 .3 
+set hei .3
+text horizon.gle
+
+amove 0 0
+begin path clip
+box 10 13
+end path
+box 10 9 fill gray10
+amove 0 9
+box 10 4 fill gray40
+amove 2 9
+aline 3 0
+amove 2 9 
+aline 6 0
+amove 2 9
+aline 9 0
+
+set font texcmr
+amove 3 4
+gsave
+set hei 5
+set color yellow
+text C
+rmove 0 .37
+begin scale 1 -1.4
+begin rotate -20
+set color black
+text C
+end rotate
+end scale
+grestore 
+
+
+

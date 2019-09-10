@@ -1,0 +1,47 @@
+! Example by Jan Soubusta
+
+size 11 11
+
+mmax = 16   ! size of the matrix
+
+alfa = 25   ! rotation of the cube in horizontal direction
+beta = 35   ! rotation of the cube in vertical direction
+
+z_axis_min  = -.5
+z_axis_max  = 0.5
+persp_scale = 3      ! perspective scale
+
+include "matrix_3D.gle"
+
+z0 = normalize_z(0)  ! origin of z-axis at 0
+
+! compute position of the perspective point of infinity (xgrp, ygrp)
+project_3D2D 0.5 0.5 0.5
+xgrp = xgr+0; ygrp = ygr-3
+
+begin object graph
+
+   ! draw the graph based on data matrix in "xim03.dat"
+   draw_bar_graph_3d "xim03.dat"
+
+   ! draw the axis ticks
+   draw_z_ticks z_axis_min z_axis_max .25
+   draw_xy_ticks2 5
+
+   ! draw the x-axis tick labels
+   label_x 1  "HHHH"
+   label_x 6  "HVHV"
+   label_x 11 "VHVH"
+   label_x 16 "VVVV"
+
+   ! draw the y-axis tick labels
+   label_y 1  "HHHH"
+   label_y 6  "HVHV"
+   label_y 11 "VHVH"
+   label_y 16 "VVVV"
+
+end object
+
+! center the graph on the page
+amove pagewidth()/2 pageheight()/2
+draw graph.cc

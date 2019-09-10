@@ -1,0 +1,14 @@
+#
+# makefile for makeing and uploading subroutines
+#
+
+all:
+#	copy $(GLE_USRLIB)\stm.gle stm.gle
+	perl gen_function_page.pl
+
+upload:
+	copy *.html $(GLE_SITE)\subroutines
+	copy *.gle $(GLE_SITE)\subroutines
+
+clean:
+	-erase /Q  *.bak *.html

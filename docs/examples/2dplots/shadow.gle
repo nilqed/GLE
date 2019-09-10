@@ -1,0 +1,29 @@
+
+size 12 8
+
+include "graphutil.gle"
+
+set font texcmr
+
+amove 0 0.3
+begin graph
+   title "Chart 1"
+   x2axis off
+   y2axis off
+   yside off
+   yaxis grid
+   yticks color gray
+   xside color gray
+   ysubticks off
+   xaxis min 0 max 2
+   xnoticks 2
+   let d1 = x^2
+   let d2 = x^2/2
+   key pos bc compact offset 0 -0.6 nobox
+   d1 line marker wdiamond mdist 1 color steelblue lwidth 0.05 key "Method 1"
+   key separator
+   d2 line marker wcircle msize 0.3 mdist 1 color green lwidth 0.05 key "Method 2" 
+   begin layer 150
+      draw graph_shaded_background from 0.7 to 1.0
+   end layer
+end graph

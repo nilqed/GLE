@@ -1,0 +1,12 @@
+*.pdf
+*.gz
+*.exe
+*.zip
+*.msi
+.svn
+gle.nedit
+gle.stx
+gle.vim
+gle-emacs.el
+downloads.html
+

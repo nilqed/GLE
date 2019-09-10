@@ -1,0 +1,55 @@
+! Some nice plots submitted by Johan Granholm <jg@emi.dtu.dk>
+
+size 17.5 8
+set font texcmr hei 0.3 titlescale 1
+
+sub mygrid xtick ytick xsubtick ysubtick
+   begin graph
+      size 10 8
+      xaxis min xgmin max xgmax dticks xtick dsubticks xsubtick
+      yaxis min ygmin max ygmax dticks ytick dsubticks ysubtick
+      ticks    length 0.2
+      subticks length 0.1
+      labels   off
+   end graph
+end sub
+
+amove -.3 0 ! Left half...
+begin graph
+   size 10 8
+   title  "S_{11} & S_{21}, 20 mm patch on 4 mm RH31HF, f_{ofs}=7.5mm"
+   ytitle "[dB]"
+   xtitle "Frequency [GHz]"
+   side off
+   ticks color gray10
+   xaxis min 4.25 max 6.25 dticks 0.25 dsubticks 0.05 grid
+   yaxis min -25  max 5    dticks 5    dsubticks 1    grid
+   data "c20f75.out" ignore 4
+   key position tr offset 0.4 0.4
+   d3 lstyle 1 lwidth 0.02 key "S_{11} unmatched"
+   d5 lstyle 1 lwidth 0.02 key "S_{21} unmatched"
+   d1 lstyle 6 lwidth 0.02 key "S_{11} matched"
+   d2 lstyle 6 lwidth 0.02 key "S_{21} matched"
+end graph
+
+mygrid xtick 0.25 ytick 5 xsubtick 0.05 ysubtick 1
+
+amove 8.3 0 ! Right half...
+begin graph
+   size 10 8
+   title  "Re[Z_{in}] & Im[Z_{in}], matched vs. unmatched"
+   ytitle "[\Omega]"
+   xtitle "Frequency [GHz]"
+   side off
+   ticks color gray10
+   xaxis min 4.25 max 6.25 dticks 0.25 dsubticks 0.05 grid
+   yaxis min -50  max 150  dticks 25   dsubticks 5    grid   
+   data "c20f75.out" ignore 4
+   key position tr offset 0.4 0.4
+   d6 lstyle 1 lwidth 0.02 key "Re[Z_{in}] unmatched"
+   d7 lstyle 1 lwidth 0.02 key "Im[Z_{in}] unmatched"
+   d8 lstyle 6 lwidth 0.02 key "Re[Z_{in}] matched"
+   d9 lstyle 6 lwidth 0.02 key "Im[Z_{in}] matched"
+end graph
+
+mygrid xtick 0.25 ytick 25 xsubtick 0.05 ysubtick 5

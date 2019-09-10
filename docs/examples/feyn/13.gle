@@ -1,0 +1,64 @@
+size 6 2.4 ! 4*(x+x2)+2*d+d1 2*(x+d)
+
+include "feyn.gle"
+
+x = 1
+y = 0.75
+x2 = 0.2
+b = 0.2*sqrt(0.5)
+d = 0.1
+d1 = 1
+d2 = 0.4
+r = 0.05
+
+begin translate x+x2+d y+d2+0.1
+    amove -x-x2 0
+    set lwidth 0.06
+    @fermion x+x2 0
+    set lwidth 0.03
+    @arrow (0.5*x+x2)/(2*(x+x2))
+    @arrow (1.5*x+x2)/(2*(x+x2))
+    amove x 0
+    circle r fill black
+    @photon2 0 -y -x 0
+    @mom 0.5
+    circle r fill black
+    amove 0 x
+    @photon 0 0
+    @mom 0.4
+    circle r fill black
+    amove -b x-b
+    @fermion b x+b
+    amove -b x+b
+    @fermion b x-b
+end translate
+
+begin translate 3*(x+x2)+d+d1 d+0.1
+    amove -x-x2 0
+    set lwidth 0.06
+    @fermion x+x2 0
+    set lwidth 0.03
+    @arrow 0.5
+    amove x 0
+    circle r fill black
+    photona = -photona
+    photonn = -1
+    @photon 0 x
+    momd = -momd
+    @mom 0.4
+    circle r fill black
+    photonn = -1
+    @photon -x 0
+    photona = -photona
+    @mom 0.6
+    momd = -momd
+    circle r fill black
+    amove 0 2*x
+    @photon 0 x
+    @mom 0.4
+    circle r fill black
+    amove -b 2*x-b
+    @fermion b 2*x+b
+    amove -b 2*x+b
+    @fermion b 2*x-b
+end translate

@@ -1,0 +1,22 @@
+size 3.2 1 ! 2*(x1+d) y+d+dl
+
+include "feyn.gle"
+
+x = 1
+y = 0.75
+x1 = 1.5
+d = 0.1
+dl = 0.15
+r = 0.05
+doublea = 0.05
+
+begin translate x1+d dl
+    amove -x1 0
+    set lwidth 0.06
+    @fermion x1 0
+    set lwidth 0.03
+    amove -x 0
+    circle r fill black
+    @fermion2 0 y x 0
+    circle r fill black
+end translate

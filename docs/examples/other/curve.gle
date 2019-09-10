@@ -1,0 +1,36 @@
+size 18 27
+set font pltr
+amove  9.2  22
+begin path fill blue
+amove  9.2  22
+bezier 10.05 22.05 11.15 20.6 11.6 19.6
+bezier 12.05 18.6 10.45 18.5 11 18
+bezier 11.55 17.5 14.45 17.9 13.8 17.6
+bezier 13.15 17.3 9.9 16.5 8.4 16.8
+closepath
+end path
+amove  4.6  23.4
+circle 1.67092
+amove  6  21.8
+circle 1.33752  fill GREEN
+amove  11.2  16.2
+circle 1.32639  fill GREEN
+amove  3.8  13.2
+box  6.6 -2.2   fill GREEN
+amove  9.6  24.8
+text General test
+amove  10.4  15
+aline  7  13.4  arrow both
+set lstyle 3
+amove  4  18.4
+rline  3.8 -2.2
+rline -3.6 -1.6
+closepath
+set lwidth .1
+amove  5.4  9.2
+rline  3 -3
+rline  3.8  2.2
+closepath
+amove  1.8  10.2
+rline  0 -3
+rline  2  1

@@ -1,0 +1,84 @@
+
+size 12 6
+
+set arrowsize 1 arrowangle 15
+
+set color red lstyle 2
+amove 4.5 0.5
+aline 4.5 pageheight()-0.5
+set color green lstyle 2
+amove 3.5 0.5
+aline 3.5 pageheight()-0.5
+amove 6 0.5
+aline 6 pageheight()-0.5
+set color red lwidth 0.1 lstyle 1
+amove 5 0.5
+aline 5 pageheight()-0.5
+set color black lstyle 1
+
+set arrowstyle filled
+amove 0.5 3
+aline 4.5 3 arrow end
+
+set arrowstyle empty
+amove 0.5 4
+aline 4.5 4 arrow end
+
+set arrowstyle simple
+amove 0.5 5
+aline 4.5 5 arrow end
+
+set font texcmr hei 0.4 just bc
+amove 2 3.2
+write "filled"
+
+amove 2 4.2
+write "empty"
+
+amove 2 5.2
+write "simple"
+
+set join round
+
+set arrowstyle filled
+amove 4.5 0.5
+arc 1.5 90 180 arrow start
+
+set arrowstyle filled arrowtip round
+amove 8 3
+aline 5 3 arrow end
+
+set arrowstyle empty
+amove 8 4
+aline 5 4 arrow end
+
+set arrowstyle simple
+amove 8 5
+aline 5 5 arrow end
+
+set arrowstyle filled
+amove 5 0.5
+arc 1.5 0 90 arrow end
+
+sub arrow_curved angle open size
+   local xp = xpos()
+   local yp = ypos()
+   local dy = size*sin(torad(open))
+   begin rotate angle
+      begin path stroke fill black
+         rmove size-size/4 0
+         rline size/4 dy
+         aline xp    yp curve 180     open/2 0.5*size 0.5*size
+         rline size -dy curve -open/2 180    0.5*size 0.5*size
+         closepath
+      end path
+   end rotate
+   amove xp yp
+end sub
+
+set arrowstyle curved lwidth 0.05 arrowsize 0.5
+
+for angle = 0 to 360 step 45
+   amove 10 2
+   aline 10+1.5*cos(torad(angle)) 2+1.5*sin(torad(angle)) arrow end
+next angle

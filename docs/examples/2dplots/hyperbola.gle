@@ -1,0 +1,11 @@
+size 11 11
+
+set texlabels 1
+begin graph
+   math
+   scale auto
+   title "Plot of $y(x) = \frac{1}{x}$"
+   yaxis min -3 max 3
+   let d1 = 1/x from -3 to 3
+   d1 line color red
+end graph

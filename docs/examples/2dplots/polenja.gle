@@ -1,0 +1,78 @@
+size 18 19
+
+include "color.gle"
+
+set lwidth .02 hei .7 font texcmr
+imax = 0; imaxc = 0
+
+dpsi = 2.5; dphi = 2.5
+! dpsi = stepwidth in psi direction, i.e. angle of latitude or elevation;
+! dphi = stepwidth in phi direction, i.e. angle of longitude or azimuth.
+
+file$ = "serguei2.nja"
+
+! open result file with three rows: psi   phi   intensity
+! first open to find overall maximum intensity = imax
+! and maximum intensity at center = imaxc (i.e. for psi=0)
+
+fopen file$ inchan read
+until feof(inchan)
+   fread inchan psi phi i
+   if i>imax then
+      imax = i
+   end if
+   if psi=0 then
+      if i>imaxc then
+         imaxc = i
+      end if
+   end if
+next
+fclose inchan
+
+! now open result file for actual plotting
+! colors are defined with rgb color scheme:
+!     rgb(0,0,1) (i.e. blue) corresponds to i=0
+!     rgb(1,0,0) (i.e. red) corresponds to i=max
+fopen file$ inchan read
+until feof(inchan)
+   fread inchan psi phi i
+   amove 8.2 8.2
+   if psi=0 then
+      circle dphi fill cvtrgb(imaxc/imax,0,1-imaxc/imax)
+   else
+      begin path fill cvtrgb(i/imax,0,1-i/imax)
+         arc 8*sin(torad(psi+dpsi/2))/(1+cos(torad(psi+dpsi/2))) phi-dphi/2 phi+dphi/2
+         narc 8*sin(torad(psi-dpsi/2))/(1+cos(torad(psi-dpsi/2))) phi+dphi/2 phi-dphi/2
+      end path
+   end if
+next
+fclose inchan
+
+! labeling
+circle 8
+for c = 0 to 3
+   begin rotate c*90
+      rmove 8 0
+      rline 0.2 0
+   end rotate
+next c
+
+rmove 8.2 0
+set just lc
+write "\varphi =0\movexy{-.15}{0}\char{23}"
+rmove -8.2 8.2
+set just bc
+write "\varphi =90\movexy{-.15}{0}\char{23}"
+
+amove 8.2-5 17.5
+begin name range
+   colormap "x" 0 1 0 1 100 1 10 1 palette palette_blue_purple_red
+end name
+
+amove pointx(range.lc)-0.1 pointy(range.lc)
+set just rc
+write "I = 0"
+
+amove pointx(range.rc)+0.1 pointy(range.rc)
+set just lc
+write "I = max."

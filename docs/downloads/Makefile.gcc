@@ -1,0 +1,30 @@
+
+SRC=../src
+SCRIPT=../script
+
+HL = ../../gle/contrib/editors/highlighting
+ 
+ALL = gle-emacs.el gle.nedit gle.stx gle-npp.xml fedora.html
+ 
+all: $(ALL)
+ 
+clean:
+	rm -rf $(ALL)
+
+gle-emacs.el: $(HL)/gle-emacs.el
+	cp $(HL)/gle-emacs.el .
+ 
+vim_gle.zip: $(HL)/vim_gle.zip
+	cp $(HL)/vim_gle.zip .
+ 
+gle.nedit: $(HL)/gle.nedit
+	cp $(HL)/gle.nedit .
+ 
+gle.stx: $(HL)/gle.stx
+	cp $(HL)/gle.stx .
+
+gle-npp.xml: $(HL)/gle-npp.xml
+	cp $(HL)/gle-npp.xml .
+
+fedora.html: $(SRC)/template.html $(SRC)/fedora.html
+	perl $(SCRIPT)/combine.pl ../ -english $(SRC)/template.html $(SRC)/menu.html $(SRC)/fedora.html fedora.html

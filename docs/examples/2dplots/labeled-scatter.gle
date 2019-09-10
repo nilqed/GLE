@@ -1,0 +1,46 @@
+size 10 7
+
+! This example has been kindly provided by Emilio Torres Manzanera
+
+set font texcmr hei 0.3
+
+begin graph
+   scale auto
+   yaxis min 0 max 4000
+   xaxis min 0 max 75000
+   title  "Labeled scatter plot"
+   xtitle "Second homes"
+   ytitle "Tax / resident (EUR)"
+   draw labeled_scatter "labeled-scatter.dat"
+end graph
+
+begin key
+   pos tr
+   marker star color blue text "Coast"
+   marker star color red  text "Inland"
+end key
+
+! Open file and read it line by line.
+! For each line, plot a labeled marker.
+
+! Supporse that "labeled-scatter.dat" contains:
+! "Sierra"    1  164.6  2
+! "Relleu"    1  376.8  2
+! "Salinas"   2  418.1  2
+! "Almargen"  3  182.5  2
+! "Moclinejo" 3  235.0  2
+
+sub labeled_scatter file$
+   set just lc hei 0.22
+   fopen file$ f1 read
+   until feof(f1)
+      fread f1 txt$ x y t
+      amove xg(x) yg(y)
+      if t = 1 then set color red
+      else set color blue
+      marker star
+      rmove 0.1 0
+      write txt$
+   next
+   fclose f1
+end sub

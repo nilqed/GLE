@@ -1,0 +1,36 @@
+size 16 8
+
+include "color.gle"
+
+! draw left graph
+amove 0 0
+begin graph
+   size 8 8
+   title "Auckland's Maunga Whau Volcano"
+   colormap "volcano.z" 100 100 palette palette_blue_white_red
+end graph
+
+! define zoom rectangle on left graph
+zx0 = 1; zy0 = 4
+zx1 = 8; zy1 = 12
+
+! draw zoom rectangle in yellow
+gsave
+set color yellow lwidth 0.1
+amove xg(zx0) yg(zy0)
+box xg(zx1)-xg(zx0) yg(zy1)-yg(zy0)
+grestore
+
+! draw right graph
+amove 7 0
+begin graph
+   size 8 8
+   title "Zoom on ("+num$(zx0)+","+num$(zy0)+") x ("+num$(zx1)+","+num$(zy1)+")"
+   xaxis min zx0 max zx1
+   yaxis min zy0 max zy1
+   colormap "volcano.z" 100 100 palette palette_blue_white_red
+end graph
+
+! draw vertical color range
+amove 14.5 yg(ygmin)
+color_range_vertical zmin 0 zmax 180 zstep 20 palette palette_blue_white_red

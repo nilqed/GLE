@@ -1,0 +1,72 @@
+!
+! GLE logo for web page
+! by: V.P. LaBella vlabella@albany.edu
+!
+size 12 6
+
+set font psagb
+
+dx = 12; dy = 6; boxw = dx/7; boxh = dy
+
+amove 0 0
+set color white
+box dx dy
+
+sub draw_box clr$
+	gsave
+	set color clr$
+	box boxw boxh fill clr$
+	grestore
+end sub
+
+amove dx/2 dy/2+0.5
+set just cc
+begin clip			! Save default clipping region
+	begin path clip	! Set up the clipping region
+		set hei 6.0
+		text GLE
+	end path
+	amove 0 0
+	draw_box red
+	rmove boxw 0
+	draw_box orange
+	rmove boxw 0
+	draw_box yellow
+	rmove boxw 0
+	draw_box lime
+	rmove boxw 0
+	draw_box blue
+	rmove boxw 0
+	draw_box navy
+	rmove boxw 0
+	draw_box violet
+	rmove boxw 0
+	gsave
+	set hei 0.67
+	delta=0.8
+	amove dx/2 dy-delta	
+	set color black
+	for i=1 to 10
+		write "Professional Graphics Language"
+		rmove 0.0 -delta
+	next i
+	grestore
+end clip
+
+!
+! lower name
+!
+set just cc
+set hei 0.669
+set color black
+amove dx/2 0.5
+write "Professional Graphics Language"
+
+!
+! version number
+!
+amove 9.4 1.8
+set hei 1.0
+set just bl
+set color gray40
+write "v4.0"

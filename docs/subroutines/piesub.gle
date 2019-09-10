@@ -1,0 +1,44 @@
+! Subroutines to draw a pie wedge between two supplied angles 
+
+sub pie ang1 ang2 radius colour$ 
+   !
+   ! draw pie wedge between ang1 and ang2
+   ! radius.... the radius
+   ! colour$... the fill color of the wedge
+   !
+   begin path fill colour$ stroke
+   rmove 0 0                       !The rmove command is neccesary to set
+   arc radius ang1 ang2            !the beginning of the path
+   closepath
+   end path 
+end sub
+
+sub pie_text ang1 ang2 radius colour$ label$
+   !sub pie - Subroutine to draw a coloured pie wedge
+   !          between two supplied angles
+   !          with a key and a label
+   ! draw pie wedge between ang1 and ang2
+   ! radius.... the radius
+   ! colour$... the fill color of the wedge
+   ! label$ ... te text you want to display
+   !
+   gsave
+   begin path fill colour$ stroke
+   rmove 0 0                 !The rmove command is neccesary to set
+   arc radius ang1 ang2      !the beginning of the path
+   closepath
+   end path
+
+   !
+   ! put text in center of pie
+   !
+   set just cc
+   ang = ang1+(ang2-ang1)/2
+   rmove (radius/2)*cos(torad(ang)) (radius/2)*sin(torad(ang))
+   write label$
+   grestore
+
+end sub
+
+
+

@@ -1,0 +1,63 @@
+size 12.5 5
+
+include "shape.gle"
+
+set arrowangle 15 arrowsize 0.25 lwidth 0.02
+
+sub boxline x1 y1 x2 y2 d
+   amove x1 y1
+   circle 0.05 fill black
+   local l = sqrt((x2-x1)^2+(y2-y1)^2)
+   begin rotate xy2angle(x2-x1,y2-y1)
+      rmove 0 -d/2
+      box l d
+   end rotate
+   amove x2 y2
+   circle 0.05 fill black
+end sub
+
+sub lrarrow x1 y1 x2 y2 d str$
+   set color red
+   amove x1 y1
+   aline x2 y2 arrow both
+   set color black
+   line_label x1 y1 x2 y2 str$ d
+end sub
+
+l = 6; t = 15
+amove 10 2.5
+begin origin
+   boxline -l*cos(torad(t))  l*sin(torad(t)) 0 0 1
+   boxline -l*cos(torad(t)) -l*sin(torad(t)) 0 0 1
+   boxline -9.5 0 -0.5/sin(torad(t)) 0 1
+   amove 0.5*cos(torad(90-t))  0.5*sin(torad(90-t))
+   aline 0.5/sin(torad(t)) 0
+   amove 0.5*cos(torad(90-t)) -0.5*sin(torad(90-t))
+   aline 0.5/sin(torad(t)) 0
+   set color red lstyle 2
+   amove -0.5/sin(torad(t)) 0
+   rline 0 -2
+   amove 0  0
+   rline 0 -2
+   amove +0.5/sin(torad(t)) 0
+   rline 0 -2
+   amove 0  0
+   aline -l 0
+   amove 0  0
+   aline -l*cos(torad(t)) l*sin(torad(t))
+   set lstyle 1
+   amove 0 0
+   arc   5.5 180-t 180 arrow both
+   amove 5.6*cos(torad(180-t/2)) 5.6*sin(torad(180-t/2))
+   set just rc color black
+   tex "$\alpha$"
+   amove -l 0
+   circle 0.05 fill black
+   lrarrow -7 -0.5 -7 0.5 -0.1 "\tex{$d$}"
+   lrarrow -0.5/sin(torad(t)) -1.75 0 -1.75 -0.1 "\tex{$\frac{d/2}{\mathrm{sin} \alpha}$}"
+   lrarrow 0 -1.75 0.5/sin(torad(t)) -1.75 -0.1 "\tex{$\frac{d/2}{\mathrm{sin} \alpha}$}"
+end origin
+
+amove 0.1 0.1
+set just bl
+tex "GLE arrow design"

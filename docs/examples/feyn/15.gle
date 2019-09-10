@@ -1,0 +1,220 @@
+size 11.3 7.7 ! 8*x2+4*(x+y)+2*(d2+d)+d1 4*y+2*(x+dy+d)
+
+include "feyn.gle"
+
+x = 1
+x2 = 0.2
+y = 0.75
+y1 = 0.2
+x3 = 0.5
+d = 0.1
+d1 = 1
+d2 = 1
+d3 = 0.2
+dy = 1.25
+r = 0.05
+r2 = 0.07
+rr = 0.2
+at = 0.12
+
+sub tri a
+    begin origin
+        begin rotate 90*a
+            begin path fill black
+                amove 0 -at
+                aline -0.75*at at
+                aline 0.75*at at
+                aline 0 -at
+            end path
+        end rotate
+    end origin
+end sub
+
+begin translate x+x2+d 3*y+2*(x+dy)+d ! 1.1
+    amove -x-x2 0
+    set lwidth 0.06
+    @fermion x+x2 0
+    set lwidth 0.03
+    @arrow (0.5*x+x2)/(2*(x+x2))
+    @arrow (1.5*x+x2)/(2*(x+x2))
+    amove x 0
+    circle r fill black
+    @photon2 0 -y -x 0
+    circle r fill black
+    amove 0 y
+    @tri 0
+    @photon 0 0
+    circle r fill black
+    amove 0.5*x y1
+    circle r2 fill black
+end translate
+
+begin translate 3*x2+2*x+y+d2+d 3*y+2*(x+dy)+d ! 1.2
+    amove -y-x2 0
+    @fermion y+x2 0
+    @arrow (0.5*y+x2)/(2*(y+x2))
+    @arrow (1.5*y+x2)/(2*(y+x2))
+    amove y 0
+    circle r fill black
+    photonn = -1
+    @photon2 0 -0.75*y -y 0
+    circle r fill black
+    amove 0 y
+    @photon 0 0
+    circle r fill black
+end translate
+
+begin translate 5*x2+3*y+2*(x+d2)+d 2.625*y+2*(x+dy)+d ! 1.3
+    amove -y-x2 0
+    set lwidth 0.06
+    @fermion y+x2 0
+    set lwidth 0.03
+    @arrow 0.5
+    amove -y 0
+    circle r fill black
+    photonn = -1
+    @photon2 0 0.75*y y 0
+    circle r fill black
+    amove 0 -y1
+    circle r2 fill black
+end translate
+
+begin translate 7*x2+5*y+2*(x+d2)+d1+d 2.625*y+2*(x+dy)+d ! 1.4
+    amove -y-x2 0
+    set lwidth 0.06
+    @fermion y+x2 0
+    set lwidth 0.03
+    @arrow 0.5
+    amove -y 0
+    circle r fill black
+    photonn = -1
+    @photon2 0 0.75*y y 0
+    circle r fill black
+end translate
+
+begin translate x+x2+d x+y+dy+d ! 2.1
+    amove -x-x2 0
+    set lwidth 0.06
+    @fermion x+x2 0
+    set lwidth 0.03
+    @arrow 0.5
+    amove x 0
+    circle r fill black
+    photona = -photona
+    photonn = -1
+    @photon 0 x
+    circle r fill black
+    photonn = -1
+    @photon -x 0
+    photona = -photona
+    circle r fill black
+    amove 0 x+y
+    @tri 0
+    @photon 0 x
+    circle r fill black
+    amove 0.5*x+sqrt(0.5)*y1 0.5*x+sqrt(0.5)*y1
+    circle r2 fill black
+end translate
+
+begin translate 3*x2+2*x+y+d2+d x+1.625*y+dy+d ! 2.2
+    amove -y-x2 0
+    @fermion y+x2 0
+    @arrow 0.5
+    amove y 0
+    circle r fill black
+    photona = -photona
+    @photon 0 y
+    circle r fill black
+    @photon -y 0
+    photona = -photona
+    circle r fill black
+    amove 0 2*y
+    @photon 0 y
+    circle r fill black
+    ! direction
+    amove -2*rr y+rr-d3
+    @fermion -rr y-d3
+    @fermion2 0 y-sqrt(0.125)*rr-d3 rr y-d3
+    @fermion 2*rr y+rr-d3
+    @arrow 1
+end translate
+
+begin translate 5*x2+3*y+2*(x+d2)+d x+1.625*y+dy+d ! 2.3
+    amove -y-x2 0
+    set lwidth 0.06
+    @fermion y+x2 0
+    set lwidth 0.03
+    @arrow 0.5
+    amove -y 0
+    circle r fill black
+    photonn = -1
+    @photon2 0 0.75*y y 0
+    circle r fill black
+    amove 0 0.75*y+y1
+    circle r2 fill black
+end translate
+
+begin translate 7*x2+5*y+2*(x+d2)+d1+d x+1.625*y+dy+d ! 2.4
+    amove -y-x2 0
+    set lwidth 0.06
+    @fermion y+x2 0
+    set lwidth 0.03
+    @arrow 0.5
+    amove -y 0
+    circle r fill black
+    photonn = -1
+    @photon2 0 0.75*y y 0
+    circle r fill black
+end translate
+
+begin translate x+x2+d y+d ! 3.1
+    amove -x-x2 0
+    @fermion x+x2 0
+    @arrow (0.5*x+x2)/(2*(x+x2))
+    @arrow (1.5*x+x2)/(2*(x+x2))
+    amove x 0
+    circle r fill black
+    @photon2 0 -y -x 0
+    circle r fill black
+    amove 0 y
+    @photon 0 0
+    circle r fill black
+end translate
+
+begin translate 3*(x+x2)+d+d1 0.5*y+d ! 3.2
+    amove -x-x2 0
+    @fermion x+x2 0
+    @arrow 0.5
+    amove x 0
+    circle r fill black
+    photona = -photona
+    photonn = -1
+    @photon 0 x
+    circle r fill black
+    photonn = -1
+    @photon -x 0
+    photona = -photona
+    circle r fill black
+    amove 0 x+y
+    @photon 0 x
+    circle r fill black
+    ! direction
+    amove -2*rr x+rr-d3
+    @fermion -rr x-d3
+    @fermion2 0 x-sqrt(0.125)*rr-d3 rr x-d3
+    @fermion 2*rr x+rr-d3
+    @arrow 1
+end translate
+
+begin translate 4*(x+x2)+2*d1+d 0.5*y+d ! 3.3
+    amove 0 0
+    @fermion 2*(x+x2)+x3 0
+    @arrow (x+x2)/(2*(x+x2)+x3)
+    amove x2 0
+    circle r fill black
+    @photon2 x2+x y x2+2*x 0
+    circle r fill black
+    amove x2+2*x+x3 0
+    circle r fill black
+    @photon x2+2*x+x3 y
+end translate

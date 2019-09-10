@@ -1,0 +1,51 @@
+size 7.2 1 ! 6*x+2*(dx+d) y+2*d
+
+include "feyn.gle"
+
+x = 1
+y = 0.8
+dx = 0.5
+d = 0.1
+
+a = 1.75*doublea
+
+sub quad x y
+    amove x-a y-a
+    begin path fill black
+        rline 2*a 0
+        rline 0 2*a
+        rline -2*a 0
+        rline 0 -2*a
+    end path
+    amove x y
+end sub
+
+begin translate x+d d
+    amove -x 0
+    @double x 0
+    @arrow 0.25
+    @arrow 0.75
+    @quad 0 0
+end translate
+
+begin translate 3*x+dx+d d
+    amove -x 0
+    @double x 0
+    @arrow 0.25
+    @arrow 0.75
+    @quad 0 0
+    @photon 0 y
+end translate
+
+begin translate 5*x+2*dx+d d
+    amove -x 0
+    @double x 0
+    @arrow 0.25
+    @arrow 0.75
+    @quad 0 0
+    @photon -y y
+    amove 0 0
+    photona = -photona
+    @photon y y
+    photona = -photona
+end translate

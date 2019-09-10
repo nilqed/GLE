@@ -1,0 +1,555 @@
+! GLE2000 Circuit Diagram Example
+! 5th December 1999
+  Size   17   12
+  WindowOrigin 0  0
+  PixelsPerCm  40
+  Amove    0.3  11.5
+! set caption
+ set fillstyle 1 fillcolor aqua fill2color lightgray 
+& linecolor silver linewidth 0.005 linestyle 1
+ begin origin
+ begin scale 1.2 1.2
+  box      1.3 -1.3
+  set linecolor black fillstyle 1 fillcolor black 
+  apolygon -1.3 0 -1.45 -0.15 0.15 -0.15
+  set linecolor gray fillcolor gray
+  apolygon 0 1.3 0.15 1.45 0.15 -0.15
+  set  linecolor lightgray
+  rmove  0.15 1.45
+  set fillcolor offwhite
+  apolygon -1.6 0 -1.45 -0.15 -0.15 -0.15 
+  rmove -1.6 0
+  set fillcolor silver linecolor silver
+  apolygon 0.15 -0.15 0.15 -1.45 0.0 -1.6
+  Set Font "Times New Roman"  Hei 0.5 fontcolor red fillstyle 0 
+  begin scale 0.95 1.2
+  rmove    0.2 -0.05
+  Text    G
+  rmove    0.4  -0.34
+  Text    L
+  rmove    0.4  -0.34
+  Text    E
+  end scale
+  Set Font "Arial Narrow"  Hei 0.55 fontcolor blue  
+  rmove    -0.2  0.78
+  begin scale 0.43 1.0
+  Text    2000
+  end scale
+ end scale
+ end origin
+ amove 2.25 11.7 
+ set font "Times New Roman"  hei 0.5 fontcolor red
+ text Circuit Diagram
+ set linecolor red linewidth 0.05
+ Amove    2.25 11.1
+ RLine    4.25 0
+! Add text
+ set linecolor black linewidth 0.02
+ amove 2.25 11.0
+ set font "Arial" hei 0.35 fontcolor black
+ text This example demonstrates the use of a set of subroutines defining electronic 
+ rmove 0 -0.4
+ text components to draw a circuit diagram. The components defined by the 
+ rmove 0 -0.4
+ text subroutines are shown on the left. Note the use of 'scale -1 1' to produce
+ rmove 0 -0.4
+ text mirror images of the inductors.   
+! now set up component subroutines
+  degrees
+  fix 8 3
+! Electrical Circuit Diagrams
+! Capacitor
+ sub "capacitor" a  b 
+! a is top fill colour
+! b is lower fill colour
+! height -1 width 0.8
+  begin origin
+   set fillstyle 1 fillcolor a
+   aline 0 -0.2
+   amove -0.4 -0.4
+   box  0.80 0.20
+   set fillcolor b 
+   amove -0.40 -0.8
+   box  0.80 0.20
+   amove 0.0  -0.80
+   aline 0.0 -1.00
+  end origin
+ endsub
+
+
+ sub "inductor"  n 
+! n is number of turns
+! height -(0.4*n+0.5) 
+  begin origin
+   aline  0   -0.1
+   aline  0.3 -0.1
+   aline  0.4 -0.2
+   for i = 1 to n
+     aline  0.4  -0.4*i-0.1
+     rline -0.1  -0.1
+     rline -0.6  0
+     rline -0.1  0.1
+     rline  0    0.1
+     rline  0.1   0.1
+     rline  0.6    0
+     rline  0.1   -0.1 
+   next i
+   aline 0.4  -0.4*n-0.3 
+   rline  -0.1  -0.1
+   rline  -0.3   0
+   rline 0 -0.1
+  end origin
+ endsub
+
+! Resistor
+sub "resistor"  n
+! n is number of segments
+! height  -(0.3*n+0.2)
+ begin origin
+   rline 0 -0.1
+   for i = 1 to n
+    rline  0.3 -0.075
+    rline -0.6 -0.15
+    rline  0.3 -0.075
+   next i
+   rline 0 -0.1
+  end origin
+endsub
+
+ sub "earth"  a  b  c
+! Earth point 
+! a is box color  b is earth line width
+! c is earth colour
+! height  -0.7
+begin origin
+   aline 0 -0.20
+   set linewidth b linecolor c
+   for i = 0 to 6
+    amove -0.2*(i-3) -0.25
+    rline 0.15 -0.5
+   next i
+   set linecolor a fillcolor a
+   amove -0.7 -0.25 
+   box 1.4 0.1
+  end origin
+ endsub
+
+! Diode 
+! Width 1.5
+sub "diode"
+ begin origin
+  set arrowstyle froman arrowlinecolor black arrowfillcolor black 
+& arrowsize 0.7
+  begin scale 1 1
+   aline 0.9 0 arrow end
+   amove 0.9 -0.3
+   box  0.3 0.6
+   amove 1.2 0
+   aline 1.5 0 arrow none
+  end scale
+ end origin
+endsub
+ 
+! Voltage source
+! height -1.5
+sub "vsource"
+ begin origin
+   aline 0 -0.35
+   amove 0 -0.75
+   set fillcolor white
+   circle 0.4
+   amove 0 -1.15 
+   aline 0 -1.5 
+ end origin
+endsub
+
+! Current source
+! height -1.5
+sub "csource" 
+ begin origin
+   aline 0 -0.2
+   amove 0 -0.55
+   set fillstyle 0 
+   circle 0.35
+   amove 0 -0.90
+   circle 0.35
+   amove 0 -1.25 
+   aline 0 -1.5 
+ end origin
+endsub
+
+sub "pnptran"
+! width 1.0  height 1.6
+! output at collector
+ begin origin
+  aline 0.2 0
+  amove 0.2 -0.5
+  set fillstyle 1 fillcolor black
+  box   0.2  1.0
+  set arrowstyle fnorman arrowlinecolor black arrowfillcolor black
+& arrowsize 0.35
+  amove 0.4 -0.2
+  aline 1.0 -0.8 arrow start
+  amove 0.4 0.2
+  aline 1.0 0.8  arrow none
+ end origin
+endsub
+
+sub "npntran"
+! width 1.0  height 1.6
+! output at collector
+ begin origin
+  aline 0.2 0
+  amove 0.2 -0.5
+  set fillstyle 1 fillcolor black
+  box   0.2  1.0
+  set arrowstyle fnorman arrowlinecolor black arrowfillcolor black
+& arrowsize 0.35
+  amove 0.4 -0.2
+  aline 0.8 -0.6 arrow end
+  aline 1.0 -0.8 arrow none
+  amove 0.4 0.2
+  aline 1.0 0.8  arrow none
+ end origin
+endsub
+
+! Enter component table
+ amove 2 6.25
+  begin scale 1.00 1.00  
+   begin rotate 0.00
+    @capacitor black white black
+   end rotate
+  end scale
+
+ amove 2 5.0
+ begin scale 1.0 1.0
+   begin rotate 0
+    @inductor 3  
+  end rotate
+ end scale
+
+ amove 2 3.0
+ begin scale 1 1
+  begin rotate 0
+   @resistor 3
+  end rotate
+ end scale
+
+ amove 2.3 1.5
+  begin scale 1.0 1.0
+   @earth  black 0.01  green
+  end scale
+
+ amove  4.5  4.0
+ begin scale 1 1
+  begin rotate 0
+   @vsource
+  end rotate
+ end scale
+ 
+ amove 4.5 2.25
+ begin scale 1 1
+  begin rotate 0
+   @csource
+  end rotate
+ end scale
+
+ amove  1.5 7.5
+ begin scale 1 1.5
+  begin rotate  0
+   @diode
+  end rotate
+ end scale
+
+ amove  4.2 5.3
+ begin scale 1 1
+  begin rotate 0
+   @pnptran
+  end rotate
+ end scale
+
+ amove  4.2 7.5
+ begin scale 1 1
+  begin rotate 0
+   @npntran
+  end rotate
+ end scale
+
+ begin scale 0.5 0.5 
+ Amove     3.000  18.400
+ set fillstyle 0
+ set font "Times New Roman" hei 0.75 fontcolor blue
+ Text    Basic Components
+ set linewidth 0.1
+ Amove     12.000   18.000
+ ALine     12.000    1.500
+set linewidth 0.01
+end scale
+ set arrowsize 0.25
+ Amove      1.460    6.720
+ ALine      3.000    6.720 arrow both
+ Amove      1.200    6.260
+ ALine      1.200    5.260
+ Amove      1.200    5.040
+ ALine      1.200    3.300
+ Amove      1.200    3.000
+ ALine      1.200    1.900
+ Amove      1.200    1.500
+ ALine      1.200    0.800
+ Set Fillstyle 1 Fillcolor white
+ Set Font "Arial"  Hei   0.285714 fontcolor $00000000  
+ Amove      0.600    5.880
+ Text    1.0
+ Amove      0.300    4.520
+ Text    0.4.n
+ Amove      0.280    4.140
+ Text    +0.5
+ Amove      0.300    2.760
+ Text    0.3.n
+ Amove      0.260    2.380
+ Text    +0.2
+ Amove      0.480    1.320
+ Text    0.7
+ Amove      2.020    6.860
+ Text    1.5
+ Amove      4.200    6.420
+ ALine      5.240    6.420
+ Amove      5.360    8.280
+ ALine      5.360    6.720
+ Amove      5.080    7.860
+ Text    1.6
+ Amove      5.360    6.080
+ ALine      5.360    4.520
+ Amove      5.100    5.460
+ Text    1.6
+ Amove      4.480    6.80
+ Text    1.0
+ Amove      1.100    7.680
+ Text    in
+ Amove      1.600    6.400
+ Text    in
+ Amove      1.540    5.160
+ Text    in
+ Amove      1.520    3.160
+ Text    in
+ Amove      1.880    1.680
+ Text    in
+ Amove      3.780    7.660
+ Text    in
+ Amove      3.760    5.480
+ Text    in
+ Amove      4.020    4.120
+ Text    in
+ Amove      4.040    2.360
+ Text    in
+ Amove     5.340    4.000
+ ALine     5.340    2.500
+
+ Amove      5.340    2.240
+ ALine      5.340    0.740
+ Amove      5.100    3.360
+ Text    1.5
+ Amove      5.100    1.660
+ Text    1.5
+ Amove      3.060    7.660
+ Text    out
+ Amove      4.940    8.600
+ Text    out
+ Amove      5.040    6.380
+! Text    out
+ Amove      3.900    2.780
+ Text    out
+ Amove      3.900    0.960
+ Text    out
+ Amove      2.180    2.080
+ Text    out
+ Amove      1.420    3.540
+ Text    out
+ Amove      2.100    5.380
+ Text    out
+ Amove      2.400    1.700
+ Text    out
+ Amove      4.550    6.280
+ Text    out
+
+! Draw circuit with optional scaling and rotation
+amove 6  2.75
+begin origin
+! Try altering the size and angle of the circuit
+begin scale 0.5 0.5
+ begin rotate -25
+ 
+ set linewidth 0.05
+ Amove      2.000    2.500
+ ALine     14.000    2.500 arrow none
+ ALine     14.000    1.750
+ @earth black 0.035 green
+ set linewidth 0.02 fillstyle 1 fillcolor white
+ amove  2.000    2.500
+ circle 0.200
+ amove   2.000  8.000
+ circle 0.200
+ Amove    2.200  8.000
+ ALine    2.60   8.000
+ begin rotate 90
+  @capacitor black black black
+ end rotate
+ set fillcolor white
+ ALine     5.000   8.000
+ Amove     4.00    8.000
+ ALine     4.000   6.500
+ @resistor 5
+ ALine     4.000   2.480
+ Amove     5.000   8.000
+ @npntran
+ Amove     6.000   7.200
+ ALine     6.000   6.000
+ @resistor 5
+ ALine     6.000    2.500
+ Amove     6.000    6.600
+ ALine     7.000    6.600
+ ALine     7.000    5.600
+ @capacitor black black black
+ ALine     7.000    2.500
+ set linewidth 0.05
+ Amove    15.000   16.000
+ ALine    2.000   16.000
+ aline   2.00    14.00
+ rmove 0 0.2
+ set linewidth 0.02
+ @capacitor black  white
+ rmove 0.0  0.2
+ set linewidth 0.05
+ aline   2.00    12.00
+ @earth  black 0.035 green 
+ set linewidth 0.02
+ Amove     6.000   16.000
+ Aline     6.000   12.000
+ @inductor 5
+ Aline     6.000    8.750
+ Amove      6.000   12.500
+ ALine      4.800   12.500
+ Aline      4.80    11.25
+ @capacitor black black
+ Aline      4.800    9.200
+ Aline      6.000    9.200
+ Amove      3.800   16.000
+ ALine      3.800   14.000
+ @resistor 5
+ Aline      3.800    8.000
+ Amove      8.500   16.000
+ Aline      8.500   14.000
+ @resistor 5
+ aline      8.500    8.25
+ Amove      10.00    8.0
+ aline      7.250    8.0
+ aline      7.25     9.5
+! Note rotation of inductor to produce a mirror image
+ begin rotate 180
+ @inductor 3
+ end rotate
+ aline      7.25    11.500
+ aline      8.50    11.500
+ Amove      8.500   11.500
+ ALine      8.500    8.200
+ Amove      8.500    7.760
+ ALine      8.500    6.200
+ @resistor 5
+ Aline      8.500    2.500
+ amove      8.500    7.000
+ aline      9.500    7.000
+ aline      9.500    5.500
+ @capacitor  black  black  
+ aline      9.500    2.500
+ amove     10.000    8.000
+ @npntran
+ amove     11.000   16.000
+ aline     11.000   12.000
+ @inductor 5
+ aline     11.000    8.750
+ Amove     11.000   12.500
+ ALine      9.800   12.500
+ Aline      9.80    11.25
+ @capacitor black black
+ Aline      9.800    9.200
+ Aline     11.000    9.200
+ Amove     11.000   7.200
+ ALine     11.000   6.000
+ @resistor 5
+ ALine     11.000    2.500
+ Amove     11.000    6.600
+ ALine     12.000    6.600
+ ALine     12.000    5.600
+ @capacitor black black black
+ ALine     12.000    2.500
+ Amove     15.000   9.2500
+ Aline     12.250   9.2500
+ ALine     12.250   9.500
+!  amove     12.250   9.5
+ begin rotate 180
+ @inductor 3
+ end rotate
+ aline     12.250    11.50
+ aline     15.000    11.50
+ set fillcolor white
+ circle 0.200
+ amove     15.000    9.2500
+ circle 0.200
+ amove     14.000    9.250
+ set linewidth 0.05
+ aline     14.000    2.500
+! Add component labels
+ Set Font "Arial"  Hei   0.500000 fontcolor $00000000  
+ set fillstyle 0
+ Amove      0.480   13.960
+ Text    C1
+ Amove      2.680    9.240
+ Text    C2
+ Amove      3.960   11.600
+ Text    C3
+ Amove      7.160    6.000
+ Text    C4
+ Amove      9.680    5.960
+ Text    C5
+ Amove      8.800   11.640
+ Text    C6
+ Amove     12.280    5.960
+ Text    C7
+ Amove      4.440   13.800
+ Text    R1
+ Amove      2.680    5.800
+ Text    R2
+ Amove      4.720    5.720
+ Text    R3
+ Amove      8.640    6.640
+ Text    R4
+ Amove     11.160    6.440
+ Text    R5
+ Amove      9.040   13.480
+ Text    R6
+ Amove      6.280   12.440
+ Text    L1
+ Amove      7.480    9.640
+ Text    L2
+ Amove     10.080   12.280
+ Text    L3
+ Amove     12.880   10.760
+ Text    L4
+ Amove      5.760    8.240
+ Text    T1
+ Amove     10.760    8.280
+ Text    T2
+ Amove     13.680   16.760
+ Text    +5.6V
+ end rotate
+ end scale
+ end origin
+! End of scaling and rotation blocks
+! The Source code for GLE 2000 and further examples
+! can be downloaded from either SimTel in
+! http://www.simtel.net/simtel.net/win95/graphics/
+! or from my File cache on http://www.cai.cam.ac.uk/people/dgi
+! the latest version which includes minor bug fixes is in
+! GLEFix2.zip.
+! Derek Ingram.  Gonville & Caius College. Cambridge
+! dgi1@cus.cam.ac.uk

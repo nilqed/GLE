@@ -1,0 +1,71 @@
+size 9 4.1
+
+set font psh
+
+sub red_bullet
+   ! draw a red bullet
+   gsave
+   set color red fill red
+   circle 0.06
+   grestore
+end sub
+
+begin object house
+   ! draw a house with a named door and window
+   set join round
+   ! draw the roof
+   begin path stroke fill lightsalmon
+      amove 0 1.625
+      aline 1.25 2.5
+      aline 2.5 1.625
+      closepath
+   end path
+   ! draw the brick wall
+   amove 0 0
+   box 2.5 1.625 fill cornsilk
+   ! draw the door
+   amove 1.5 0
+   box 0.75 1.375 fill burlywood name door
+   ! draw the window
+   amove 0.25 0.625
+   box 1 0.75 fill skyblue name window
+end object
+
+! draw the house
+amove pagewidth()/2 1.5
+draw house.bc
+red_bullet
+
+! mark the door and window with a red bullet
+move house.door.cc
+red_bullet
+move house.window.cc
+red_bullet
+
+! draw the labels
+set just bc
+amove pagewidth()/2 0.1
+begin name drawcmd add 0.05
+   begin text
+      amove pagewidth()/2 1.5
+      draw house.bc
+   end text
+end name
+
+set just lc
+amove pointx(house.rc)+0.5 pointy(house.door.cc)
+begin name doorlabel add 0.05
+   write "house.door.cc"
+end name
+
+set just rc
+amove pointx(house.lc)-0.5 pointy(house.window.cc)
+begin name windowlabel add 0.05
+   write "house.window.cc"
+end name
+
+! draw the arrows
+join drawcmd.tc -> house.bc
+join windowlabel.rc -> house.window.cc
+join doorlabel.lc -> house.door.cc
+

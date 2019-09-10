@@ -1,0 +1,519 @@
+! Subroutines to draw various shapes
+
+shape_use_tex  = 0
+shape_color_2$ = clear
+shadow_color$  = "gray10"
+
+shape_dx = 0.1
+shape_dy = 0.1
+
+sub set_shape_use_tex use
+   shape_use_tex = use
+end sub
+
+sub set_shape_color_2 color$
+   ! Set the secondary filling color for the shapes
+   shape_color_2$ = color$
+end sub
+
+sub set_shadow_color color$
+   ! Set the color of the shadow
+   shadow_color$ = color$
+end sub
+
+sub set_shape_dxdy dx dy
+   ! Set the internal gap of a shape (for shapes containing text)
+   shape_dx = dx
+   shape_dy = dy
+end sub
+
+begin object rectangle width height round
+   ! Draw a rectangle
+   ! width, height: the width and height of the rectangle
+   default width 1
+   default height 1
+   default round 0
+   box width height round round
+end object
+
+begin object rectangle_text width height text$ round
+   ! Draw a rectangle
+   ! width, height: the width and height of the rectangle
+   default width 1
+   default height 1
+   default round 0
+   default text "X"
+   box width height round round
+   set just cc
+   amove width/2 height/2
+   write text$
+end object
+
+begin object rectangle_text_fit text$ round margin_x margin_y
+   ! Draw a rectangle
+   default text "X"
+   default round 0
+   default margin_x 0.1
+   default margin_y 0.1
+   local tw = twidth(text$)+2*margin_x
+   local th = theight(text$)+2*margin_y
+   amove -tw/2 -th/2
+   box tw th round round
+   set just cc
+   amove 0 0
+   write text$
+end object
+
+begin object triangle width height angle
+   ! Draw a rectangle
+   ! w, h: the width and height of the rectangle
+   default width 1
+   default height 1
+   default angle 0
+   begin rotate angle
+      amove width/2 height
+      begin path stroke
+         aline width 0
+         aline 0  0
+         closepath
+      end path
+   end rotate
+end object
+
+begin object hexagon width height
+   ! Draw a named hexagon
+   ! w, h: the width and height of the hexagon
+   default width 1
+   default height 1
+   dx=width/2*cos(torad(30))
+   dy=height/2*sin(torad(30))
+   amove x y+height/4+dy; name "p1"
+   begin path stroke
+      aline x+dx y+height/4; name "p2"
+      aline x+dx y-height/4; name "p3"
+      aline x y-height/4-dy; name "p4"
+      aline x-dx y-height/4; name "p5"
+      aline x-dx y+height/4; name "p6"
+      closepath
+   end path
+end object
+
+begin object rhomb width height
+   ! Draw a rhomb
+   ! width: width of the rhomb
+   ! height: height of the rhomb
+   default width 1
+   default height 1
+   amove 0 +height/2
+   begin path stroke
+      aline -width/2 0
+      aline 0       -height/2
+      aline +width/2 0
+      closepath
+   end path
+end object
+
+begin object plus width height
+   ! Draw a plus "+" at current position
+   ! d: the size of the plus
+   ! width: width of the plus
+   ! height: height of the plus
+   default width 1
+   default height 1
+   amove -width/2  0
+   aline  width/2  0
+   amove  0   -height/2
+   aline  0    height/2
+end object
+
+begin object cross width height
+   ! Draw a cross "x" at current position
+   ! width: width of the cross
+   ! height: height of the cross
+   default width 1
+   default height 1
+   amove -width/2 -height/2
+   aline  width/2  height/2
+   amove -width/2  height/2
+   aline  width/2 -height/2
+end object
+
+begin object disk width height ellipse
+   ! Draw a disk
+   ! width: disk width
+   ! height: disk height
+   ! ellipse: height of top ellipse
+   default width 1
+   default height 1
+   default ellipse 0.15
+   set join round
+   amove 0 height/2-ellipse*height
+   begin path stroke
+      elliptical_narc width/2 ellipse*height 0 180
+      aline -width/2 -height/2+ellipse*height
+      asetpos 0 -height/2+ellipse*height
+      elliptical_arc width/2 ellipse*height 180 0
+      closepath
+   end path
+   amove 0 height/2-ellipse*height
+   begin path stroke fill shape_color_2$
+      elliptical_arc width/2 ellipse*height 0 180
+      asetpos 0 height/2-ellipse*height
+      elliptical_arc width/2 ellipse*height 180 0
+      closepath
+   end path
+   abound -width/2 height/2;  abound +width/2 height/2
+   abound -width/2 -height/2; abound +width/2 -height/2
+end object
+
+begin object disk_text width height ellipse text$ text_distance
+   ! Draw a disk
+   ! width: disk width
+   ! height: disk height
+   ! ellipse: height of top ellipse
+   ! text$: text to write
+   ! text_distance: offset for text (normally 0)
+   default width 1
+   default height 1
+   default ellipse 0.15
+   default text "X"
+   default text_distance 0
+   draw disk width height ellipse
+   gsave
+   set just cc
+   rmove 0 text_distance-ellipse*height
+   write text$
+   grestore
+end object
+
+sub rootnode xp yp width height name$
+   amove xp-width/2 yp-height
+   box width height name name$
+end sub
+
+sub drawnode width height name$ type
+   if type = 0 then
+      amove xpos()-width/2 ypos()-height
+      box width height name name$
+   else
+      amove xpos()-width/2 ypos()-height
+      box width height name name$ nobox fill clear
+      rmove width/2 height/2
+      if shape_color_2$ = "clear" then
+         ellipse width/2 height/2
+      else
+         ellipse width/2 height/2 fill shape_color_2$
+      end if
+   end if
+end sub
+
+sub binchilds par$ c1$ c2$ width height ydel xdel l1 l2
+   amove pointx(par$+".bc")-xdel pointy(par$+".bc")-ydel
+   drawnode width height c1$ l1
+   amove pointx(par$+".bc")+xdel pointy(par$+".bc")-ydel
+   drawnode width height c2$ l2
+   join par$+".bc" - c1$+".tc"
+   join par$+".bc" - c2$+".tc"
+end sub
+
+begin object l_tree width height width_factor height_factor
+   ! Draw a small tree (with left subtree)
+   ! width: width of the tree
+   ! height: height of the tree
+   ! width_factor: proportion of width = width of node
+   ! height_factor: proportion of height = height of node
+   default width 1
+   default height 1
+   default width_factor 0.3
+   default height_factor 0.2
+   local nodewd = width*width_factor
+   local nodehi = height*height_factor
+   local yoffs = (height-3*nodehi)/2
+   local xoffs = (width-nodewd)/3
+   rootnode -width/2+nodewd/2+2*xoffs height/2 nodewd nodehi "n1"
+   binchilds "n1" "n2" "l3" nodewd nodehi yoffs xoffs 0 1
+   binchilds "n2" "l1" "l2" nodewd nodehi yoffs xoffs 1 1
+end object
+
+begin object r_tree width height width_factor height_factor
+   ! Draw a small tree (with right subtree)
+   ! width: width of the tree
+   ! height: height of the tree
+   ! width_factor: proportion of width = width of node
+   ! height_factor: proportion of height = height of node
+   default width 1
+   default height 1
+   default width_factor 0.3
+   default height_factor 0.2
+   local nodewd = width*width_factor
+   local nodehi = height*height_factor
+   local yoffs = (height-3*nodehi)/2
+   local xoffs = (width-nodewd)/3
+   rootnode xpos()-width/2+nodewd/2+xoffs ypos()+height/2 nodewd nodehi "n1"
+   binchilds "n1" "l1" "n2" nodewd nodehi yoffs xoffs 1 0
+   binchilds "n2" "l2" "l3" nodewd nodehi yoffs xoffs 1 1
+end object
+
+begin object human_stick width height
+   default width 0.5
+   default height 1
+   local sx = width/0.4
+   local sy = height/0.7
+   amove 0 0.6*sy; circle 0.1*sy
+   amove 0 0.5*sy; aline  0.0 0.2*sy
+   amove 0 0.2*sy; aline -0.2*sx 0
+   amove 0 0.2*sy; aline +0.2*sx 0
+   amove 0 0.5*sy; aline -0.2*sx 0.3*sy
+   amove 0 0.5*sy; aline +0.2*sx 0.3*sy
+end object
+
+begin object shadow_box obj$ margin shadow
+   begin box fill white add margin nobox name obj$+"-box"
+      draw obj$+".tl"
+   end box
+   local xp = ptx(obj$+"-box.tl")
+   local yp = pty(obj$+"-box.tl")
+   local width = width(obj$+"-box")
+   local height = height(obj$+"-box")
+   begin path fill shadow_color$
+      amove xp+shadow yp-height
+      aline xp+width yp-height
+      aline xp+width yp-shadow
+      aline xp+width+shadow yp-shadow
+      aline xp+width+shadow yp-height-shadow
+      aline xp+shadow yp-height-shadow
+      closepath
+   end path
+   amove xp yp-height
+   box width height
+end object
+
+begin object big_arrow_both_angle width height angle
+   ! Draw an up/down arrow
+   ! width: width of the arrow
+   ! height: height of the arrow
+   ! angle: rotation angle
+   default width 1
+   default height 1
+   default angle 0
+   begin rotate angle
+      amove 0 -height/2
+      begin path stroke
+         aline width/2  -height/6
+         aline width/4  -height/6
+         aline width/4  +height/6
+         aline width/2  +height/6
+         aline 0        +height/2
+         aline -width/2 +height/6
+         aline -width/4 +height/6
+         aline -width/4 -height/6
+         aline -width/2 -height/6
+         closepath
+      end path
+   end rotate
+end object
+
+begin object big_arrow_angle width height angle
+   ! Draw a left facing arrow
+   ! width: width of the arrow
+   ! height: height of the arrow
+   ! angle: rotation angle
+   default width 1
+   default height 1
+   default angle 0
+   begin rotate angle
+      amove -width/2 0
+      begin path stroke
+         aline 0       -height/2
+         aline 0       -height/4
+         aline width/2 -height/4
+         aline width/2 +height/4
+         aline 0       +height/4
+         aline 0       +height/2
+         closepath
+      end path
+   end rotate
+end object
+
+begin object big_arrow_ud width height
+   ! Draw an up/down arrow
+   ! width: width of the arrow
+   ! height: height of the arrow
+   default width 1
+   default height 1
+   big_arrow_both_angle width height 0
+end object
+
+begin object big_arrow_lr width height
+   ! Draw an left/right arrow
+   ! width: width of the arrow
+   ! height: height of the arrow
+   default width 1
+   default height 1
+   big_arrow_both_angle width height 90
+end object
+
+begin object big_arrow_left width height
+   ! Draw a left facing arrow
+   ! width: width of the arrow
+   ! height: height of the arrow
+   default width 1
+   default height 1
+   big_arrow_angle width height 0
+end object
+
+begin object big_arrow_right width height
+   ! Draw a right facing arrow
+   ! width: width of the arrow
+   ! height: height of the arrow
+   default width 1
+   default height 1
+   big_arrow_angle width height 180
+end object
+
+begin object big_arrow_up width height
+   ! Draw a up facing arrow
+   ! width: width of the arrow
+   ! height: height of the arrow
+   default width 1
+   default height 1
+   big_arrow_angle width height -90
+end object
+
+begin object big_arrow_down width height
+   ! Draw a down facing arrow
+   ! width: width of the arrow
+   ! height: height of the arrow
+   default width 1
+   default height 1
+   big_arrow_angle width height 90
+end object
+
+sub pmove d a
+   amove xpos()+d*cos(torad(a)) ypos()+d*sin(torad(a))
+end sub
+
+sub jointo n$
+   aline ptx(n$) pty(n$)
+end sub
+
+sub set_angle_just angle
+   if angle = 0 then
+      set just lc
+   else if angle = 90 then
+      set just bc
+   else if angle = 180 then
+      set just rc
+   else if angle = -90 then
+      set just tc
+   else if (angle > 0) and (angle < 90) then
+      set just bl
+   else if (angle > 90) and (angle < 180) then
+      set just br
+   else if (angle > -90) and (angle < 0) then
+      set just tl
+   else
+      set just tr
+   end if
+end sub
+
+sub line_label x1 y1 x2 y2 str$ dist
+   ! Draw a label at the center of an imaginary line from (x1,y1) to (x2,y2)
+   ! (x1,y1): starting point of the line
+   ! (x2,y2): ending point of the line
+   ! str$: label to draw
+   ! dist: distance between label and line
+   if dist > 0 then set just bc
+   else set just tc
+   amove (x1+x2)/2 (y1+y2)/2
+   begin rotate xy2angle(x2-x1,y2-y1)
+      rmove 0 dist
+      write str$
+   end rotate
+end sub
+
+sub join_label a$ dir$ b$ label$ deltax deltay ldist
+   ! Similar to the join command, but also labels the arrow
+   default deltax 0
+   default deltay 0
+   default ldist 0.1
+   local x1 = ptx(a$)
+   local x2 = ptx(b$)
+   local y1 = pty(a$)
+   local y2 = pty(b$)
+   amove x1+deltax y1+deltay
+   if dir$ = "->" then aline x2-deltax y2-deltay arrow end
+   else if dir$ = "<-" then aline x2-deltax y2-deltay arrow start
+   else if dir$ = "<->" then aline x2-deltax y2-deltay arrow both
+   else aline x2-deltax y2-deltay
+   line_label x1+deltax y1+deltay x2-deltax y2-deltay label$ ldist
+end sub
+
+sub curly_bracket x1 y1 x2 y2 r
+   ! Draw a curly bracket from (x1,y1) to (x2,y2) with radius r
+   ! To draw the curly bracket on the "other side" of the line, swap (x1,y1) and (x2,y2)
+   local xm = (x1+x2)/2
+   local ym = (y1+y2)/2
+   width = sqrt((xm-x1)^2+(ym-y1)^2)
+   amove xm ym
+   set fill clear
+   begin rotate xy2angle(x2-x1,y2-y1)
+      rmove -width+r 0
+      begin path stroke
+         arc r 90 180
+         rmove 0 r
+         rline width-2*r 0
+         rsetpos 0 r
+         arc r 270 0
+         rsetpos 2*r 0
+         arc r 180 270
+         rmove 0 -r
+         rline width-2*r 0
+         rsetpos 0 -r
+         narc r 90 0
+      end path
+   end rotate
+   abound x1 y1
+   abound x2 y2
+end sub
+
+begin object curly_bracket_left width height
+   default width 0.2
+   default height 1
+   curly_bracket 0 0 0 height width/2
+end object
+
+begin object curly_bracket_right width height
+   default width 0.2
+   default height 1
+   curly_bracket 0 height 0 0 width/2
+end object
+
+begin object curly_bracket_up width height
+   default width 1
+   default height 0.2
+   curly_bracket 0 0 width 0 height/2
+end object
+
+begin object curly_bracket_down width height
+   default width 1
+   default height 0.2
+   curly_bracket width 0 0 0 height/2
+end object
+
+sub labeled_circle label$ radius lradius langle name$ lcolor$
+   default lradius 0.1
+   default langle  90
+   default name    "n"
+   default lcolor  black
+   gsave
+   begin name name$
+      circle radius
+   end name
+   set color lcolor$
+   pmove radius+lradius langle
+   set_angle_just langle
+   tex label$
+   grestore
+end sub
+

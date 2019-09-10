@@ -1,0 +1,29 @@
+size 7 7
+
+set font texcmr
+
+begin fitz
+   data "fitz.dat"
+   x from 0 to 5 step 0.2
+   y from 0 to 5 step 0.2
+   ncontour 6
+end fitz
+
+begin object fitz
+   begin surface
+      size 8 8
+      data "fitz.z"
+      top color blue
+      xaxis min 0 max 5 step 1 hei .25
+      yaxis min 0 max 5 step 1 hei .25
+      zaxis step .5 hei .25
+      zaxis min 0 max 2.5
+      points "fitz.dat"
+      droplines lstyle 1
+      marker circle
+      view 2.5 3 .3
+   end surface
+end object
+
+amove pagewidth()/2 pageheight()/2
+draw fitz.cc

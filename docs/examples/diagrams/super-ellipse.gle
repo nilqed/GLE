@@ -1,0 +1,38 @@
+! Graphical representation of Piet Hein's superellipse
+
+size 8 10.5
+
+set cap round just tc hei 0.5 font rm
+
+amove 4 5 
+begin origin                     ! Sets the origin of the ellipse at (10,9) 
+   a = 3.75; b = 4.75            ! a and b represent the excentricity of the ellipse
+   begin clip
+      amove -a -b                ! Draws the box that represents the limit as n tends to    
+      begin path clip stroke
+         box 2*a 2*b             ! infinity
+      end path 
+      for n=0.5 to 5 step 0.25   ! n is the exponent of the ellipse 
+         for i=0 to 360          ! Calculates the radial distance from the x and y
+            ang = torad(i)
+            c = abs(cos(ang))
+            s = abs(sin(ang))
+            ax = (c/a)^n         ! ax is the projection of the radial coordinate along the x axis
+            ay = (s/b)^n         ! ay is the same along the y axis
+            z = 1/(ax+ay)^(1/n) 
+            if i = 0 then 
+               amove z*cos(ang) z*sin(ang) 
+            else 
+               aline z*cos(ang) z*sin(ang)
+            end if 
+         next i 
+      next n
+   end clip
+end origin
+
+amove pagewidth()/2 pageheight()-0.15
+write "Piet Hein's superellipse"
+
+set just cc
+amove pagewidth()/2 5
+tex "\large $|\frac{x}{a}|^n + |\frac{y}{b}|^n = 1$"

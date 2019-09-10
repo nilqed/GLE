@@ -1,0 +1,117 @@
+size 10.7 3.2 ! 2*(x+y+x2+d1+d)+d2 2*y+dl+d+dy
+
+include "feyn.gle"
+
+x = 1
+x2 = 1.5
+y = 0.75
+y1 = 0.2
+d = 0.1
+dl = 0.3
+d1 = 1.5
+d2 = 1
+d3 = 0.05
+dy = 1.25
+r = 0.05
+r2 = 0.07
+rr = 0.2
+at = 0.12
+
+sub tri a
+    begin origin
+        begin rotate 90*a
+            begin path fill black
+                amove 0 -at
+                aline -0.75*at at
+                aline 0.75*at at
+                aline 0 -at
+            end path
+        end rotate
+    end origin
+end sub
+
+begin translate d y+dy+dl ! 1.1
+    amove 0 0
+    circle r fill black
+    @fermion 2*x 0
+    @arrow 0.25
+    @arrow 0.75
+    circle r fill black
+    amove x 0
+    circle r fill black
+    @photon x y
+    @tri 0
+    amove 1.5*x y1
+    circle r2 fill black
+end translate
+
+begin translate 2*x+d1+d y+dy+dl ! 1.2
+    amove 0 0
+    @fermion 2*y 0
+    @arrow 0.25
+    @arrow 0.75
+    amove y 0
+    circle r fill black
+    @photon y y
+end translate
+
+begin translate 2*(x+y+d1)+d y+dy+dl ! 1.3
+    amove 0 0
+    circle r fill black
+    @fermion x2 0
+    @arrow 0.5
+    circle r fill black
+    amove 0.5*x2 y1
+    circle r2 fill black
+end translate
+
+begin translate 2*(x+y+d1)+x2+d2+d y+dy+dl ! 1.4
+    amove 0 0
+    circle r fill black
+    @fermion x2 0
+    @arrow 0.5
+    circle r fill black
+end translate
+
+begin translate d dl ! 2.1
+    amove 0 0
+    circle r fill black
+    @photon 2*x 0
+    circle r fill black
+    amove x 0
+    circle r fill black
+    @photon x y
+    @tri 0
+    amove 1.5*x y1
+    circle r2 fill black
+end translate
+
+begin translate 2*x+d1+d dl ! 2.2
+    amove 0 0
+    @photon 2*y 0
+    amove y 0
+    circle r fill black
+    @photon y y
+    ! direction
+    amove y-rr rr+d3
+    @fermion y-rr d3
+    @fermion2 y d3-rr y+rr d3
+    @fermion y+rr rr+d3
+    @arrow 1
+end translate
+
+begin translate 2*(x+y+d1)+d dl ! 2.3
+    amove 0 0
+    circle r fill black
+    @photon x2 0
+    circle r fill black
+    amove 0.5*x2 y1
+    circle r2 fill black
+end translate
+
+begin translate 2*(x+y+d1)+x2+d2+d dl ! 2.4
+    amove 0 0
+    circle r fill black
+    @photon x2 0
+    circle r fill black
+end translate

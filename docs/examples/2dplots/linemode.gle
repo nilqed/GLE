@@ -1,0 +1,21 @@
+size 18 8
+
+set font texcmr
+sub linemode xp yp type$
+   amove xp*6 yp*4
+   begin graph
+      size 6 3.75
+      data  "test.dat"
+      title "d1 line "+type$
+      yaxis min 0 max 12 dticks 4
+      xaxis min -0.5 max 5.5
+      d1 line \expr{type$}
+      d1 marker square msize 0.15 color red
+   end graph
+end sub
+
+linemode 0 1 "impulses"
+linemode 1 1 "steps"
+linemode 0 0 "fsteps"
+linemode 1 0 "hist"
+linemode 2 1 "bar"

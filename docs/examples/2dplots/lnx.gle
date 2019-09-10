@@ -1,0 +1,46 @@
+size 9 7
+
+include "shape.gle"
+include "graphutil.gle"
+
+a = 4
+
+! draw graph
+set texlabels 1
+begin graph
+   scale auto
+   title "Natural Logarithm"
+   xtitle "$x$"
+   ytitle "$y$"
+   xaxis min 0 max a+1
+   yaxis min 0 max 1.2
+   let d1 = 1/x
+   let d2 = 1/x from 1 to a
+   d1 line color red
+   fill x1,d2 color moccasin
+end graph
+
+! draw vertical red lines
+set color red
+graph_line 1 0 1 1
+graph_line a 0 a 1/a
+set color black
+
+! draw integral equation
+set just cc
+amove xg(2.5) yg(0.18)
+tex "$\displaystyle\log a = \int_{1}^{a}{\textstyle \frac{1}{x}\,dx}$"
+
+! define subroutine to add labels to graph
+sub label_by_dist_angle xp yp label$ dist angle
+   default dist 0.75
+   default angle 90
+   amove xg(xp) yg(yp); pmove dist angle
+   set just bc; tex label$
+   amove xg(xp) yg(yp); pmove dist-0.1 angle
+   aline xg(xp) yg(yp) arrow end
+end sub
+
+! draw "a" and "1/x"
+label_by_dist_angle a    1/a    "$a$"
+label_by_dist_angle 1.75 1/1.75 "$y = \frac{1}{x}$" angle 40

@@ -1,0 +1,78 @@
+size 16 12 box
+
+set hei .6 just center font texcmr
+
+amove 10.9 10.3
+begin box add .2
+begin text
+ Fill Colors and Patterns for GLE
+end text
+end box
+
+set just left font texcmss hei .25
+amove 0.5 .4
+text dvifill.gle
+amove 2 4
+
+sub sh f$ 
+ set just left
+ box 2.3 1 fill f$
+ box 2 .5 fill white
+ RMOVE .2 .1
+ write f$
+ rmove -.2 1.4
+end sub
+
+sub ssh f$ ff$ n$
+ set just left
+ set fill f$
+ set pattern ff$
+ box 2.3 1
+ box 2 .5 fill white
+ RMOVE .2 .1
+ write n$
+ rmove -.2 1.4
+end sub
+
+amove .5 1
+@sh "Red"
+@sh "Green"
+@sh "Blue"
+@sh "Magenta"
+@sh "Yellow"
+@ssh "red" "grid" "RED GRID"
+@SsH "blue" "grid" "BLUE GRID"
+
+amove 3 1
+@sh "Orange"
+@sh "Cyan"
+@sh "White"
+@sh "Gray90"
+@sh "cvtrgb(.2,0,0)"
+@sh "cvtrgb(0,.8,0)"
+@sh "cvtrgb(0,0,.8)"
+
+amove 6.5 1
+@sh "Shade"
+@sh "Shade1"
+@sh "Shade2"
+@sh "Shade3"
+@sh "Shade4"
+@sh "Shade5"
+
+amove 9.75 1
+@sh "Grid"
+@sh "Grid1"
+@sh "Grid2"
+@sh "Grid3"
+@sh "Grid4"
+@sh "Grid5"
+
+amove 13 1
+@sh "Gray1"
+@sh "Gray5"
+@sh "Gray10"
+@sh "Gray30"
+@sh "Gray70"
+@sh "Gray90"
+

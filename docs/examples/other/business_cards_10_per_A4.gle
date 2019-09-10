@@ -1,0 +1,209 @@
+papersize a4paper
+size 21.0 29.7
+
+!============================================================================
+! this gle script produces 10 business cards on an A4 sheet
+! Use any good paper, photo or board. 
+! Not aligned to pre-perforated sheets !!!!
+! use the arrow marks to align guillotine.
+! for accurate sizing, set printer to NO PAGE SCALING
+!  If you want border enable the  : box  card_width card_height  code below
+!
+!    author: emile                
+!    march 2010.
+!============================================================================
+
+!       modify the fields below with your details.
+
+name$ =         "Your Name"
+mobile$ =       "+99 0411 111 111"
+telephone$ =    "+99 123456789"
+title$ =        "Electronics Engineer"
+post_nominals$ ="B.Eng. MBA"
+email$ =        "Your\_Name@company.com"    !note escape for underscore
+jobs1$ =        "Sales Electronics"
+jobs2$ =        "Project management"
+Website$ =      "www.company.com"
+Company$ =      "Universal Electronics LLC"
+Street$ =       "123 Looooong Street"
+City$ =         "BigTown, 12345"
+Country$ =      "Australia"
+
+!--- choose yor font here
+set font ssb        ! psagb pshn psncsr  psagb  sets global font; these fonts work ok
+
+!slightly modify font heights here.  Values are in cm
+name_height = 0.55             !  
+info_height = 0.32            !  corner texts
+qualifications_height = 0.35  !  appears under name
+
+margin_offset = 1.15              ! cm ;   used to set left and bottom margin
+
+!============== Modify below at own risk 0.01 cm allowed for offcut
+paper_width =       21.0    ! A4 sheer
+paper_height =      29.7
+card_width =        9.01             ! cm    
+card_height =       5.11             ! cm  This is slightly smaller than some.
+!=============================================================================
+
+gutter = 0   ! do not change , use only if you want to have gap between cards,
+ 
+sub card   
+ begin origin 
+ gsave
+ amove 0 0
+
+!  ============= Optional box  border ===============================
+!  set lwidth 0.18
+!  box  card_width card_height
+!  if you want to have a border  convert the above comment to script, remove the !
+ 
+ set color black
+  
+  !---- write name, title, qualifications
+ 
+ set hei   name_height
+ set just bc
+ amove    card_width/2 card_height/2+0.2
+ write name$
+ 
+ set just tc
+ amove    card_width/2 ((card_height/2)-qualifications_height+0.2)
+ set hei    qualifications_height
+ write title$
+ 
+ set just tc
+ amove    card_width/2 ((card_height/2)-2.15*qualifications_height+0.2)
+ set hei    qualifications_height
+ write post_nominals$
+ 
+ !=================== write contacts ===========================
+ 
+ set just tr
+ amove    card_width*0.95 (card_height*0.95)
+ set hei    info_height
+ write "Cell: "  mobile$
+  
+ set just tr
+ amove    card_width*0.95 (card_height*0.95- (info_height*1.24 ))
+ set hei   info_height
+ write "Tel: "  telephone$
+ 
+ set just tr
+ amove    card_width*0.95 (card_height*0.95- 2*(info_height*1.24))
+ set hei    info_height
+ 
+ write "Email: "  email$
+ 
+ !=================== write address ===========================
+ 
+ set just tl
+ amove    card_width*0.05 (card_height*0.95)
+ set hei   info_height
+ write   Street$
+ 
+ set just tl
+ amove    card_width*0.05 (card_height*0.95-( info_height*1.24))
+ set hei    info_height
+ write City$
+ 
+ set just tl
+ amove    card_width*0.05 (card_height*0.95-2*( info_height*1.24))
+ set hei    info_height
+ write    Country$
+ 
+ !============== write services=====================
+  set just bl
+ amove    card_width*0.05 (card_height*0.05)
+ set hei    info_height
+ write    jobs2$
+ 
+ set just bl
+ 
+ amove    card_width*0.05 (card_height*0.05+(info_height*1.5))
+ set hei    info_height
+ write    jobs1$
+ 
+ !================ write company and website===============================
+ 
+ set just br
+ amove    card_width*0.95 (card_height*0.05)
+ set hei    info_height
+ write    Website$
+ 
+ set just br
+ amove    card_width*0.95 (card_height*0.05+(info_height*1.5))
+ set hei   info_height
+ write     Company$
+ 
+ grestore
+ end origin
+ end sub
+ 
+ !====================================================
+  
+ ! draw cards
+ for k = margin_offset to ( paper_width - card_width ) step (card_width + gutter)
+ for p = margin_offset to  ( paper_height - card_height) step (card_height + gutter)
+ amove k p 
+ @card 
+ next p
+ next k
+  
+ !====================================================================
+ !draw cut marks horizontal
+ 
+ for k = margin_offset to ( paper_width  ) step (card_width + gutter)
+ set arrowstyle  filled
+ set arrowsize 0.3
+ amove k margin_offset
+ rline 0 -0.7 arrow both
+ amove k (card_height*5+margin_offset )
+ rline 0 0.7 arrow both
+ next  k
+ 
+  !draw cut marks vertical
+ 
+for p = margin_offset to  ( paper_height  ) step (card_height + gutter)
+  
+ set arrowstyle  filled
+ set arrowsize 0.3
+ set font texcmssi
+ amove margin_offset p
+ rline -0.7 0 arrow start
+ amove ((card_width*2)+margin_offset )  p
+ rline 0.7 0 arrow start
+ next p
+ 
+ !======================= print instructions 
+ 
+ amove 4  paper_height-0.5
+ set just tr
+ 
+ set hei 0.4
+ write date$()
+
+ amove 5  paper_height-0.5
+ 
+ set lwidth 0.05
+ rline 15 0 
+ 
+ set hei 0.45
+ 
+ !=============== write top instructions
+ 
+ amove paper_width/2  paper_height-0.95
+ set just tc
+ write  "Card size =" card_width " cm x " card_height  "cm .  Line above and on right is 150 mm, printer check."
+ amove paper_width/2   paper_height-1.6
+ set just tc
+ write "Use arrows to align guillotine over A4 sheet. Make one centre vertical cut through middle  first."
+ 
+ amove paper_width/2   paper_height-2.1
+ set just tc
+ write "Followed by all horizontal cuts. Then finally trim remaining two vertial edges at arrow tip."
+  
+ amove paper_width-0.5 5
+ rline 0 15
+ 
+ 

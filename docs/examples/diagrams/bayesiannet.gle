@@ -1,0 +1,70 @@
+size 14.5 5.75
+
+set texlabels 1
+x0 = 4.75;  y0 = 5
+xdel = 3.5; ydel = 2
+
+include "ellipse.gle"
+
+set_ellipse_c 0.35
+set_shape_dxdy 0.15 0.15
+set fill wheat
+
+ellipse_text x0      y0        "Burglary"   burglary
+ellipse_text x0+xdel y0        "Earthquake" earthquake
+ellipse_text x0      y0-2*ydel "John calls" john
+ellipse_text x0+xdel y0-2*ydel "Mary calls" mary
+
+set fill darksalmon
+ellipse_text x0+xdel*0.5 y0-ydel "Alarm" alarm
+
+set hei 0.35 arrowsize 0.27
+join burglary.ci   -> alarm.ci
+join earthquake.ci -> alarm.ci
+join alarm.ci      -> john.ci
+join alarm.ci      -> mary.ci
+
+set just rc
+amove pointx(burglary.lc)-0.5 pointy(burglary.lc)
+begin tex
+	\begin{tabular}{|l|l|}   \hline
+	B          & 0.05     \\ \hline
+	$\lnot\:$B & 0.95     \\ \hline
+	\end{tabular}
+end tex
+
+amove pointx(john.lc)-0.5 pointy(john.lc)
+begin tex
+	\begin{tabular}{|l|l|l|}       \hline
+	           & A & $\lnot\:$A \\ \hline
+	J          & 0.8 & 0.1      \\ \hline
+	$\lnot\:$J & 0.2 & 0.9      \\ \hline
+	\end{tabular}
+end tex
+
+set just lc
+amove pointx(mary.rc)+0.5 pointy(mary.rc)
+begin tex
+	\begin{tabular}{|l|l|l|}         \hline
+	           & A   & $\lnot\:$A \\ \hline
+	M          & 0.9 & 0.2        \\ \hline
+	$\lnot\:$M & 0.1 & 0.8        \\ \hline
+	\end{tabular}
+end tex
+
+amove pointx(earthquake.rc)+0.5 pointy(earthquake.rc)
+begin tex
+	\begin{tabular}{|l|l|}   \hline
+	E          & 0.01     \\ \hline
+	$\lnot\:$E & 0.99     \\ \hline
+	\end{tabular}
+end tex
+
+amove pointx(alarm.rc)+0.5 pointy(alarm.rc)
+begin tex
+	\begin{tabular}{|l|l|l|l|l|}                                              \hline
+	           & B,E & B,$\lnot\:$E & $\lnot\:$B,E & $\lnot\:$B,$\lnot\:$E \\ \hline
+	A          & 0.9 & 0.8          & 0.4          & 0.01                  \\ \hline
+	$\lnot\:$A & 0.1 & 0.2          & 0.6          & 0.99                  \\ \hline
+	\end{tabular}
+end tex

@@ -1,0 +1,28 @@
+size 11 8
+
+! Based on example by Pascal B.
+
+include "graphutil.gle"
+
+set texlabels 1
+begin graph
+  scale auto
+  title "Sine Function Approximation"
+  xtitle "$x$"
+  xaxis min 0 max 10
+  yaxis min -3 max 3
+  ytitle "$f(x)$"
+  key pos tr hei 0.25
+  let d100 = sin(x)
+  let d101 = x
+  d100 line color autocolor(1) key "$\sin(x)$"	
+  d101 line color autocolor(2) key "order = $1$"
+  let d1 = x
+  factorial = 1
+  for order = 2 to 5
+    n = order-1
+    factorial = factorial*(2*n)*(2*n+1)
+    let d[order] = d[order-1]+(-1)^(n)*(x^(2*n+1))/factorial
+    d[order] line color autocolor(order+1) key "order = $"+num$(order)+"$"
+  next order   
+end graph

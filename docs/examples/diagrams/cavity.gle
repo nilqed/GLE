@@ -1,0 +1,107 @@
+size 14 12
+
+set hei 0.6 ! Make arrows smaller
+
+sub parmove focus_x focus_y length new_y
+! length is distance to right of focus
+    new_x=length-sqr(new_y-focus_y)/(4*length)+focus_x
+    amove new_x new_y
+end sub
+
+sub parline focus_x focus_y length new_y
+! length is distance to right of focus
+    new_x=length-sqr(new_y-focus_y)/(4*length)+focus_x
+    aline new_x new_y
+end sub
+
+sub parabola length start_y end_y
+    parsteps = 20
+    focus_x = xpos()
+    focus_y = ypos()
+    @parmove focus_x focus_y length start_y
+    for i = 1 to parsteps step 1
+        new_y=start_y+(end_y-start_y)*i/parsteps
+        @parline focus_x focus_y length new_y
+    next i
+end sub
+
+! Optical axes
+amove 1.6 6
+set lstyle 4
+aline 13 6
+amove 0.5 8.75
+@parline 1.5 6 11 8.75
+aline 1.5 6
+@parline 1.5 6 11 3.25
+aline 4 3.25
+set lstyle 0
+
+! mirror
+amove 1 6
+rmove 0.5 0
+box 0.25 3 justify cr fill shade nobox name backmirror
+box 0.02 3 justify cr fill black
+
+! crystal
+amove 1 6
+rmove 0.5 0
+box 0.5 2 justify cl name crystal
+
+! top parabolic mirror
+amove 1.5 6
+begin path fill shade
+    @parabola 11 7.5 10
+    rline 0.8 0
+    rline 0 -2.5
+    closepath
+end path
+amove 1.5 6
+set lwidth 0.04
+@parabola 11 7.5 10
+
+! bottom parabolic mirror
+amove 1.5 6
+begin path fill shade
+    @parabola 11 4.5 2
+    rline 0.8 0
+    rline 0 2.5
+    closepath
+end path
+amove 1.5 6
+set lwidth 0.04
+@parabola 11 4.5 2
+set lwidth 0
+
+! pump return mirror
+amove 4 2
+box 0.25 2.5 just br fill shade nobox
+set lwidth 0.04
+rline 0 2.5
+set lwidth 0
+
+!
+! these beams may be best done first in order not cover optics.
+!
+! pump beam
+set color red
+!inside ray
+amove 0.5 9.9
+rline 1 0 arrow end
+@parline 1.5 6 11 9.9
+aline 1.5 6
+@parline 1.5 6 11 2.1
+aline 4 2.1 arrow both
+! outside ray
+amove 0.5 7.6
+rline 1 0 arrow end
+@parline 1.5 6 11 7.6
+aline 1.5 6
+@parline 1.5 6 11 4.4
+aline 4 4.4 arrow both
+
+! laser beam
+set color blue
+amove 1.5 6
+set lwidth 0.1
+rline 11 0 arrow end
+set lwidth 0

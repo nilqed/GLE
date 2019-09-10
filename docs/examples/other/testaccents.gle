@@ -1,0 +1,68 @@
+size 8.8 6
+
+! Test of all possible accents
+
+sub write_nxt ch$
+   amove xend()+0.05 ypos()
+   write ch$
+end sub
+
+sub print_all ch$
+   write "\'"+ch$
+   write_nxt "\`"+ch$
+   write_nxt "\="+ch$
+   write_nxt "\."+ch$
+   write_nxt "\~"+ch$
+   write_nxt "\''"+ch$
+   write_nxt "\^"+ch$
+   write_nxt "\v "+ch$
+   write_nxt "\u "+ch$
+   write_nxt "\H "+ch$
+end sub
+
+set just left hei 0.55 font texcmr
+
+dy = 1; topy = 0.7
+
+amove 0.5 pageheight()-theight("H")-0.3
+write "Test of TeX accents"
+
+amove 0.5 pageheight()-1*dy-topy
+print_all "e"
+
+amove 0.5 pageheight()-2*dy-topy
+print_all "n"
+
+amove 0.5 pageheight()-3*dy-topy
+print_all "o"
+
+amove 0.5 pageheight()-4*dy-topy
+print_all "s"
+
+amove 0.5 pageheight()-5*dy-topy
+print_all "E"
+
+amove 5 pageheight()-5*dy-topy
+write "\k a\k e"
+
+set font rm
+amove xend()+0.05 yend()
+
+write "\l\L"
+
+set font texcmr
+
+amove 5 pageheight()-1*dy-topy
+print_all "\i"
+
+amove 5 pageheight()-2*dy-topy
+print_all "\j"
+
+amove 5 pageheight()-3*dy-topy
+print_all "\gamma"
+
+amove 5 pageheight()-4*dy-topy
+begin table
+ ab\gamma \i\j\'\i cd\'\gamma ef\gamma
+end table
+

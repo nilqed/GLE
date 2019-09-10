@@ -1,0 +1,31 @@
+size 12 3
+amove 1 2.7
+set hei 0.27
+set font pldr !tt
+mm$ = "green"
+begin table
+  amove .5 .5 
+  for c = 0 to 1 step .05
+    box .2 2 fill (c) nostroke
+    rmove .2 0
+  next c 
+  amove 2 1 
+  box 2 1 fill white nostroke
+  rmove -.2  .2
+  box 2 1 fill mm$
+end table
+
+amove 5.8 0
+box 5 3
+begin origin
+  amove .5 .5 
+  for c = 0 to 1 step .05
+    box .2 2 fill (c) nostroke
+    rmove .2 0
+  next c 
+  amove 2 1 
+  box 2 1 fill white nostroke
+  rmove -.2  .2
+  box 2 1 fill mm$
+end origin
+     

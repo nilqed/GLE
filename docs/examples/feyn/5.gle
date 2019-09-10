@@ -1,0 +1,94 @@
+size 8.7 4.8 ! 4*(x1+x2)-x+d1+2*d=4*x1+2*(y+d1+d) yy+2*x2+2*dl+y
+
+include "feyn.gle"
+
+x = 1
+y = 0.75
+x1 = 1.5
+x2 = 0.75
+y2 = 0.5625
+yc = 0.3
+d = 0.1
+dl = 0.2
+d1 = 0.5
+yy = 2.2
+r = 0.05
+doublea = 0.05
+
+rr = (x*x+y*y)/(2*y)
+yb = sqrt(rr*rr-0.25*x*x)+y-rr
+xi = x*(2*yb-y)/(x*x+y*y)
+xa=0.5*x-xi*y
+ya=yb-xi*x
+
+begin translate d+2*x2+x1-x yy+y+dl ! a
+    amove -2*x2-x1+x 0
+    set lwidth 0.06
+    @fermion 2*x2+x1-x 0
+    set lwidth 0.03
+    amove -2*x2 0
+    circle r fill black
+    @fermion 0 2*x2
+    circle r fill black
+    @fermion 2*x2 0
+    circle r fill black
+    amove 0 2*x2
+    @fermion 0 0
+    circle r fill black
+end translate
+
+begin translate d+d1-2*x+3*x1+4*x2 yy+dl+2*y ! b
+    amove -x1 0
+    set lwidth 0.06
+    @fermion x1+x 0
+    set lwidth 0.03
+    amove -x 0
+    circle r fill black
+    @fermion2 0 y x 0
+    circle r fill black
+    amove 0 0
+    circle r fill black
+    @fermion2 x -y 2*x 0
+    circle r fill black
+end translate
+
+begin translate d+y y+dl ! c
+    amove -y 0
+    set lwidth 0.06
+    @fermion y 0
+    amove 0 0
+    circle r fill black
+    @fermion2 -0.5*y 0.5*y 0 y
+    @fermion2 0.5*y 0.5*y 0 0
+    @fermion2 -0.5*y -0.5*y 0 -y
+    @fermion2 0.5*y -0.5*y 0 0
+    set lwidth 0.03
+end translate
+
+begin translate d+d1+2*y+x1 y+dl ! d
+    amove -x1 0
+    set lwidth 0.06
+    @fermion x1 0
+    set lwidth 0.03
+    amove x 0
+    circle r fill black
+    @fermion2 0 y -x 0
+    circle r fill black
+    @fermion2 0 -y x 0
+end translate
+
+begin translate d+2*(d1+y)+3*x1 y+dl ! e
+    amove -x1 0
+    set lwidth 0.06
+    @fermion x1 0
+    set lwidth 0.03
+    amove x 0
+    circle r fill black
+    set lwidth 0.06
+    @fermion2 0 y -x 0
+    set lwidth 0.03
+    circle r fill black
+    set lwidth 0.06
+    @fermion2 0 -y x 0
+    set lwidth 0.03
+end translate

@@ -1,0 +1,49 @@
+!
+! Small gle Logo
+!
+psbbtweak
+size 4 2
+!set font psagb
+dx=4
+dy=2
+set hei 2
+boxw=dx/7
+boxh=6
+amove -0.05 -0.05
+set color BLACK
+box dx+0.1 dy+0.1
+sub draw_box dx dy clr$
+	gsave
+	set color clr$
+	box dx dy fill clr$
+	grestore
+end sub
+
+
+amove dx/2 dy/2
+
+
+set just cc
+
+begin clip	! Save default clipping region
+begin path clip	! Set up the clipping region
+	text GLE
+end path
+amove 0 0
+@draw_box boxw boxh red
+rmove boxw 0
+@draw_box boxw boxh orange
+rmove boxw 0
+@draw_box boxw boxh yellow
+rmove boxw 0
+@draw_box boxw boxh lime
+rmove boxw 0
+@draw_box boxw boxh royalblue
+rmove boxw 0
+@draw_box boxw boxh coral
+rmove boxw 0
+@draw_box boxw boxh violet
+rmove boxw 0
+
+end clip
+

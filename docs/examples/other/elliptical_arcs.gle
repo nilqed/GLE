@@ -1,0 +1,119 @@
+!
+! ellispes - demo of new elliptical arc functions with arrows
+!
+size 15 15
+
+
+amove 15/4 15/4
+elliptical_arc 3 1 0 90
+set color GREEN
+elliptical_arc 3 1 270 360
+set color BLACK
+rline -0.5 -0.5
+
+elliptical_arc 3 1 180 260
+
+set color red
+elliptical_arc 3 1 100 180
+
+
+! bugs arrow move current position from center fix it
+! elliptical narcs and cricular narcs have arrows backwards
+
+set color black
+amove 3*15/4 15/4
+elliptical_arc 3 1 30 60 arrow end
+set color blue
+elliptical_arc 3 1 30 60 
+rmove -0.5 -0.5
+set color blue
+elliptical_narc 3 1 30 60 arrow end
+set color black
+elliptical_narc 3 1 30 60
+
+
+
+rmove -1 -1
+
+set color black
+
+elliptical_arc 3 1 30 60 arrow start
+set color blue
+elliptical_arc 3 1 30 60 
+rmove -0.5 -0.5
+set color blue
+elliptical_narc 3 1 30 60 arrow start
+set color black
+elliptical_narc 3 1 30 60
+
+!elliptical_arc 3 1 100 150 arrow start
+!elliptical_arc 3 1 200 270 arrow both
+
+
+
+!elliptical_narc 3 1 100 150 arrow start
+!elliptical_narc 3 1 200 270 arrow both
+
+
+amove 3*15/4 3*15/4
+
+arc 3  30 60 arrow end
+set color blue
+arc 3  30 60 
+rmove -0.5 -0.5
+set color blue
+narc 3  30 60 arrow end
+set color black
+narc 3  30 60
+
+
+
+rmove -1 -1
+
+set color black
+
+arc 3  30 60 arrow start
+set color blue
+arc 3  30 60 
+rmove -0.5 -0.5
+set color blue
+narc 3  30 60 arrow start
+set color black
+narc 3  30 60
+
+
+
+amove 15/4 3*15/4
+
+stp=20
+set color red
+for i=0 to 360-stp STEP stp
+	begin rotate i
+	elliptical_arc 3 0.5 0 90 arrow both
+	end rotate
+
+next i
+
+set color black
+amove 15/2 15/2
+set just cc
+set font ss
+set hei 0.5
+
+txt$="fun with GLE elliptical arcs"
+ellipse 3.0*TWIDTH(txt$) 1.5*THEIGHT(txt$) fill BLACK
+set lwidth 0.1
+set color YELLOW
+elliptical_arc 3.0*TWIDTH(txt$) 1.5*THEIGHT(txt$) 0 90
+set color RED
+elliptical_arc 3.0*TWIDTH(txt$) 1.5*THEIGHT(txt$) 90 180
+set color GREEN
+elliptical_arc 3.0*TWIDTH(txt$) 1.5*THEIGHT(txt$) 180 270
+set color BLUE
+elliptical_arc 3.0*TWIDTH(txt$) 1.5*THEIGHT(txt$) 270 360
+
+set color white
+write txt$
+
+
+

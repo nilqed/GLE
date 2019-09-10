@@ -1,0 +1,38 @@
+size 12 6
+
+! Illustrates curved arrows on circle arcs, ellipse arcs, and bezier curves
+
+set lwidth 0.05 arrowangle 18 arrowsize 0.5 arrowstyle empty arrowtip round
+
+amove 6 3
+elliptical_arc 5.5 2.5 90  180
+elliptical_arc 5.5 2.5 270 360
+
+amove 0  3
+aline 12 3
+amove 6  0
+aline 6  6
+
+set color red
+amove 6 3
+elliptical_arc 5.5 2.5 0   90  arrow both
+elliptical_arc 5.5 2.5 180 270 arrow both
+
+amove 6 3
+arc 1.5 90  180
+arc 1.5 270 360
+set color black arrowstyle filled
+arc 1.5 0   90  arrow both
+arc 1.5 180 270 arrow both
+
+set color blue
+amove 2.5 3
+aline 6   1 curve -48 180 2 2
+amove 9.5 3
+aline 6   5 curve 135 0 2 2
+
+set color black arrowstyle simple
+amove 6   5
+aline 2.5 3 curve 180 135 2 2 arrow both
+amove 6   1
+aline 9.5 3 curve 0 -45 2 2 arrow both

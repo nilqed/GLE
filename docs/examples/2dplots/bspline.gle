@@ -1,0 +1,27 @@
+size 10 8
+
+! http://en.wikipedia.org/wiki/B-spline
+
+sub N j n x
+   if n = 0 then
+      if (x >= j) and (x < j+1) then return 1
+      else return 0
+   else
+      return (x-j)/n*N(j,n-1,x) + (j+n+1-x)/n*N(j+1,n-1,x)
+   end if
+end sub
+
+set texlabels 1
+begin graph
+   scale auto
+   title "B-Spline Basis Functions"
+   xaxis min 0 max 5 dticks 1 grid
+   xticks color gray10
+   let d1 = N(0,2,x)
+   let d2 = N(1,2,x)
+   let d3 = N(2,2,x)
+   key pos br
+   d1 line color red   key "$b_{0,2}$"
+   d2 line color green key "$b_{1,2}$"
+   d3 line color blue  key "$b_{2,2}$"
+end graph

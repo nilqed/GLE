@@ -1,0 +1,117 @@
+!
+! Brillouin zone of the face-centered cubic lattice
+! by P. Straube, Experimentalphysik 2, Univ. Kassel, Germany
+!
+
+size 12 9
+amove 6 1
+set font texcmr hei 0.3
+
+begin origin
+   begin scale 1.1 1.1
+      xten=.5
+      amove 0.000 2.788
+      xa=xpos()
+      ya=ypos()
+      xe=0.00
+      ye=5.575
+      set lstyle 2
+      aline xe ye
+      set lstyle 1
+      rline xten*(xe-xa) xten*(ye-ya) arrow end
+      rmove .2 -.2
+      text [001]
+      set lstyle 2
+      amove 0.000 2.788
+      xe=-0.686
+      ye=2.324
+      xa=xpos()
+      ya=ypos()
+      aline xe ye
+      set lstyle 1
+      rline xten*(xe-xa) xten*(ye-ya) arrow end
+      rmove .2 -.2
+      text [100]
+      set lstyle 2
+      amove 0.000 2.788
+      xa=xpos()
+      ya=ypos()
+      xe=2.744
+      ye=2.672
+      aline xe ye
+      set lstyle 1
+      rline xten*(xe-xa) xten*(ye-ya) arrow end
+      rmove .2 -.2
+      text [010]
+      set lstyle 2
+      begin path stroke fill shade1
+         amove 0.000 2.788
+         aline 1.543 2.353
+         aline 0.514 5.431
+         aline 0.000 5.575
+         aline 0.000 2.788
+      end path
+      begin path stroke fill shade2
+         amove 0.000 2.788
+         aline 1.543 2.353
+         set lstyle 1
+         aline 0.686 2.266
+         set lstyle 2
+         aline -0.686 2.324
+         aline 0.000 2.788
+      end path
+      set lstyle 1
+      amove -.3 2.788
+      text \Gamma
+      amove 1.55 2.2
+      text K
+      amove 0.68 2
+      text W
+      amove -.986 2.32
+      text X
+      amove 1.0285 3.892
+      text L
+      amove .6 5.2
+      text U
+      amove -.3 5.5
+      text X
+      set lstyle 2
+      set lstyle 1
+      amove -0.343 5.344
+      aline -1.372 5.633
+      aline 0.343 5.807
+      aline 1.372 5.517
+      aline -0.343 5.344
+      amove -0.343 -0.232
+      aline -0.686 0.930
+      aline -2.058 2.382
+      aline -3.087 2.672
+      aline -2.744 1.510
+      aline -1.372 0.058
+      aline -0.343 -0.232
+      amove -2.058 2.382
+      aline -0.686 3.718
+      aline -0.343 5.344
+      aline -1.372 5.633
+      aline -2.744 4.298
+      aline -3.087 2.672
+      aline -2.058 2.382
+      amove -0.343 -0.232
+      aline -0.686 0.930
+      aline 0.686 2.266
+      aline 2.401 2.440
+      aline 2.744 1.278
+      aline 1.372 -0.058
+      aline -0.343 -0.232
+      amove 0.686 2.266
+      aline -0.686 3.718
+      aline -0.343 5.344
+      aline 1.372 5.517
+      aline 2.744 4.066
+      aline 2.401 2.440
+      aline 0.686 2.266
+      amove 2.744 1.278
+      aline 3.087 2.904
+      aline 2.744 4.066
+   end scale
+end origin

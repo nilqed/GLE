@@ -1,0 +1,39 @@
+size 4 3.7
+
+set hei 0.4 just cc arrowsize 0.2
+cy = pageheight()/2; delx = 0.7; crad = 1;
+cx1 = pagewidth()/2-delx; cx2 = pagewidth()/2+delx
+angle = todeg(acos(delx/crad))
+
+! draw red circle
+amove cx1 cy
+circle crad fill red
+tex "$A$" name A
+
+! draw green circle
+amove cx2 cy
+circle crad fill green
+tex "$B$" name B
+
+! draw yellow intersection
+begin path fill yellow stroke
+   asetpos cx2 cy; arc crad 180-angle 180+angle
+   asetpos cx1 cy; arc crad 360-angle angle
+end path
+
+! draw "A \cap B" at the top + corresponding arrow
+set just bc
+amove pagewidth()/2 cy+1.4
+tex "$A \cap B$"
+rmove 0 -0.1; aline pagewidth()/2 cy+0.25 arrow end
+
+! draw "A \cup B" at the bottom
+set just tc
+amove pagewidth()/2 cy-1.4
+tex "$A \cup B$"
+rmove 0 +0.1; save arroworig
+
+! draw three arrows at the bottom
+aline pagewidth()/2 cy-0.25 arrow end
+amove ptx(arroworig) pty(arroworig); aline pointx(A.bc) cy-0.25 arrow end
+amove ptx(arroworig) pty(arroworig); aline pointx(B.bc) cy-0.25 arrow end

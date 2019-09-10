@@ -1,0 +1,90 @@
+size 3 4 box
+set font texcmr !pldr
+begin scale 1/6 1/6
+amove 9 21
+set just center hei 1.4
+text Non-zero winding rule
+set just left hei .7
+set hei 1.2
+set lwidth .1
+begin path fill gray10
+amove  5  19 
+aline  5  14  
+aline  11  14 
+aline  11  19 
+closepath 
+amove  6  18 
+aline  10  18 
+aline  10  15 
+aline  6  15  
+closepath 
+end path
+
+amove  5  19 
+aline  5  14  arrow end 
+aline  11  14  arrow end 
+aline  11  19  arrow end 
+aline  5  19  arrow end 
+amove  6  18 
+aline  10  18  arrow end 
+aline  10  15  arrow end 
+aline  6  15  arrow end 
+aline  6  18  arrow end 
+
+
+begin path fill gray10
+amove  5  11 
+aline  5  6  
+aline  11  6 
+aline  11  11
+aline  5  11 
+amove  6  10 
+aline  6  7  
+aline  10  7  
+aline  10  10 
+aline  6  10  
+end path
+
+amove  5  11 
+aline  5  6  arrow end 
+aline  11  6  arrow end 
+aline  11  11  arrow end 
+aline  5  11  arrow end 
+amove  6  10 
+aline  6  7  arrow end 
+aline  10  7  arrow end 
+aline  10  10  arrow end 
+aline  6  10  arrow end 
+
+set lwidth 0 
+amove  3  16.4 
+rmove  10  0 
+amove  3.2  8.2 
+rmove  10  0 
+amove  3  8 
+aline  13  8  arrow end 
+amove  3  16 
+aline  13  16  arrow end 
+set hei .7 just center
+amove  4  16.5 
+text 0
+amove  5.5  16.5 
+text 1
+amove  7  16.5 
+text 0
+amove  10.5  16.5 
+text 1
+amove  12  16.5 
+text 0
+amove  4  8.5 
+text 0
+amove  5.5  8.5 
+text 1
+amove  7  8.5 
+text 2
+amove  10.5  8.5 
+text 1
+amove  12  8.5 
+text 0
+
+end scale

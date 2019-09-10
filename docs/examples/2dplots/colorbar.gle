@@ -1,0 +1,16 @@
+size 12 8
+
+include "barstyles.gle"
+
+set font texcmr
+begin graph
+   title  "Customized bar style"
+   ytitle "Number of users"
+   xtitle "Year"
+   data   "colorbar.dat"	
+   xticks off
+   yticks color gray10
+   yaxis grid
+   xaxis nofirst
+   bar d1 style colormap
+end graph

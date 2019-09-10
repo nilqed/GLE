@@ -1,0 +1,35 @@
+size 10 10
+
+sub koch x1 y1 x2 y2 d
+  if d = 0 then
+    amove x1 y1
+    aline x2 y2
+  else
+    local x13 = x1+(x2-x1)/3
+    local y13 = y1+(y2-y1)/3
+    local x23 = x1+(x2-x1)*2/3
+    local y23 = y1+(y2-y1)*2/3
+    local x_c = x1+0.5*(x2-x1)+(y2-y1)/sqrt(12)
+    local y_c = y1+0.5*(y2-y1)-(x2-x1)/sqrt(12)
+    koch x1  y1  x13 y13 d-1
+    koch x13 y13 x_c y_c d-1
+    koch x_c y_c x23 y23 d-1
+    koch x23 y23 x2  y2  d-1
+  end if
+end sub
+
+sub kochflake wd depth
+  local x0 = pagewidth()/2-wd
+  local y0 = pageheight()/2-wd*tan(torad(30))
+  local x1 = x0+wd
+  local y1 = y0+2*wd*sin(torad(60))
+  local x2 = x0+wd*2
+  koch x0 y0 x2 y0 depth
+  koch x1 y1 x0 y0 depth
+  koch x2 y0 x1 y1 depth
+end sub
+
+for i = 1 to 4
+  set color rgb(0,0,i/5)
+  kochflake 0.4*(1.8^i) i
+next i

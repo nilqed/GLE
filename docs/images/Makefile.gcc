@@ -1,0 +1,31 @@
+#
+# this needs make not nmake
+#
+
+FIGS = logo.gle logo_icon.gle sample.gle
+
+PNG = $(addsuffix .png, $(basename $(FIGS)))
+
+all: $(PNG)
+
+logo.png: src/logo.gle
+	gle -dpi 500 -d png src/logo.gle
+	convert -scale 600 src/logo.png logo.png
+	rm src/logo.png
+
+logo_icon.png: src/logo_icon.gle
+	gle -dpi 200 -transparent -d png src/logo_icon.gle
+	convert -scale 125 src/logo_icon.png logo_icon.png
+	rm src/logo_icon.png
+
+sample.png: src/sample.gle
+	gle -dpi 200 -d png src/sample.gle
+	convert -scale 200 src/sample.png sample.png
+	rm src/sample.png
+
+clean:
+	rm -rf logo.png logo_icon.png sample.png src/*.png src/*.eps src/*.gif
+
+
+
+

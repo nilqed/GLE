@@ -1,0 +1,83 @@
+
+! This example was provided by Ole Göbel
+
+size 29 21
+
+rp = 10                                            ! radius of primitive, only value that needs to be changed to blow up
+f = pi/180                                         ! or shrink the entire net
+thinl = 0.005                                      ! lwidth of thin lines 
+thickl = 0.01                                      ! lwidth of thick lines
+
+!drawing primitive and central cross
+set lwidth .02
+amove 15 10.5
+circle rp
+rmove 0 -rp
+rline 0 2*rp
+rmove -rp -rp
+rline 2*rp 0
+rmove -rp 0
+
+!drawing small circles around east pole
+for ang=2 to 88 step 2                             ! defining the grid of small circles
+   set lwidth thinl                                ! ang must not become 0 nor 90!
+   ang2=180-ang
+   r1=rp*sin(ang*f)/(1+cos(ang*f))
+   r2=rp*sin(ang2*f)/(1+cos(ang2*f))
+   om=(r1+r2)/2
+   r=r2-om
+   rmove om 0
+   if ang/10=int(ang/10) then
+      set lwidth thickl                            ! drawing every small circle fatter with: angular
+   end if                                          ! distance to east pole = n*10deg
+   arc r 180-ang 180+ang
+   rmove -om 0
+next ang
+
+!drawing small circles around west pole
+for ang=2 to 88 step 2                             ! defining the grid of small circles
+   set lwidth thinl                                ! ang must not become 0 nor 90!
+   ang2=180-ang
+   r1=rp*sin(ang*f)/(1+cos(ang*f))
+   r2=rp*sin(ang2*f)/(1+cos(ang2*f))
+   om=(r1+r2)/2
+   r=r2-om
+   rmove -om 0
+   if ang/10=int(ang/10) then
+      set lwidth thickl                            ! drawing every small circle fatter with: angular
+   end if                                          ! distance to west pole = n*10deg
+   arc r -ang ang
+   rmove om 0
+next ang
+
+!drawing great circles in northern hemisphere
+for ang=2 to 88 step 2                             ! defining the grid of great circles
+   set lwidth thinl                                ! ang must not become 0 nor 90!
+   ang2=180-ang
+   r1=rp*sin(ang*f)/(1+cos(ang*f))
+   r2=rp*sin(ang2*f)/(1+cos(ang2*f))
+   om=(r2-r1)/2
+   r=r2-om
+   rmove 0 -om
+   if ang/10=int(ang/10) then
+      set lwidth thickl                            ! drawing every small circle fatter with: angular
+   end if                                          ! distance to primitive = n*10deg
+   arc r 90-ang 90+ang
+   rmove 0 om
+next ang
+
+!drawing great circles in southern hemisphere
+for ang=2 to 88 step 2                             ! defining the grid of great circles
+   set lwidth thinl                                ! ang must not become 0 nor 90!
+   ang2=180-ang
+   r1=rp*sin(ang*f)/(1+cos(ang*f))
+   r2=rp*sin(ang2*f)/(1+cos(ang2*f))
+   om=(r2-r1)/2
+   r=r2-om
+   rmove 0 om
+   if ang/10=int(ang/10) then
+      set lwidth thickl                            ! drawing every small circle fatter with: angular
+   end if                                          ! distance to primitive = n*10deg
+   arc r 270-ang 270+ang
+   rmove 0 -om
+next ang

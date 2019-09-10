@@ -1,0 +1,86 @@
+[SOURCE CODE]
+I=source-logo.gif
+F=gle-graphics-4.2.4cf-src.tar.gz:SF
+D=Source code for Windows, Cygwin, Linux, Unix, Mac OS/X, and OS/2 (<a href="../tut/gcc.html">compilation and installation guide</a>).
+I=source-logo.gif
+F=gle-graphics-4.2.4c-src.tar.gz:SF
+D=Source code without additional fonts.
+I=source-logo.gif
+F=gle-graphics-extrafonts-1.0.tar.gz:SF
+D=Additional fonts for GLE.
+[EXECUTABLES]
+I=xp-logo.gif
+F=gle-graphics-4.2.4c-exe-win32.exe:SF
+D=Windows self installing executable (<a href="../tut/windows.html">installation and configuration guide</a>).
+I=macosx-logo.gif
+U=../tut/mac.html
+N=Mac OS/X distribution
+D=Mac OS/X distribution.
+I=fedora-logo.gif
+U=fedora.html
+N=Fedora RPMs
+D=Packages for the Fedora distribution of GNU/Linux.
+LINK=EXT
+I=suse-logo.gif
+U=http://software.opensuse.org/search?p=1&q=gle-graphics&baseproject=ALL
+N=Suse RPMs
+D=Packages for the Open Suse distribution of GNU/Linux.
+LINK=EXT
+I=debian-logo.gif
+U=http://packages.debian.org/sid/gle-graphics
+N=Debian packages
+D=Packages for the Debian distribution of GNU/Linux.
+LINK=EXT
+I=t2-logo.gif
+U=http://www.t2-project.org/packages/gle-graphics.html
+N=T2 SDE package
+D=Packages for the T2 SDE distribution of GNU/Linux.
+I=os2-logo.gif
+F=gle-os2-__VERSION8__.zip:SF
+D=OS/2 archive (includes DLLs and manual).
+[PREVIEW]
+I=source-logo.gif
+U=../cvs.html
+N=Next Version Preview
+D=A preview of the next version (source code and installers).
+[DOCUMENTATION]
+I=pdf-logo.gif
+F=gle-manual.pdf:SF
+D=GLE Reference Manual (PDF format).
+I=pdf-logo.gif
+F=GLEusersguide.pdf:SF
+D=GLE Users Manual by David Parfitt (PDF format).
+[SYNTAX]
+I=emacs-logo.gif
+F=gle-emacs.el
+D=GLE mode for <a href="http://www.gnu.org/software/emacs/" target=blank_>GNU Emacs</a> by Kai Nordlund.
+I=vim-logo.gif
+F=vim_gle.zip
+D=GLE syntax highlighting for <a href="http://www.vim.org" target=blank_>VIM</a>.
+I=npp-logo.png
+F=gle-npp.xml
+D=GLE syntax highlighting for <a href="http://notepad-plus-plus.org/" target=blank_>Notepad++</a> by Budo Zindovic.
+I=nedit-logo.gif
+F=gle.nedit
+D=GLE syntax highlighting for <a href="http://www.nedit.org" target=blank_>Nedit</a>.
+F=gle-winedt.zip:SF
+D=GLE macros for <a href="http://www.winedt.org" target=blank_>WinEdt</a>.
+F=gle.stx
+D=GLE syntax highlighting file for EditPlus.
+[SCRIPTS]
+I=perl-logo.gif
+F=makeani.pl
+D=Perl script for making slide show animations with GLE.
+I=shell-logo.gif
+F=bbox_gle.sh
+D=Shell script to correct the bounding box of .eps files (by A. S. Budden).
+LINK=EXT
+I=shell-logo.gif
+F=fig2gle.zip
+D=Script for creating GLE plots from within Matlab (<a href="http://www.ee.usyd.edu.au/~cibby/fig2gle.htm">http://www.ee.usyd.edu.au/~cibby/fig2gle.htm</a>).
+[OLD VERSIONS]
+LINK=EXT
+I=source-logo.gif
+U=http://sourceforge.net/project/showfiles.php?group_id=11225
+N=Older versions of GLE
+D=Go to file release page at SourceForge.net.

@@ -1,0 +1,68 @@
+size 9.8 2.8 ! 6*a 1.5*a+2*d
+
+include "feyn.gle"
+
+a = 1.6
+b = 0.2
+d1 = 0.4
+d2 = 0.1
+d = 0.1
+r = 0.05
+
+begin translate a-d2 0.5*a+d
+    amove -sqrt(0.75)*a -0.5*a
+    photonn = -1
+    @photon 0 0
+    momd = -momd
+    @mom 0.5
+    amove sqrt(0.75)*a -0.5*a
+    photonn = -1
+    photona = -photona
+    @photon 0 0
+    @mom 0.5
+    amove 0 a
+    photonn = -1
+    @photon 0 0
+    photona = -photona
+    @mom 0.5
+    circle r fill black
+    amove -sqrt(0.5)*b a-sqrt(0.5)*b
+    @fermion sqrt(0.5)*b a+sqrt(0.5)*b
+    amove -sqrt(0.5)*b a+sqrt(0.5)*b
+    @fermion sqrt(0.5)*b a-sqrt(0.5)*b
+end translate
+
+begin translate 3*a+d1 0.5*a+d
+    amove -sqrt(0.75)*a -0.5*a
+    @dash 0 0
+    @arrow 0.5
+    @mom 0.5
+    @dash sqrt(0.75)*a -0.5*a
+    @arrow 0.5
+    @mom 0.5
+    amove 0 0
+    circle r fill black
+    photonn = -1
+    @photon 0 a
+    amove -sqrt(0.5)*b a-sqrt(0.5)*b
+    @fermion sqrt(0.5)*b a+sqrt(0.5)*b
+    amove -sqrt(0.5)*b a+sqrt(0.5)*b
+    @fermion sqrt(0.5)*b a-sqrt(0.5)*b
+end translate
+
+begin translate 5*a+d1 sqrt(0.5)*a+d
+    amove -sqrt(0.5)*a -sqrt(0.5)*a
+    @dash 0 0
+    @arrow 0.5
+    @dash sqrt(0.5)*a -sqrt(0.5)*a
+    @arrow 0.5
+    amove -sqrt(0.5)*a sqrt(0.5)*a
+    @photon 0 0
+    circle r fill black
+    photona = -photona
+    @photon sqrt(0.5)*a sqrt(0.5)*a
+    amove sqrt(0.5)*a-b sqrt(0.5)*a
+    @fermion sqrt(0.5)*a+b sqrt(0.5)*a
+    amove sqrt(0.5)*a sqrt(0.5)*a-b
+    @fermion sqrt(0.5)*a sqrt(0.5)*a+b
+end translate

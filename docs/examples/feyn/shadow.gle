@@ -1,0 +1,17 @@
+hei = 2.5
+wid = 2.5
+
+verty = hei*.4
+
+size wid hei
+
+include "feyn.gle"
+
+@Fermion wid hei
+amove wid 0
+ShadowA = .15
+@Gluon 0 hei
+@Shadow .5
+amove .25*wid .75*hei
+@Gluon2 .25*wid .25*hei .75*wid .25*hei
+@Shadow .5

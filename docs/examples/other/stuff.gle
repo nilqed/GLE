@@ -1,0 +1,60 @@
+size 18 27
+amove 2 2
+arc 2 10 95
+amove  3  24.2
+circle 1.48513
+rline 1 1
+circle 1.5 fill green
+amove  3.4  18.4
+rline  1.2 -2.6
+aline  6.6  17.6  arrow both
+rline -3.2  .799999
+set lwidth .3
+amove  1.2  11.2
+rline  1.6 -1.4
+rline  2.2  2.2
+rline -3.8 -.8
+amove  0  7.8
+box  2.8 -1.4   fill gray40
+rline 1 1
+box  2.8 -1.4
+rline .3 .3
+box 2.8 -1.4 fill white
+amove  3.4  24
+box  1.8 -2.6   fill blue
+amove  12.2  15.6
+text Text
+set color GREEN
+amove  8.6  7.4
+box  1.6 -2.2   fill gray40
+set lstyle 3
+amove  2.4  12.8
+rline  3.4 -.2
+rline  .6 -2
+rline -2.4 -1.6
+rline -2.6  .6
+rline -1  2.4
+rline  2  .8
+set lstyle 1
+begin path fill red
+	amove  9  12.4
+	bezier 2 0 2 2 1 3
+	rline  -1.8  .6
+	rline -.2 1.4
+	closepath
+end path
+
+set lwidth .1
+set color black
+amove  9  12.4
+bezier 2 0 2 2 1 3
+rline  -1.8  .6
+rline -.2 1.4
+
+amove  7.6  3
+rline  1.6 -1.2
+rline -1.6  0
+closepath
+
+
+                                 

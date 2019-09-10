@@ -1,0 +1,200 @@
+!
+! GLE logo for web page
+! by: V.P. LaBella vlabella@albany.edu
+!
+size 14 5
+
+include "color.gle"
+include "barstyles.gle"
+include "contour.gle"
+include "shape.gle"
+include "polarplot.gle"
+
+set font psagb
+
+dx = 12; dy = 6; boxw = dx/7; boxh = dy
+
+sub draw_box clr$
+	gsave
+	set color clr$
+	box boxw boxh fill clr$
+	grestore
+end sub
+
+offset = 1.1
+amove dx/2+offset dy/2-0.5
+set just cc
+
+begin scale 0.75 1
+   s = 0.2
+   set hei 6.0
+   rmove +s -s
+   set color gray10
+   text GLE
+   rmove -s +s
+   begin clip			! Save default clipping region
+	begin path clip	! Set up the clipping region
+		set hei 6.0
+		text GLE
+	end path
+	amove +offset 0
+	draw_box red
+	rmove boxw 0
+	draw_box orange
+	rmove boxw 0
+	draw_box yellow
+	rmove boxw 0
+	draw_box lime
+	rmove boxw 0
+	draw_box blue
+	rmove boxw 0
+	draw_box navy
+	rmove boxw 0
+	draw_box violet
+	rmove boxw 0
+	gsave
+	set hei 0.67
+	delta=0.8
+	amove dx/2+offset dy-delta	
+	set color black
+	for i=1 to 10
+		write "Professional Graphics Language"
+		rmove 0.0 -delta
+	next i
+	grestore
+   end clip
+end scale
+
+set font psh
+
+! creates the z-value file to be used by the contour command
+begin fitz
+   data "../../examples/3dplots/Zstress.csv"
+   x from 0 to 2 step 0.1
+   y from 0 to 2 step 0.1
+   ncontour 6
+end fitz
+
+begin contour    
+   data "../../examples/3dplots/Zstress.z"
+   values from 100 to 800 step 100
+end contour
+
+ysecond = 2.1
+gsiz = 3
+
+set color black
+amove 0.2 ysecond
+set hei 0.18 color black lwidth 0.01
+begin graph
+   size gsiz gsiz
+   title "Specimen stress" hei 0.18
+   xtitle "Bolt shortening (mm)"
+   ytitle "Step"
+   yaxis dticks 0.4
+   xaxis dticks 0.4
+   xticks off
+   yticks off
+   colormap "../../examples/3dplots/Zstress.z" 500 500 color
+   data "../../examples/3dplots/Zstress-cdata.dat"
+   d1 line color white lwidth 0.015
+end graph
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! draw noise variance parameter
+amove 0.25 0.6
+set color red fill red
+labeled_circle "$\sigma^2$" 0.05 langle 90 name "sigma"
+
+hiok = 0.75
+
+! draw center plate
+begin box add 0.15 round 0.2
+  ! draw t_n node
+   rmove 0.9 0
+   set fill thistle
+   labeled_circle "$t_n$" 0.2 lradius 0.05 langle 240 name "tn"
+   ! draw label "N" on plate
+   gsave
+   set just tl color black
+   pmove 0.4 -45
+   tex "$N$"
+   grestore
+   ! draw x_n node
+   rmove 0 hiok
+   set fill red
+   labeled_circle "$x_n$" 0.05 langle 90 name "xn"
+   set color purple
+end box
+
+! draw omega node
+rmove 1.1 -hiok
+set fill thistle color red
+labeled_circle "$w$" 0.2 langle 45 name "w"
+
+! draw alpha node
+rmove 0 hiok
+set fill red
+labeled_circle "$\alpha$" 0.05 langle 90 name "alpha"
+
+! connect with arrows
+join sigma -> tn
+join w -> tn
+join alpha -> w
+join xn -> tn
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+sub bar_purplecolormap x1 y1 x2 y2 bar group
+  set hei 0.15
+  set_palette_shade_gray_color red 94 green 19 blue 175
+  bar_colormap_palette_labels x1 y1 x2 y2 bar palette_shade_gray "fix 0 append '%'" 0.12
+end sub
+
+sub bar_yellowcolormap x1 y1 x2 y2 bar group
+  set hei 0.15
+  set_palette_shade_gray_color red 255 green 255 blue 0
+  bar_colormap_palette_labels x1 y1 x2 y2 bar palette_shade_gray "fix 0 append '%'" 0.12
+end sub
+
+xsecond = pagewidth()-2.7
+
+amove xsecond ysecond
+set hei 0.18 color black lwidth 0.01
+begin graph
+  size gsiz gsiz
+  x2axis off
+  y2axis off
+  title "Bar Chart" hei 0.18
+  xaxis min 0.5 max 4.5 dticks 1
+  yaxis min -5  max 90  dticks 20 format "fix 0 append '%'" grid
+  xsubticks off
+  yticks color grey20
+  data "../../examples/2dplots/shadebar.csv"
+  bar d1,d2 width 0.3,0.3 style purplecolormap,yellowcolormap
+end graph
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+set fill clear
+
+amove xsecond -0.35
+begin graph
+   size gsiz gsiz
+   xaxis min -2 max 2
+   yaxis min -2 max 2
+   x2axis off
+   y2axis off
+   xlabels off
+   begin layer 300
+      draw polar_grid radius 2 rings 4 sectors 24
+   end layer
+   draw polar "2*cos(3*t)" from 0 to pi color red fill thistle lwidth 0.02
+end graph
+
+begin key
+   pos br
+   text "r = 2cos(3\theta)"
+end key
+

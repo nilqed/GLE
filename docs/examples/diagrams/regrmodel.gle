@@ -1,0 +1,46 @@
+size 5 3.1
+
+! A discussion of this diagram can be found in:
+! "Pattern Recognition and Machine Learning" by Christopher M. Bishop
+
+include "shape.gle"
+
+! draw noise variance parameter
+amove 0.9 1
+set color red fill red
+labeled_circle "$\sigma^2$" 0.05 langle 180 name "sigma"
+
+! draw center plate
+begin box add 0.2 round 0.2
+  ! draw t_n node
+   rmove 1.5 0
+   set fill thistle
+   labeled_circle "$t_n$" 0.35 lradius 0.05 langle 240 name "tn"
+   ! draw label "N" on plate
+   gsave
+   set just tl color black
+   pmove 0.6 -45
+   tex "$N$"
+   grestore
+   ! draw x_n node
+   rmove 0 1.5
+   set fill red
+   labeled_circle "$x_n$" 0.05 langle 90 name "xn"
+   set color purple
+end box
+
+! draw omega node
+rmove 1.75 -1.5
+set fill thistle color red
+labeled_circle "$w$" 0.35 langle 45 name "w"
+
+! draw alpha node
+rmove 0 1.5
+set fill red
+labeled_circle "$\alpha$" 0.05 langle 90 name "alpha"
+
+! connect with arrows
+join sigma -> tn
+join w -> tn
+join alpha -> w
+join xn -> tn

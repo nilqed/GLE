@@ -1,0 +1,46 @@
+size 18 24 box		! This is LOOP.GLE, shows programming examples
+set hei .3
+amove .3 .3 
+text loop.gle
+
+amove 5 14
+set just center hei 1
+set font pldr hei 0.7
+text Subroutines, Loops
+set just left hei .7
+set hei .9
+
+! First define a single neuron
+sub neuron xx yy
+  amove xx yy 
+  begin scale .5 .5
+    curve  0  .4  .4  .4  .4 -.4  .4  .4  .4 -.8 -.4 -.8 -.4 .4
+    curve -.4 -.8 -.4  .4 -.4 -.4 -.4  .4  0  .4   
+    closepath
+  end scale
+end sub
+
+! Draw the neurons
+for xx = 0 to 1
+  for i = 1 to 6
+    @neuron xx*6+2 i*2+1.2
+  next i
+next xx
+
+! Draw the lines between them
+for i = 1 to 6
+  for j = 1 to 6
+    amove 3 i*2+1
+    aline 7.5 j*2+1
+  next j
+next i
+
+!--------------------------------------------------------------------------
+include ziptext.gle
+set font pltr hei 1.2
+amove 12 1
+@ziptext "Hello"
+amove 10.5 4
+begin rotate 20
+@ziptext "Green trees"
+end rotate

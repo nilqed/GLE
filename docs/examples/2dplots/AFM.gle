@@ -1,0 +1,86 @@
+!-----------------------------------------------------------------!
+!   These graphs illustrate the correlation of the heights and di-!
+! ameters of a set of InAs self-organized quantum-dots (QD), grown!
+! over GaAs by means of Molecular Beam Epitaxy.                   !
+!   The figure was obtained by means of Atomic Force Microscopy.  !
+! The histograms was obtained from the figure by counting and     !
+! measuring the height and diameter of each quantum-dot (each     !
+! circle). The correlation gives rise to what is known as quantum-!
+! dots families.                                                  !
+!                                                                 !
+! Author:  Ivan Ramos Pagnossin                                   !
+! Data:    December 2003                                          !
+! Project: Master thesis                                          !
+!-----------------------------------------------------------------!
+
+size 15 15
+
+set font texcmr
+
+! Graph at the lower left corner.
+amove 1.5 1.25
+begin graph
+   size 6 6
+   fullsize
+   xaxis min 20 max 80 dticks 10 dsubticks 5
+   yaxis min 0  max 15 dticks 5  dsubticks 1
+   xtitle "Diameter (nm)"
+   ytitle "Height (nm)"
+   ! Quantum dots (QD) diameter-height correlation data.
+   data "3um/3um-diameterXheight.dat"
+   d1 marker fcircle msize 0.05
+end graph
+
+! Graph at the upper left corner.
+amove 1.5 7.25
+begin graph
+   size 6 6
+   fullsize
+   xaxis min 20 max 80 dticks 10 dsubticks 5
+   yaxis min -1 max 12 dticks 5  dsubticks 1
+   xlabels  off
+   x2labels on
+   x2title "Diameter (nm)"
+   ytitle "QDs surface density (10^8 cm^{-2})"
+   ! Quantum-dots (QD) diameter distribution.
+   data "3um/3um-diameter.dat"
+   bar d1 width 0.4 color grey10 fill grey10
+end graph
+
+! Graph at the lower right corner.
+amove 7.5 1.25
+begin graph
+   size 6 6
+   fullsize
+   xaxis min -1 max 12 dticks 5 dsubticks 1
+   yaxis min 0  max 15 dticks 5 dsubticks 1
+   ylabels  off
+   y2labels on
+   xtitle "QDs surface density (10^8 cm^{-2})"
+   y2title "Height (nm)"
+   ! Quantum-dots (QD) height distribution.
+   data "3um/3um-height.dat" 
+   bar d1 horiz width 0.1 color grey10 fill grey10 
+end graph
+
+! Atomic-force microscopy image at the upper right corner.
+amove 8.2 7.95
+begin name img
+   bitmap "3um/3um.png" 5 5
+end name
+
+set just cc
+amove ptx(img.tc) pty(img.tc)+0.3
+write "Atomic Force Microscopy image"
+
+amove ptx(img.bl) pty(img.bl)-0.3
+aline ptx(img.br) pty(img.br)-0.3 arrow both
+amove ptx(img.bc) pty(img.bc)-0.3
+begin box add 0.1 nobox fill white
+   tex "3 $\mathrm{\mu m}$"
+end box
+
+set hei 0.45
+amove 7.5 14.7
+write "Self-organized InAs quantum-dots (QD) height-diameter correlation"
+

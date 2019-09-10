@@ -1,0 +1,21 @@
+size 12 9
+
+set font texcmr
+begin graph
+   math
+   scale auto
+   title "Complex quantile scale example"
+   xaxis min -4.5 max 4.5
+   yaxis scale quantile
+   let d1 = sin(x)
+   d1 line color red
+   let d2 = x
+   d2 line color 0.2
+   let d3 = x-x^3/6
+   d3 line color 0.4
+   let d4 = x-x^3/6+x^5/120
+   d4 line color 0.6
+   let d5 = x-x^3/6+x^5/120-x^7/5040
+   d5 line color 0.8
+end graph
+
